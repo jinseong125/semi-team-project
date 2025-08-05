@@ -15,7 +15,7 @@
 	<form method="post"
 	      action="${contextPath}/user/login">
 		<input type="hidden" name="url" value="${url}"/>
-		<label>이메일 : <input type="text" name="email"/></label>
+		<label>아이디 : <input type="text" name="Id"/></label>
 		<br>
 		<label>비밀번호 : <input type="password" name="password"/> </label>
 		<br>
