@@ -11,8 +11,7 @@
   
   <!-- 클래스에 별명 등록 (DTO) -->
   <typeAliases>
-    <typeAlias type="org.shark.crud.model.dto.BoardDTO" alias="BoardDTO"/>
-    <typeAlias type="org.shark.crud.model.dto.UserDTO" alias="UserDTO"/>
+    <typeAlias type="org.puppit.model.dto.ChatDTO" alias="ChatDTO"/>
   </typeAliases>
 
   

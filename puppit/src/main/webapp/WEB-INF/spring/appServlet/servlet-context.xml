@@ -10,6 +10,7 @@
    <annotation-driven />
    
    <resources location="/resources/" mapping="/resources/**" />
+   <resources location="file:/upload/" mapping="/upload/**" />
    
    <beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
      <beans:property name="prefix" value="/WEB-INF/views/" />
