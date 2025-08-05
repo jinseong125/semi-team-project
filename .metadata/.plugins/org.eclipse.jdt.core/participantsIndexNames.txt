@@ -1,3 +1,0 @@
-INDEX VERSION 1.131
-C:\study\semi_project\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\4091110493.index
-\puppit\src\main\java
