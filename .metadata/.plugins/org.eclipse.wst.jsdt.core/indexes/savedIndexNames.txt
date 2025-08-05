@@ -1,6 +1,8 @@
-INDEX VERSION 1.4+D:\dev\puppit_semi_project\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
-3265664270.index
-3972173332.index
-3423066166.index
-897073971.index
-1910010659.index
+INDEX VERSION 1.4+C:\study\semi_project\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+3249422392.index
+2677052356.index
+3226275354.index
+2069060704.index
+336623188.index
+4091110493.index
+126698270.index

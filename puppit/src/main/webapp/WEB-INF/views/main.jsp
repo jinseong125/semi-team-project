@@ -9,6 +9,6 @@
 
 <img src="${contextPath}/resources/image/main.jpg" width="1024px"/>
 
-    
+<!-- 테스트 변경사항 이유천 -->   
 </body>
 </html>

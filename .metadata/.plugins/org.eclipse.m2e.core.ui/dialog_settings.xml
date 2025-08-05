@@ -2,7 +2,7 @@
 <section name="Workbench">
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
-			<item value="D:\dev\puppit_semi_project\05_CRUD"/>
+			<item value="C:\study\semi_project\puppit"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>
