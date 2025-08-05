@@ -2,7 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,java,maven,eclipse
 
 ### Eclipse ###
-.metadata
+# Eclipse metadata
+.metadata/
 bin/
 tmp/
 *.tmp
