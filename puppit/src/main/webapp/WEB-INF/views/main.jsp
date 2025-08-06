@@ -7,7 +7,18 @@
   <jsp:param value="Home" name="title"/>
 </jsp:include>  
 
-<img src="${contextPath}/resources/image/MainLogo.png" width="500px"/>
+<form action="${contextPath}/search" method="get">
+<input type="text" name="keyword" placeholder="검색어 입력">
+<button type="submit">검색</button>
+</form>
+
+<h3>카테고리</h3>
+<ul>
+  <li><a href="${contextPath}/category?type=toys">장난감</a></li>
+  <li><a href="${contextPath}/category?type=food">사료</a></li>
+  <li><a href="${contextPath}/category?type=clothes">의류</a></li>
+  <li><a href="${contextPath}/category?type=accessories">악세서리</a></li>
+</ul>
 
 
 </body>

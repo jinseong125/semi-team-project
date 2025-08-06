@@ -11,7 +11,7 @@
 <title>Puppit</title>
 </head>
 <body>
-
+<img src="${contextPath}/resources/image/DOG.jpg" width="500px"/>
   <h1>Puppit에 오신걸 환영합니다!</h1>
   
   <hr>
