@@ -7,9 +7,8 @@
   <jsp:param value="Home" name="title"/>
 </jsp:include>  
 
-<img src="${contextPath}/resources/image/main.jpg" width="1024px"/>
+<img src="${contextPath}/resources/image/MainLogo.png" width="500px"/>
 
-<!-- 테스트 변경사항123 이유천 -->  
 
 </body>
 </html>
