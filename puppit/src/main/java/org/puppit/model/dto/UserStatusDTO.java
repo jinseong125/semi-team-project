@@ -19,7 +19,6 @@ public class UserStatusDTO {
   
   private Integer loginId;
   private Integer userId;
-  private String accountId;
   private LocalDateTime loginAt;
 
 }

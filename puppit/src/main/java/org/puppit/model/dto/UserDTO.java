@@ -1,6 +1,6 @@
 package org.puppit.model.dto;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,7 +24,7 @@ public class UserDTO {
   private String userPassword;
   private String userEmail;
   private String userPhone;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
+  private Timestamp createdAt;
+  private Timestamp updatedAt;
   
 }
