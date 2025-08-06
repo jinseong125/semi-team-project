@@ -11,7 +11,7 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<h1>로그인 화면</h1>
+	<h1>Puppit 회원가입 화면</h1>
 	<form method="post"
 	      action="${contextPath}/user/login">
 		<input type="hidden" name="url" value="${url}"/>

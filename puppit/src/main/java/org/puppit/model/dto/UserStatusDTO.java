@@ -15,16 +15,11 @@ import lombok.ToString;
 @Setter
 @ToString
 @Builder
-public class UserDTO {
-
-  private Integer userId;
-  private String acountId;
-  private String userName;
-  private String nickName;
-  private String userPassword;
-  private String userEmail;
-  private String userPhone;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
+public class UserStatusDTO {
   
+  private Integer loginId;
+  private Integer userId;
+  private String accountId;
+  private LocalDateTime loginAt;
+
 }
