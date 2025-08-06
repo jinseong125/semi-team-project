@@ -4,6 +4,7 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mybatis.mapper.userMapper">
 
+
   <!-- Mapper 작성 규칙 
     1.쿼리 id는 각 쿼리를 호출할 메소드의 이름과 동일하게 설정하는 것을 권장한다. 
     2. parameterType : 메소드가 쿼리로 전달하는 데이터의 타입이다. TypeAlias를 사용 할 수 있다. 
@@ -15,6 +16,8 @@
      INSERT INTO user (user_id, account_id, user_name, nick_name, user_password, salt, user_email, user_phone, created_at)
      VALUES (#{userId}, #{acoountId}, #{userName}, #{nickName}, #{userPassword}, #{salt}, #{userEmail}, #{userPhone}, #{createdAt})
   </insert>
+  
+
   
   <!-- 아이디 중복 검사 -->
   <select id="countByLoginId" parameterType="String" resultType="Integer">
