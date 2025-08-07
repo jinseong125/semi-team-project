@@ -18,7 +18,7 @@ import lombok.ToString;
 public class UserDTO {
 
   private Integer userId;
-  private String acountId;
+  private String accountId;
   private String userName;
   private String nickName;
   private String userPassword;

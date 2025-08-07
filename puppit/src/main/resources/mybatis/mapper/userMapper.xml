@@ -17,11 +17,23 @@
      VALUES (#{userId}, #{acoountId}, #{userName}, #{nickName}, #{userPassword}, #{salt}, #{userEmail}, #{userPhone}, #{createdAt})
   </insert>
   
-
-  
   <!-- 아이디 중복 검사 -->
   <select id="countByLoginId" parameterType="String" resultType="Integer">
     SELECT COUNT(*)
+      FROM user
+     WHERE account_id = #{accountId}
+  </select>
+  
+  <!-- 로그인(아이디) -->
+  <select id="getUserById" parameterType="String" resultType="UserDTO">
+    SELECT account_id, user_password, salt 
+      FROM user
+     WHERE account_id = #{accountId}
+  </select>
+  
+  <!-- account_id, password, user_email 검증, 중복확인, 조회 -->
+  <select id="findUserInfo" parameterType="String" resultType="UserDTO">
+    SELECT account_id, user_password, user_email, nick_name
       FROM user
      WHERE account_id = #{accountId}
   </select>
