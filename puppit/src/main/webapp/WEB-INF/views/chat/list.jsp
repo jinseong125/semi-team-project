@@ -1,0 +1,245 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>채팅방 목록</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+.container-header {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 24px;
+}
+.container-header h1 {
+    font-size: 24px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    color: #222;
+    /* display: flex; align-items: center; gap: 6px; 삭제 */
+}
+
+.container {
+    width: 1000px;
+    min-height: 700px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+    margin: 0 auto;
+    background: #fff;
+}
+
+/* 왼쪽 채팅방 목록 */
+.chatlist-container {
+    width: 400px;
+    height: 600px;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.chatListD {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 10px;
+    gap: 16px;
+    cursor: pointer;
+    background: #fff;
+    border-radius: 18px;
+    min-height: 80px;
+    transition: background 0.15s;
+    box-shadow: none;
+    border: none;
+}
+.chatListD:hover {
+    background: #f5f5f5;
+}
+.chat-profile-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 1.5px solid #eee;
+    background: #fafafa;
+}
+.chat-info-area {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.chat-nickname {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 2px;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.chat-message {
+    font-size: 15px;
+    color: #444;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+.chat-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 90px;
+    gap: 8px;
+}
+.chat-time {
+    font-size: 14px;
+    color: #757575;
+    font-weight: 400;
+}
+.chat-unread-badge {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    line-height: 20px;
+    font-size: 15px;
+    background: #fff;
+    color: #e74c3c;
+    border: 2px solid #e74c3c;
+    border-radius: 50%;
+    text-align: center;
+    font-weight: 700;
+    margin-top: 2px;
+    margin-right: 5px;
+}
+
+/* 오른쪽 채팅창 */
+.chat-container {
+    width: 400px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* 입력창을 바닥에 붙임 */
+    padding: 20px;
+    box-sizing: border-box;
+    background: #fafafa;
+}
+
+.chat-input-group {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    width: 100%;
+   
+}
+
+.chat-container input {
+   
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 16px;
+    height: 38px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.chat-container button {
+    height: 38px;
+    padding: 0 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background: #888;
+    color: #fff;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin-top: 10px;
+}
+
+.chat-profile-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+    border: 1.5px solid #eee;
+    background: #fafafa;
+    display: flex;                /* 추가 */
+    justify-content: center;      /* 추가 */
+    align-items: center;          /* 추가 */
+    font-size: 28px;              /* 아이콘 크기 */
+    color: #bbb;                  /* 아이콘 컬러 */
+}
+
+
+
+  </style>
+</head>
+<body>
+
+<div class="container-header">
+	<h1>채팅방 목록</h1>
+</div>
+
+<div class="container">
+	<div class="chatlist-container">
+		<c:forEach items="${chatList}" var="chat">
+		    <div class="chatListD">
+		       <!-- <div>senderAccountID: ${chat.senderAccountId}</div> --> 
+		        <!--  <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/> -->
+		        <c:choose>
+				    <c:when test="${empty chat.profileImage}">
+				        <span class="chat-profile-img chat-profile-icon">
+				            <i class="fa-solid fa-user"></i>
+				        </span>
+				    </c:when>
+				    <c:otherwise>
+				        <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/>
+				    </c:otherwise>
+				</c:choose>
+		        <div class="chat-info-area">
+                    <div class="chat-nickname">${chat.receiverAccountId}</div>
+                    <div class="chat-message">${chat.chatMessage}</div>
+                </div>
+		        <div class="chat-meta">
+                    <span class="chat-time">
+                        <fmt:formatDate value="${chat.chatSentAt}" pattern="a h시 mm분"/>
+                    </span>
+                </div>
+		    </div>
+		</c:forEach>
+	
+	</div>
+	<div class="chat-container">
+		<input placeholder="채팅메시지를 입력하세요"/>
+		<button type="submit">전송</button>
+	</div>
+
+
+</div>
+
+</body>
+</html>

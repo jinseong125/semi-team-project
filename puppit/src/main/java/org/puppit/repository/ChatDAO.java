@@ -1,8 +1,22 @@
 package org.puppit.repository;
 
+import java.util.List;
+
+import org.mybatis.spring.SqlSessionTemplate;
+import org.puppit.model.dto.ChatListDTO;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
-public class ChatDAO {
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
+@Transactional
+@Repository
+public class ChatDAO {
+	
+	private final SqlSessionTemplate sqlSession;
+	
+	public List<ChatListDTO> getChatList(String accountId) {
+		return sqlSession.selectList("mybatis.mapper.chatMapper.getChatList", accountId);
+	}
 }
