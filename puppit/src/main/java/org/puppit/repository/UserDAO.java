@@ -12,10 +12,10 @@ public class UserDAO {
   
   private final SqlSessionTemplate sqlSession;
   
-  public Integer userSignUp(UserDTO userId) {
-    return sqlSession.insert("mybatis.mapper.userMapper.userSignUp", userId);
+  public Integer userSignUp(UserDTO user) {
+    return sqlSession.insert("mybatis.mapper.userMapper.userSignUp", user);
   }
-  public Integer countByLoginId(String userId) {
+  public int countByAccountId(String userId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.countByLoginId", userId);
   }
   public String getUserById(String userId) {

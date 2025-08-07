@@ -13,12 +13,12 @@
 
   <!-- 회원가입 -->
   <insert id="userSignUp" parameterType="UserDTO">
-     INSERT INTO user (user_id, account_id, user_name, nick_name, user_password, salt, user_email, user_phone, created_at)
-     VALUES (#{userId}, #{acoountId}, #{userName}, #{nickName}, #{userPassword}, #{salt}, #{userEmail}, #{userPhone}, #{createdAt})
+     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone)
+     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone})
   </insert>
   
   <!-- 아이디 중복 검사 -->
-  <select id="countByLoginId" parameterType="String" resultType="Integer">
+  <select id="countByAccountId" parameterType="String" resultType="int">
     SELECT COUNT(*)
       FROM user
      WHERE account_id = #{accountId}
@@ -26,14 +26,7 @@
   
   <!-- 로그인(아이디) -->
   <select id="getUserById" parameterType="String" resultType="UserDTO">
-    SELECT account_id, user_password, salt 
-      FROM user
-     WHERE account_id = #{accountId}
-  </select>
-  
-  <!-- account_id, password, user_email 검증, 중복확인, 조회 -->
-  <select id="findUserInfo" parameterType="String" resultType="UserDTO">
-    SELECT account_id, user_password, user_email, nick_name
+    SELECT account_id, user_password, salt
       FROM user
      WHERE account_id = #{accountId}
   </select>

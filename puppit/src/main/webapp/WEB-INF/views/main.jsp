@@ -20,6 +20,12 @@
   <li><a href="${contextPath}/category?type=accessories">악세서리</a></li>
 </ul>
 
+  <script type="text/javascript">
+    const msg = "${msg}";
+    if(msg !== "")
+      alert(msg);
+  </script>
+
 
 </body>
 </html>
