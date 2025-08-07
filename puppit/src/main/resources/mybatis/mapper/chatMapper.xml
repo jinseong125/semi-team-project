@@ -4,6 +4,34 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mybatis.mapper.chatMapper">
   
- 
+<!-- 내가 로그인 해서 내가 채팅한 모든 사용자들과의 마지막 메시지만 불러오는 코드 -->  
+<select id="getChatList" resultType="org.puppit.model.dto.ChatListDTO">
+    SELECT
+        c2.chat_room_id AS roomId,
+        c2.is_read AS chatIsRead,
+        c2.chat_message AS chatMessage,
+        c2.chat_created_at AS chatSentAt,
+        c2.chat_sender AS chatSenderId,
+        c2.chat_receiver AS chatReceiverId,
+        sender.account_id AS senderAccountId,
+        receiver.account_id AS receiverAccountId,
+        0 AS unreadCount
+    FROM (
+        SELECT c1.*
+        FROM chat c1
+        INNER JOIN (
+            SELECT chat_room_id, MAX(message_id) AS max_message_id
+            FROM chat
+            WHERE chat_sender = #{userId} OR chat_receiver = #{userId}
+            GROUP BY chat_room_id
+        ) latest
+          ON c1.chat_room_id = latest.chat_room_id
+         AND c1.message_id = latest.max_message_id
+        WHERE c1.chat_sender = #{userId} OR c1.chat_receiver = #{userId}
+    ) AS c2
+    INNER JOIN user AS sender ON sender.user_id = c2.chat_sender
+    INNER JOIN user AS receiver ON receiver.user_id = c2.chat_receiver
+    ORDER BY c2.chat_created_at DESC
+</select>
   
 </mapper>
