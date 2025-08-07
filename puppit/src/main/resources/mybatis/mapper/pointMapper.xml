@@ -3,6 +3,12 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mybatis.mapper.pointMapper">
+
+<update id="updatePoint" >
+  UPDATE point_charge 
+  SET point_charge_amount = point_charge_amount + #{amount}
+  WHERE user_id = #{uid}
+</update>
   
   
 </mapper>

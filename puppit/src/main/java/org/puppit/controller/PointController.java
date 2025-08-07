@@ -1,33 +1,30 @@
 package org.puppit.controller;
 
 import org.puppit.service.PointService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequiredArgsConstructor
 public class PointController {
-
-    @Autowired
-    private PointService pointService;
-
-    @GetMapping("/payment/form")
-    public String paymentForm() {
-        return "payment/paymentForm";
-    }
-
-    @PostMapping("/payment/verify")
-    public String verifyPayment(@RequestParam("imp_uid") String impUid,
-                                @RequestParam("amount") int amount,
-                                Model model) {
-        String userId = "testuser";
-        boolean success = pointService.verifyAndCharge(impUid, amount, userId);
-        model.addAttribute("success", success);
-        model.addAttribute("amount", amount);
-        return "payment/paymentResult";
-    }
+  
+  private final PointService pointService;
+  
+  @GetMapping("/payment/paymentForm")
+  public String paymentForm() {
+    return "/user/paymentForm";
+  }
+  
+  @PostMapping("/payment/insertPoint")
+  public String insertPoint(int uid, int amount, Model model) {
+    boolean result = pointService.verifyAndCharge(uid, amount);
+    model.addAttribute("result", result);
+    return "/user/showPoint";
+  }
+    
 }
 
