@@ -1,7 +1,5 @@
 package org.puppit.service;
 
-
-
 import org.puppit.repository.PointDAO;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +13,10 @@ public class PointServiceImpl implements PointService {
 
   @Override
   public boolean verifyAndCharge(int uid, int amount) {
-      return pointDAO.updatePoint(uid, amount) == 1;
+     boolean resultPointUpdate =  pointDAO.updatePoint(uid, amount) == 1;
+     boolean resultRecordUpdate = pointDAO.updatePointRecord(uid, amount) == 1;
+     
+     return resultPointUpdate && resultRecordUpdate;
 
   }
 }

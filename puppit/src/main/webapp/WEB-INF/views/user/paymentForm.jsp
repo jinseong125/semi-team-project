@@ -1,21 +1,67 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>결제 화면</title>
+<script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+<script>
+  const IMP = window.IMP;
+  IMP.init("imp85811517"); 
+
+  function requestPay() {
+    const uid = document.getElementById("uid").value;
+    const amount = document.getElementById("amount").value;
+
+    if (!uid || !amount) {
+      alert("유저 ID와 금액을 입력하세요.");
+      return;
+    }
+
+    IMP.request_pay({
+      pg: "html5_inicis",       
+      pay_method: "card",
+      name: "포인트 충전",
+      amount: amount,
+      buyer_name: "테스트유저",
+      buyer_email: "test@example.com"
+    }, function (rsp) {
+      if (rsp.success) {
+        // 결제 성공 → 서버에 imp_uid 전송하여 검증 요청
+        fetch("${contextPath}/payment/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            imp_uid: rsp.imp_uid,
+            uid: uid
+          })
+        })
+        .then(res => res.json())
+        .then(result => {
+        	console.log("서버 응답:", result);
+          if (result.success) {
+            alert("충전 성공!");
+          } else {
+            alert("결제는 성공했지만 검증에 실패했습니다.");
+          }
+        });
+      } else {
+        alert("결제 실패: " + rsp.error_msg);
+      }
+    });
+  }
+</script>
 </head>
 <body>
   <h1>결제 화면</h1>
-  <form action="${contextPath}/payment/insertPoint" method="post">
-    충전할 유저ID: <input type="text" name="uid">
-    <br>
-    충전할 금액: <input type="text" name="amount">
-    <br>
-    <button type="submit">확인</button>
-  </form>
+  <label>충전할 유저ID:</label>
+  <input type="text" id="uid">
+  <br>
+  <label>충전할 금액:</label>
+  <input type="text" id="amount">
+  <br>
+  <button type="button" onclick="requestPay()">결제하기</button>
 </body>
 </html>
