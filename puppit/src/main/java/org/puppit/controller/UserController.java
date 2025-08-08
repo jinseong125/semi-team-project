@@ -17,6 +17,11 @@ public class UserController {
   
   private final UserService userService;
   
+  @GetMapping("/mypage")
+  public String myPage() {
+    return "user/mypage";
+  }
+  
   // 회원가입 폼 보여주기
   @GetMapping("/signup")
   public String showSignupForm() {
