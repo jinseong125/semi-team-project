@@ -195,6 +195,50 @@ body {
 }
 
 
+/*채팅 메시지들 정렬용 css*/
+.chat-history {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    overflow-y: auto;
+    flex: 1;
+}
+.chat-message {
+    max-width: 60%;
+    padding: 10px 16px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    word-break: break-all;
+}
+.chat-message.right {
+    align-self: flex-end;
+    background: #e9f7fe;
+    text-align: right;
+}
+.chat-message.left {
+    align-self: flex-start;
+    background: #eee;
+    text-align: left;
+}
+.chat-userid {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 2px;
+}
+.chat-text {
+    font-size: 15px;
+    margin-bottom: 2px;
+}
+.chat-time {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 2px;
+}
+
+
 
   </style>
 </head>
@@ -207,39 +251,94 @@ body {
 <div class="container">
 	<div class="chatlist-container">
 		<c:forEach items="${chatList}" var="chat">
-		    <div class="chatListD">
-		       <!-- <div>senderAccountID: ${chat.senderAccountId}</div> --> 
-		        <!--  <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/> -->
-		        <c:choose>
-				    <c:when test="${empty chat.profileImage}">
-				        <span class="chat-profile-img chat-profile-icon">
-				            <i class="fa-solid fa-user"></i>
-				        </span>
-				    </c:when>
-				    <c:otherwise>
-				        <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/>
-				    </c:otherwise>
-				</c:choose>
-		        <div class="chat-info-area">
-                    <div class="chat-nickname">${chat.receiverAccountId}</div>
-                    <div class="chat-message">${chat.chatMessage}</div>
-                </div>
-		        <div class="chat-meta">
-                    <span class="chat-time">
-                        <fmt:formatDate value="${chat.chatSentAt}" pattern="a h시 mm분"/>
-                    </span>
-                </div>
-		    </div>
+			<form action="${contextPath}/chat/message" method="get">
+			      <!-- <div>senderAccountID: ${chat.senderAccountId}</div> --> 
+		          <!--  <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/> -->
+		          <input type="hidden" name="roomId" value="${chat.roomId}"/>
+		          <input type="hidden" name="loginUserId" value="1" />  <!-- 실제론 세션에서 가져와야 함 -->
+				  <div class="chatList">
+			        <c:choose>
+					    <c:when test="${empty chat.profileImage}">
+					        <span class="chat-profile-img chat-profile-icon">
+					            <i class="fa-solid fa-user"></i>
+					        </span>
+					    </c:when>
+					    <c:otherwise>
+					        <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/>
+					    </c:otherwise>
+					</c:choose>
+			        <div class="chat-info-area">
+	                    <div class="chat-nickname">${chat.receiverAccountId}</div>
+	                    <div class="chat-message">${chat.chatMessage}</div>
+	                </div>
+			        <div class="chat-meta">
+	                    <span class="chat-time">
+	                        <fmt:formatDate value="${chat.chatSentAt}" pattern="a h시 mm분"/>
+	                    </span>
+	                </div>
+				   </div>
+			
+			
+			
+			</form>
+		  
 		</c:forEach>
 	
 	</div>
 	<div class="chat-container">
+		<div class="chat-history">
+			<c:forEach items="${chatMessages}" var="msg">
+				<c:choose>
+                    <c:when test="${msg.senderRole eq 'SELLER' || msg.chatSender == loginUserId}">
+                        <!-- 판매자 또는 로그인 사용자 메시지: 오른쪽 정렬 -->
+                        <div class="chat-message right">
+                            <div class="chat-userid">${msg.chatSender}</div>
+                            <div class="chat-text">${msg.chatMessage}</div>
+                            <div class="chat-time">
+                                <fmt:formatDate value="${msg.chatCreatedAt}" pattern="a h시 mm분"/>
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- 그 외 메시지: 왼쪽 정렬 -->
+                        <div class="chat-message left">
+                            <div class="chat-userid">${msg.chatSender}</div>
+                            <div class="chat-text">${msg.chatMessage}</div>
+                            <div class="chat-time">
+                                <fmt:formatDate value="${msg.chatCreatedAt}" pattern="a h시 mm분"/>
+                            </div>
+                        </div>
+                    </c:otherwise>
+                </c:choose>
+			
+			</c:forEach>
+		
+		
+		</div>
+	
+	
+	
+	
 		<input placeholder="채팅메시지를 입력하세요"/>
 		<button type="submit">전송</button>
 	</div>
 
 
 </div>
+
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.chat-info-area').forEach(function(area) {
+        area.addEventListener('click', function() {
+            this.closest('form').submit();
+        });
+    });
+});
+
+
+</script>
+
+
 
 </body>
 </html>
