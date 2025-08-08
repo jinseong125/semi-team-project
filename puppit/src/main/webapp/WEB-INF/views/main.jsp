@@ -7,16 +7,36 @@
   <jsp:param value="Home" name="title"/>
 </jsp:include>
 <style>
-.container {
- width: 1000px
- min-heigh}
+ * {
+    box-sizing: border-box;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+  }
+  .product-page {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  } 
+  .product-box {
+  text-align: center;
+  }
+  .product-image {
+  width: 100%;
+  max-width: 200px;
+  height: 200px
+   
+  }
+  
 </style>
-
+<div class="container">
 <form action="${contextPath}/search" method="get">
 <input type="text" name="keyword" placeholder="검색어 입력">
 <button type="submit">검색</button>
 </form>
-
 
 <h3>카테고리</h3>
 <ul>
@@ -25,7 +45,7 @@
   <li><a href="${contextPath}/category?type=clothes">의류</a></li>
   <li><a href="${contextPath}/category?type=accessories">기타용품</a></li>
 </ul>
-
+</div>
   <script type="text/javascript">
     const msg = "${msg}";
     if(msg !== "")
