@@ -30,11 +30,11 @@ public class UserController {
     boolean signupResult = userService.signup(user);
     // 회원가입 실패
     if(!signupResult) {
-      redirectAttr.addAttribute("error", "회원가입에 실패 하였습니다. 다시 시도 해주세요");
+      redirectAttr.addFlashAttribute("error", "아이디를 입력 해주세요");
       return "redirect:/user/signup";
     }
     // 회원가입 성공
-    redirectAttr.addAttribute("msg", "Puppit에 오신것을 환영 합니다");
+    redirectAttr.addFlashAttribute("msg", "Puppit에 오신것을 환영 합니다");
     return "redirect:/";
   }
 }

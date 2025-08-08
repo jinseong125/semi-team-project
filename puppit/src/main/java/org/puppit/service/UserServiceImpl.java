@@ -11,10 +11,19 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
   
   private final UserDAO userDAO;
+  
+  private boolean emptyCheck(String... fields) {
+    for(String field : fields) {
+      if(field == null || field.trim().isEmpty()) {
+        return true;
+      }
+    }
+    return false; 
+  }
 
   public boolean signup(UserDTO user) {
     try {
-      if(user.getUserName() == null || user.getUserName().trim().isEmpty()) {
+      if(emptyCheck(user.getAccountId(), user.getUserPassword(), user.getUserName(), user.getNickName(), user.getUserEmail(), user.getUserPhone())) {
         return false;
       }
       return userDAO.userSignUp(user) == 1 ? true : false;
@@ -22,6 +31,10 @@ public class UserServiceImpl implements UserService {
       e.printStackTrace();
       return false;
     }
+  }
+  @Override
+  public boolean countByAccountId(String accountId) {
+    return false;
   }
 
 }
