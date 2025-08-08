@@ -3,6 +3,8 @@ package org.puppit.service;
 import java.util.List;
 
 import org.puppit.model.dto.ChatListDTO;
+import org.puppit.model.dto.ChatMessageDTO;
+import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.repository.ChatDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,11 @@ public class ChatServiceImpl implements ChatService{
 	public List<ChatListDTO> getChatRooms(String accountId) {
 		
 		return chatDAO.getChatList(accountId);
+	}
+
+	@Override
+	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO) {
+		return chatDAO.getChatMessageList(chatMessageSelectDTO);
 	}
 
 }

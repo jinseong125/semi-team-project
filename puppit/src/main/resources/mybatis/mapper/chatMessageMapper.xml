@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.chatMessageMapper">
+  
+<!-- 내가 채팅한 사람과 채팅 메시지를 전부 불러오는 코드 -->
+<select id="getChatMessageList" resultType="org.puppit.model.dto.ChatMessageDTO" parameterType="org.puppit.model.dto.ChatMessageSelectDTO">
+   SELECT
+      c.message_id,
+      c.chat_room_id,
+      c.chat_sender,
+      c.chat_receiver,
+      c.chat_message,
+      c.chat_created_at,
+      CASE
+        WHEN c.chat_sender = #{loginUserId} THEN 'ME'
+        WHEN c.chat_sender = r.user_id THEN 'SELLER'
+        ELSE 'BUYER'
+      END AS senderRole
+    FROM chat c
+    JOIN room r ON c.chat_room_id = r.room_id
+    WHERE c.chat_room_id = #{roomId}
+    ORDER BY c.chat_created_at ASC
+</select>
+  
+</mapper>
