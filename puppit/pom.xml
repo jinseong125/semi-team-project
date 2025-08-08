@@ -16,6 +16,7 @@
     <slf4j.version>1.7.36</slf4j.version>
     <logback.version>1.2.13</logback.version>
     <junit.version>4.13.2</junit.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   
   <!-- dependencies : 디펜던시를 모아둡니다. -->
