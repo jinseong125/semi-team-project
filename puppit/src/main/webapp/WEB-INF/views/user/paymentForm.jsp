@@ -40,7 +40,6 @@
         })
         .then(res => res.json())
         .then(result => {
-        	console.log("서버 응답:", result);
           if (result.success) {
             alert("충전 성공!");
           } else {
@@ -59,9 +58,15 @@
   <label>충전할 유저ID:</label>
   <input type="text" id="uid">
   <br>
-  <label>충전할 금액:</label>
+  <label>충전할 포인트:</label>
   <input type="text" id="amount">
-  <br>
+  <h2>충전할 포인트 선택</h2>
+  <select>
+    <option>100</option>
+    <option>200</option>
+    <option>500</option>
+    <option>1000</option>
+  </select>
   <button type="button" onclick="requestPay()">결제하기</button>
 </body>
 </html>
