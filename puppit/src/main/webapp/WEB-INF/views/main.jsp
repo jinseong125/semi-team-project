@@ -14,10 +14,10 @@
 
 <h3>카테고리</h3>
 <ul>
-  <li><a href="${contextPath}/category?type=toys">장난감</a></li>
+  <li><a href="${contextPath}/category?type=toys">외출용품</a></li>
   <li><a href="${contextPath}/category?type=food">사료</a></li>
   <li><a href="${contextPath}/category?type=clothes">의류</a></li>
-  <li><a href="${contextPath}/category?type=accessories">악세서리</a></li>
+  <li><a href="${contextPath}/category?type=accessories">기타용품</a></li>
 </ul>
 
   <script type="text/javascript">
