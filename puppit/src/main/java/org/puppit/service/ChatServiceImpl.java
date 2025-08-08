@@ -1,6 +1,7 @@
 package org.puppit.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
@@ -25,7 +26,7 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO) {
+	public List<Map<String, Object>> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO) {
 		return chatDAO.getChatMessageList(chatMessageSelectDTO);
 	}
 
