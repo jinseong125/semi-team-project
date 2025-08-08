@@ -19,7 +19,7 @@
   
   <!-- 아이디 중복 검사 -->
   <select id="countByAccountId" parameterType="String" resultType="int">
-    SELECT COUNT(*)
+    SELECT COUNT(*) > 0
       FROM user
      WHERE account_id = #{accountId}
   </select>
