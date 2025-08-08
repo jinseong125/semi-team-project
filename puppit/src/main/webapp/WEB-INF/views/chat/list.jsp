@@ -321,14 +321,14 @@ document.querySelectorAll('.chatList').forEach(function(item) {
                         <div class="chat-message right">
                             <div class="chat-userid">${msg.sender_account_id} (${msg.sender_user_name})</div>
                             <div class="chat-text">${msg.chat_message}</div>
-                            <div class="chat-time">${formatKoreanTime(msg.chat_created_at)}</div>
+                            
                         </div>`;
                     } else {
                         html += `
                         <div class="chat-message left">
                             <div class="chat-userid">${msg.sender_account_id} (${msg.sender_user_name})</div>
                             <div class="chat-text">${msg.chat_message}</div>
-                            <div class="chat-time">${formatKoreanTime(msg.chat_created_at)}</div>
+                            
                         </div>`;
                     }
                 });

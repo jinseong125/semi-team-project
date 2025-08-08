@@ -8,9 +8,11 @@
  <!-- 1. HikariConfig -->
   <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
     <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
-    <property name="jdbcUrl" value="jdbc:mysql://172.16.2.17:3306/db_puppit?characterEncoding=UTF-8&amp;serverTimezone=UTC"/>
-    <property name="username" value="puppit"/>
-    <property name="password" value="puppit"/>
+    <!--  <property name="jdbcUrl" value="jdbc:mysql://192.168.35.224:3306/db_puppit?characterEncoding=UTF-8&amp;serverTimezone=UTC"/>-->
+    <property name="jdbcUrl"
+          value="jdbc:mysql://kwonht.synology.me:33309/db?characterEncoding=UTF-8&amp;serverTimezone=UTC"/>
+      <property name="username" value="user"/>
+      <property name="password" value="user"/>
   </bean>
   
  <!-- 2. DataSource -->
