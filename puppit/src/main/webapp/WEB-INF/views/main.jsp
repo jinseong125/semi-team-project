@@ -5,12 +5,18 @@
 
 <jsp:include page="./layout/header.jsp">
   <jsp:param value="Home" name="title"/>
-</jsp:include>  
+</jsp:include>
+<style>
+.container {
+ width: 1000px
+ min-heigh}
+</style>
 
 <form action="${contextPath}/search" method="get">
 <input type="text" name="keyword" placeholder="검색어 입력">
 <button type="submit">검색</button>
 </form>
+
 
 <h3>카테고리</h3>
 <ul>
