@@ -1,6 +1,7 @@
 package org.puppit.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.puppit.model.dto.ChatListDTO;
@@ -22,7 +23,7 @@ public class ChatDAO {
 		return sqlSession.selectList("mybatis.mapper.chatMapper.getChatList", accountId);
 	}
 	
-	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO) {
+	public List<Map<String, Object>> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO) {
 		return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getChatMessageList", chatMessageSelectDTO);
 	}
 	

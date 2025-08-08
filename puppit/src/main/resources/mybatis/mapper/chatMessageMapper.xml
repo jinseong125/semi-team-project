@@ -4,24 +4,38 @@
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mybatis.mapper.chatMessageMapper">
   
-<!-- 내가 채팅한 사람과 채팅 메시지를 전부 불러오는 코드 -->
-<select id="getChatMessageList" resultType="org.puppit.model.dto.ChatMessageDTO" parameterType="org.puppit.model.dto.ChatMessageSelectDTO">
-   SELECT
-      c.message_id,
-      c.chat_room_id,
-      c.chat_sender,
-      c.chat_receiver,
-      c.chat_message,
-      c.chat_created_at,
-      CASE
+<!-- 내가 채팅한 사람과 채팅 메시지를 전부 불러오는 코드, 채팅을 보내는 사람과 받는 사람의 seller, buyer 구분, 어떤 product에 대해서 채팅하고 있는지 -->
+<select id="getChatMessageList" resultType="map" parameterType="org.puppit.model.dto.ChatMessageSelectDTO">
+SELECT
+    c.message_id,
+    c.chat_room_id,
+    r.product_id,
+    c.chat_sender,
+    sender.account_id AS sender_account_id,
+    sender.user_name AS sender_user_name,
+    c.chat_receiver,
+    receiver.account_id AS receiver_account_id,
+    receiver.user_name AS receiver_user_name,
+    c.chat_message,
+    c.chat_created_at,
+    CASE
         WHEN c.chat_sender = #{loginUserId} THEN 'ME'
-        WHEN c.chat_sender = r.user_id THEN 'SELLER'
-        ELSE 'BUYER'
-      END AS senderRole
-    FROM chat c
-    JOIN room r ON c.chat_room_id = r.room_id
-    WHERE c.chat_room_id = #{roomId}
-    ORDER BY c.chat_created_at ASC
+        WHEN c.chat_sender = p.seller_id THEN 'SELLER'
+        WHEN c.chat_sender = r.user_id THEN 'BUYER'
+        ELSE 'OTHER'
+    END AS senderRole,
+    CASE
+        WHEN c.chat_receiver = p.seller_id THEN 'SELLER'
+        WHEN c.chat_receiver = r.user_id THEN 'BUYER'
+        ELSE 'OTHER'
+    END AS receiverRole
+FROM chat c
+JOIN room r ON c.chat_room_id = r.room_id
+JOIN product p ON r.product_id = p.product_id
+JOIN user sender ON c.chat_sender = sender.user_id
+JOIN user receiver ON c.chat_receiver = receiver.user_id
+WHERE c.chat_room_id = #{roomId}
+ORDER BY c.chat_created_at ASC
 </select>
   
 </mapper>

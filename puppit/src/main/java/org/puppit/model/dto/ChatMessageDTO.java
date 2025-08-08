@@ -16,9 +16,15 @@ import lombok.ToString;
 public class ChatMessageDTO {
 	private int messageId;
 	private int chatRoomId;
+	private int productId;
 	private int chatSender;
+	private String chatSenderAccountId;
+	private String chatSenderUserName;
 	private int chatReceiver;
+	private String chatReceiverAccountId;
+	private String chatReceiverUserName;
 	private String chatMessage;
 	private Timestamp chatCreatedAt;
 	private String senderRole;
+	private String receiverRole;
 }
