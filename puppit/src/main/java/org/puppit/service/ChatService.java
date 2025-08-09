@@ -8,6 +8,6 @@ import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 
 public interface ChatService {
-	public List<ChatListDTO> getChatRooms(String userId);
-	public List<Map<String, Object>> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO);
+	public List<ChatListDTO> getChatRooms(int userId);
+	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO);
 }
