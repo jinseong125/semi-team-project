@@ -2,7 +2,8 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-
+<c:set var="loginUserId" value="${loginUserId}" />
+<c:set var="roomId" value="${roomId}" />
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,7 +56,7 @@ body {
     flex-direction: column;
     gap: 20px;
 }
-.chatListD {
+.chatList {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -69,7 +70,7 @@ body {
     box-shadow: none;
     border: none;
 }
-.chatListD:hover {
+.chatList:hover {
     background: #f5f5f5;
 }
 .chat-profile-img {
@@ -258,7 +259,7 @@ body {
     <!-- 채팅방 목록(왼쪽, 항상 유지) -->
     <div class="chatlist-container">
         <c:forEach items="${chatList}" var="chat">
-            <div class="chatListD" data-room-id="${chat.roomId}">
+            <div class="chatList" data-room-id="${chat.roomId}" >
                 <c:choose>
                     <c:when test="${empty chat.profileImage}">
                         <span class="chat-profile-img chat-profile-icon">
@@ -293,50 +294,85 @@ body {
 </div>
 
 <script>
-const loginUserId = "${loginUserId}";
+const contextPath = "${contextPath}";
 
-// 한글 시간 포맷팅 (간단)
-function formatKoreanTime(dateStr) {
-    if(!dateStr) return "";
-    const d = new Date(dateStr);
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('.chatlist-container').addEventListener('click', function(e) {
+        const chatDiv = e.target.closest('.chatList');
+        if (chatDiv) {
+            const roomId = chatDiv.dataset.roomId;
+            const senderId = "1"; // 반드시 string으로!
+            if (!roomId) {
+                alert("roomId가 비어 있습니다!");
+                return;
+            }
+            console.log('roomId:', roomId, 'senderId:', senderId);
+
+            const url = contextPath + "/chat/message?roomId=" + roomId + "&loginUserId=" + senderId;
+            console.log("fetch url:", url);
+            fetch(url)
+            .then(res => res.json())
+            .then(list => {
+                console.log("list:", list, Array.isArray(list));
+                let html = "";
+                list.forEach(msg => {
+                    console.log('msg:', msg);
+                    // 아래에서 값을 반드시 console로 찍어보세요!
+                    console.log('chatSenderAccountId:', msg.chatSenderAccountId);
+                    console.log('chatSenderUserName:', msg.chatSenderUserName);
+                    console.log('chatMessage:', msg.chatMessage);
+                    console.log('chatCreatedAt:', msg.chatCreatedAt);
+
+                    // 실 데이터 확인
+                    console.log('accountId:', msg.chatSenderAccountId, 'username:', msg.chatSenderUserName, 'msg:', msg.chatMessage);
+					                    
+                    // 본인 메시지 구분 (타입 맞추기)
+                    const alignClass = (String(msg.chatSender) === senderId) ? "right" : "left";
+
+                    // 시간 포맷팅 (숫자 → Date)
+                    let chatTime = "";
+				    if (msg.chatCreatedAt) {
+				        chatTime = new Date(msg.chatCreatedAt).toLocaleString('ko-KR');
+				    }
+
+				    html +=
+				        '<div class="chat-message ' + alignClass + '">' +
+				          '<div class="chat-userid">' + msg.chatSenderAccountId + ' (' + msg.chatSenderUserName + ')</div>' +
+				          '<div class="chat-text">' + msg.chatMessage + '</div>' +
+				          '<div class="chat-time">' + chatTime + '</div>' +
+				        '</div>';
+                });
+                console.log("최종 html:", html);
+
+                const chatHistoryElem = document.getElementById('chat-history');
+                if (!chatHistoryElem) {
+                    alert("#chat-history 요소가 없습니다!");
+                    return;
+                }
+                chatHistoryElem.innerHTML = html;
+
+                console.log("chat-history innerHTML:", chatHistoryElem.innerHTML);
+            })
+            .catch(err => console.error("fetch 실패:", err));
+        }
+    });
+});
+
+// formatKoreanTime은 timestamp(ms)도 지원하게!
+function formatKoreanTime(ts) {
+    if (!ts) return "";
+    // 숫자인 경우(UNIX timestamp ms) 처리
+    const d = new Date(Number(ts));
     let hour = d.getHours();
     let min = d.getMinutes();
     const ampm = hour < 12 ? "오전" : "오후";
-    hour = hour % 12; if(hour === 0) hour = 12;
-    return `${ampm} ${hour}시 ${min < 10 ? '0'+min : min}분`;
+    hour = hour % 12; if (hour === 0) hour = 12;
+    return `${ampm} ${hour}시 ${min < 10 ? '0' + min : min}분`;
 }
 
-// 채팅방 목록 클릭시 fetch로 메시지 불러오기
-document.querySelectorAll('.chatList').forEach(function(item) {
-    item.addEventListener('click', function() {
-        const roomId = this.dataset.roomId;
-        fetch(`${'${contextPath}'}/chat/messages?roomId=${roomId}&loginUserId=${loginUserId}`)
-            .then(res => res.json())
-            .then(list => {
-                let html = "";
-                list.forEach(msg => {
-                    // Map이므로 key로 접근
-                    if(msg.senderRole === 'SELLER' || msg.chat_sender == loginUserId) {
-                        html += `
-                        <div class="chat-message right">
-                            <div class="chat-userid">${msg.sender_account_id} (${msg.sender_user_name})</div>
-                            <div class="chat-text">${msg.chat_message}</div>
-                            
-                        </div>`;
-                    } else {
-                        html += `
-                        <div class="chat-message left">
-                            <div class="chat-userid">${msg.sender_account_id} (${msg.sender_user_name})</div>
-                            <div class="chat-text">${msg.chat_message}</div>
-                            
-                        </div>`;
-                    }
-                });
-                document.getElementById('chat-history').innerHTML = html;
-            });
-    });
-});
 </script>
+
 
 
 

@@ -14,17 +14,29 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ChatMessageDTO {
-	private int messageId;
-	private int chatRoomId;
-	private int productId;
-	private int chatSender;
+	private String messageId;
+	private String chatRoomId;
+	private String productId;
+	private String chatSender;
 	private String chatSenderAccountId;
 	private String chatSenderUserName;
-	private int chatReceiver;
+	private String chatReceiver;
 	private String chatReceiverAccountId;
 	private String chatReceiverUserName;
 	private String chatMessage;
 	private Timestamp chatCreatedAt;
 	private String senderRole;
 	private String receiverRole;
+	@Override
+	public String toString() {
+		return "ChatMessageDTO [messageId=" + messageId + ", chatRoomId=" + chatRoomId + ", productId=" + productId
+				+ ", chatSender=" + chatSender + ", chatSenderAccountId=" + chatSenderAccountId
+				+ ", chatSenderUserName=" + chatSenderUserName + ", chatReceiver=" + chatReceiver
+				+ ", chatReceiverAccountId=" + chatReceiverAccountId + ", chatReceiverUserName=" + chatReceiverUserName
+				+ ", chatMessage=" + chatMessage + ", chatCreatedAt=" + chatCreatedAt + ", senderRole=" + senderRole
+				+ ", receiverRole=" + receiverRole + "]";
+	}
+	
+	
+	
 }

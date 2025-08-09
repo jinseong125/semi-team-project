@@ -19,7 +19,7 @@ public class ChatDAO {
 	
 	private final SqlSessionTemplate sqlSession;
 	
-	public List<ChatListDTO> getChatList(String accountId) {
+	public List<ChatListDTO> getChatList(int accountId) {
 		return sqlSession.selectList("mybatis.mapper.chatMapper.getChatList", accountId);
 	}
 	
