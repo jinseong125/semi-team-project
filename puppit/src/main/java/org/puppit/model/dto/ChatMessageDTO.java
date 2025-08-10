@@ -12,7 +12,6 @@ import lombok.ToString;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class ChatMessageDTO {
 	private String messageId;
 	private String chatRoomId;

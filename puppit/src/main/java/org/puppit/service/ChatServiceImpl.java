@@ -56,8 +56,8 @@ public class ChatServiceImpl implements ChatService{
 	                dto.setChatCreatedAt(null);
 	            }
 	        }
-	        dto.setSenderRole(String.valueOf(message.get("senderRole")));
-	        dto.setReceiverRole(String.valueOf(message.get("receiverRole")));
+	        dto.setSenderRole(String.valueOf(message.get("sender_role")));
+	        dto.setReceiverRole(String.valueOf(message.get("receiver_role")));
 			return dto;
 		}).collect(Collectors.toList());
 		

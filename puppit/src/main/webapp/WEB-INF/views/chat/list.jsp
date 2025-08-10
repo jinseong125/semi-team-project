@@ -28,7 +28,6 @@ body {
     font-weight: bold;
     letter-spacing: -1px;
     color: #222;
-    /* display: flex; align-items: center; gap: 6px; 삭제 */
 }
 
 .container {
@@ -81,6 +80,11 @@ body {
     margin-right: 10px;
     border: 1.5px solid #eee;
     background: #fafafa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    color: #bbb;
 }
 .chat-info-area {
     flex: 1 1 0;
@@ -141,7 +145,7 @@ body {
     height: 600px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* 입력창을 바닥에 붙임 */
+    justify-content: flex-end;
     padding: 20px;
     box-sizing: border-box;
     background: #fafafa;
@@ -152,11 +156,9 @@ body {
     flex-direction: row;
     gap: 8px;
     width: 100%;
-   
 }
 
 .chat-container input {
-   
     min-width: 0;
     padding: 0 10px;
     font-size: 16px;
@@ -180,68 +182,64 @@ body {
     margin-top: 10px;
 }
 
-.chat-profile-img {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 10px;
-    border: 1.5px solid #eee;
-    background: #fafafa;
-    display: flex;                /* 추가 */
-    justify-content: center;      /* 추가 */
-    align-items: center;          /* 추가 */
-    font-size: 28px;              /* 아이콘 크기 */
-    color: #bbb;                  /* 아이콘 컬러 */
-}
-
-
-/*채팅 메시지들 정렬용 css*/
+/* 채팅 내역(오른쪽 채팅창) */
 .chat-history {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
     gap: 12px;
     margin-bottom: 16px;
     overflow-y: auto;
     flex: 1;
 }
-.chat-message {
+
+/* 채팅 메시지 버블(여러 줄 지원, BUYER/SELLER 정렬) */
+.chat-history .chat-message {
     max-width: 60%;
+    min-width: 80px;
     padding: 10px 16px;
     border-radius: 12px;
     margin-bottom: 4px;
     display: flex;
     flex-direction: column;
-    word-break: break-all;
+    background: #eee;
+    box-sizing: border-box;
+    word-break: break-word;
+    height: auto;
+    overflow: visible;
 }
-.chat-message.right {
-    align-self: flex-end;
+
+.chat-history .chat-message.right {
+    align-self: flex-end !important;
     background: #e9f7fe;
     text-align: right;
 }
-.chat-message.left {
-    align-self: flex-start;
+.chat-history .chat-message.left {
+    align-self: flex-start !important;
     background: #eee;
     text-align: left;
 }
-.chat-userid {
+
+.chat-history .chat-message .chat-userid {
     font-size: 13px;
     color: #888;
     margin-bottom: 2px;
 }
 
-.chat-text {
+.chat-history .chat-message .chat-text {
     font-size: 15px;
     margin-bottom: 2px;
-    /* 아래 두 줄 추가 */
-    white-space: pre-line;
-    word-break: break-all;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
-.chat-time {
+.chat-history .chat-message .chat-time {
     font-size: 12px;
     color: #aaa;
     margin-top: 2px;
+    align-self: flex-end;
 }
 
 
@@ -327,21 +325,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 실 데이터 확인
                     console.log('accountId:', msg.chatSenderAccountId, 'username:', msg.chatSenderUserName, 'msg:', msg.chatMessage);
 					                    
-                    // 본인 메시지 구분 (타입 맞추기)
-                    const alignClass = (String(msg.chatSender) === senderId) ? "right" : "left";
-
-                    // 시간 포맷팅 (숫자 → Date)
+                 	// BUYER/SELLER에 따라 정렬 클래스 부여
+                    const alignClass = (msg.senderRole === "BUYER") ? "right" : "left";
+                    console.log('senderRole: ' , msg.senderRole, ' alignClass: ', alignClass); // 이거 추가!
+                 	
                     let chatTime = "";
-				    if (msg.chatCreatedAt) {
-				        chatTime = new Date(msg.chatCreatedAt).toLocaleString('ko-KR');
-				    }
-
-				    html +=
-				        '<div class="chat-message ' + alignClass + '">' +
-				          '<div class="chat-userid">' + msg.chatSenderAccountId + ' (' + msg.chatSenderUserName + ')</div>' +
-				          '<div class="chat-text">' + msg.chatMessage + '</div>' +
-				          '<div class="chat-time">' + chatTime + '</div>' +
-				        '</div>';
+                    if (msg.chatCreatedAt) {
+                        chatTime = new Date(msg.chatCreatedAt).toLocaleString('ko-KR');
+                    }
+                    html +=
+                        '<div class="chat-message ' + alignClass + '">' +
+                            '<div class="chat-userid">' +
+                                msg.chatSenderAccountId + ' (' + msg.chatSenderUserName + ') (' + msg.senderRole + ')' +
+                            '</div>' +
+                            '<div class="chat-text">' + msg.chatMessage + '</div>' +
+                            '<div class="chat-time">' + chatTime + '</div>' +
+                        '</div>';
                 });
                 console.log("최종 html:", html);
 
