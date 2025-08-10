@@ -4,6 +4,13 @@
 # Servers
 Servers/
 
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+
 ### Eclipse ###
 # Eclipse metadata
 .metadata/
