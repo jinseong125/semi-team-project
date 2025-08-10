@@ -192,7 +192,16 @@ body {
     margin-bottom: 16px;
     overflow-y: auto;
     flex: 1;
+    
+     /* 스크롤바 숨기기 (크로스 브라우저) */
+    scrollbar-width: none;         /* Firefox */
+    -ms-overflow-style: none;      /* IE, Edge */
 }
+
+.chat-history::-webkit-scrollbar {
+    display: none;                 /* Chrome, Safari, Opera */
+}
+
 
 /* 채팅 메시지 버블(여러 줄 지원, BUYER/SELLER 정렬) */
 .chat-history .chat-message {
@@ -351,6 +360,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 chatHistoryElem.innerHTML = html;
 
+                // [여기 추가]
+                chatHistoryElem.scrollTop = chatHistoryElem.scrollHeight;
+                
                 console.log("chat-history innerHTML:", chatHistoryElem.innerHTML);
             })
             .catch(err => console.error("fetch 실패:", err));
