@@ -10,9 +10,10 @@
     <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
     <!--  <property name="jdbcUrl" value="jdbc:mysql://192.168.35.224:3306/db_puppit?characterEncoding=UTF-8&amp;serverTimezone=UTC"/>-->
     <property name="jdbcUrl"
-          value="jdbc:mysql://kwonht.synology.me:33309/db?characterEncoding=UTF-8&amp;serverTimezone=UTC"/>
+          value="jdbc:mysql://puppit.cp2aos8cos6t.ap-southeast-2.rds.amazonaws.com
+          :3306/puppit?characterEncoding=UTF-8&amp;serverTimezone=UTC"/>
       <property name="username" value="user"/>
-      <property name="password" value="user"/>
+      <property name="password" value="puppitgood"/>
   </bean>
   
  <!-- 2. DataSource -->
