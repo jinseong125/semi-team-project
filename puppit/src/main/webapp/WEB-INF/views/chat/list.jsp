@@ -2,15 +2,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%
-	//세션에서 accountId 가져오기 (null 체크)
 	Object accountIdObj = session.getAttribute("accountId");
-	int accountId = 0;
+	String accountId = "";
 	if (accountIdObj != null) {
-	    try {
-	        accountId = Integer.parseInt(accountIdObj.toString());
-	    } catch (Exception e) {
-	        accountId = 0; // 또는 오류 처리
-	    }
+	    accountId = accountIdObj.toString();
 	}
 %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
@@ -204,18 +199,12 @@ body {
     margin-bottom: 16px;
     overflow-y: auto;
     flex: 1;
-    
-     /* 스크롤바 숨기기 (크로스 브라우저) */
     scrollbar-width: none;         /* Firefox */
     -ms-overflow-style: none;      /* IE, Edge */
 }
-
 .chat-history::-webkit-scrollbar {
     display: none;                 /* Chrome, Safari, Opera */
 }
-
-
-/* 채팅 메시지 버블(여러 줄 지원, BUYER/SELLER 정렬) */
 .chat-history .chat-message {
     max-width: 60%;
     min-width: 80px;
@@ -230,7 +219,6 @@ body {
     height: auto;
     overflow: visible;
 }
-
 .chat-history .chat-message.right {
     align-self: flex-end !important;
     background: #e9f7fe;
@@ -241,13 +229,11 @@ body {
     background: #eee;
     text-align: left;
 }
-
 .chat-history .chat-message .chat-userid {
     font-size: 13px;
     color: #888;
     margin-bottom: 2px;
 }
-
 .chat-history .chat-message .chat-text {
     font-size: 15px;
     margin-bottom: 2px;
@@ -255,20 +241,15 @@ body {
     overflow-wrap: break-word;
     word-break: break-word;
 }
-
 .chat-history .chat-message .chat-time {
     font-size: 12px;
     color: #aaa;
     margin-top: 2px;
     align-self: flex-end;
 }
-
-
-
   </style>
 </head>
 <body>
-
 
 <div class="container-header">
     <h1>채팅방 목록</h1>
@@ -333,22 +314,38 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(map => {
                 const productInfoElem = document.getElementById('product-info-area');
                 if (productInfoElem) {
-                    if (map.product) {
-                    	var pname = map.product.productName ? map.product.productName : '';
-                        var pprice = (map.product.productPrice != null ? map.product.productPrice : '');
-                        var sellerId = map.product.sellerAccountId ? map.product.sellerAccountId.toString() : '';
-                        var buyerId = map.product.buyerAccountId ? map.product.buyerAccountId.toString() : '';
+                    const chatMessages = map.chatMessages || [];
+                    if (chatMessages.length > 0) {
+                        // 첫번째 메시지에서 필요한 정보 추출
+                        const firstMsg = chatMessages[0];
+                        // sellerId는 productSellerId 또는 senderSellerId/receiverSellerId 중 실제 값이 있는 것으로 선택
+                        let sellerId = firstMsg.productSellerId || firstMsg.senderSellerId || firstMsg.receiverSellerId || "";
+                        sellerId = sellerId ? sellerId.toString() : "";
+                        let buyerId = "";
+                        if (firstMsg.senderRole === "BUYER") buyerId = firstMsg.chatSenderAccountId;
+                        else if (firstMsg.receiverRole === "BUYER") buyerId = firstMsg.chatReceiverAccountId;
+
+                        // 상품 정보는 map.product 또는 메시지에서 가져옴
+                        let pname = "";
+                        let pprice = "";
+                        if (map.product) {
+                            pname = map.product.productName || "";
+                            pprice = (map.product.productPrice != null ? map.product.productPrice : "");
+                        } else {
+                            pname = firstMsg.productName || "";
+                            pprice = (firstMsg.productPrice != null ? firstMsg.productPrice : "");
+                        }
 
                         // 디버깅
-                        console.log("loginUserId:", loginUserId, "sellerId:", sellerId, "타입:", typeof loginUserId, typeof sellerId);
+                        console.log("loginUserId:", loginUserId, "sellerId:", sellerId, "buyerId:", buyerId);
 
-                        var productHtml =
+                        let productHtml =
                             '<div class="product-info" style="margin-bottom:16px;padding:12px;background:#f3f3f3;border-radius:10px;">'
                             + '<b>상품명:</b> ' + pname
                             + '<br><b>가격:</b> ' + pprice + '원';
 
                         // SELLER가 보는 화면이면 버튼 추가 (타입을 맞춰서 비교!)
-                        if (String(loginUserId) === String(sellerId)) {
+                        if (String(loginUserId) === String(buyerId)) {
                             productHtml +=
                                 '<br><button id="pay-btn"'
                                 + ' style="margin-top:12px;padding:10px 24px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;"'
@@ -393,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     const alignClass = (msg.senderRole === "BUYER") ? "right" : "left";
                     let chatTime = "";
                     if (msg.chatCreatedAt) {
-                        chatTime = new Date(msg.chatCreatedAt).toLocaleString('ko-KR');
+                        chatTime = formatKoreanTime(msg.chatCreatedAt);
                     }
                     html +=
                         '<div class="chat-message ' + alignClass + '">' +
@@ -420,8 +417,15 @@ document.addEventListener('DOMContentLoaded', function() {
 // formatKoreanTime은 timestamp(ms)도 지원하게!
 function formatKoreanTime(ts) {
     if (!ts) return "";
-    // 숫자인 경우(UNIX timestamp ms) 처리
-    const d = new Date(Number(ts));
+    let d;
+    if (typeof ts === "string" && ts.length > 0 && !isNaN(Number(ts))) {
+        d = new Date(Number(ts));
+    } else if (typeof ts === "number") {
+        d = new Date(ts);
+    } else {
+        d = new Date(ts);
+    }
+    if (isNaN(d.getTime())) return "";
     let hour = d.getHours();
     let min = d.getMinutes();
     const ampm = hour < 12 ? "오전" : "오후";
