@@ -24,10 +24,23 @@
      WHERE account_id = #{accountId}
   </select>
   
-  <!-- 로그인(아이디) -->
-  <select id="getUserById" parameterType="String" resultType="UserDTO">
-    SELECT account_id, user_password, salt
+  <!-- 로그인(아이디, 비밀번호) -->
+  <select id="getUserByIdAndPassword" parameterType="UserDTO" resultType="UserDTO">
+    SELECT account_id, user_password
+      FROM user
+     WHERE account_id = #{accountId} AND user_password = #{userPassword}
+  </select>
+  
+  <!-- account 사용해서 user_id(PK) 조회 -->
+  <select id="getUserId" parameterType="String" resultType="java.lang.Integer">
+    SELECT user_id
       FROM user
      WHERE account_id = #{accountId}
   </select>
+  
+  <!-- 로그인 로그 저장 -->
+  <insert id="insertLogStatus" parameterType="UserStatusDTO">
+    INSERT INTO user_status (user_id, account_id, login_at)
+    VALUES (#{userId}, #{accountId}, #{loginAt})
+  </insert>
 </mapper>
