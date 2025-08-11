@@ -32,8 +32,8 @@
   </select>
   
   <!-- account 사용해서 user_id(PK) 조회 -->
-  <select id="getUserId" parameterType="String" resultType="java.lang.Integer">
-    SELECT user_id
+  <select id="getUserId" parameterType="String" resultType="UserDTO">
+    SELECT user_id, user_email, user_name
       FROM user
      WHERE account_id = #{accountId}
   </select>

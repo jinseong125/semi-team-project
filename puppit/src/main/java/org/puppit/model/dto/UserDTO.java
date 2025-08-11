@@ -17,7 +17,9 @@ import lombok.ToString;
 @Builder
 public class UserDTO {
 
+  //user table PK
   private Integer userId;
+  
   private String accountId;
   private String userName;
   private String nickName;

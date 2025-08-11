@@ -11,6 +11,6 @@ public interface UserService {
   boolean countByAccountId(String accountId);
   boolean login(UserDTO user);
   Integer insertLogStatus(UserStatusDTO log);
-  Integer getUserId(String accountId);
+  UserDTO getUserId(String accountId);
   
 }
