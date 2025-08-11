@@ -24,9 +24,9 @@ public class ChatServiceImpl implements ChatService{
 	private final ChatDAO chatDAO;
 	
 	@Override
-	public List<ChatListDTO> getChatRooms(int accountId) {
+	public List<ChatListDTO> getChatRooms(int userId) {
 		
-		return chatDAO.getChatList(accountId);
+		return chatDAO.getChatList(userId);
 	}
 
 	@Override
