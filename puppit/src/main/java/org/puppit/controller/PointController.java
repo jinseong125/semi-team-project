@@ -25,7 +25,7 @@ public class PointController {
   
   @GetMapping("/payment/paymentForm")
   public String paymentForm() {
-    return "/user/paymentForm";
+    return "/payment/paymentForm";
   }
   
   @PostMapping(value = "/payment/verify", produces = "application/json")

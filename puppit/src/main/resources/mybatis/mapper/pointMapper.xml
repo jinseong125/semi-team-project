@@ -14,5 +14,6 @@
   INSERT INTO point_charge(user_id, point_charge_amount, point_charge_order_number)
   VALUES (#{uid}, #{amount}, #{uuid})
 </update>
+
   
 </mapper>
