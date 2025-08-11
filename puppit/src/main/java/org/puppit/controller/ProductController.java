@@ -20,7 +20,14 @@ public class ProductController {
 
     /** 상품 등록 폼 */
     @GetMapping("/new")
-    public String newForm(ProductDTO productDTO , Model model) {
+    public String newForm(ProductDTO productDTO , Model model , HttpSession session,
+                          RedirectAttributes ra) {
+        Integer sellerId = (Integer) session.getAttribute("userId");
+        if (sellerId == null) {
+            // 로그인 안 한 경우 → 로그인 페이지로 리다이렉트
+            ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
+            return "redirect:/user/login";
+        }
 
         // 셀렉트 박스 데이터
         var formData = productService.getProductFormData();
@@ -34,9 +41,22 @@ public class ProductController {
 
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
+                         HttpSession session,
                          RedirectAttributes ra) {
 
-        product.setSellerId(1); // <-- DB에 user_id=1 이 실제로 있어야 함
+        // 세션에서 로그인 사용자 정보 확인
+        //자바에서 Object → 구체적인 타입(Integer, String 등)으로 사용할 때는 명시적 타입 변환(캐스팅)
+        //getAttribute는 object 타입이라 casting해주어야함
+        //Integer는 참조형이라 null 가능 → 로그인 안 한 상태
+        Integer sellerId =  (Integer) session.getAttribute("userId");
+        if (sellerId == null) {
+            // 로그인 안 한 경우 → 로그인 페이지로 리다이렉트
+            ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
+            return "redirect:/user/login";
+        }
+
+        // 로그인 한 경우 → sellerId 주입
+        product.setSellerId(sellerId);
 
         // 기본 상태값 (예: 1=ACTIVE)
         if (product.getStatusId() == 0) {

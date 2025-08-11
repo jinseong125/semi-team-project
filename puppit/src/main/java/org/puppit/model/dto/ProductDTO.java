@@ -13,14 +13,14 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class ProductDTO {
-    private int productId;
-    private int locationId;
-    private int categoryId;
-    private int sellerId;
-    private int conditionId;
-    private int statusId;
+    private Integer productId;
+    private Integer locationId;
+    private Integer categoryId;
+    private Integer sellerId;
+    private Integer conditionId;
+    private Integer statusId;
     private String productName;
-    private int productPrice;
+    private Integer productPrice;
     private String productDescription;
     private Timestamp productCreatedAt;
     private Timestamp productUpdatedAt;

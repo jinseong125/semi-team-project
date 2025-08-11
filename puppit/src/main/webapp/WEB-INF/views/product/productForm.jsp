@@ -19,10 +19,8 @@
 <h2 style="text-align:center;">상품 등록</h2>
 
 <form action="<c:url value='/product/new'/>" method="post">
-  <!-- Spring Security 사용 시 CSRF 토큰 -->
-  <c:if test="${not empty _csrf}">
-    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
-  </c:if>
+
+
 
   <div>
     <label>상품명</label>

@@ -39,4 +39,16 @@
         ORDER BY condition_id
     </select>
 
+    <!-- getProductById-->
+    <select id="getProductById"
+            parameterType="int"
+            resultType="org.puppit.model.dto.ProductDTO">
+        SELECT user_id AS userId,
+               price AS productPrice
+        FROM product
+        WHERE product_id = #{productId}
+    </select>
+
+
+
 </mapper>
