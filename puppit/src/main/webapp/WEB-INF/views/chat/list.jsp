@@ -266,7 +266,7 @@ body {
                         </span>
                    
                 <div class="chat-info-area" style="cursor:pointer;">
-                    <div class="chat-nickname">${chat.lastMessageReceiverAccountId}</div>
+                    <div class="chat-nickname">${chat.lastMessageSenderAccountId}</div>
                     <div class="chat-message">${chat.lastMessage}</div>
                 </div>
                 <div class="chat-meta">
@@ -382,10 +382,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const list = map.chatMessages || [];
                 let html = "";   
                 list.forEach(msg => {
+                	console.log("chatCreatedAt:", msg.chatCreatedAt, typeof msg.chatCreatedAt);
                     const alignClass = (msg.senderRole === "BUYER") ? "right" : "left";
                     let chatTime = "";
                     if (msg.chatCreatedAt) {
                         chatTime = formatKoreanTime(msg.chatCreatedAt);
+                        console.log('chatTime:', chatTime);
                     }
                     html +=
                         '<div class="chat-message ' + alignClass + '">' +
@@ -409,24 +411,47 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// formatKoreanTime은 timestamp(ms)도 지원하게!
-function formatKoreanTime(ts) {
-    if (!ts) return "";
-    let d;
-    if (typeof ts === "string" && ts.length > 0 && !isNaN(Number(ts))) {
-        d = new Date(Number(ts));
-    } else if (typeof ts === "number") {
-        d = new Date(ts);
-    } else {
-        d = new Date(ts);
-    }
-    if (isNaN(d.getTime())) return "";
-    let hour = d.getHours();
-    let min = d.getMinutes();
-    const ampm = hour < 12 ? "오전" : "오후";
-    hour = hour % 12; if (hour === 0) hour = 12;
-    return `${ampm} ${hour}시 ${min < 10 ? '0' + min : min}분`;
-}
+/**
+ * 주어진 값(ts)을 한국식 시간 문자열("오전/오후 h시 mm분")로 변환
+ * 지원 포맷:
+ *  - number (timestamp, 밀리초)
+ *  - ISO8601 문자열 ("2025-08-10T22:29:38.0")
+ *  - "yyyy-MM-dd HH:mm:ss[.S]" (공백 포함 문자열)
+ *  - 숫자 형태의 문자열 ("1754832578000")
+ */
+ function formatKoreanTime(ts) {
+	    if (!ts) return "";
+	    let d;
+
+	    if (typeof ts === "number" || (typeof ts === "string" && !isNaN(Number(ts)))) {
+	        d = new Date(Number(ts));
+	    } else if (typeof ts === "string" && ts.indexOf("T") > 0) {
+	        d = new Date(ts);
+	    } else if (typeof ts === "string" && ts.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}/)) {
+	        d = new Date(ts.replace(" ", "T"));
+	    } else {
+	        d = new Date(ts);
+	    }
+
+	    if (!d || isNaN(d.getTime())) return "";
+
+	    let hour = d.getHours();
+	    console.log('hour: ' , hour);
+	    let min = d.getMinutes();
+	    console.log('min: ' , min);
+	    let ampm = hour < 12 ? "오전" : "오후";
+	    console.log('ampm: ', ampm);
+	    let hour12 = hour % 12;
+	    if (hour12 === 0) hour12 = 12;
+	    console.log('hour12:', hour12);
+	    // 여기서 반드시 백틱(`) 사용! 따옴표(') 아님!
+	    // **백틱(`)으로 감싼 것에 주의!**
+   
+    let formatted = `\${ampm} \${hour12}시 \${min < 10 ? '0' + min : min}분`;
+    console.log('formatted:', formatted);
+	    return formatted;
+	}
+
 </script>
 </body>
 </html>
