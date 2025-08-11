@@ -10,9 +10,11 @@ import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.puppit.service.UserService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +52,14 @@ public class UserController {
     return "redirect:/";
   }
   
+  @GetMapping("/checkId")
+  public String checkId(@RequestParam("accountId") String accountId, Model model) {
+    boolean available = userService.countByAccountId(accountId);
+    model.addAttribute("accountId", accountId);
+    model.addAttribute("available", available);
+    return "user/checkIdResult"; 
+  }
+  
   // 로그인 폼 보여주기
   @GetMapping("/login")
   public String loginForm() {
@@ -75,14 +85,14 @@ public class UserController {
         return "redirect:/user/login";
       }
       // 세션 저장
-      // 세션 저장
       session.setAttribute("userId", userDTO.getUserId());
       session.setAttribute("accountId", user.getAccountId());
       session.setAttribute("userName", userDTO.getUserName());
       session.setAttribute("userEmail", userDTO.getUserEmail());
-      redirectAttr.addFlashAttribute("msg", "로그인 성공!");
-      
+      // 로그 기록
       userService.insertLogStatus(userLog);
+      // 로그 기록 후 메시지 띄우기
+      redirectAttr.addFlashAttribute("msg", "로그인 성공!");
       return "redirect:/";
     } catch (Exception e) {
        e.printStackTrace();

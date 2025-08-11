@@ -13,6 +13,7 @@
 <style>
  .main {
  text-align: center;
+ border: 1px solid black;
  }
 </style>
 <body>
@@ -27,11 +28,12 @@
 		<br>
 		<button type="submit" onclick="onLogin()">로그인</button>
 	</form>
-	
 	<c:if test="${not empty error}">
 		<div style="font-size: 12px; color: red;">${error}</div>
-	
 	</c:if>
+  <label>아아디/비밀번호를 잊으셨나요? <a href="">아이디/비밀번호 찾기</a></label><br>
+  <label>Puppit이 처음이신가요? <a href=" ${contextPath}/user/signup">회원가입 하기</a></label>
+	
 </div>
 	
 	
@@ -40,8 +42,9 @@
 	<script type="text/javascript">
 
 		 const msg = "${msg}";
-		    if (msg !== "")
+		    if (msg && msg.trim() !== "") {
 		      alert(msg);
+		    }
 	
 	</script>
 	

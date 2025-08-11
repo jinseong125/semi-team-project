@@ -13,13 +13,13 @@
 
   <!-- 회원가입 -->
   <insert id="userSignUp" parameterType="UserDTO">
-     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone)
-     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone})
+     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at)
+     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW())
   </insert>
   
   <!-- 아이디 중복 검사 -->
   <select id="countByAccountId" parameterType="String" resultType="int">
-    SELECT COUNT(*) > 0
+    SELECT COUNT(*)
       FROM user
      WHERE account_id = #{accountId}
   </select>
