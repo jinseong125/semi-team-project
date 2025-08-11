@@ -260,23 +260,18 @@ body {
     <div class="chatlist-container">
         <c:forEach items="${chatList}" var="chat">
             <div class="chatList" data-room-id="${chat.roomId}" >
-                <c:choose>
-                    <c:when test="${empty chat.profileImage}">
+                
                         <span class="chat-profile-img chat-profile-icon">
                             <i class="fa-solid fa-user"></i>
                         </span>
-                    </c:when>
-                    <c:otherwise>
-                        <img class="chat-profile-img" src="${chat.profileImage}" alt="profile"/>
-                    </c:otherwise>
-                </c:choose>
+                   
                 <div class="chat-info-area" style="cursor:pointer;">
-                    <div class="chat-nickname">${chat.receiverAccountId}</div>
-                    <div class="chat-message">${chat.chatMessage}</div>
+                    <div class="chat-nickname">${chat.lastMessageReceiverAccountId}</div>
+                    <div class="chat-message">${chat.lastMessage}</div>
                 </div>
                 <div class="chat-meta">
                     <span class="chat-time">
-                        <fmt:formatDate value="${chat.chatSentAt}" pattern="a h시 mm분"/>
+                        <fmt:formatDate value="${chat.lastMessageAT}" pattern="a h시 mm분"/>
                     </span>
                 </div>
             </div>

@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
@@ -26,8 +28,9 @@ public class ChatController {
 	private final ChatService chatService;
 	
 	@GetMapping("/list")
-	public String chats(Model model) {
-		List<ChatListDTO> chatList = chatService.getChatRooms(1);
+	public String chats(Model model, HttpSession session) {
+		int userId = (Integer) session.getAttribute("userId");
+		List<ChatListDTO> chatList = chatService.getChatRooms(userId);
 		System.out.println("chatList: " + chatList);
 		model.addAttribute("chatList", chatList);		
 		return "chat/list";
