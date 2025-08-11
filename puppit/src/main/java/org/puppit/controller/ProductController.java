@@ -32,22 +32,20 @@ public class ProductController {
         return "product/productForm";
     }
 
-    /** 상품 등록 처리 */
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
-                         HttpSession session,
                          RedirectAttributes ra) {
-        // 로그인에서 sellerId 주입 (세션 키는 프로젝트에 맞게)
-        UserDTO login = (UserDTO) session.getAttribute("loginUser");
-        if (login == null) return "redirect:/login";
-        product.setSellerId(login.getUserId());
 
-        // 기본 상태값 (예: 1 = ACTIVE)
-        if (product.getStatusId() == 0) product.setStatusId(1);
+        product.setSellerId(1); // <-- DB에 user_id=1 이 실제로 있어야 함
 
-        int id = productService.registerProduct(product); // ★ 실제 insert
-        ra.addFlashAttribute("msg","상품 등록 완료 #" + id);
-        return "redirect:/product/list"; // 메인이 목록을 안 보여주면 /product/list로
+        // 기본 상태값 (예: 1=ACTIVE)
+        if (product.getStatusId() == 0) {
+            product.setStatusId(1);
+        }
+
+        int id = productService.registerProduct(product);
+        ra.addFlashAttribute("msg", "상품 등록 완료 #" + id);
+        return "redirect:/product/list";
     }
 
 
