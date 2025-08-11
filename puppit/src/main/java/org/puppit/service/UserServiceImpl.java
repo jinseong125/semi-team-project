@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     return userDAO.insertLogStatus(log);
   }
   @Override
-  public Integer getUserId(String accountId) {
+  public UserDTO getUserId(String accountId) {
     return userDAO.getUserId(accountId);
   }
 

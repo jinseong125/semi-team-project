@@ -28,7 +28,7 @@ public class UserDAO {
   public Integer insertLogStatus(UserStatusDTO log) {
     return sqlSession.insert("mybatis.mapper.userMapper.insertLogStatus", log);
   }
-  public Integer getUserId(String accountId) {
+  public UserDTO getUserId(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserId", accountId);
   }
 }

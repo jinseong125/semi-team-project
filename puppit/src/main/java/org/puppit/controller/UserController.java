@@ -50,6 +50,7 @@ public class UserController {
     return "redirect:/";
   }
   
+  // 로그인 폼 보여주기
   @GetMapping("/login")
   public String loginForm() {
     return "user/login";
@@ -66,13 +67,19 @@ public class UserController {
       String dateTimeStr = stf.format(now);
       Date date = stf.parse(dateTimeStr);
       Timestamp timestamp = new Timestamp(date.getTime());
-      Integer userId = userService.getUserId(user.getAccountId());
-      UserStatusDTO userLog = new UserStatusDTO(user.getAccountId(), userId, timestamp);
+      
+      UserDTO userDTO = userService.getUserId(user.getAccountId());
+      UserStatusDTO userLog = new UserStatusDTO(user.getAccountId(), userDTO.getUserId(), timestamp);
       if(!loginResult) {
         redirectAttr.addFlashAttribute("error", "아이디나 비밀번호를 확인 해주세요");
         return "redirect:/user/login";
       }
+      // 세션 저장
+      // 세션 저장
+      session.setAttribute("userId", userDTO.getUserId());
       session.setAttribute("accountId", user.getAccountId());
+      session.setAttribute("userName", userDTO.getUserName());
+      session.setAttribute("userEmail", userDTO.getUserEmail());
       redirectAttr.addFlashAttribute("msg", "로그인 성공!");
       
       userService.insertLogStatus(userLog);
