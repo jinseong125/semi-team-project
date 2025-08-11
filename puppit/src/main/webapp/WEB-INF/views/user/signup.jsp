@@ -26,8 +26,13 @@
     <h1>기본정보</h1>
     <form action="${contextPath}/user/signup"
           method="post"
-          id="signForm">
-    <label>아이디: <input type="text" id="accountId" name="accountId"></label>
+          id="signupForm">
+    <div class="input-id">
+      <label>아이디: <input type="text" id="accountId" name="accountId"></label>
+      <button type="button" onclick="checkIdBtn()" class="checkId" id="checkIdBtn">중복검사</button>
+      <!-- 아이디 중복 체크 여부 -->
+      <input type="hidden" name="idDuplication" value="idUncheck"/>
+    </div>
     <br>
     <label>비밀번호: <input type="password" id="userPassword" name="userPassword"></label>
     <br>
@@ -43,7 +48,7 @@
     <br>
     <button type="submit">가입하기</button>
     </form>
-    
+
 <script>
   document.getElementById("signupForm").addEventListener("submit", function (e) {
     const requiredFields = [
@@ -65,6 +70,22 @@
       }
     }
   });
+  document.getElementById('checkIdBtn').addEventListener('click', function(){
+	  const id = document.getElementById("accountId").value.trim();
+	  if(!id){ alert('아이디를 입력하세요'); return; }
+
+	  fetch('${contextPath}/user/checkId?accountId=' + encodeURIComponent(id))
+	    .then(res => res.json())
+	    .then(data => {
+	      // Controller는 { available: true } 같은 JSON을 반환한다고 가정
+	      if(data.available) alert('사용 가능한 아이디입니다.');
+	      else alert('이미 사용중인 아이디입니다.');
+	    })
+	    .catch(err => {
+	      console.error(err);
+	      alert('서버 오류가 발생했습니다.');
+	    });
+	});
 </script>
     
 
