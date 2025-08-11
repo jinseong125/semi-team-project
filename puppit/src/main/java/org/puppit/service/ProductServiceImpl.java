@@ -51,4 +51,9 @@ public class ProductServiceImpl implements ProductService {
         return map;
     }
 
+    @Override
+    public ProductDTO getProductById(Integer productId) {
+        return productDAO.getProductById(productId);
+    }
+
 }

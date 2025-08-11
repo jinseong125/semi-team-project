@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConditionDTO {
-    private int conditionId;
+    private Integer conditionId;
     private String conditionName;
 }

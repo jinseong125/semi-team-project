@@ -12,4 +12,5 @@ public interface ProductService {
     // org.puppit.service.ProductService
     public Map<String, List<?>> getProductFormData();
 
+    public ProductDTO getProductById(Integer productId);
 }

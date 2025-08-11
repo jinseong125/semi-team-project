@@ -16,13 +16,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProductDAO {
 
+
+
     private final SqlSession sqlSession;
 
-    /**
-     * 상품 등록
-     * @param productDTO 등록할 상품 정보
-     * @return 생성된 상품의 PK(productId)
-     */
+
     public int insertProduct(org.puppit.model.dto.ProductDTO productDTO) {
         sqlSession.insert( "product.insertProduct", productDTO);
 
@@ -41,6 +39,9 @@ public class ProductDAO {
         return sqlSession.selectList("product.getConditions");
     }
 
+    public ProductDTO getProductById(Integer productId){
+        return sqlSession.selectOne("product.getProductById");
+    }
 
 
 }
