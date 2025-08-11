@@ -4,7 +4,12 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <jsp:include page="./layout/header.jsp" />
-
+   <script type="text/javascript">
+       const msg = "${msg}";
+          if (msg && msg.trim() !== "") {
+            alert(msg);
+          }
+   </script>
 <style>
   .container {
     max-width: 1200px;
@@ -54,14 +59,13 @@
 <div class="container">
   <!-- 컨트롤러에서 request.setAttribute("products", List<ProductDTO>) -->
   <!-- ProductDTO: id, name, description, price(BigDecimal/Long), imageUrl -->
-
   <c:choose>
     <c:when test="${not empty products}">
-      <div class="product-grid">
+      <div class="product-grid"
+      	   id="productGrid">
         <c:forEach items="${products}" var="p">
           <div class="product-box">
             <a href="${contextPath}/product/${p.id}">
-
             </a>
             <div class="title"><c:out value="${p.name}" /></div>
             <div class="desc"><c:out value="${p.description}" /></div>
@@ -73,15 +77,15 @@
       </div>
     </c:when>
     <c:otherwise>
-
-      <div class="product-grid">
+      <div class="product-grid"
+      	   id="productGrid">
         <c:forEach begin="1" end="8" var="i">
           <div class="product-box">
             <img class="thumb" src="${contextPath}/resources/image/car.png" alt="유모차" />
             <div class="title">유모차</div>
             <div class="desc">상품 정보 입니다</div>
             <div class="price">₩3,0000원</div>
-          </div>
+            </div>
         </c:forEach>
       </div>
     </c:otherwise>
