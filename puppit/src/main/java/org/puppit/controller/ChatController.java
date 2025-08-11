@@ -40,6 +40,7 @@ public class ChatController {
 		System.out.println("/chat/message 요청");
 		System.out.println("chatMessageSelectDTO: " + chatMessageSelectDTO.toString());
 		List<ChatMessageDTO> chatMessages = chatService.getChatMessageList(chatMessageSelectDTO);
+		System.out.println("messages: " + chatMessages.toString());
 		System.out.println("chatMessages.length: " + chatMessages.size());
 		model.addAttribute("chatMessages", chatMessages.toString());
 		model.addAttribute("loginUserId", chatMessageSelectDTO.getLoginUserId());
