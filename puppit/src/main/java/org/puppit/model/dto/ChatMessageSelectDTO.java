@@ -11,5 +11,5 @@ import lombok.Setter;
 @Setter
 public class ChatMessageSelectDTO {
 	private int roomId;
-	private int loginUserId;
+	private String loginUserId;
 }
