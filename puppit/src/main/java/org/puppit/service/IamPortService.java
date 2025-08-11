@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
 public class IamPortService {
 
     private final String API_KEY = "6476012641127056";
-    private final String API_SECRET = "NsyxckUoWzY8BECgqIAIFjLnNkRgagoqBOeWgh15b3aI5SSWRckxrBLuMPK0li4j4e6TzfPNi6PG6bAh";
+    private final String API_SECRET = "MY_API_SECRET";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
