@@ -51,4 +51,23 @@ SELECT
     ORDER BY c.chat_created_at ASC;
 </select>
   
+  
+  
+<select id="getProduct" resultType="org.puppit.model.dto.ChatMessageProductDTO" parameterType="java.lang.Integer">
+
+SELECT product_id, product_name, product_price
+from product
+where product_id = #{product_Id}
+
+
+
+
+</select>  
+  
+  
+  
+  
+  
+  
+  
 </mapper>
