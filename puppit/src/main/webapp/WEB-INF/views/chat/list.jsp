@@ -1,8 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%
+	//세션에서 accountId 가져오기 (null 체크)
+	Object accountIdObj = session.getAttribute("accountId");
+	int accountId = 0;
+	if (accountIdObj != null) {
+	    try {
+	        accountId = Integer.parseInt(accountIdObj.toString());
+	    } catch (Exception e) {
+	        accountId = 0; // 또는 오류 처리
+	    }
+	}
+%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
-<c:set var="loginUserId" value="${loginUserId}" />
+<c:set var="loginUserId" value="<%= accountId %>" />
 <c:set var="roomId" value="${roomId}" />
 <!DOCTYPE html>
 <html>
@@ -292,6 +304,7 @@ body {
 
     <!-- 채팅내역 + 입력창 (오른쪽) -->
     <div class="chat-container">
+    	<div class="product-info-area" id="product-info-area"></div>
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-input-group">
             <input placeholder="채팅메시지를 입력하세요"/>
@@ -302,42 +315,82 @@ body {
 
 <script>
 const contextPath = "${contextPath}";
-
+const loginUserId = "${loginUserId}";
 
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.chatlist-container').addEventListener('click', function(e) {
         const chatDiv = e.target.closest('.chatList');
         if (chatDiv) {
             const roomId = chatDiv.dataset.roomId;
-            const senderId = "1"; // 반드시 string으로!
+            const senderId = loginUserId; // 세션에서 가져온 유저 아이디 사용
             if (!roomId) {
                 alert("roomId가 비어 있습니다!");
                 return;
             }
-            console.log('roomId:', roomId, 'senderId:', senderId);
-
             const url = contextPath + "/chat/message?roomId=" + roomId + "&loginUserId=" + senderId;
-            console.log("fetch url:", url);
             fetch(url)
             .then(res => res.json())
-            .then(list => {
-                console.log("list:", list, Array.isArray(list));
-                let html = "";
-                list.forEach(msg => {
-                    console.log('msg:', msg);
-                    // 아래에서 값을 반드시 console로 찍어보세요!
-                    console.log('chatSenderAccountId:', msg.chatSenderAccountId);
-                    console.log('chatSenderUserName:', msg.chatSenderUserName);
-                    console.log('chatMessage:', msg.chatMessage);
-                    console.log('chatCreatedAt:', msg.chatCreatedAt);
+            .then(map => {
+                const productInfoElem = document.getElementById('product-info-area');
+                if (productInfoElem) {
+                    if (map.product) {
+                    	var pname = map.product.productName ? map.product.productName : '';
+                        var pprice = (map.product.productPrice != null ? map.product.productPrice : '');
+                        var sellerId = map.product.sellerAccountId ? map.product.sellerAccountId.toString() : '';
+                        var buyerId = map.product.buyerAccountId ? map.product.buyerAccountId.toString() : '';
 
-                    // 실 데이터 확인
-                    console.log('accountId:', msg.chatSenderAccountId, 'username:', msg.chatSenderUserName, 'msg:', msg.chatMessage);
-					                    
-                 	// BUYER/SELLER에 따라 정렬 클래스 부여
+                        // 디버깅
+                        console.log("loginUserId:", loginUserId, "sellerId:", sellerId, "타입:", typeof loginUserId, typeof sellerId);
+
+                        var productHtml =
+                            '<div class="product-info" style="margin-bottom:16px;padding:12px;background:#f3f3f3;border-radius:10px;">'
+                            + '<b>상품명:</b> ' + pname
+                            + '<br><b>가격:</b> ' + pprice + '원';
+
+                        // SELLER가 보는 화면이면 버튼 추가 (타입을 맞춰서 비교!)
+                        if (String(loginUserId) === String(sellerId)) {
+                            productHtml +=
+                                '<br><button id="pay-btn"'
+                                + ' style="margin-top:12px;padding:10px 24px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;"'
+                                + ' data-buyer-id="' + buyerId + '"'
+                                + ' data-seller-id="' + sellerId + '"'
+                                + ' data-product-name="' + pname + '"'
+                                + ' data-qty="1"'
+                                + '>'
+                                + '결제하기'
+                                + '</button>';
+                        }
+
+                        productHtml += '</div>';
+                        productInfoElem.innerHTML = productHtml;
+
+                        // 결제하기 버튼 이벤트 바인딩
+                        setTimeout(function() {
+                            var payBtn = document.getElementById('pay-btn');
+                            if (payBtn) {
+                                payBtn.onclick = function() {
+                                    var buyerId = this.getAttribute('data-buyer-id');
+                                    var sellerId = this.getAttribute('data-seller-id');
+                                    var productName = this.getAttribute('data-product-name');
+                                    var qty = this.getAttribute('data-qty');
+                                    var payUrl = contextPath + '/order/pay'
+                                        + '?buyerId=' + encodeURIComponent(buyerId)
+                                        + '&sellerId=' + encodeURIComponent(sellerId)
+                                        + '&productName=' + encodeURIComponent(productName)
+                                        + '&qty=' + encodeURIComponent(qty);
+                                    window.location.href = payUrl;
+                                };
+                            }
+                        }, 0);
+                    } else {
+                        productInfoElem.innerHTML = "";
+                    }
+                }
+
+                const list = map.chatMessages || [];
+                let html = "";   
+                list.forEach(msg => {
                     const alignClass = (msg.senderRole === "BUYER") ? "right" : "left";
-                    console.log('senderRole: ' , msg.senderRole, ' alignClass: ', alignClass); // 이거 추가!
-                 	
                     let chatTime = "";
                     if (msg.chatCreatedAt) {
                         chatTime = new Date(msg.chatCreatedAt).toLocaleString('ko-KR');
@@ -351,19 +404,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             '<div class="chat-time">' + chatTime + '</div>' +
                         '</div>';
                 });
-                console.log("최종 html:", html);
-
                 const chatHistoryElem = document.getElementById('chat-history');
                 if (!chatHistoryElem) {
                     alert("#chat-history 요소가 없습니다!");
                     return;
                 }
                 chatHistoryElem.innerHTML = html;
-
-                // [여기 추가]
                 chatHistoryElem.scrollTop = chatHistoryElem.scrollHeight;
-                
-                console.log("chat-history innerHTML:", chatHistoryElem.innerHTML);
             })
             .catch(err => console.error("fetch 실패:", err));
         }
@@ -381,12 +428,6 @@ function formatKoreanTime(ts) {
     hour = hour % 12; if (hour === 0) hour = 12;
     return `${ampm} ${hour}시 ${min < 10 ? '0' + min : min}분`;
 }
-
 </script>
-
-
-
-
-
 </body>
 </html>

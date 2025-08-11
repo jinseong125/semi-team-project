@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
+import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.repository.ChatDAO;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,11 @@ public class ChatServiceImpl implements ChatService{
 		}).collect(Collectors.toList());
 		
 		return dtoList;
+	}
+
+	@Override
+	public ChatMessageProductDTO getProduct(Integer productId) {
+		return chatDAO.getProduct(productId);
 	}
 
 }
