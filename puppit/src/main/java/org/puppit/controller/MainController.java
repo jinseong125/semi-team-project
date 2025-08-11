@@ -15,14 +15,4 @@ public class MainController {
     return "main";
   }
   
-  @GetMapping("user/login")
-  public String userlogin() {
-    return "user/login";
-  }
-
-
-
-  
- 
-  
 }
