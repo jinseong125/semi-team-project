@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.chatMessageMapper">
+  
+<!-- 내가 채팅한 사람과 채팅 메시지를 전부 불러오는 코드, 채팅을 보내는 사람과 받는 사람의 seller, buyer 구분, 어떤 product에 대해서 채팅하고 있는지 -->
+ <!-- 내가 채팅한 사람과 채팅 메시지를 전부 불러오는 코드
+       - 판매자/구매자 역할 구분
+       - 어떤 product에 대한 채팅인지
+       - 역할이 '판매자'일 때 해당 사용자의 seller_id도 함께 반환 -->
+<select id="getChatMessageList" resultType="map" parameterType="org.puppit.model.dto.ChatMessageSelectDTO">
+
+SELECT
+        c.message_id,
+        c.chat_room_id,
+        r.product_id,
+
+        c.chat_sender,
+        sender.account_id   AS sender_account_id,
+        sender.user_name    AS sender_user_name,
+
+        c.chat_receiver,
+        receiver.account_id AS receiver_account_id,
+        receiver.user_name  AS receiver_user_name,
+
+        c.chat_message,
+        c.chat_created_at,
+
+        -- 내가 보낸/받은 메시지 여부
+        CASE WHEN c.chat_sender   = #{loginUserId} THEN 1 ELSE 0 END AS sender_is_me,
+        CASE WHEN c.chat_receiver = #{loginUserId} THEN 1 ELSE 0 END AS receiver_is_me,
+
+        -- 역할(판매자/구매자) 판정: product.seller_id 기준
+        CASE WHEN c.chat_sender   = p.seller_id THEN 'SELLER' ELSE 'BUYER' END AS sender_role,
+        CASE WHEN c.chat_receiver = p.seller_id THEN 'SELLER' ELSE 'BUYER' END AS receiver_role,
+
+        -- 상품의 seller_id (항상 제공)
+        p.seller_id AS product_seller_id,
+
+        -- 역할이 '판매자'일 때만 해당 컬럼에 seller_id 채움(아니면 NULL)
+        CASE WHEN c.chat_sender   = p.seller_id THEN p.seller_id ELSE NULL END AS sender_seller_id,
+        CASE WHEN c.chat_receiver = p.seller_id THEN p.seller_id ELSE NULL END AS receiver_seller_id
+
+    FROM chat c
+    JOIN room    r ON c.chat_room_id = r.room_id
+    JOIN product p ON r.product_id   = p.product_id
+    JOIN user sender   ON c.chat_sender   = sender.user_id
+    JOIN user receiver ON c.chat_receiver = receiver.user_id
+    WHERE c.chat_room_id = #{roomId}
+    ORDER BY c.chat_created_at ASC;
+</select>
+  
+  
+  
+<select id="getProduct" resultType="org.puppit.model.dto.ChatMessageProductDTO" parameterType="java.lang.Integer">
+
+SELECT product_id, product_name, product_price
+from product
+where product_id = #{product_Id}
+
+
+
+
+</select>  
+  
+  
+  
+  
+  
+  
+  
+</mapper>

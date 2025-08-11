@@ -3,19 +3,44 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mybatis.mapper.userMapper">
+
+
+  <!-- Mapper 작성 규칙 
+    1.쿼리 id는 각 쿼리를 호출할 메소드의 이름과 동일하게 설정하는 것을 권장한다. 
+    2. parameterType : 메소드가 쿼리로 전달하는 데이터의 타입이다. TypeAlias를 사용 할 수 있다. 
+    3. resultType : 쿼리문이 메소드로 반환하는 값의 타입이다. <select> 태그만 작성 한다.
+   -->
+
+  <!-- 회원가입 -->
+  <insert id="userSignUp" parameterType="UserDTO">
+     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone)
+     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone})
+  </insert>
   
-  <!-- 조회 (회원 정보) -->
-  <select id="getUser" parameterType="UserDTO" resultType="UserDTO">
-    SELECT uid, email, password, nickname
-      FROM tbl_user
-     WHERE email = #{email} AND password = #{password}
+  <!-- 아이디 중복 검사 -->
+  <select id="countByAccountId" parameterType="String" resultType="int">
+    SELECT COUNT(*) > 0
+      FROM user
+     WHERE account_id = #{accountId}
   </select>
   
-  <!-- 조회 (회원 정보) -->
-  <select id="getUserByNickname" parameterType="String" resultType="UserDTO">
-    SELECT uid, email, password, nickname
-      FROM tbl_user
-     WHERE nickname = #{nickname}
+  <!-- 로그인(아이디, 비밀번호) -->
+  <select id="getUserByIdAndPassword" parameterType="UserDTO" resultType="UserDTO">
+    SELECT account_id, user_password
+      FROM user
+     WHERE account_id = #{accountId} AND user_password = #{userPassword}
   </select>
   
+  <!-- account 사용해서 user_id(PK) 조회 -->
+  <select id="getUserId" parameterType="String" resultType="UserDTO">
+    SELECT user_id, user_email, user_name
+      FROM user
+     WHERE account_id = #{accountId}
+  </select>
+  
+  <!-- 로그인 로그 저장 -->
+  <insert id="insertLogStatus" parameterType="UserStatusDTO">
+    INSERT INTO user_status (user_id, account_id, login_at)
+    VALUES (#{userId}, #{accountId}, #{loginAt})
+  </insert>
 </mapper>

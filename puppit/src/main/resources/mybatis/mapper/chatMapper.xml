@@ -2,77 +2,36 @@
 <!DOCTYPE mapper 
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mybatis.mapper.boardMapper">
+<mapper namespace="mybatis.mapper.chatMapper">
   
-  <!-- 중첩 객체 필드(UserDTO user) 매핑을 위한 resultMap 정의하기 -->
-  <resultMap type="BoardDTO" id="boardResultMap">
-  
-    <!-- 단순 필드 -->
-    <id property="bid" column="bid"/>
-    <result property="title" column="title"/>
-    <result property="content" column="content"/>
-    <result property="createdAt" column="created_at"/>
-    <result property="modifiedAt" column="modified_at"/>
-    
-    <!-- 중첩 객체 필드 (UserDTO user) -->
-    <association property="user" javaType="UserDTO">
-      <id property="uid" column="uid"/>
-      <result property="email" column="email"/>
-      <result property="nickname" column="nickname"/>
-      <!-- password는 쿼리문에서 조회하지 않으므로 생략 가능 -->
-    </association>
-    
-  </resultMap>
-  
-  <!-- 조회 (목록) -->
-  <select id="getBoards" resultMap="boardResultMap">
-    SELECT b.bid, u.uid, u.email, u.nickname, b.title, b.content, b.created_at, b.modified_at
-      FROM tbl_user AS u INNER JOIN tbl_board AS b
-        ON u.uid = b.uid
-     ORDER BY bid DESC
-     LIMIT 0, 10
-  </select>
-  
-  <!-- 조회 (개수) -->
-  <select id="getBoardCount" resultType="java.lang.Integer">
-    SELECT COUNT(*)
-      FROM tbl_board
-  </select>
-  
-  <!-- 조회 (단일) -->
-  <select id="getBoardById" parameterType="java.lang.Integer" resultMap="boardResultMap">
-    SELECT b.bid, u.uid, u.email, u.nickname, b.title, b.content, b.created_at, b.modified_at
-      FROM tbl_user AS u INNER JOIN tbl_board AS b
-        ON u.uid = b.uid
-     WHERE bid = #{bid}
-  </select>
-  
-  <!-- 등록 -->
-  <insert id="insertBoard" parameterType="BoardDTO">
-    INSERT INTO tbl_board (
-        uid
-      , title
-      , content
-    ) VALUES (
-        #{user.uid}
-      , #{title}
-      , #{content}
-    )
-  </insert>
-  
-  <!-- 수정 -->
-  <update id="updateBoard" parameterType="BoardDTO">
-    UPDATE tbl_board
-       SET title = #{title}
-         , content = #{content}
-     WHERE bid = #{bid}
-  </update>
-  
-  <!-- 삭제 (단일) -->
-  <delete id="deleteBoardById" parameterType="java.lang.Integer">
-    DELETE
-      FROM tbl_board
-     WHERE bid = #{bid}
-  </delete>
+<!-- 내가 로그인 해서 내가 채팅한 모든 사용자들과의 마지막 메시지만 불러오는 코드 -->  
+<select id="getChatList" resultType="org.puppit.model.dto.ChatListDTO">
+    SELECT
+        c2.chat_room_id AS roomId,
+        c2.is_read AS chatIsRead,
+        c2.chat_message AS chatMessage,
+        c2.chat_created_at AS chatSentAt,
+        c2.chat_sender AS chatSenderId,
+        c2.chat_receiver AS chatReceiverId,
+        sender.account_id AS senderAccountId,
+        receiver.account_id AS receiverAccountId,
+        0 AS unreadCount
+    FROM (
+        SELECT c1.*
+        FROM chat c1
+        INNER JOIN (
+            SELECT chat_room_id, MAX(message_id) AS max_message_id
+            FROM chat
+            WHERE chat_sender = #{userId} OR chat_receiver = #{userId}
+            GROUP BY chat_room_id
+        ) latest
+          ON c1.chat_room_id = latest.chat_room_id
+         AND c1.message_id = latest.max_message_id
+        WHERE c1.chat_sender = #{userId} OR c1.chat_receiver = #{userId}
+    ) AS c2
+    INNER JOIN user AS sender ON sender.user_id = c2.chat_sender
+    INNER JOIN user AS receiver ON receiver.user_id = c2.chat_receiver
+    ORDER BY c2.chat_created_at DESC
+</select>
   
 </mapper>

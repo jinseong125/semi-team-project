@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="product">
+
+    <!-- 상품 등록 -->
+    <insert id="insertProduct" parameterType="org.puppit.model.dto.ProductDTO"
+            useGeneratedKeys="true" keyProperty="productId">
+        INSERT INTO product
+        (location_id, category_id, seller_id, condition_id, status_id,
+         product_name, product_price, product_description)
+        VALUES
+            (#{locationId}, #{categoryId}, #{sellerId}, #{conditionId}, #{statusId},
+             #{productName}, #{productPrice}, #{productDescription})
+    </insert>
+
+    <!-- 카테고리 -->
+    <select id="getCategories" resultType="org.puppit.model.dto.CategoryDTO">
+        SELECT category_id   AS categoryId,
+               category_name AS categoryName
+        FROM product_category
+        ORDER BY category_id
+    </select>
+
+    <!-- 지역 -->
+    <select id="getLocations" resultType="org.puppit.model.dto.LocationDTO">
+        SELECT location_id AS locationId,
+               region
+        FROM location
+        ORDER BY location_id
+    </select>
+
+    <!-- 컨디션 -->
+    <select id="getConditions" resultType="org.puppit.model.dto.ConditionDTO">
+        SELECT condition_id   AS conditionId,
+               condition_name AS conditionName
+        FROM product_condition
+        ORDER BY condition_id
+    </select>
+
+</mapper>

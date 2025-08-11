@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.pointMapper">
+
+<update id="updatePoint" parameterType="Map">
+  UPDATE user
+  SET point = point + #{amount}
+  WHERE user_id = #{uid}
+</update>
+
+<update id="updatePointRecord" parameterType="Map">
+  INSERT INTO point_charge(user_id, point_charge_amount, point_charge_order_number)
+  VALUES (#{uid}, #{amount}, #{uuid})
+</update>
+  
+</mapper>

@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.shark</groupId>
+  <groupId>org.puppit</groupId>
   <artifactId>puppit</artifactId>
   <version>1.0.0</version>
   <packaging>war</packaging>
@@ -16,6 +16,7 @@
     <slf4j.version>1.7.36</slf4j.version>
     <logback.version>1.2.13</logback.version>
     <junit.version>4.13.2</junit.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   
   <!-- dependencies : 디펜던시를 모아둡니다. -->
@@ -116,10 +117,15 @@
       <scope>test</scope>
     </dependency>
     
-    <!-- Database (Spring JDBC, MySQL Connector/J, MyBatis, MyBatis Spring, HikariCP -->
+    <!-- Database (Spring JDBC,Spring TX, MySQL Connector/J, MyBatis, MyBatis Spring, HikariCP -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
       <version>${spring.version}</version>
     </dependency>
     <dependency>
@@ -163,6 +169,14 @@
         <artifactId>jackson-dataformat-xml</artifactId>
         <version>2.12.7</version>
     </dependency>
+    
+    <!-- org.json -->
+    <dependency>
+        <groupId>org.json</groupId>
+        <artifactId>json</artifactId>
+        <version>20240303</version>
+    </dependency>
+    
     
     
   </dependencies>
