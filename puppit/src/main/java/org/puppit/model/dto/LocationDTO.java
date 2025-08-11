@@ -5,11 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class ChatMessageSelectDTO {
-	private int roomId;
-	private String loginUserId;
+@NoArgsConstructor
+@AllArgsConstructor
+public class LocationDTO {
+    private int locationId;
+    private String region;
 }

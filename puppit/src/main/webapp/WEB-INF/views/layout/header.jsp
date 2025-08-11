@@ -94,6 +94,7 @@
   align-items:flex-end;
   gap:12px;
  
+
 }
 a {
   text-decoration: none;
@@ -178,3 +179,15 @@ nav a:hover{ text-decoration:underline; }
     <li><a href="${contextPath}/category?type=etc">기타용품</a></li>
   </ul>
 </nav>
+
+      <li><a href="${contextPath}/">홈</a></li>
+      <li><a href="${contextPath}/product/list">상품목록</a></li>
+      <li><a href="${contextPath}/user/login">로그인</a></li>
+      <li><a href="${contextPath}/user/join">회원가입</a></li>
+      <li><a href="${contextPath}/user/mypage">마이페이지</a></li>
+      <li><a href="${contextPath}/product/new">상품 등록</a></li>
+      
+    </ul>
+  </nav>
+  <hr>
+

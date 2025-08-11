@@ -1,6 +1,7 @@
 package org.puppit.service;
 
 import org.puppit.model.dto.UserDTO;
+import org.puppit.model.dto.UserStatusDTO;
 import org.puppit.repository.UserDAO;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,30 @@ public class UserServiceImpl implements UserService {
   @Override
   public boolean countByAccountId(String accountId) {
     return false;
+  }
+  @Override
+  public boolean login(UserDTO user) {
+    try {
+      if(emptyCheck(user.getAccountId(), user.getUserPassword())) {
+        return false;
+      }
+      UserDTO userDTO = userDAO.getUserByIdAndPassword(user);
+      if(userDTO != null) {
+        return true;
+      }
+      return false;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+  @Override
+  public Integer insertLogStatus(UserStatusDTO log) {
+    return userDAO.insertLogStatus(log);
+  }
+  @Override
+  public UserDTO getUserId(String accountId) {
+    return userDAO.getUserId(accountId);
   }
 
 }

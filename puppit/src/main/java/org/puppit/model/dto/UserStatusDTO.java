@@ -1,6 +1,6 @@
 package org.puppit.model.dto;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,8 +17,8 @@ import lombok.ToString;
 @Builder
 public class UserStatusDTO {
   
-  private Integer loginId;
+  private String accountId;
   private Integer userId;
-  private LocalDateTime loginAt;
+  private Timestamp loginAt;
 
 }
