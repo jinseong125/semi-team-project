@@ -83,38 +83,34 @@
 	  }
 	     fetch("${contextPath}/user/check?accountId=" + accountId)
          .then(response => {
-            if(!response.ok) {
-               alert('잘못된 접근입니다.')
+            if(response.status == '409') {
+            	alert('중복된 아이디입니다.');
             }
-            return response.text();
+            else alert('사용 가능한 아이디 입니다.');
          })
-         .then(jsonData => {
-            if(jsonData !== null) {
-            	alert("중복된 아이디 입니다");
-            	console.log("false" + jsonData);
-            } else {
-            	alert("사용 가능한 아이디 입니다");
-            	console.log("true" + jsonData);
-            }
-         })
-	 // 닉네임 중복 검사
-	 document.getElementById("checkNickNameBtn").addEventListener("click", function(e){
-		 const nickName = document.getElementById("nickName").value.trim();
-		 if(!nickName) {
-			 alert("닉네임을 입력 해주세요");
-			 return;
-		 }
-		 fetch("${contextPath}/user/check?nickName=" + nickName)
-		 		.then(response => {
-		 			if(!response.ok) {
-		 				alert("중복된 닉네임 입니다");
-		 			} else {
-		 				alert("사용 가능한 닉네임 입니다");
-		 			}
-		 		})
-	 })
   })
-
+	// 닉네임 중복 검사
+  	document.getElementById("checkNickNameBtn").addEventListener("click", function(e) {
+	  // 빈 문자 입력
+	  const nickName = document.getElementById("nickName").value.trim();
+	  if(!nickName) {
+		  alert("닉네임을 입력 해주세요");
+		  return;
+	  }
+	  // 닉네임 형식 (정규식 검사)
+/* 	  const isRegex = /^[a-z0-9]{4,12}$/;
+	  if(!isRegex.test(nickName)) {
+		  alert("닉네임 형식이 올바르지 않습니다");
+		  return false;
+	  } */
+	     fetch("${contextPath}/user/check?nickName=" + nickName)
+         .then(response => {
+            if(response.status == '409') {
+            	alert('중복된 닉네임입니다.');
+            }
+            else alert('사용 가능한 닉네임 입니다.');
+         })
+  	})
 </script>
 	
 </body>
