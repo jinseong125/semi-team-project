@@ -21,6 +21,7 @@ public class OrderController {
   private final TradePaymentService tps;
   private final ProductService productService;
   
+
   @GetMapping("/pay")
   public String orderForm(@RequestParam("buyerId") String buyerId, 
                           @RequestParam("sellerId") String sellerId, 
@@ -28,11 +29,11 @@ public class OrderController {
                           @RequestParam("quantity") String quantity, 
                           Model model) {
 
+
     model.addAttribute("buyerId", Integer.parseInt(buyerId));
     model.addAttribute("sellerId", Integer.parseInt(sellerId));
     model.addAttribute("productId", Integer.parseInt(productId));
     model.addAttribute("quantity", Integer.parseInt(quantity));
-    
     return "/payment/orderForm";
   }
   
