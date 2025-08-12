@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -54,6 +56,21 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDTO getProductById(Integer productId) {
         return productDAO.getProductById(productId);
+    }
+
+    public List<ProductDTO> getProductList() {
+      return productDAO.getProductList();
+    }
+
+    @Override
+    public ProductDTO getProductDetail(Integer productId) {
+      return productDAO.getProductDetail(productId);
+    }
+
+    @Override
+    public Map<String, Object> getScrollUsers(ProductDTO dto, HttpServletRequest request) {
+      return null;
+
     }
 
 }

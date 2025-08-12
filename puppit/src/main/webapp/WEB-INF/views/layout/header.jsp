@@ -165,8 +165,7 @@ nav a:hover{ text-decoration:underline; }
     </div>
     
     <div class="bottom-actions">
-      <a href="${contextPath}/product/sell" class="btn dark">판매하기</a>
-      <a href="${contextPath}/product/my" class="btn dark">내 상품</a>
+      <a href="${contextPath}/myproduct" class="btn dark">상품 관리</a>
     </div>
   </div>
 </div>
@@ -180,14 +179,5 @@ nav a:hover{ text-decoration:underline; }
   </ul>
 </nav>
 
-      <li><a href="${contextPath}/">홈</a></li>
-      <li><a href="${contextPath}/product/list">상품목록</a></li>
-      <li><a href="${contextPath}/user/login">로그인</a></li>
-      <li><a href="${contextPath}/user/join">회원가입</a></li>
-      <li><a href="${contextPath}/user/mypage">마이페이지</a></li>
-      <li><a href="${contextPath}/product/new">상품 등록</a></li>
-      
-    </ul>
-  </nav>
   <hr>
 
