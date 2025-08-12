@@ -27,7 +27,7 @@ public class PointController {
   public String paymentForm() {
     return "/payment/paymentForm";
   }
-  
+    
   @PostMapping(value = "/payment/verify", produces = "application/json")
   @ResponseBody
   public Map<String, Object> verifyPayment(@RequestBody Map<String, Object> data) {

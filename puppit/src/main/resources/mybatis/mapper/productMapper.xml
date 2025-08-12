@@ -43,7 +43,7 @@
     <select id="getProductById"
             parameterType="int"
             resultType="org.puppit.model.dto.ProductDTO">
-        SELECT user_id AS userId,
+        SELECT product_id AS productId,
                price AS productPrice
         FROM product
         WHERE product_id = #{productId}

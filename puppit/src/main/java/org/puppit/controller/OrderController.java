@@ -7,11 +7,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
 
+@RequestMapping("/order")
 @Controller
 @RequiredArgsConstructor
 public class OrderController {
@@ -19,30 +21,31 @@ public class OrderController {
   private final TradePaymentService tps;
   private final ProductService productService;
   
-  @GetMapping("/order/pay")
+
+  @GetMapping("/pay")
   public String orderForm(@RequestParam("buyerId") String buyerId, 
                           @RequestParam("sellerId") String sellerId, 
                           @RequestParam("productId") String productId, 
                           @RequestParam("quantity") String quantity, 
                           Model model) {
-    model.addAttribute("buyerId", buyerId);
-    model.addAttribute("sellerId", sellerId);
-    model.addAttribute("productId", productId);
-    model.addAttribute("quantity", quantity);
-    
+
+
+    model.addAttribute("buyerId", Integer.parseInt(buyerId));
+    model.addAttribute("sellerId", Integer.parseInt(sellerId));
+    model.addAttribute("productId", Integer.parseInt(productId));
+    model.addAttribute("quantity", Integer.parseInt(quantity));
     return "/payment/orderForm";
   }
   
-  @PostMapping("/order/pay")
+  @PostMapping("/pay")
   public String order(@RequestParam("buyerId") int buyerId, 
                       @RequestParam("sellerId") int sellerId, 
-                      @RequestParam("prodId") int prodId, 
-                      @RequestParam("quantity") int quantity, 
-                      Model model) {
-    ProductDTO productDTO = productService.getProductById(prodId);
+                      @RequestParam("productId") int productId, 
+                      @RequestParam("quantity") int quantity) {
+    ProductDTO productDTO = productService.getProductById(productId);
     int price = productDTO.getProductPrice();
     int amount = price * quantity;
-    tps.updateBuyerPoint(buyerId, amount);
+    tps.updateBuyerPoint(buyerId, -amount);
     tps.updateSellerPoint(sellerId, amount);
     
     return "redirect:/user/mypage";

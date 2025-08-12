@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,java,maven,eclipse
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,java,maven,eclipse
 
+# API키 파일
+/puppit/src/main/resources/application-secret.properties
 
 #.DS_Store
 *.DS_Store
