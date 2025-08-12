@@ -40,7 +40,7 @@ public class ProductDAO {
     }
 
     public ProductDTO getProductById(Integer productId){
-        return sqlSession.selectOne("product.getProductById");
+        return sqlSession.selectOne("product.getProductById", productId);
     }
 
 

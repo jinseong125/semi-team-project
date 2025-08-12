@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,9 +44,11 @@ public class OrderController {
     ProductDTO productDTO = productService.getProductById(productId);
     int price = productDTO.getProductPrice();
     int amount = price * quantity;
+    String status = "거래완료";
     tps.updateBuyerPoint(buyerId, -amount);
     tps.updateSellerPoint(sellerId, amount);
+    tps.insertTrade(buyerId, sellerId, productId, status);
     
-    return "redirect:/user/mypage";
+    return "redirect:/";
   }
 }
