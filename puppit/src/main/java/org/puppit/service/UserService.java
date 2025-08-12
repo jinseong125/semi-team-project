@@ -8,8 +8,8 @@ import org.puppit.model.dto.UserStatusDTO;
 public interface UserService {
   
   boolean signup(UserDTO user); 
-  boolean countByAccountId(String accountId);
   boolean login(UserDTO user);
+  boolean countByAccountId(String accountId);
   Integer insertLogStatus(UserStatusDTO log);
   UserDTO getUserId(String accountId);
   
