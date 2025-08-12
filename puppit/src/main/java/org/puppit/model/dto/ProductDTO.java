@@ -13,6 +13,8 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class ProductDTO {
+
+
     private Integer productId;
     private Integer locationId;
     private Integer categoryId;
@@ -24,4 +26,8 @@ public class ProductDTO {
     private String productDescription;
     private Timestamp productCreatedAt;
     private Timestamp productUpdatedAt;
+
+    private CategoryDTO      category;
+    private ProductStatusDTO  status;
+    private ProductImageDTO   thumbnail;  // 썸네일 1장
 }

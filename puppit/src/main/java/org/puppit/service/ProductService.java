@@ -21,4 +21,6 @@ public interface ProductService {
     public Map<String, Object> getScrollUsers(ProductDTO dto, HttpServletRequest request);
 
     public ProductDTO getProductById(Integer productId);
+
+    public List<ProductDTO> selectMyProducts(Integer sellerId);
 }
