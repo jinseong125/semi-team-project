@@ -160,8 +160,18 @@ nav a:hover{ text-decoration:underline; }
   <!-- 오른쪽: 버튼(링크) -->
   <div class="right">
     <div class="top-actions">
-      <a href="${contextPath}/user/login" class="btn">login</a>
-      <a href="${contextPath}/user/signup" class="btn">Sign up</a>
+    <c:choose>
+      <c:when test="${empty userId}">
+        <a href="${contextPath}/user/login" class="btn">로그인</a>
+        <a href="${contextPath}/user/signup" class="btn">회원가입</a>
+      </c:when>
+      <c:otherwise>
+        <div>${sessionScope.userName}님 환영합니다!</div>
+      
+        <a href="${contextPath}/user/mypage">마이페이지</a>
+        <a href="${contextPath}/user/logout">로그아웃</a>
+      </c:otherwise>
+    </c:choose>
     </div>
     
     <div class="bottom-actions">
