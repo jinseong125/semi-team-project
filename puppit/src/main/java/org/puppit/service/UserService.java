@@ -9,7 +9,9 @@ public interface UserService {
   
   boolean signup(UserDTO user); 
   boolean login(UserDTO user);
-  boolean countByAccountId(String accountId);
+  Boolean isAccountIdAvailable(String accountId);
+  Boolean isNickNameAvailable(String nickName);
+  Boolean isUserEmailAvailable(String userEmail);
   Integer insertLogStatus(UserStatusDTO log);
   UserDTO getUserId(String accountId);
   

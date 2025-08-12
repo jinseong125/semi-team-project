@@ -3,19 +3,17 @@ package org.puppit.controller;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.puppit.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
@@ -53,11 +51,19 @@ public class UserController {
     return "redirect:/";
   }
   
-  @ResponseBody
-  @GetMapping(value="/checkId", produces="application/json")
-  public Map<String, Object> checkId(@RequestParam("accountId") String accountId) {
-    boolean available = userService.countByAccountId(accountId);
-    return Map.of("available", available);
+  // 아이디 중복 검사
+  @GetMapping("/check")
+  public ResponseEntity<Boolean> check(UserDTO userDTO) {
+    if(userDTO.getNickName() != null) {
+      return ResponseEntity.ok(userService.isNickNameAvailable(userDTO.getNickName()));
+    } else if(userDTO.getAccountId() != null) {
+      return ResponseEntity.ok(userService.isAccountIdAvailable(userDTO.getAccountId()));
+    } else if(userDTO.getUserEmail() != null) {
+      return ResponseEntity.ok(userService.isUserEmailAvailable(userDTO.getUserEmail()));
+    } else {
+      return ResponseEntity.badRequest().build();
+    }
+    
   }
   
   // 로그인 폼 보여주기
@@ -98,6 +104,10 @@ public class UserController {
        e.printStackTrace();
        return "redirect:/user/login";
     }
-    
+  }
+  @GetMapping("/logout")
+  public String logout(HttpSession session) {
+    session.invalidate();
+    return "redirect:/";
   }
 }
