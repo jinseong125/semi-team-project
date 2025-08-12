@@ -32,4 +32,8 @@ public class ChatDAO {
 		return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getProduct", productId);
 	}
 	
+	 public Integer insertChatMessage(ChatMessageDTO chatMessageDTO) {
+	    	return sqlSession.insert("mybatis.mapper.chatMessageMapper.insertChatMessage", chatMessageDTO);
+	    }
+	
 }

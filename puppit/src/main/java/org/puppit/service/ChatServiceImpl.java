@@ -71,4 +71,9 @@ public class ChatServiceImpl implements ChatService{
 		return chatDAO.getProduct(productId);
 	}
 
+	@Override
+	public Integer saveChatMessage(ChatMessageDTO chatMessageDTO) {
+		return chatDAO.insertChatMessage(chatMessageDTO);
+	}
+
 }

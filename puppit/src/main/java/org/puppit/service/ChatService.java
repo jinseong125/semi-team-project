@@ -12,5 +12,6 @@ public interface ChatService {
 	public List<ChatListDTO> getChatRooms(int userId);
 	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO);
 	public ChatMessageProductDTO getProduct(Integer productId);
+	public Integer saveChatMessage(ChatMessageDTO chatMessageDTO);
 	
 }
