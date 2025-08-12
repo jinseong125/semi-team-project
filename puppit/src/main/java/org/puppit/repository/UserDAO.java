@@ -16,8 +16,8 @@ public class UserDAO {
   public Integer userSignUp(UserDTO user) {
     return sqlSession.insert("mybatis.mapper.userMapper.userSignUp", user);
   }
-  public Integer countByAccountId(String userId) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.countByLoginId", userId);
+  public Integer countByAccountId(String accountId) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.countByAccountId", accountId);
   }
   public String getUserById(String userId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserById", userId);

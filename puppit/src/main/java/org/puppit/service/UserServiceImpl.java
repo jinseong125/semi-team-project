@@ -35,9 +35,12 @@ public class UserServiceImpl implements UserService {
   }
   @Override
   public boolean countByAccountId(String accountId) {
-    if(accountId == null) return false;
     int count = userDAO.countByAccountId(accountId.trim()); 
-    return count == 0;
+    if(count == 0) {
+      return true;
+    } else {
+      return false;
+    }
   }
   @Override
   public boolean login(UserDTO user) {

@@ -27,12 +27,8 @@
     <form action="${contextPath}/user/signup"
           method="post"
           id="signupForm">
-    <div class="input-id">
-      <label>아이디: <input type="text" id="accountId" name="accountId"></label>
-      <button type="button" onclick="checkIdBtn()" class="checkId" id="checkIdBtn">중복검사</button>
-      <!-- 아이디 중복 체크 여부 -->
-      <input type="hidden" name="idDuplication" value="idUncheck"/>
-    </div>
+    <label>아이디: <input type="text" id="accountId" name="accountId"></label>
+    <button type="button"  class="checkId" id="checkIdBtn">중복검사</button>
     <br>
     <label>비밀번호: <input type="password" id="userPassword" name="userPassword"></label>
     <br>
@@ -41,6 +37,7 @@
     <label>이름 : <input type="text" id="userName" name="userName"></label>
     <br>
     <label>닉네임 : <input type="text" id="nickName" name="nickName"></label>
+    <button type="button" class="checkNickName" name="checkNickName">중복검사</button>
     <br>
     <label>휴대전화 : <input type="text" id="userPhone" name="userPhone"></label>
     <br>
@@ -70,22 +67,28 @@
       }
     }
   });
-  document.getElementById('checkIdBtn').addEventListener('click', function(){
-	  const id = document.getElementById("accountId").value.trim();
-	  if(!id){ alert('아이디를 입력하세요'); return; }
+  document.getElementById("checkIdBtn").addEventListener("click", function(e) {
+	  const accountId = document.getElementById("accountId").value;
+	  if(accountId == null || accountId == "") {
+		  alert("아이디를 입력 해주세요");
+		  return;
+	  }
+	  fetch("${contextPath}/user/checkId?accountId=" + accountId)
+	  		.then(response => response.json())
+	  		.then(data => {
+	  			console.log("data : " + data.available);
+	  			if(!data.available) {
+	  				alert("중복된 아이디 입니다");
+	  			} else {
+	  				alert("사용 가능한 아이디 입니다");
+	  			}
+	  		})
+	  		.catch(error => {
+	  			alert("서버 오류가 발생 했습니다");
+	  		})
+  })
 
-	  fetch('${contextPath}/user/checkId?accountId=' + encodeURIComponent(id))
-	    .then(res => res.json())
-	    .then(data => {
-	      // Controller는 { available: true } 같은 JSON을 반환한다고 가정
-	      if(data.available) alert('사용 가능한 아이디입니다.');
-	      else alert('이미 사용중인 아이디입니다.');
-	    })
-	    .catch(err => {
-	      console.error(err);
-	      alert('서버 오류가 발생했습니다.');
-	    });
-	});
+
 </script>
     
 
