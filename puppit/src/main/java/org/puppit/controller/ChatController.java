@@ -53,6 +53,26 @@ public class ChatController {
 		System.out.println("product: " + product.toString() );
 		Map<String, Object> map = new HashMap<>();
 	    map.put("chatMessages", chatMessages);
+	    
+	    ChatMessageProductDTO product2 = null;
+	    if (chatMessages != null && !chatMessages.isEmpty()) {
+	        try {
+	            String pid = chatMessages.get(0).getProductId();
+	            if (pid != null && !pid.isEmpty()) {
+	                product2 = chatService.getProduct(Integer.parseInt(pid));
+	                System.out.println("product2: " + product2);
+	            } else {
+	                System.err.println("productId is null or empty");
+	            }
+	        } catch (Exception e) {
+	            System.err.println("상품 정보 조회 에러: " + e.getMessage());
+	        }
+	    } else {
+	        System.err.println("chatMessages가 비어있음");
+	    }
+	    
+	    
+	    
 	    map.put("product", product);
 		return map;
 	}

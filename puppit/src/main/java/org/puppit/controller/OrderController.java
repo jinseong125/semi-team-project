@@ -20,14 +20,14 @@ public class OrderController {
   private final ProductService productService;
   
   @GetMapping("/order/pay")
-  public String orderForm(@RequestParam("buyerId") int buyerId, 
-                          @RequestParam("sellerId") int sellerId, 
-                          @RequestParam("prodId") int prodId, 
-                          @RequestParam("quantity") int quantity, 
+  public String orderForm(@RequestParam("buyerId") String buyerId, 
+                          @RequestParam("sellerId") String sellerId, 
+                          @RequestParam("productId") String productId, 
+                          @RequestParam("quantity") String quantity, 
                           Model model) {
     model.addAttribute("buyerId", buyerId);
     model.addAttribute("sellerId", sellerId);
-    model.addAttribute("prodId", prodId);
+    model.addAttribute("productId", productId);
     model.addAttribute("quantity", quantity);
     
     return "/payment/orderForm";

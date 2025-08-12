@@ -10,6 +10,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChatMessageSelectDTO {
+	private Integer userId;
 	private int roomId;
 	private String loginUserId;
+	
+	
+	
+	
 }
