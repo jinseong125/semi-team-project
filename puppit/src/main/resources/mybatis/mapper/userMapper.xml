@@ -47,7 +47,7 @@
   
   <!-- account 사용해서 user_id(PK) 조회 -->
   <select id="getUserId" parameterType="String" resultType="UserDTO">
-    SELECT user_id, user_email, user_name
+    SELECT user_id, user_email, user_name, nick_name, point
       FROM user
      WHERE account_id = #{accountId}
   </select>
