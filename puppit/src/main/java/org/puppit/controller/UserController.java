@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.puppit.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -56,16 +57,17 @@ public class UserController {
   }
   
   // 아이디 중복 검사
+  @SuppressWarnings("unchecked")
   @GetMapping("/check")
-  public ResponseEntity<Boolean> check(UserDTO userDTO) {
-    if(userDTO.getNickName() != null) {
-      return ResponseEntity.ok(userService.isNickNameAvailable(userDTO.getNickName()));
-    } else if(userDTO.getAccountId() != null) {
-      return ResponseEntity.ok(userService.isAccountIdAvailable(userDTO.getAccountId()));
-    } else if(userDTO.getUserEmail() != null) {
-      return ResponseEntity.ok(userService.isUserEmailAvailable(userDTO.getUserEmail()));
+  public ResponseEntity<Void> check(UserDTO userDTO) {
+    if(userDTO.getNickName() != null && userService.isNickNameAvailable(userDTO.getNickName())) {
+        return (ResponseEntity<Void>) ResponseEntity.ok();
+    } else if(userDTO.getAccountId() != null && userService.isAccountIdAvailable(userDTO.getAccountId())) {
+      return (ResponseEntity<Void>) ResponseEntity.ok();
+    } else if(userDTO.getUserEmail() != null && userService.isUserEmailAvailable(userDTO.getUserEmail())) {
+      return (ResponseEntity<Void>) ResponseEntity.ok();
     } else {
-      return ResponseEntity.badRequest().build();
+      return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
     
   }
