@@ -55,7 +55,7 @@ SELECT
   
 <select id="getProduct" resultType="org.puppit.model.dto.ChatMessageProductDTO" parameterType="java.lang.Integer">
 
-SELECT product_id, product_name, product_price
+SELECT product_id, product_name, product_price, seller_id
 from product
 where product_id = #{product_Id}
 

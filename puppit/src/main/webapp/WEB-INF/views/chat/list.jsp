@@ -314,21 +314,31 @@ document.addEventListener('DOMContentLoaded', function() {
                         // 첫번째 메시지에서 필요한 정보 추출
                         const firstMsg = chatMessages[0];
                         // sellerId는 productSellerId 또는 senderSellerId/receiverSellerId 중 실제 값이 있는 것으로 선택
-                        let sellerId = firstMsg.productSellerId || firstMsg.senderSellerId || firstMsg.receiverSellerId || "";
-                        sellerId = sellerId ? sellerId.toString() : "";
+                        //let sellerId = firstMsg.productSellerId || firstMsg.senderSellerId || firstMsg.receiverSellerId || "";
+                        //sellerId = sellerId ? sellerId.toString() : "";
+                        let sellerId = map.product.sellerId;
+                       
+                        console.log("버튼 생성 직전 sellerId:", sellerId); // 확인용
+                        
+                        
+                        
+                        
                         let buyerId = "";
                         if (firstMsg.senderRole === "BUYER") buyerId = firstMsg.chatSenderAccountId;
                         else if (firstMsg.receiverRole === "BUYER") buyerId = firstMsg.chatReceiverAccountId;
 
                         // 상품 정보는 map.product 또는 메시지에서 가져옴
+                        let pId = 0;
                         let pname = "";
                         let pprice = "";
                         if (map.product) {
                             pname = map.product.productName || "";
                             pprice = (map.product.productPrice != null ? map.product.productPrice : "");
+                            pId = map.product.productId;
                         } else {
                             pname = firstMsg.productName || "";
                             pprice = (firstMsg.productPrice != null ? firstMsg.productPrice : "");
+                            pId = map.product.productId;
                         }
 
                         // 디버깅
@@ -345,8 +355,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 '<br><button id="pay-btn"'
                                 + ' style="margin-top:12px;padding:10px 24px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;"'
                                 + ' data-buyer-id="' + buyerId + '"'
-                                + ' data-seller-id="' + sellerId + '"'
+                                + ' data-seller-id="'+ sellerId+ '"'
                                 + ' data-product-name="' + pname + '"'
+                                + ' data-product-id="' + pId + '"'
                                 + ' data-qty="1"'
                                 + '>'
                                 + '결제하기'
@@ -362,14 +373,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (payBtn) {
                                 payBtn.onclick = function() {
                                     var buyerId = this.getAttribute('data-buyer-id');
-                                    var sellerId = this.getAttribute('data-seller-id');
+                                    var sellerId = this.getAttribute('data-seller-id'); // 여기서 버튼 속성값으로 가져옴
                                     var productName = this.getAttribute('data-product-name');
-                                    var qty = this.getAttribute('data-qty');
+                                    var productId = this.getAttribute('data-product-id');
+                                    var quantity = 1;
+                                    console.log("buyerId: " , buyerId);
+                                    console.log("sellerId: " , sellerId);
+                                    console.log("productName: " , productName);
+                                    console.log("productId: " , productId);
+                                    console.log("quantity: " , quantity);
+                                    
                                     var payUrl = contextPath + '/order/pay'
                                         + '?buyerId=' + encodeURIComponent(buyerId)
                                         + '&sellerId=' + encodeURIComponent(sellerId)
                                         + '&productName=' + encodeURIComponent(productName)
-                                        + '&qty=' + encodeURIComponent(qty);
+                                        + '&productId=' + encodeURIComponent(productId)
+                                        + '&quantity=' + encodeURIComponent(quantity);
                                     window.location.href = payUrl;
                                 };
                             }

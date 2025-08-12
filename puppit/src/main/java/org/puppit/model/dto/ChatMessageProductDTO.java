@@ -13,10 +13,12 @@ public class ChatMessageProductDTO {
 	private String productId;
 	private String productName;
 	private String productPrice;
+	private String sellerId;
 	
 	@Override
 	public String toString() {
 		return "ChatMessageProductDTO [productId=" + productId + ", productName=" + productName + ", productPrice="
-				+ productPrice + "]";
+				+ productPrice + ", sellerId=" + sellerId + "]";
 	}
+	
 }
