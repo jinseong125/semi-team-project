@@ -66,6 +66,12 @@ where product_id = #{product_Id}
 
 
 </select>  
+
+
+<insert id="insertChatMessage" parameterType="org.puppit.model.dto.ChatMessageDTO" useGeneratedKeys="true" keyProperty="messageId">
+ INSERT INTO chat (chat_room_id, chat_sender, chat_message, chat_receiver)
+  VALUES (#{chatRoomId}, #{sender}, #{message}, #{receiver})
+</insert>
   
   
   
