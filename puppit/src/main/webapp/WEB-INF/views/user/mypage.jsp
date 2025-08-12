@@ -3,7 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
-
 <jsp:include page="../layout/header.jsp">
   <jsp:param value="Home" name="title"/>
 </jsp:include>
@@ -37,7 +36,6 @@
   .avatar img{width:100%;height:100%;object-fit:cover;}
   .who{flex:1;}
   .nick{font-weight:700;font-size:18px;}
-  .tag{color:var(--muted);font-size:14px;margin-top:2px;}
   .edit{
     margin-left:auto;background:#8e8e8e;color:#fff;border:none;border-radius:10px;padding:10px 14px;
     cursor:pointer;opacity:.95;transition:.15s;white-space:nowrap;
@@ -104,8 +102,7 @@
         <img src="${contextPath}/resources/image/profile-default.png" alt="프로필 이미지" />
       </div>
       <div class="who">
-        <div class="nick">${user.nickname != null ? user.nickname : 'happy'}</div>
-        <div class="tag">#${user.tag != null ? user.tag : 'abcd1234'}</div>
+        <div class="nick">${user.nickName != null ? user.nickName : 'happy'}</div>
       </div>
       <button class="edit" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
     </div>
@@ -134,6 +131,8 @@
     <!-- 향후 기능 영역 -->
     <div class="future-area">
       여기에 나중에 기능(쿠폰, 구매내역, 적립내역 등)을 추가할 공간입니다.
+      <div>user.nickName: ${user.nickName}</div>
+      <div>user.point: ${user.point}</div>
     </div>
 </div>
 
