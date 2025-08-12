@@ -67,24 +67,27 @@
       }
     }
   });
+  // 아이디 중복 검사
   document.getElementById("checkIdBtn").addEventListener("click", function(e) {
-	  const accountId = document.getElementById("accountId").value;
-	  if(accountId == null || accountId == "") {
+	  // 빈 문자 입력
+	  const accountId = document.getElementById("accountId").value.trim();
+	  if(!accountId) {
 		  alert("아이디를 입력 해주세요");
 		  return;
 	  }
-	  fetch("${contextPath}/user/checkId?accountId=" + accountId)
-	  		.then(response => response.json())
-	  		.then(data => {
-	  			console.log("data : " + data.available);
-	  			if(!data.available) {
+	  // 아이디 형식 (정규식 검사)
+	  const isRegex = /^[a-z0-9]{4,12}$/;
+	  if(!isRegex.test(accountId)) {
+		  alert("아이디 형식이 올바르지 않습니다");
+		  return false;
+	  }
+	  fetch("${contextPath}/user/check?accountId=" + accountId)
+	  		.then(response => {
+	  			if(!response.ok) {
 	  				alert("중복된 아이디 입니다");
 	  			} else {
 	  				alert("사용 가능한 아이디 입니다");
 	  			}
-	  		})
-	  		.catch(error => {
-	  			alert("서버 오류가 발생 했습니다");
 	  		})
   })
 
