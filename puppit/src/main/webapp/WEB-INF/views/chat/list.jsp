@@ -317,15 +317,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         //let sellerId = firstMsg.productSellerId || firstMsg.senderSellerId || firstMsg.receiverSellerId || "";
                         //sellerId = sellerId ? sellerId.toString() : "";
                         let sellerId = map.product.sellerId;
+                        
                        
                         console.log("버튼 생성 직전 sellerId:", sellerId); // 확인용
                         
                         
                         
                         
+                        let productBuyerId = "";
                         let buyerId = "";
-                        if (firstMsg.senderRole === "BUYER") buyerId = firstMsg.chatSenderAccountId;
-                        else if (firstMsg.receiverRole === "BUYER") buyerId = firstMsg.chatReceiverAccountId;
+                        buyerId = chatMessages[0].buyerId;
+                        console.log("buyerId: ", buyerId);
+                        
+                        
+                        if (firstMsg.senderRole === "BUYER") productBuyerId = firstMsg.chatSenderAccountId;
+                        else if (firstMsg.receiverRole === "BUYER") productBuyerId = firstMsg.chatReceiverAccountId;
 
                         // 상품 정보는 map.product 또는 메시지에서 가져옴
                         let pId = 0;
@@ -342,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
 
                         // 디버깅
-                        console.log("loginUserId:", loginUserId, "sellerId:", sellerId, "buyerId:", buyerId);
+                        console.log("loginUserId:", loginUserId, "sellerId:", sellerId, "productBuyerId:", productBuyerId , " buyerId: ", buyerId);
 
                         let productHtml =
                             '<div class="product-info" style="margin-bottom:16px;padding:12px;background:#f3f3f3;border-radius:10px;">'
@@ -350,11 +356,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             + '<br><b>가격:</b> ' + pprice + '원';
 
                         // SELLER가 보는 화면이면 버튼 추가 (타입을 맞춰서 비교!)
-                        if (String(loginUserId) === String(buyerId)) {
+                        if (String(loginUserId) === String(productBuyerId)) {
                             productHtml +=
                                 '<br><button id="pay-btn"'
                                 + ' style="margin-top:12px;padding:10px 24px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;"'
-                                + ' data-buyer-id="' + buyerId + '"'
+                                + 'data-buyerId-id=' + buyerId + ''
+                                + ' data-productBuyerId-id="' + productBuyerId + '"'
                                 + ' data-seller-id="'+ sellerId+ '"'
                                 + ' data-product-name="' + pname + '"'
                                 + ' data-product-id="' + pId + '"'
@@ -372,19 +379,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             var payBtn = document.getElementById('pay-btn');
                             if (payBtn) {
                                 payBtn.onclick = function() {
-                                    var buyerId = this.getAttribute('data-buyer-id');
+                                    var productBuyerId = this.getAttribute('data-productBuyerId-id');
+                                    var buyerId = this.getAttribute('data-buyerId-id');
                                     var sellerId = this.getAttribute('data-seller-id'); // 여기서 버튼 속성값으로 가져옴
                                     var productName = this.getAttribute('data-product-name');
                                     var productId = this.getAttribute('data-product-id');
+                                    this.getAttribute('');
                                     var quantity = 1;
-                                    console.log("buyerId: " , buyerId);
+                                    console.log("productBuyerId: " , productBuyerId);
+                                    console.log("buyerId: ", buyerId);
                                     console.log("sellerId: " , sellerId);
                                     console.log("productName: " , productName);
                                     console.log("productId: " , productId);
                                     console.log("quantity: " , quantity);
                                     
                                     var payUrl = contextPath + '/order/pay'
-                                        + '?buyerId=' + encodeURIComponent(buyerId)
+                                        + '?buyerId=' + encodeURIComponent(buyerId)		
                                         + '&sellerId=' + encodeURIComponent(sellerId)
                                         + '&productName=' + encodeURIComponent(productName)
                                         + '&productId=' + encodeURIComponent(productId)
