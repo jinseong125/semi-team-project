@@ -67,6 +67,20 @@ public class ProductController {
         ra.addFlashAttribute("msg", "상품 등록 완료 #" + id);
         return "redirect:/product/list";
     }
+    
+    
+    @GetMapping("/detail/{productId}")
+    public String getProductDetail(@PathVariable int productId, Model model) {
+    
+     model.addAttribute("product", productService.getProductDetail(productId));
+      return "product/detail";
+    }
+      
+      @GetMapping("/user/scroll")
+      public String scrollList() {
+        return "user/scroll";
+    }
+    
 
 
 

@@ -36,6 +36,7 @@ public class ProductDAO {
         return sqlSession.selectList("product.getConditions");
     }
 
+
     public int insertProductImage(org.puppit.model.dto.ProductImageDTO productImageDTO) {
         sqlSession.insert("product.insertProductImage", productImageDTO);
         return productImageDTO.getImageId();
@@ -48,5 +49,14 @@ public class ProductDAO {
         return sqlSession.selectOne("product.getProductById");
     }
 
+    public List<ProductDTO> getProductList() {
+      System.out.println("productList: " + sqlSession.selectList("product.getProductList"));
+      return sqlSession.selectList("product.getProductList");
+
+    }
+
+    public ProductDTO getProductDetail(Integer productId) {
+      return sqlSession.selectOne("product.getProductDetail", productId);
+    }
 
 }
