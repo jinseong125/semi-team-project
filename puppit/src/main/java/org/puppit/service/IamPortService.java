@@ -3,18 +3,22 @@ package org.puppit.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class IamPortService {
-
-    private final String API_KEY = "6476012641127056";
-    private final String API_SECRET = "MY_API_SECRET";
-
+    private final String API_KEY;
+    private final String API_SECRET;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    public IamPortService(@Value("${iamport.api.key}") String API_KEY,
+                          @Value("${iamport.api.secret}") String API_SECRET) {
+      this.API_KEY = API_KEY;
+      this.API_SECRET = API_SECRET;
+    }
     // 1. 아임포트 access_token 발급
     @SuppressWarnings("unchecked")
     private String getAccessToken() {

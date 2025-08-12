@@ -8,14 +8,14 @@
 <form action="${contextPath}/order/pay" method="post">
   <div>구매자ID: ${buyerId}</div>
   <div>판매자ID: ${sellerId}</div>
-  <div>거래상품: ${prodId}</div>
+  <div>거래상품: ${productId}</div>
   <div>상품수량: ${quantity}</div>
   <input type="hidden" name="buyerId" value="${buyerId}">
   <input type="hidden" name="sellerId" value="${sellerId}">
-  <input type="hidden" name="prodId" value="${prodId}">
+  <input type="hidden" name="productId" value="${productId}">
   <input type="hidden" name="quantity" value="${quantity}">
   <br>
-  <button type="submit">결제</button>
+  <button type="submit">결제하기</button>
 </form>
 
 
