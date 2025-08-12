@@ -50,13 +50,16 @@ public class ProductDAO {
     }
 
     public List<ProductDTO> getProductList() {
-      System.out.println("productList: " + sqlSession.selectList("product.getProductList"));
       return sqlSession.selectList("product.getProductList");
 
     }
 
     public ProductDTO getProductDetail(Integer productId) {
       return sqlSession.selectOne("product.getProductDetail", productId);
+    }
+
+    public List<ProductDTO> selectMyProducts(Integer sellerId){
+        return sqlSession.selectList("product.selectMyProducts", sellerId);
     }
 
 }

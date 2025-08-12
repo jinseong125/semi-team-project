@@ -127,9 +127,9 @@ nav a:hover{ text-decoration:underline; }
 <div class="header">
   <!-- 왼쪽: 로고 + 검색 + 카테고리 -->
   <div class="left">
-    <div class="logo">
-      <img src="${contextPath}/resources/image/DOG.jpg" width="100px" alt="puppit">
-    </div>
+    <a class="logo" href="${contextPath}">
+      <img src="${contextPath}/resources/image/DOG.jpg" alt="puppit" width="100">
+    </a>
 
     <div class="left-col">
       <div class="searchBar">
@@ -175,7 +175,7 @@ nav a:hover{ text-decoration:underline; }
     </div>
     
     <div class="bottom-actions">
-      <a href="${contextPath}/myproduct" class="btn dark">상품 관리</a>
+      <a href="${contextPath}/product/myproduct" class="btn dark">상품 관리</a>
     </div>
   </div>
 </div>

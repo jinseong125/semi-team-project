@@ -105,4 +105,66 @@
           
 	</select>
 
+
+
+    <!--상품 관리-->
+        <resultMap id="MyProducts" type="org.puppit.model.dto.ProductDTO">
+            <!-- Product 본체 -->
+            <id     property="productId"        column="product_id"/>
+            <result property="productName"      column="product_name"/>
+            <result property="productPrice"     column="product_price"/>
+            <result property="productCreatedAt" column="product_created_at"/>
+            <result property="productUpdatedAt" column="product_updated_at"/>
+            <result property="categoryId"       column="category_id"/>
+            <result property="statusId"         column="status_id"/>
+
+            <!-- 하위: Category -->
+            <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
+                <id     property="categoryId"   column="category_id"/>
+                <result property="categoryName" column="category_name"/>
+            </association>
+
+            <!-- 하위: Status -->
+            <association property="status" javaType="org.puppit.model.dto.ProductStatusDTO">
+                <id     property="statusId"   column="status_id"/>
+                <result property="statusName" column="status_name"/>
+            </association>
+
+            <!-- 하위: Thumbnail (1장) -->
+            <association property="thumbnail" javaType="org.puppit.model.dto.ProductImageDTO">
+                <id     property="imageId"    column="thumb_image_id"/>
+                <result property="productId"  column="product_id"/>
+                <result property="imageUrl"   column="thumb_image_url"/>
+                <!-- boolean isThumbnail -> 자바빈 프로퍼티명 'thumbnail' -->
+                <result property="isThumbnail"  column="thumb_is_thumbnail"/>
+            </association>
+        </resultMap>
+
+        <select id="selectMyProducts" parameterType="int" resultMap="MyProducts">
+            SELECT
+            p.product_id,
+            p.product_name,
+            p.product_price,
+            p.product_created_at,
+            p.product_updated_at,
+            p.category_id,
+            p.status_id,
+            c.category_name,
+            s.status_name,
+            -- 썸네일 1장만 JOIN
+            t.image_id     AS thumb_image_id,
+            t.image_url    AS thumb_image_url,
+            t.is_thumbnail AS thumb_is_thumbnail
+
+            FROM product p
+            JOIN product_category c ON p.category_id = c.category_id
+            JOIN product_status   s ON p.status_id   = s.status_id
+            LEFT JOIN product_image t
+            ON t.product_id = p.product_id
+            AND t.is_thumbnail = 1
+
+            WHERE p.seller_id = #{value}   <!-- DAO가 Integer 하나를 그대로 넘기면 #{value} -->
+            ORDER BY p.product_updated_at DESC, p.product_created_at DESC
+        </select>
+
 </mapper>
