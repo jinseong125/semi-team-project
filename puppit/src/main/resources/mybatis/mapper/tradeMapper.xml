@@ -8,5 +8,11 @@
     INSERT INTO trade_payment(uuid, buyer_id, seller_id, product_id, status)
     VALUES(#{uuid}, #{buyerId}, #{sellerId}, #{productId}, #{status})
   </insert>
+  
+  <select id="selectTradeById" parameterType="Map" resultType="org.puppit.model.dto.TradeDTO">
+    SELECT uuid, buyer_id, seller_id, product_id, status, created_at
+    FROM trade_payment
+    WHERE buyer_id = #{userId} OR seller_id = #{userId}
+  </select>
 
 </mapper>

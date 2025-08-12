@@ -1,10 +1,12 @@
 package org.puppit.repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.mybatis.spring.SqlSessionTemplate;
+import org.puppit.model.dto.TradeDTO;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,14 @@ public class TradeDAO {
     
     return sst.insert("mybatis.mapper.tradeMapper.insertTrade", paraMap);
     
+  }
+  
+  // dto 불러오기
+  public List<TradeDTO> selectTradeById(Integer userId) {
+    Map<String, Object> paraMap = new HashMap<>();
+    paraMap.put("userId", userId);
+    
+    return sst.selectList("mybatis.mapper.tradeMapper.selectTradeById", paraMap);
   }
 
 }
