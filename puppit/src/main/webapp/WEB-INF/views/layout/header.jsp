@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 /* 전체 헤더 한 줄 */
-.header{
+.header {
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
@@ -21,12 +21,12 @@
 }
 
 /* 왼쪽 영역: 세로로 로고, 검색창, 카테고리 */
-.left{
+.left {
   display:flex;
   align-items:flex-start;
   gap:18px;
 }
-.left-col{                /* 로고 오른쪽에 쌓일 컬럼 */
+.left-col {                /* 로고 오른쪽에 쌓일 컬럼 */
   display:flex;
   flex-direction:column;
   gap:14px;
@@ -34,12 +34,12 @@
 }
 
 /* 검색창 (아이콘 포함, 밝은 배경) */
-.searchBar{
+.searchBar {
   position:relative;
   width:100%;
   max-width:600px;
 }
-.searchBar .input{
+.searchBar .input {
   width:100%;
   height:44px;
   padding:0 44px 0 40px;
@@ -48,11 +48,19 @@
   background:#f5f7fa;
   outline:none;
 }
-.searchBar .fa-magnifying-glass{
-  position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#666;
+.searchBar .fa-magnifying-glass {
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#666;
 }
-.searchBar .fa-keyboard{
-  position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#666;
+.searchBar .fa-keyboard {
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#666;
 }
 
 /* 카테고리 선택 + 빠른링크 */
@@ -149,10 +157,6 @@ nav a:hover{ text-decoration:underline; }
           </select>
           <i class="fa-solid fa-chevron-down chev"></i>
         </label>
-
-        <!-- 필요하면 빠른 링크들 -->
-        <a href="${contextPath}/category?type=walk" style="color:#ef4444; font-size:14px;">산책용품</a>
-        <a href="${contextPath}/category?type=food" style="color:#6b7280; font-size:14px;">강아지 사료간식</a>
       </div>
     </div>
   </div>
@@ -170,14 +174,7 @@ nav a:hover{ text-decoration:underline; }
   </div>
 </div>
 
-<nav>
-  <ul>
-    <li><a href="${contextPath}/category?type=walk">산책용품</a></li>
-    <li><a href="${contextPath}/category?type=wear">강아지 의류</a></li>
-    <li><a href="${contextPath}/category?type=food">강아지 사료</a></li>
-    <li><a href="${contextPath}/category?type=etc">기타용품</a></li>
-  </ul>
-</nav>
+
 
   <hr>
 

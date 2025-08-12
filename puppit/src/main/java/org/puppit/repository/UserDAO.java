@@ -1,6 +1,7 @@
 package org.puppit.repository;
 
 import org.mybatis.spring.SqlSessionTemplate;
+import org.puppit.controller.UserController;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.springframework.stereotype.Repository;
@@ -31,4 +32,5 @@ public class UserDAO {
   public UserDTO getUserId(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserId", accountId);
   }
+
 }

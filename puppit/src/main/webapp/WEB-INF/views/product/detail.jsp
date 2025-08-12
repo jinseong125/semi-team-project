@@ -1,44 +1,49 @@
-productService.getProductDetail(productId)<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8"/>
-  <title>상품 등록</title>
-  <style>
-    form { max-width: 560px; margin: 24px auto; display: grid; gap: 12px; }
-    label { display: block; margin-bottom: 6px; font-weight: 600; }
-    input[type=text], input[type=number], textarea {
-      width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
-    }
-    button { padding: 10px 16px; border: 0; border-radius: 8px; cursor: pointer; }
-    .submit { background: #222; color: #fff; }
-  </style>
-</head>
-<body>
-<h2 style="text-align:center;">상품 등록</h2>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
-	<c:if test="${not empty product}">
-		<input type="hidden" name="productId"
-			value="${product.productId}" />
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
-		<div>
-			<label>상품명</label> <input type="text" name="productName" value="${product.productName}" />
-		</div>
+<jsp:include page="/WEB-INF/views/layout/header.jsp" />
 
-		<div>
-			<label>가격(원)</label> <input type="number" name="productPrice" value="${product.productPrice}"
-				readonly="readonly"/>	
-		</div>
+<div class="product-detail-container">
+    <h2>${product.productName}</h2>
+    <%-- <p>카테고리: ${product.categoryId}</p>
+    <p>위치: ${product.locationId}</p>
+    <p>상태: ${product.conditionId}</p>
+    <p>판매상태: ${product.statusId}</p> --%>
+    <p>가격: <fmt:formatNumber value="${product.productPrice}" type="currency" /></p>
+    <p>등록일: <fmt:formatDate value="${product.productCreatedAt}" pattern="yyyy-MM-dd HH:mm" /></p>
+    <hr>
+    <div class="description">
+        ${product.productDescription}
+    </div>
+</div>
 
-		<label>설명</label>
-    	<textarea name="productDescription" >${product.productDescription}</textarea>
-		<div>
-	</c:if>
-  </div>
-  
+<style>
+.product-detail-container {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+.product-detail-container h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+.product-detail-container p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+.description {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+</style>
 
 
-
-</body>
-</html>
