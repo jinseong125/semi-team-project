@@ -39,6 +39,29 @@
         ORDER BY condition_id
     </select>
 
+
+    <!-- 상품 이미지 -->
+    <insert id="insertProductImage" parameterType="org.puppit.model.dto.ProductImageDTO"
+            useGeneratedKeys="true" keyProperty="imageId" keyColumn="image_id">
+        INSERT INTO product_image
+        (product_id, image_url, is_thumbnail)
+        VALUES
+            (#{productId} , #{imageUrl},#{isThumbnail})
+    </insert>
+
+    <!-- 상품 이미지 조회-->
+    <select id="getProductImages"  parameterType="int" resultType="org.puppit.model.dto.ProductImageDTO">
+        SELECT image_id AS imageId,
+               product_id AS productId,
+               image_url AS imageUrl,
+               is_thumbnail AS isThumbnail
+        FROM product_image
+        WHERE product_id = #{productId}
+        ORDER BY is_thumbnail DESC, image_id ASC
+    </select>
+
+
+
     <!-- getProductById-->
     <select id="getProductById"
             parameterType="int"
@@ -48,6 +71,7 @@
         FROM product
         WHERE product_id = #{productId}
     </select>
+
 
 
 

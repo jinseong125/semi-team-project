@@ -1,10 +1,7 @@
 package org.puppit.repository;
 
 import org.apache.ibatis.session.SqlSession;
-import org.puppit.model.dto.CategoryDTO;
-import org.puppit.model.dto.ConditionDTO;
-import org.puppit.model.dto.LocationDTO;
-import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.*;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +34,14 @@ public class ProductDAO {
 
     public List<ConditionDTO> getConditions(){
         return sqlSession.selectList("product.getConditions");
+    }
+
+    public int insertProductImage(org.puppit.model.dto.ProductImageDTO productImageDTO) {
+        sqlSession.insert("product.insertProductImage", productImageDTO);
+        return productImageDTO.getImageId();
+    }
+    public List<ProductImageDTO> getProductImages(int productId){
+        return sqlSession.selectList("product.getProductImages", productId);
     }
 
     public ProductDTO getProductById(Integer productId){
