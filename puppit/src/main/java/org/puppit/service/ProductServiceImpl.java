@@ -74,8 +74,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Map<String, Object> getScrollUsers(ProductDTO dto, HttpServletRequest request) {
+      
       return null;
 
+    }
+
+    @Override
+    public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
+      return null;
     }
 
 }

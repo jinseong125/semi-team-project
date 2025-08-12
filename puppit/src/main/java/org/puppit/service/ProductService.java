@@ -22,5 +22,10 @@ public interface ProductService {
 
     public ProductDTO getProductById(Integer productId);
 
+    
+    public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request);
+
+
     public List<ProductDTO> selectMyProducts(Integer sellerId);
+
 }

@@ -45,10 +45,6 @@ public class ProductController {
                          HttpSession session,
                          RedirectAttributes ra) {
 
-        // 세션에서 로그인 사용자 정보 확인
-        //자바에서 Object → 구체적인 타입(Integer, String 등)으로 사용할 때는 명시적 타입 변환(캐스팅)
-        //getAttribute는 object 타입이라 casting해주어야함
-        //Integer는 참조형이라 null 가능 → 로그인 안 한 상태
         Integer sellerId =  (Integer) session.getAttribute("userId");
         if (sellerId == null) {
             // 로그인 안 한 경우 → 로그인 페이지로 리다이렉트
@@ -72,7 +68,7 @@ public class ProductController {
     
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, Model model) {
-    
+    System.out.println("product" + productService.getProductDetail(productId).toString());
      model.addAttribute("product", productService.getProductDetail(productId));
       return "product/detail";
     }

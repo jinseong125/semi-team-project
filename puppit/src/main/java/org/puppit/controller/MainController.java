@@ -1,5 +1,6 @@
 package org.puppit.controller;
 
+import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.service.ProductService;
 import org.springframework.stereotype.Controller;
@@ -18,7 +19,7 @@ public class MainController {
   private final ProductService productService;
   
   @RequestMapping(value = "/")
-  public String main(Model model) {
+  public String main(PageDTO dto, Model model) {
    model.addAttribute("products", productService.getProductList());
     return "main";
   }
