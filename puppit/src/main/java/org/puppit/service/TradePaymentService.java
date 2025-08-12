@@ -1,5 +1,8 @@
 package org.puppit.service;
 
+import java.util.List;
+
+import org.puppit.model.dto.TradeDTO;
 import org.puppit.repository.PointDAO;
 import org.puppit.repository.TradeDAO;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,11 @@ public class TradePaymentService {
   public boolean insertTrade(Integer buyerId, Integer sellerId, Integer productId, String status) {
     int result = tradeDAO.insertTrade(buyerId, sellerId, productId, status);
     return result == 1;
+  }
+  
+  public List<TradeDTO> selectTradeById(Integer userId) {
+    List<TradeDTO> result = tradeDAO.selectTradeById(userId);
+    return result;
   }
   
 
