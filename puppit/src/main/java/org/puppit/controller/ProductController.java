@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -61,7 +62,7 @@ public class ProductController {
 
         int id = productService.registerProduct(product);
         ra.addFlashAttribute("msg", "상품 등록 완료 #" + id);
-        return "redirect:/product/list";
+        return "redirect:/product/myproduct";
     }
     
     
@@ -76,9 +77,21 @@ public class ProductController {
       public String scrollList() {
         return "user/scroll";
     }
-    
 
 
+    @GetMapping("/myproduct")
+    public String myProduct(HttpSession session, RedirectAttributes ra, Model model){
+        Integer sellerId = (Integer) session.getAttribute("userId");
+        if (sellerId == null) {
+            ra.addFlashAttribute("error", "상품 관리는 로그인 후 이용 가능합니다.");
+            return "redirect:/user/login";
+        }
+        List<ProductDTO> items = productService.selectMyProducts(sellerId);
+        System.out.println(items.toString());
+        model.addAttribute("items", items);
+
+        return "product/myproduct";
+    }
 
 
 }

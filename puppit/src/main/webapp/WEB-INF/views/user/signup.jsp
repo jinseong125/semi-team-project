@@ -37,7 +37,7 @@
     <label>이름 : <input type="text" id="userName" name="userName"></label>
     <br>
     <label>닉네임 : <input type="text" id="nickName" name="nickName"></label>
-    <button type="button" class="checkNickName" name="checkNickName">중복검사</button>
+    <button type="button" class="checkNickName" id="checkNickNameBtn">중복검사</button>
     <br>
     <label>휴대전화 : <input type="text" id="userPhone" name="userPhone"></label>
     <br>
@@ -67,33 +67,51 @@
       }
     }
   });
+  // 아이디 중복 검사
   document.getElementById("checkIdBtn").addEventListener("click", function(e) {
-	  const accountId = document.getElementById("accountId").value;
-	  if(accountId == null || accountId == "") {
+	  // 빈 문자 입력
+	  const accountId = document.getElementById("accountId").value.trim();
+	  if(!accountId) {
 		  alert("아이디를 입력 해주세요");
 		  return;
 	  }
-	  fetch("${contextPath}/user/checkId?accountId=" + accountId)
-	  		.then(response => response.json())
-	  		.then(data => {
-	  			console.log("data : " + data.available);
-	  			if(!data.available) {
-	  				alert("중복된 아이디 입니다");
-	  			} else {
-	  				alert("사용 가능한 아이디 입니다");
-	  			}
-	  		})
-	  		.catch(error => {
-	  			alert("서버 오류가 발생 했습니다");
-	  		})
+	  // 아이디 형식 (정규식 검사)
+	  const isRegex = /^[a-z0-9]{4,12}$/;
+	  if(!isRegex.test(accountId)) {
+		  alert("아이디 형식이 올바르지 않습니다");
+		  return false;
+	  }
+	     fetch("${contextPath}/user/check?accountId=" + accountId)
+         .then(response => {
+            if(response.status == '409') {
+            	alert('중복된 아이디입니다.');
+            }
+            else alert('사용 가능한 아이디 입니다.');
+         })
   })
-
-
+	// 닉네임 중복 검사
+  	document.getElementById("checkNickNameBtn").addEventListener("click", function(e) {
+	  // 빈 문자 입력
+	  const nickName = document.getElementById("nickName").value.trim();
+	  if(!nickName) {
+		  alert("닉네임을 입력 해주세요");
+		  return;
+	  }
+	  // 닉네임 형식 (정규식 검사)
+/* 	  const isRegex = /^[a-z0-9]{4,12}$/;
+	  if(!isRegex.test(nickName)) {
+		  alert("닉네임 형식이 올바르지 않습니다");
+		  return false;
+	  } */
+	     fetch("${contextPath}/user/check?nickName=" + nickName)
+         .then(response => {
+            if(response.status == '409') {
+            	alert('중복된 닉네임입니다.');
+            }
+            else alert('사용 가능한 닉네임 입니다.');
+         })
+  	})
 </script>
-    
-
-    
-	
 	
 </body>
 </html>

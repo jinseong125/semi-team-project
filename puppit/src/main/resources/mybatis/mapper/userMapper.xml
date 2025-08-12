@@ -18,10 +18,24 @@
   </insert>
   
   <!-- 아이디 중복 검사 -->
-  <select id="countByAccountId" parameterType="String" resultType="int">
+  <select id="countByAccountId" parameterType="String" resultType="java.lang.Integer">
     SELECT COUNT(*)
       FROM user
      WHERE account_id = #{accountId}
+  </select>
+  
+  <!-- 닉네임 중복 검사 -->
+  <select id="countByNickName" parameterType="String" resultType="java.lang.Integer">
+    SELECT COUNT(*)
+      FROM user
+     WHERE nick_name = #{nickName}
+  </select>
+  
+  <!-- 이메일 중복 검사 -->
+  <select id="countByEmail" parameterType="String" resultType="java.lang.Integer">
+    SELECT COUNT(*)
+      FROM user
+     WHERE user_email = #{userEmail}
   </select>
   
   <!-- 로그인(아이디, 비밀번호) -->
@@ -33,7 +47,7 @@
   
   <!-- account 사용해서 user_id(PK) 조회 -->
   <select id="getUserId" parameterType="String" resultType="UserDTO">
-    SELECT user_id, user_email, user_name
+    SELECT user_id, user_email, user_name, nick_name, point
       FROM user
      WHERE account_id = #{accountId}
   </select>

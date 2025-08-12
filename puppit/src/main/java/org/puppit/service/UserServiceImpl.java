@@ -34,13 +34,16 @@ public class UserServiceImpl implements UserService {
     }
   }
   @Override
-  public boolean countByAccountId(String accountId) {
-    int count = userDAO.countByAccountId(accountId.trim()); 
-    if(count == 0) {
-      return true;
-    } else {
-      return false;
-    }
+  public Boolean isAccountIdAvailable(String accountId) {
+    return userDAO.countByAccountId(accountId.trim()) == 0; 
+  }
+  @Override
+  public Boolean isNickNameAvailable(String nickName) {
+    return userDAO.countByNickName(nickName.trim()) == 0;
+  }
+  @Override
+  public Boolean isUserEmailAvailable(String userEmail) {
+    return userDAO.countByEmail(userEmail.trim()) == 0;
   }
   @Override
   public boolean login(UserDTO user) {

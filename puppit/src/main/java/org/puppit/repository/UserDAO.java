@@ -20,6 +20,12 @@ public class UserDAO {
   public Integer countByAccountId(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.countByAccountId", accountId);
   }
+  public Integer countByNickName(String nickName) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.countByNickName", nickName);
+  }
+  public Integer countByEmail(String userEmail) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.countByEmail", userEmail);
+  }
   public String getUserById(String userId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserById", userId);
   }
