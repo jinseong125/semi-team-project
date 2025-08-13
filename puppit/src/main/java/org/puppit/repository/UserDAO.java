@@ -47,7 +47,11 @@ public class UserDAO {
   
   //채팅 보낸 사람의 사용자 정보 조회
   public ChatUserDTO getUserByUserId(String senderUserId) {
+
+    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", senderUserId);
+
 	  return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", senderUserId);
+
   }
 
 

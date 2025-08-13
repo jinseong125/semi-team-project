@@ -72,15 +72,22 @@ public class ProductServiceImpl implements ProductService {
       return productDAO.getProductDetail(productId);
     }
 
-    @Override
-    public Map<String, Object> getScrollUsers(ProductDTO dto, HttpServletRequest request) {
-      
-      return null;
-
-    }
+  
 
     @Override
     public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
+      return null;
+    }
+
+    @Override
+    public int countProducts(Integer categoryId, String keyword) {
+      // TODO Auto-generated method stub
+      return 0;
+    }
+
+    @Override
+    public List<ProductDTO> findProductsByOffset(int offset, int size, Integer categoryId, String keyword) {
+      // TODO Auto-generated method stub
       return null;
     }
 
