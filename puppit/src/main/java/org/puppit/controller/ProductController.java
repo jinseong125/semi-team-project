@@ -81,7 +81,8 @@ public class ProductController {
 
     @GetMapping("/myproduct")
     public String myProduct(HttpSession session, RedirectAttributes ra, Model model){
-        Integer sellerId = (Integer) session.getAttribute("userId");
+        Integer sellerId = (Integer)session.getAttribute("userId");
+
         if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 관리는 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
