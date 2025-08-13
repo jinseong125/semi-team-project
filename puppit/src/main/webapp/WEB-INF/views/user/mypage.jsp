@@ -9,14 +9,14 @@
 </jsp:include>
 
 <style>
-:root { -
-  -bg: #f7f8fa; -
-  -card: #fff; -
-  -text: #111; -
-  -muted: #8a8f98; -
-  -primary: #4f86ff; -
-  -line: #dfe3ea; -
-  -shadow: 0 8px 24px rgba(0, 0, 0, .08);
+:root {
+  --bg: #f7f8fa;
+  --card: #fff;
+  --text: #111;
+  --muted: #8a8f98;
+  --primary: #4f86ff;
+  --line: #dfe3ea;
+  --shadow: 0 8px 24px rgba(0, 0, 0, .08);
 }
 
 * {
@@ -25,10 +25,9 @@
 
 body {
   margin: 0;
-  background: var(- -bg);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto,
-    "Noto Sans KR", sans-serif;
-  color: var(- -text);
+  background: var(--bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  color: var(--text);
 }
 
 .wrap {
@@ -62,11 +61,11 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(- -card);
-  border: 1px solid var(- -line);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: var(- -shadow);
+  box-shadow: var(--shadow);
 }
 
 .avatar {
@@ -108,17 +107,17 @@ body {
 }
 
 .edit:hover {
-  opacity: 1
+  opacity: 1;
 }
 
 /* 포인트 카드 — 살짝 컴팩트 */
 .point-card {
   margin-top: 18px;
-  background: var(- -card);
-  border: 1px solid var(- -line);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 20px;
   padding: 18px;
-  box-shadow: var(- -shadow);
+  box-shadow: var(--shadow);
 }
 
 .point-head {
@@ -169,7 +168,7 @@ body {
   height: 56px;
   border: none;
   border-radius: 14px;
-  background: var(- -primary);
+  background: var(--primary);
   color: #fff;
   font-weight: 800;
   font-size: 18px;
@@ -179,21 +178,21 @@ body {
 }
 
 .charge:active {
-  transform: translateY(1px)
+  transform: translateY(1px);
 }
 
 /* 아래 확장 공간 */
 .future-area {
   margin-top: 18px;
-  background: var(- -card);
-  border: 1px solid var(- -line);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 20px;
   padding: 18px;
-  box-shadow: var(- -shadow);
+  box-shadow: var(--shadow);
 }
 
 /* 반응형 */
-@media ( min-width :768px) {
+@media (min-width: 768px) {
   .avatar {
     width: 72px;
     height: 72px;
@@ -215,11 +214,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(- -card);
-  border: 1px solid var(- -line);
+  background: var(--card);
+  border: 1px solid var(--line);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: var(- -shadow);
+  box-shadow: var(--shadow);
 }
 
 .action-title {
@@ -228,7 +227,7 @@ body {
 }
 
 .action-desc {
-  color: var(- -muted);
+  color: var(--muted);
   font-size: 13px;
   margin-top: 4px;
 }
@@ -240,9 +239,9 @@ body {
   border-radius: 12px;
   cursor: pointer;
   background: #fff;
-  color: var(- -text);
+  color: var(--text);
   font-weight: 800;
-  border: 1px solid var(- -line);
+  border: 1px solid var(--line);
   box-shadow: none;
 }
 
@@ -262,15 +261,12 @@ body {
   <!-- 프로필 -->
   <div class="profile">
     <div class="avatar">
-      <img src="${contextPath}/resources/image/profile-default.png"
-        alt="프로필 이미지" />
+      <img src="${contextPath}/resources/image/profile-default.png" alt="프로필 이미지" />
     </div>
     <div class="who">
       <div class="nick">${user.nickName != null ? user.nickName : 'happy'}</div>
     </div>
-    <button class="edit" type="button"
-      onclick="location.href='${contextPath}/user/profile'">프로필
-      수정</button>
+    <button class="edit" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
   </div>
 
   <!-- 포인트 카드 (컴팩트) -->
@@ -280,8 +276,7 @@ body {
     </div>
     <div class="point-row">
       <div class="p-icon">
-        <img src="${contextPath}/resources/image/point-icon.png"
-          alt="포인트" />
+        <img src="${contextPath}/resources/image/point-icon.png" alt="포인트" />
       </div>
       <div class="p-amount">
         <c:choose>
@@ -292,8 +287,7 @@ body {
         </c:choose>
       </div>
     </div>
-    <button class="charge" type="button"
-      onclick="location.href='${contextPath}/payment/paymentForm'">충전하기</button>
+    <button class="charge" type="button" onclick="location.href='${contextPath}/payment/paymentForm'">충전하기</button>
   </div>
 
   <div class="future-area">
@@ -304,9 +298,7 @@ body {
           <div class="action-title">포인트 충전 내역</div>
           <div class="action-desc">최근 충전 기록을 확인하세요</div>
         </div>
-        <button class="action-btn" type="button"
-          onclick="location.href='${contextPath}/payment/history'">
-          내역 보기</button>
+        <button class="action-btn" type="button" onclick="location.href='${contextPath}/payment/history?userId=${user.userId}'">내역 보기</button>
       </div>
 
       <!-- 거래 내역 -->
@@ -315,14 +307,10 @@ body {
           <div class="action-title">거래 내역</div>
           <div class="action-desc">구매·판매 기록을 한눈에</div>
         </div>
-        <button class="action-btn" type="button"
-          onclick="location.href='${contextPath}/trade/history?userId=${user.userId}'">
-          내역 보기</button>
+        <button class="action-btn" type="button" onclick="location.href='${contextPath}/trade/history?userId=${user.userId}'">내역 보기</button>
       </div>
     </div>
   </div>
-
-
 </div>
 
 </body>

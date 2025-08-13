@@ -65,15 +65,10 @@
     <select id="getProductById"
             parameterType="int"
             resultType="org.puppit.model.dto.ProductDTO">
-
-      SELECT product_id AS productId,
-             product_price AS productPrice
-
         SELECT product_id AS productId,
                product_price AS productPrice
-
-        FROM product
-        WHERE product_id = #{productId}
+        FROM   product
+        WHERE  product_id = #{productId}
     </select>
 
 	<!-- 상품 전체목록 조회 -->
