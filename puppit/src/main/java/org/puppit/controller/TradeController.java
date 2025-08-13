@@ -23,7 +23,7 @@ public class TradeController {
     List<TradeDTO> tradeDTOs = trade.selectTradeById(userId);
     model.addAttribute("tradeDTOs", tradeDTOs);
     for(TradeDTO tradeDTO : tradeDTOs) {
-      System.out.println("sellerId: " + tradeDTO.getSellerId());
+      System.out.println("sellerNickname: " + tradeDTO.getSellerId());
       System.out.println("buyerId: " + tradeDTO.getBuyerId());
       System.out.println("productId: " + tradeDTO.getProductId());
     }
