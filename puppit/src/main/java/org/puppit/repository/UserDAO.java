@@ -50,9 +50,8 @@ public class UserDAO {
 
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", senderUserId);
 
-	  return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", senderUserId);
 
-  }
+ 
 
 
 }

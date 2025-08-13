@@ -75,13 +75,9 @@ public class UserServiceImpl implements UserService {
   @Override
   public ChatUserDTO getUserByUserId(String senderUserId) {
 
-  return userDAO.getUserByUserId(senderUserId);
-  }
-
-}
-
 	return userDAO.getUserByUserId(senderUserId);
   }
 
 }
+
 
