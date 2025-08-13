@@ -14,7 +14,4 @@ public class ChatMessageSelectDTO {
 	private int roomId;
 	private String loginUserId;
 	
-	
-	
-	
 }

@@ -17,18 +17,15 @@ public class TradePaymentService {
   private final PointDAO pointDAO;
   private final TradeDAO tradeDAO;
   
-  @Transactional
   public boolean updateBuyerPoint(int buyerId, int amount) {
     int resultPoint = pointDAO.updatePoint(buyerId, amount);
-    int resultPointRecord = pointDAO.updatePointRecord(buyerId, amount);
     
-    return resultPoint == 1 && resultPointRecord == 1;
+    return resultPoint == 1;
   }
-  @Transactional
+  
   public boolean updateSellerPoint(int sellerId, int amount) {
     int resultPoint = pointDAO.updatePoint(sellerId, amount);
-    int resultPointRecord = pointDAO.updatePointRecord(sellerId, amount);
-    return resultPoint == 1 && resultPointRecord == 1;
+    return resultPoint == 1;
   }
   
   public boolean insertTrade(Integer buyerId, Integer sellerId, Integer productId, String status) {

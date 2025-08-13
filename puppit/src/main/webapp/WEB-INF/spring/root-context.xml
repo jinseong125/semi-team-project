@@ -2,9 +2,14 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/tx    http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+         http://www.springframework.org/schema/beans    http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/tx       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- @Component/@Configuration 스캔 -->
+    <context:component-scan base-package="org.puppit"/>
 
     <!-- 1) HikariConfig -->
     <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
@@ -13,12 +18,6 @@
                   value="jdbc:mysql://puppit.cp2aos8cos6t.ap-southeast-2.rds.amazonaws.com:3306/puppit?serverTimezone=Asia/Seoul&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;sslMode=REQUIRED&amp;allowPublicKeyRetrieval=true"/>
         <property name="username" value="user"/>
         <property name="password" value="puppitgood"/>
-        <!-- 선택: 커넥션풀 기본값 -->
-        <!--
-        <property name="maximumPoolSize" value="10"/>
-        <property name="connectionTimeout" value="10000"/>
-        <property name="idleTimeout" value="300000"/>
-        -->
     </bean>
 
     <!-- 2) DataSource -->
@@ -31,8 +30,6 @@
         <property name="dataSource" ref="hikariDataSource"/>
         <property name="configLocation" value="classpath:mybatis/config/mybatis-config.xml"/>
         <property name="mapperLocations" value="classpath:mybatis/mapper/*Mapper.xml"/>
-        <!-- 또는 하위 폴더까지: classpath*:mybatis/mapper/**/*.xml -->
-        
     </bean>
 
     <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
@@ -51,5 +48,22 @@
         <property name="maxUploadSize" value="104857600"/>
         <property name="maxUploadSizePerFile" value="10485760"/>
     </bean>
+
+    <!-- AWS S3 프로퍼티 (XML 내장) -->
+    <bean id="awsProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
+            <props>
+                <prop key="aws.region">ap-northeast-2</prop>
+                <prop key="aws.s3.bucket">jscode-upload-images</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- @Value 바인딩: ① AWS(XML) ② Iamport(파일) 둘 다 읽기 -->
+    <context:property-placeholder properties-ref="awsProperties"
+                                  ignore-unresolvable="true"/>
+    <context:property-placeholder location="classpath:application-secret.properties"
+                                  system-properties-mode="OVERRIDE"
+                                  ignore-unresolvable="true"/>
 
 </beans>
