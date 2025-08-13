@@ -165,12 +165,12 @@ nav a:hover{ text-decoration:underline; }
   <div class="right">
     <div class="top-actions">
     <c:choose>
-      <c:when test="${empty userId}">
+      <c:when test="${empty sessionScope.sessionMap.accountId}">
         <a href="${contextPath}/user/login" class="btn">로그인</a>
         <a href="${contextPath}/user/signup" class="btn">회원가입</a>
       </c:when>
       <c:otherwise>
-        <div>${sessionScope.userName}님 환영합니다!</div>
+        <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
       
         <a href="${contextPath}/user/mypage">마이페이지</a>
         <a href="${contextPath}/user/logout">로그아웃</a>
