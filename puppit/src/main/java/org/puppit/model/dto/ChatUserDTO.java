@@ -10,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChatUserDTO {
+
 	private Integer userId;
 	private String accountId;
 	private String userName;
@@ -21,7 +22,8 @@ public class ChatUserDTO {
 				+ nickName + "]";
 	}
 	
-	
-	
-	
+
+  
+  
 }
+

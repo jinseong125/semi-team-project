@@ -1,5 +1,6 @@
 package org.puppit.service;
 
+import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
 
 import java.util.List;
@@ -18,7 +19,6 @@ public interface ProductService {
     
     public ProductDTO getProductDetail(Integer productId);
     
-    public Map<String, Object> getScrollUsers(ProductDTO dto, HttpServletRequest request);
 
     public ProductDTO getProductById(Integer productId);
 
@@ -27,5 +27,10 @@ public interface ProductService {
 
 
     public List<ProductDTO> selectMyProducts(Integer sellerId);
+
+   
+    int countProducts(Integer categoryId, String keyword);
+    List<ProductDTO> findProductsByOffset(int offset, int size, Integer categoryId, String keyword);
+    
 
 }

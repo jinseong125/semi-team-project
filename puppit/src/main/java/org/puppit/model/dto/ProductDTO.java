@@ -26,6 +26,7 @@ public class ProductDTO {
     private String productDescription;
     private Timestamp productCreatedAt;
     private Timestamp productUpdatedAt;
+    private int totalCount;
 
     @Override
     public String toString() {

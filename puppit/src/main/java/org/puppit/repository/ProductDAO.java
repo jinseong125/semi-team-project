@@ -6,8 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -60,6 +62,13 @@ public class ProductDAO {
 
     public List<ProductDTO> selectMyProducts(Integer sellerId){
         return sqlSession.selectList("product.selectMyProducts", sellerId);
+    }
+    
+    public List<ProductDTO> findProductsAfter(Long cursor, int size) {
+      Map<String, Object> params = new HashMap<>();         //----- MyBatis로 여러 개의 파라미터를 한 번에 보내기 위해서 HashMap사용.
+      params.put("cursor", cursor);
+      params.put("size", size);
+      return sqlSession.selectList("product.findProductsAfter", params);
     }
 
 }

@@ -74,7 +74,14 @@ public class UserServiceImpl implements UserService {
   // 채팅 보낸 사람의 사용자 정보 조회
   @Override
   public ChatUserDTO getUserByUserId(String senderUserId) {
+
 	return userDAO.getUserByUserId(senderUserId);
   }
 
 }
+
+
+  
+
+
+
