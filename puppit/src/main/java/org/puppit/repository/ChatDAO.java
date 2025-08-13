@@ -5,11 +5,22 @@ import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.puppit.model.dto.ChatListDTO;
+
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
+
+import org.puppit.model.dto.ChatMessageDTO;
+import org.puppit.model.dto.ChatMessageProductDTO;
+import org.puppit.model.dto.ChatMessageSearchDTO;
+import org.puppit.model.dto.ChatMessageSelectDTO;
+
+import org.puppit.model.dto.ChatRoomPeopleDTO;
+
+
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +49,15 @@ public class ChatDAO {
 	    	return sqlSession.insert("mybatis.mapper.chatMessageMapper.insertChatMessage", chatMessageDTO);
 	    }
 	
+
 	 public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO) {
 		 return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUserRoleANDAboutChatMessagePeople", chatMessageSearchDTO);
 	 }
+
+
+	 public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO) {
+		 return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUserRoleANDAboutChatMessagePeople", chatMessageSearchDTO);
+	 }
+
+
 }

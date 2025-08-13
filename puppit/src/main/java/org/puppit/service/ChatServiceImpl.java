@@ -1,6 +1,5 @@
 package org.puppit.service;
 
-
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,14 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
+<<<<<<< HEAD
+=======
+
+import org.puppit.model.dto.ChatMessageDTO;
+import org.puppit.model.dto.ChatMessageProductDTO;
+import org.puppit.model.dto.ChatMessageSelectDTO;
+
+>>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
 import org.puppit.repository.ChatDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +33,8 @@ public class ChatServiceImpl implements ChatService{
 	private final ChatDAO chatDAO;
 	
 	@Override
-	public List<ChatListDTO> getChatRooms(int userId) {
-		
-		return chatDAO.getChatList(userId);
+	public List<ChatListDTO> getChatRooms(String accountId) {
+		return chatDAO.getChatList(accountId);
 	}
 
 	@Override
@@ -79,6 +85,49 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
+<<<<<<< HEAD
+=======
+	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO  chatMessageSelectDTO) {
+		List<Map<String, Object>> messageList = chatDAO.getChatMessageList(chatMessageSelectDTO);
+		List<ChatMessageDTO> dtoList = messageList.stream().map(message -> {
+			ChatMessageDTO dto = new ChatMessageDTO();
+			dto.setMessageId(String.valueOf(message.get("message_id")));
+			dto.setChatRoomId(String.valueOf(message.get("chat_room_id")) );
+			dto.setProductId(String.valueOf(message.get("product_id")));
+			dto.setChatSender(Integer.parseInt(String.valueOf(message.get("chat_sender"))));
+		    dto.setChatSenderAccountId(String.valueOf(message.get("sender_account_id")));
+	        dto.setChatSenderUserName(String.valueOf(message.get("sender_user_name")));
+	        dto.setChatReceiver(Integer.parseInt(String.valueOf(message.get("chat_receiver"))));
+	        dto.setChatReceiverAccountId(String.valueOf(message.get("receiver_account_id")));
+	        dto.setChatReceiverUserName(String.valueOf(message.get("receiver_user_name")));
+	        dto.setChatMessage(String.valueOf(message.get("chat_message")));
+	        //dto.setBuyerId(String.valueOf(message.get("buyer_id")));
+	        // chat_created_at은 Timestamp로 캐스팅 필요
+	        
+	        Object createdAt = message.get("chat_created_at");
+	        if (createdAt instanceof Timestamp) {
+	            dto.setChatCreatedAt((Timestamp) createdAt); // 정상 동작
+	        }
+	        dto.setSenderRole(String.valueOf(message.get("sender_role")));
+	        dto.setReceiverRole(String.valueOf(message.get("receiver_role")));
+			return dto;
+		}).collect(Collectors.toList());
+		
+		return dtoList;
+	}
+
+	@Override
+	public ChatMessageProductDTO getProduct(Integer productId) {
+		return chatDAO.getProduct(productId);
+	}
+
+	@Override
+	public Integer saveChatMessage(ChatMessageDTO chatMessageDTO) {
+		return chatDAO.insertChatMessage(chatMessageDTO);
+	}
+
+	@Override
+>>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
 	public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO) {
 		return chatDAO.getUserRoleANDAboutChatMessagePeople(chatMessageSearchDTO);
 	}

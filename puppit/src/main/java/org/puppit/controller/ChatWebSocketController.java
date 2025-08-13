@@ -1,5 +1,6 @@
 package org.puppit.controller;
 
+
 import java.util.List;
 
 import org.puppit.model.dto.ChatMessageDTO;
@@ -8,26 +9,46 @@ import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.service.ChatService;
 import org.puppit.service.UserService;
+<<<<<<< HEAD
+=======
+
+import org.springframework.stereotype.Controller;
+
+import org.puppit.model.dto.ChatMessageDTO;
+
+>>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Controller;
 
 import lombok.RequiredArgsConstructor;
+
 
 @RequiredArgsConstructor
 @Controller
 public class ChatWebSocketController {
 	
 	private final SimpMessagingTemplate messagingTemplate;
+
 	private final UserService userService;
 	private final ChatService chatService;
+
+
+	private final UserService userService;
+	private final ChatService chatService;
+
+
 	
 	 // 클라이언트가 /app/chat.send로 메시지 전송
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload ChatMessageDTO chatMessageDTO,
                             SimpMessageHeaderAccessor headerAccessor) {
+
     	// 1. 여기서 senderId(혹은 loginUserId)로 사용자 정보 조회
         //    예: chatMessageDTO.getSender() 또는 headerAccessor.getSessionAttributes() 등에서 userId 추출
         System.out.println("chatMessageDTO: "+ chatMessageDTO.toString());

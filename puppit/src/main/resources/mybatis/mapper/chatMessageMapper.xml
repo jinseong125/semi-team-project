@@ -120,8 +120,11 @@ ORDER BY c.chat_created_at ASC;
 
 
 </select> 
+<<<<<<< HEAD
   
   
+=======
+>>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
   
   
 </mapper>
