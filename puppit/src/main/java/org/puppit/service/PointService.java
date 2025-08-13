@@ -1,5 +1,10 @@
 package org.puppit.service;
 
+import java.util.List;
+
+import org.puppit.model.dto.PointDTO;
+
 public interface PointService {
-    boolean verifyAndCharge(String impUid, int amount, String userId);
+    public boolean verifyAndCharge(int uid, int amount);
+    public List<PointDTO> selectPointRecordById(Integer userId);
 }

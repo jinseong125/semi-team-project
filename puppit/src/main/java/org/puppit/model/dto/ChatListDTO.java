@@ -12,26 +12,36 @@ import lombok.ToString;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
 public class ChatListDTO {
 	private Integer roomId;
-	private boolean chatIsRead;
-	private String chatMessage;
-	private Timestamp chatSentAt;
-	private String chatSenderId;
-	private String chatReceiverId;
-	private String profileImage;
-	private String senderAccountId;
-	private String receiverAccountId;
-	private int unreadCount;
+	private Integer productId;
+	private String productName;
+	private Integer productPrice;
+	private Integer otherUserId;
+	private String otherAccountId;
+	private String otherUserName;
+	private String lastMessage;
+	private Timestamp lastMessageAT;
+	private Integer lastMessageSenderId;
+	private String lastMessageSenderAccountId;
+	private String lastMessageSenderName;
+	private Integer lastMessageReceiverId;
+	private String lastMessageReceiverAccountId;
+	private String lastMessageReceiverName;
 	
 	@Override
 	public String toString() {
-		return "ChatListDTO [roomId=" + roomId + ", chatIsRead=" + chatIsRead + ", chatMessage=" + chatMessage
-				+ ", chatSentAt=" + chatSentAt + ", chatSenderId=" + chatSenderId + ", chatReceiverId=" + chatReceiverId
-				+ ", profileImage=" + profileImage + ", senderAccountId=" + senderAccountId + ", receiverAccountId="
-				+ receiverAccountId + ", unreadCount=" + unreadCount + "]";
+		return "ChatListDTO [roomId=" + roomId + ", productId=" + productId + ", productName=" + productName
+				+ ", productPrice=" + productPrice + ", otherUserId=" + otherUserId + ", otherAccountId="
+				+ otherAccountId + ", otherUserName=" + otherUserName + ", lastMessage=" + lastMessage
+				+ ", lastMessageAT=" + lastMessageAT + ", lastMessageSenderId=" + lastMessageSenderId
+				+ ", lastMessageSenderAccountId=" + lastMessageSenderAccountId + ", lastMessageSenderName="
+				+ lastMessageSenderName + ", lastMessageReceiverId=" + lastMessageReceiverId
+				+ ", lastMessageReceiverAccountId=" + lastMessageReceiverAccountId + ", lastMessageReceiverName="
+				+ lastMessageReceiverName + "]";
 	}
+	
+	
 	
 	
 	

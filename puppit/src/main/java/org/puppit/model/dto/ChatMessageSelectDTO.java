@@ -5,17 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class ChatMessageSelectDTO {
-	private Integer roomId;
 	private Integer userId;
-	@Override
-	public String toString() {
-		return "ChatMessageSelectDTO [roomId=" + roomId + ", userId=" + userId + "]";
-	}
-	
+	private int roomId;
+	private String loginUserId;
 	
 }

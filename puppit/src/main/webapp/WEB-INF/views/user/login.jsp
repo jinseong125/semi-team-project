@@ -10,32 +10,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Insert title here</title>
 </head>
+<style>
+ .main {
+ text-align: center;
+ border: 1px solid black;
+ }
+</style>
 <body>
-	<h1>Puppit 회원가입 화면</h1>
+
+<div class="main">
+	<h1>Puppit 로그인</h1>
 	<form method="post"
 	      action="${contextPath}/user/login">
-		<input type="hidden" name="url" value="${url}"/>
-		<label>이메일 : <input type="text" name="email"/></label>
+		<label>아이디 : <input type="text" name="accountId"/></label>
 		<br>
-		<label>비밀번호 : <input type="password" name="password"/> </label>
+		<label>비밀번호 : <input type="password" name="userPassword"/> </label>
 		<br>
-		<button type="submit">로그인</button>
-		<button type="button" onclick="onSignup()">회원가입</button>
+		<button type="submit" onclick="onLogin()">로그인</button>
 	</form>
-	
 	<c:if test="${not empty error}">
 		<div style="font-size: 12px; color: red;">${error}</div>
-	
 	</c:if>
+  <label>아아디/비밀번호를 잊으셨나요? <a href="">아이디/비밀번호 찾기</a></label><br>
+  <label>Puppit이 처음이신가요? <a href=" ${contextPath}/user/signup">회원가입 하기</a></label>
+	
+</div>
 	
 	
 	
 	
 	<script type="text/javascript">
-		function onSignup() {
-		  location.href="${contextPath}/user/signup"; // 추후 회원가입 화면으로 이동할 수 있도록 구현
-		}
-	
+
+		 const msg = "${msg}";
+		    if (msg && msg.trim() !== "") {
+		      alert(msg);
+		    }
 	
 	</script>
 	

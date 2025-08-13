@@ -122,6 +122,4 @@ ORDER BY c.chat_created_at ASC;
 </select> 
   
   
-  
-  
 </mapper>

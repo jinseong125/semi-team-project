@@ -1,33 +1,77 @@
 package org.puppit.controller;
 
 import org.puppit.service.PointService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
+import lombok.RequiredArgsConstructor;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.puppit.service.PointService;
+import org.puppit.model.dto.PointDTO;
+import org.puppit.model.dto.TradeDTO;
+import org.puppit.service.IamPortService; 
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
+@RequiredArgsConstructor
 public class PointController {
-
-    @Autowired
-    private PointService pointService;
-
-    @GetMapping("/payment/form")
-    public String paymentForm() {
-        return "payment/paymentForm";
+  
+  private final PointService pointService;
+  private final IamPortService iamportService;
+  
+  @GetMapping("/payment/history")
+  public String getPaymentHistory(Integer userId, Model model) {
+    List<PointDTO> pointDTOs = pointService.selectPointRecordById(userId);
+    model.addAttribute("pointDTOs", pointDTOs);
+    for(PointDTO pointDTO : pointDTOs) {
+      System.out.println("sellerId: " + pointDTO.getPointChargeAmount());
+      System.out.println("buyerId: " + pointDTO.getPointChargeImpUid());
+      System.out.println("productId: " + pointDTO.getChargeId());
     }
-
-    @PostMapping("/payment/verify")
-    public String verifyPayment(@RequestParam("imp_uid") String impUid,
-                                @RequestParam("amount") int amount,
-                                Model model) {
-        String userId = "testuser";
-        boolean success = pointService.verifyAndCharge(impUid, amount, userId);
-        model.addAttribute("success", success);
-        model.addAttribute("amount", amount);
-        return "payment/paymentResult";
+    return "trade/chargeRecord";
+  }
+  
+  @GetMapping("/payment/paymentForm")
+  public String paymentForm() {
+    return "/payment/paymentForm";
+  }
+    
+  @PostMapping(value = "/payment/verify", produces = "application/json")
+  @ResponseBody
+  public Map<String, Object> verifyPayment(@RequestBody Map<String, Object> data) {
+    
+    try {
+      String impUid = (String) data.get("imp_uid");
+      int uid = Integer.parseInt(data.get("uid").toString());
+      
+      int amountFromIamport = iamportService.getAmountByImpUid(impUid); // 아임포트 서버에서 조회한 실제 결제 금액
+      
+      Map<String, Object> result = new HashMap<>();
+      if (amountFromIamport > 0) {
+        // 금액 정상 → 포인트 충전
+        boolean success = pointService.verifyAndCharge(uid, amountFromIamport);
+        result.put("success", success);
+      } else {
+        // 결제 실패 or 금액 검증 실패
+        result.put("success", false);
+      }
+      
+      return result;
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+      Map<String, Object> result = new HashMap<>();
+      result.put("success", false);
+      return result;
     }
+  }
+  
 }
 

@@ -11,6 +11,11 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
+
+import org.puppit.model.dto.ChatMessageDTO;
+import org.puppit.model.dto.ChatMessageProductDTO;
+import org.puppit.model.dto.ChatMessageSelectDTO;
+
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +28,9 @@ public class ChatDAO {
 	
 	private final SqlSessionTemplate sqlSession;
 	
-	public List<ChatListDTO> getChatList(String accountId) {
-		return sqlSession.selectList("mybatis.mapper.chatMapper.getChatList", accountId);
+	public List<ChatListDTO> getChatList(int userId) {
+		return sqlSession.selectList("mybatis.mapper.chatMapper.getChatList", userId);
 	}
-
 	
 	public List<Map<String, Object>> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO) {
 		return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getChatMessageList", chatMessageSelectDTO);
@@ -40,6 +44,7 @@ public class ChatDAO {
 	    	return sqlSession.insert("mybatis.mapper.chatMessageMapper.insertChatMessage", chatMessageDTO);
 	    }
 	
+
 	 public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO) {
 		 return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUserRoleANDAboutChatMessagePeople", chatMessageSearchDTO);
 	 }

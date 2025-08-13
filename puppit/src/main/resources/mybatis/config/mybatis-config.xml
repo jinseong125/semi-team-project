@@ -12,6 +12,7 @@
   <!-- 클래스에 별명 등록 (DTO) -->
   <typeAliases>
     <typeAlias type="org.puppit.model.dto.ChatListDTO" alias="ChatListDTO"/>
+    <typeAlias type="org.puppit.model.dto.ChatMessageDTO" alias="ChatMessageDTO"/>
     <typeAlias type="org.puppit.model.dto.UserDTO" alias="UserDTO"/>
     <typeAlias type="org.puppit.model.dto.UserStatusDTO" alias="UserStatusDTO"/>
     <typeAlias type="org.puppit.model.dto.PointDTO" alias="PointDTO"/>
@@ -24,6 +25,8 @@
     <typeAlias type="org.puppit.model.dto.PointDTO" alias="PointDTO"/>
     <typeAlias type="org.puppit.model.dto.ProductDTO" alias="ProductDTO"/>
     <typeAlias type="org.puppit.model.dto.ProductStatusDTO" alias="ProductStatusDTO"/>
+    <typeAlias type="org.puppit.model.dto.ProductDTO" alias="ProductDTO"/>
+      <typeAlias type="org.puppit.model.dto.ProductStatusDTO" alias="ProductStatusDTO"/>
   </typeAliases>
 
   

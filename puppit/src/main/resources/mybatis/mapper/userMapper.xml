@@ -13,19 +13,16 @@
 
   <!-- 회원가입 -->
   <insert id="userSignUp" parameterType="UserDTO">
-     INSERT INTO user (user_id, account_id, user_name, nick_name, user_password, salt, user_email, user_phone, created_at)
-     VALUES (#{userId}, #{acoountId}, #{userName}, #{nickName}, #{userPassword}, #{salt}, #{userEmail}, #{userPhone}, #{createdAt})
+     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at)
+     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW())
   </insert>
   
-
-  
   <!-- 아이디 중복 검사 -->
-  <select id="countByLoginId" parameterType="String" resultType="Integer">
+  <select id="countByAccountId" parameterType="String" resultType="java.lang.Integer">
     SELECT COUNT(*)
       FROM user
      WHERE account_id = #{accountId}
   </select>
-
   
   <!-- 닉네임 중복 검사 -->
   <select id="countByNickName" parameterType="String" resultType="java.lang.Integer">
@@ -60,6 +57,7 @@
     INSERT INTO user_status (user_id, account_id, login_at)
     VALUES (#{userId}, #{accountId}, #{loginAt})
   </insert>
+
   
   <!-- 채팅 보낸 사람의 사용자 정보 조회 -->
   <select id="getUserByUserId" parameterType="String" resultType="ChatUserDTO">
