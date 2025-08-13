@@ -54,9 +54,6 @@ public class ChatWebSocketController {
 ```````````senderAccountId: user02
 ```````````chatMessage: test
 ```````````chatRoomID: 5
-         * 
-         * 
-         * 
          * */
         
         
