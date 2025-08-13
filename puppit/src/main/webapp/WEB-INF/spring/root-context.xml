@@ -2,11 +2,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:context="http://www.springframework.org/schema/context"
+
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-        http://www.springframework.org/schema/tx    http://www.springframework.org/schema/tx/spring-tx-4.3.xsd>
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/tx    http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+
     <!-- 1) HikariConfig -->
     <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
@@ -63,6 +63,5 @@
         </property>
     </bean>
     <!-- @Value("${...}") 형태로 XML 프로퍼티 주입 가능하게 설정 -->
-    <context:property-placeholder properties-ref="awsProperties"/>
-
+    
 </beans>
