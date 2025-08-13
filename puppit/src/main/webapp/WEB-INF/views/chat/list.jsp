@@ -97,6 +97,9 @@ let stompClient = null;
 let currentRoomId = null;
 let currentSubscription = null;
 let isConnected = false;
+let productId = null;
+let buyerId = null;
+
 
 // DOMContentLoaded에서 요소가 있는지 체크!
 document.addEventListener('DOMContentLoaded', function() {
@@ -105,7 +108,8 @@ document.addEventListener('DOMContentLoaded', function() {
         chatlist.addEventListener('click', function(e) {
             const chatDiv = e.target.closest('.chatList');
             if (chatDiv) {
-                const roomId = chatDiv.dataset.roomId;
+               const  roomId = chatDiv.dataset.roomId;
+				currentRoomId = roomId;                 
                 if (roomId) {
                     loadChatHistory(roomId).then(() => {
                         connectAndSubscribe(roomId);
@@ -119,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (sendBtn) {
         sendBtn.addEventListener('click', function(e){
             e.preventDefault();
-            sendMessage();
+            sendMessage(currentRoomId);
         });
     }
 
@@ -202,6 +206,8 @@ function renderProductInfo(product, chatMessages) {
              const btn = e.currentTarget;
             console.log('btn: ', btn);
             quantity = 1;
+            productId = product.productId;
+            buyerId = buyerId;
             console.log("buyerId: ", buyerId);
             console.log("sellerId: ",  product.sellerId);
             console.log("productName: ", product.productName);
@@ -226,6 +232,8 @@ function addChatMessageToHistory(chat) {
     const chatHistoryElem = document.getElementById('chat-history');
     let alignClass = (chat.senderRole === "BUYER") ? "right" : "left";
     let msg = (chat.message !== undefined && chat.message !== null) ? chat.message : chat.chatMessage;
+    let formattedTime = formatDateTime(chat.chatCreatedAt);
+    console.log("formattedTime: ", formattedTime);
     console.log('msg: ', msg);
     let html =
         '<div class="chat-message ' + alignClass + '">' +
@@ -233,12 +241,29 @@ function addChatMessageToHistory(chat) {
                 + chat.chatSenderAccountId + ' (' + chat.chatSenderUserName + ') (' + chat.senderRole + ')' +
             '</div>' +
             '<div class="chat-text">' + (msg ? msg : "") + '</div>' +
+            '<div class="chat-text">' + formattedTime + '</div>' 
         '</div>';
     chatHistoryElem.innerHTML += html;
     chatHistoryElem.scrollTop = chatHistoryElem.scrollHeight;
 }
 
-function connectAndSubscribe(roomId) {
+function formatDateTime(chatCreatedAt) {
+	 if (!chatCreatedAt) return "";
+	    // chatCreatedAt이 숫자(밀리초)라면 바로 Date 생성, 아니면 파싱
+	    const date = new Date(Number(chatCreatedAt));
+	    if (isNaN(date.getTime())) return "";
+	    const yyyy = date.getFullYear();
+	    const mm = String(date.getMonth() + 1).padStart(2, '0');
+	    const dd = String(date.getDate()).padStart(2, '0');
+	    const HH = String(date.getHours()).padStart(2, '0');
+	    const min = String(date.getMinutes()).padStart(2, '0');
+	    console.log("yyyy: ", yyyy , "mm: ", mm , "dd: ", "HH: ", HH, "min: ", min);
+	    return yyyy + "-" + mm + "-" + dd + " " + HH + ":" + min;
+}
+
+
+
+function connectAndSubscribe(currentRoomId) {
     if (!stompClient) {
         const socketUrl = contextPath + '/ws-chat';
         console.log("SockJS endpoint 연결 시도:", socketUrl);
@@ -248,8 +273,8 @@ function connectAndSubscribe(roomId) {
         enableChatInput(false);
         stompClient.connect({}, function(frame) {
             isConnected = true;
-            subscribeRoom(roomId);
-            enableChatInput(true);
+            subscribeRoom(currentRoomId);
+            enableChatInput(true); // <== 연결 성공시 활성화!
             console.log("WebSocket 연결 성공:", frame);
         }, function(error) {
             isConnected = false;
@@ -258,17 +283,17 @@ function connectAndSubscribe(roomId) {
             alert("채팅 서버 연결에 실패했습니다.");
         });
     } else {
-        subscribeRoom(roomId);
+        subscribeRoom(currentRoomId);
         enableChatInput(isConnected);
     }
 }
 
-function subscribeRoom(roomId) {
+function subscribeRoom(currentRoomId) {
     if (currentSubscription) {
         currentSubscription.unsubscribe();
     }
-    currentRoomId = roomId;
-    currentSubscription = stompClient.subscribe('/topic/chat/' + roomId, function(msg) {
+   
+    currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function(msg) {
         try {
             const chat = JSON.parse(msg.body);
             addChatMessageToHistory(chat);
@@ -287,7 +312,7 @@ function enableChatInput(enable) {
     }
 }
 
-function sendMessage() {
+function sendMessage(currentRoomId) {
     if (!stompClient || !isConnected) {
         console.log("stompClient: ", stompClient);
         alert("채팅 서버에 연결되어 있지 않습니다. 잠시 후 다시 시도하세요.");
@@ -295,15 +320,19 @@ function sendMessage() {
     }
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value;
+    console.log("loginUserId: ", loginUserId);
+    console.log("보내려는 메시지: ", message);
     if (!message.trim() || !currentRoomId) return;
     try {
         stompClient.send("/app/chat.send", {}, JSON.stringify({
             chatRoomId: currentRoomId,
-            sender: loginUserId,
-            message: message
+            chatMessage: message,
+            chatSenderAccountId: loginUserId, // 계정 ID와 동일하다면
+        	productId: productId,
+            buyerId: buyerId
         }));
         input.value = "";
-        console.log("메시지 전송 성공:", { roomId: currentRoomId, sender: loginUserId, message });
+        console.log("메시지 전송 성공:", { currentRoomId: currentRoomId, sender: loginUserId, message });
     } catch (e) {
         console.error("채팅 메시지 전송 중 에러 발생:", e);
         alert("채팅 메시지 전송에 실패했습니다. 콘솔을 확인해 주세요.");

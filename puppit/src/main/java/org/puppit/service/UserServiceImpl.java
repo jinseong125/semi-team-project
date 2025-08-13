@@ -1,5 +1,6 @@
 package org.puppit.service;
 
+import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.puppit.repository.UserDAO;
@@ -68,6 +69,12 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserDTO getUserId(String accountId) {
     return userDAO.getUserId(accountId);
+  }
+
+  // 채팅 보낸 사람의 사용자 정보 조회
+  @Override
+  public ChatUserDTO getUserByUserId(String senderUserId) {
+	return userDAO.getUserByUserId(senderUserId);
   }
 
 }

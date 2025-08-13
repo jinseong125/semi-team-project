@@ -57,4 +57,12 @@
     INSERT INTO user_status (user_id, account_id, login_at)
     VALUES (#{userId}, #{accountId}, #{loginAt})
   </insert>
+  
+  <!-- 채팅 보낸 사람의 사용자 정보 조회 -->
+  <select id="getUserByUserId" parameterType="String" resultType="ChatUserDTO">
+  	SELECT user_id, account_id,user_name, nick_name
+  	FROM user
+  	WHERE account_id = #{account_id}
+  </select>
+  
 </mapper>
