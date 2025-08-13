@@ -32,12 +32,12 @@ public class TradeDAO {
     
   }
   
-  // dto 불러오기
-  public List<TradeDTO> selectTradeById(Integer userId) {
-    Map<String, Object> paraMap = new HashMap<>();
-    paraMap.put("userId", userId);
-    
-    return sst.selectList("mybatis.mapper.tradeMapper.selectTradeById", paraMap);
-  }
+    // dto 불러오기
+    public List<TradeDTO> selectTradeById(Integer userId) {
+      Map<String, Object> paraMap = new HashMap<>();
+      paraMap.put("userId", userId);
+      
+      return sst.selectList("mybatis.mapper.tradeMapper.selectTradeById", paraMap);
+    }
 
 }

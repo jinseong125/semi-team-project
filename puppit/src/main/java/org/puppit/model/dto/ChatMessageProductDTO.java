@@ -1,5 +1,7 @@
 package org.puppit.model.dto;
 
+
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,4 +23,5 @@ public class ChatMessageProductDTO {
 				+ productPrice + ", sellerId=" + sellerId + "]";
 	}
 	
+
 }
