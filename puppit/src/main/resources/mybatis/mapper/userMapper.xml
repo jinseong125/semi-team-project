@@ -39,10 +39,10 @@
   </select>
   
   <!-- 로그인(아이디, 비밀번호) -->
-  <select id="getUserByIdAndPassword" parameterType="UserDTO" resultType="UserDTO">
-    SELECT account_id, user_password
+  <select id="getUserByaccountId" parameterType="String" resultType="UserDTO">
+    SELECT account_id, user_password, salt
       FROM user
-     WHERE account_id = #{accountId} AND user_password = #{userPassword}
+     WHERE account_id = #{accountId}
   </select>
   
   <!-- account 사용해서 user_id(PK) 조회 -->

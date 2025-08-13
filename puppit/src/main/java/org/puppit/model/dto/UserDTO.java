@@ -28,5 +28,6 @@ public class UserDTO {
   private Timestamp createdAt;
   private Timestamp updatedAt;
   private Integer point;
+  private byte[] salt;
   
 }

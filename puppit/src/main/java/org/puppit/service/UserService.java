@@ -10,7 +10,7 @@ import org.puppit.model.dto.UserStatusDTO;
 public interface UserService {
   
   boolean signup(UserDTO user); 
-  boolean login(UserDTO user);
+  UserDTO login(UserDTO user);
   Boolean isAccountIdAvailable(String accountId);
   Boolean isNickNameAvailable(String nickName);
   Boolean isUserEmailAvailable(String userEmail);
