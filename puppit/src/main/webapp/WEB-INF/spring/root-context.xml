@@ -45,11 +45,11 @@
     <!-- 5) 파일 업로드 -->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
         <property name="defaultEncoding" value="UTF-8"/>
-        <property name="maxUploadSize" value="104857600"/>
-        <property name="maxUploadSizePerFile" value="10485760"/>
+        <property name="maxUploadSize" value="104857600"/> <!-- 100MB -->
+        <property name="maxUploadSizePerFile" value="10485760"/> <!-- 10MB -->
     </bean>
 
-    <!-- AWS S3 프로퍼티 (XML 내장) -->
+    <!-- 6) AWS S3 프로퍼티 -->
     <bean id="awsProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
         <property name="properties">
             <props>
@@ -59,11 +59,11 @@
         </property>
     </bean>
 
-    <!-- @Value 바인딩: ① AWS(XML) ② Iamport(파일) 둘 다 읽기 -->
+    <!-- @Value 바인딩: AWS 프로퍼티 + application-secret.properties -->
     <context:property-placeholder properties-ref="awsProperties"
                                   ignore-unresolvable="true"/>
     <context:property-placeholder location="classpath:application-secret.properties"
                                   system-properties-mode="OVERRIDE"
                                   ignore-unresolvable="true"/>
 
-</beans>
+ </beans>
