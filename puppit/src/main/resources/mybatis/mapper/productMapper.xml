@@ -41,13 +41,13 @@
 
 
 
-    <!-- 상품 이미지 -->
+    <!-- 상품 이미지 삽입 -->
     <insert id="insertProductImage" parameterType="org.puppit.model.dto.ProductImageDTO"
-            useGeneratedKeys="true" keyProperty="imageId" keyColumn="image_id">
+            useGeneratedKeys="true" keyProperty="imageId" >
         INSERT INTO product_image
-        (product_id, image_url, is_thumbnail)
+        (product_id, image_url, image_id is_thumbnail)
         VALUES
-            (#{productId} , #{imageUrl},#{isThumbnail})
+            (#{productId} , #{imageUrl},#{image_id},#{isThumbnail})
     </insert>
 
     <!-- 상품 이미지 조회-->

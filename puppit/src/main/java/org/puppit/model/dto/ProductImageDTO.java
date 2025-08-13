@@ -15,6 +15,7 @@ public class ProductImageDTO {
     private Integer imageId;
     private Integer productId;
     private String imageUrl;
+    private String imageKey;
     private boolean isThumbnail;
 
 }
