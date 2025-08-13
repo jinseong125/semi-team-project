@@ -49,6 +49,7 @@ public class UserController {
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
     // 회원가입
     boolean signupResult = userService.signup(user);
+    System.out.println("singnupResult" + signupResult);
     // 회원가입 실패
     if(!signupResult) {
       redirectAttr.addFlashAttribute("error", "아이디를 입력 해주세요");
