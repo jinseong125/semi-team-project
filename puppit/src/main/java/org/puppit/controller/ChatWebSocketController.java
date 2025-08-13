@@ -9,14 +9,11 @@ import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.service.ChatService;
 import org.puppit.service.UserService;
-<<<<<<< HEAD
-=======
 
 import org.springframework.stereotype.Controller;
 
 import org.puppit.model.dto.ChatMessageDTO;
 
->>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -34,11 +31,6 @@ import lombok.RequiredArgsConstructor;
 public class ChatWebSocketController {
 	
 	private final SimpMessagingTemplate messagingTemplate;
-
-	private final UserService userService;
-	private final ChatService chatService;
-
-
 	private final UserService userService;
 	private final ChatService chatService;
 

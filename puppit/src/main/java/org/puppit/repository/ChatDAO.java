@@ -54,10 +54,4 @@ public class ChatDAO {
 		 return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUserRoleANDAboutChatMessagePeople", chatMessageSearchDTO);
 	 }
 
-
-	 public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO) {
-		 return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUserRoleANDAboutChatMessagePeople", chatMessageSearchDTO);
-	 }
-
-
 }

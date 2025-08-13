@@ -2,10 +2,7 @@ package org.puppit.service;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.puppit.model.dto.ChatUserDTO;
-<<<<<<< HEAD
-=======
 
->>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 
@@ -19,10 +16,7 @@ public interface UserService {
   Boolean isUserEmailAvailable(String userEmail);
   Integer insertLogStatus(UserStatusDTO log);
   UserDTO getUserId(String accountId);
-<<<<<<< HEAD
-=======
 
->>>>>>> 7e077768101047d964f53f4feaedf9bcbe3514d3
   // 채팅 보낸 사람의 사용자 정보 조회
   ChatUserDTO getUserByUserId(String senderUserId);
   
