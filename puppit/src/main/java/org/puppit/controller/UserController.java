@@ -32,8 +32,11 @@ public class UserController {
   
   @GetMapping("/mypage")
   public String myPage(HttpSession session, Model model) {
-    String accountId = session.getAttribute("accountId").toString();
-    UserDTO userDTO = userService.getUserId(accountId);
+    Object attr = session.getAttribute("sessionMap");
+    Map<String, Object> map = (Map<String, Object>)attr;
+    Object accountId = map.get("accountId");
+    String accountIdResult = accountId.toString();
+    UserDTO userDTO = userService.getUserId(accountIdResult);
     model.addAttribute("user", userDTO);
     return "user/mypage";
   }
