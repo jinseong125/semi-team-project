@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.puppit.service.PointService;
+import org.puppit.model.dto.PointDTO;
+import org.puppit.model.dto.TradeDTO;
 import org.puppit.service.IamPortService; 
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -22,6 +25,18 @@ public class PointController {
   
   private final PointService pointService;
   private final IamPortService iamportService;
+  
+  @GetMapping("/payment/history")
+  public String getPaymentHistory(Integer userId, Model model) {
+    List<PointDTO> pointDTOs = pointService.selectPointRecordById(userId);
+    model.addAttribute("pointDTOs", pointDTOs);
+    for(PointDTO pointDTO : pointDTOs) {
+      System.out.println("sellerId: " + pointDTO.getPointChargeAmount());
+      System.out.println("buyerId: " + pointDTO.getPointChargeImpUid());
+      System.out.println("productId: " + pointDTO.getChargeId());
+    }
+    return "trade/chargeRecord";
+  }
   
   @GetMapping("/payment/paymentForm")
   public String paymentForm() {

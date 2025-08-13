@@ -10,7 +10,7 @@
   </insert>
   
   <select id="selectTradeById" parameterType="Map" resultType="org.puppit.model.dto.TradeDTO">
-    SELECT uuid, buyer_id, seller_id, product_id, status, created_at
+    SELECT payment_id, uuid, buyer_id, seller_id, product_id, status, created_at
     FROM trade_payment
     WHERE buyer_id = #{userId} OR seller_id = #{userId}
   </select>
