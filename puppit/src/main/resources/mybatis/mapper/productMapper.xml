@@ -179,17 +179,16 @@
         </select>
         
         
-        <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
-          SELECT 
-	            product_id AS productId,
-	            product_name AS productName,
-	            product_description AS productDescription,
-	            product_price AS productPrice
-	        FROM product
-	       ORDER BY product_created_at DESC
-	       LIMIT #{size} OFFSET #{offset}
-        
-        </select>
+       <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
+  SELECT 
+    product_id AS productId,
+    product_name AS productName,
+    product_description AS productDescription,
+    product_price AS productPrice
+  FROM product
+  ORDER BY product_created_at DESC
+  LIMIT #{size} OFFSET #{offset}
+</select>
         
         
 </mapper>
