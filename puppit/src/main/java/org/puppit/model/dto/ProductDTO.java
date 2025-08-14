@@ -28,6 +28,7 @@ public class ProductDTO {
     private Timestamp productUpdatedAt;
     private int totalCount;
 
+
     @Override
     public String toString() {
       return "ProductDTO [productId=" + productId + ", locationId=" + locationId + ", categoryId=" + categoryId
