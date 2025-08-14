@@ -82,8 +82,8 @@
       <td>${item.productName}</td>
       <td>${item.category.categoryName}</td>
       <td><fmt:formatNumber value="${item.productPrice}" pattern="#,###"/></td>
-      <td><fmt:formatDate value="${item.productCreatedAt}" pattern="yyyy-MM-dd"/></td>
-      <td><fmt:formatDate value="${item.productUpdatedAt}" pattern="yyyy-MM-dd"/></td>
+      <td><fmt:formatDate value="${item.productCreatedAt}" pattern="yyyy-MM-dd HH:mm"/></td>
+      <td><fmt:formatDate value="${item.productUpdatedAt}" pattern="yyyy-MM-dd HH:mm"/></td>
     </tr>
   </c:forEach>
   </tbody>
