@@ -29,14 +29,6 @@ public class ProductDTO {
     private int totalCount;
 
 
-    @Override
-    public String toString() {
-      return "ProductDTO [productId=" + productId + ", locationId=" + locationId + ", categoryId=" + categoryId
-          + ", sellerId=" + sellerId + ", conditionId=" + conditionId + ", statusId=" + statusId + ", productName="
-          + productName + ", productPrice=" + productPrice + ", productDescription=" + productDescription
-          + ", productCreatedAt=" + productCreatedAt + ", productUpdatedAt=" + productUpdatedAt + "]";
-    }
-    
 
     private CategoryDTO      category;
     private ProductStatusDTO  status;
