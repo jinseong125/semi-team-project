@@ -2,6 +2,7 @@ package org.puppit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,23 +73,31 @@ public class ProductServiceImpl implements ProductService {
       return productDAO.getProductDetail(productId);
     }
 
-  
-
     @Override
     public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
       return null;
     }
 
-    @Override
-    public int countProducts(Integer categoryId, String keyword) {
-      // TODO Auto-generated method stub
-      return 0;
+    @Transactional(readOnly = true)
+    public ScrollResponseDTO<ProductDTO> getProductsForScroll(Long cursor, int size) {
+      List<ProductDTO> list = productDAO.findProductsAfter(cursor, size);
+      
+      ScrollResponseDTO<ProductDTO> responseDTO = new ScrollResponseDTO<ProductDTO>();
+      responseDTO.setItem(list);
+      
+      if(list.isEmpty()) {
+        responseDTO.setHasMore(false);
+        responseDTO.setNextCursor(null);
+        return responseDTO;
+      }
+      
+      Long next = list.get(list.size() - 1).getProductId().longValue();
+      responseDTO.setNextCursor(next);
+        
+      responseDTO.setHasMore(list.size() == size);
+        return responseDTO;
+      
     }
 
-    @Override
-    public List<ProductDTO> findProductsByOffset(int offset, int size, Integer categoryId, String keyword) {
-      // TODO Auto-generated method stub
-      return null;
-    }
 
 }

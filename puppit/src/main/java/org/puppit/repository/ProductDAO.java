@@ -71,4 +71,6 @@ public class ProductDAO {
       return sqlSession.selectList("product.findProductsAfter", params);
     }
 
+    //public List<ProductDTO> searchByNew
+    
 }

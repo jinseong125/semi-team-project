@@ -2,7 +2,9 @@ package org.puppit.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.service.ProductService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -93,9 +95,9 @@ public class ProductController {
         return "product/detail";
     }
 
-    @GetMapping("/user/scroll")
+    @GetMapping("/product/scroll")
     public String scrollList() {
-        return "user/scroll";
+        return "product/scroll";
     }
 
     @GetMapping("/myproduct")
@@ -116,4 +118,12 @@ public class ProductController {
 
         return "product/myproduct";
     }
-}
+    
+    @GetMapping(value="/scroll", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ScrollResponseDTO<ProductDTO> scroll(
+        @RequestParam(value = "cursor", required = false) Long cursor,
+        @RequestParam(value = "size", defaultValue = "20") int size
+    ) {
+      return productService.getProductsForScroll(cursor, size);
+    }
+  }
