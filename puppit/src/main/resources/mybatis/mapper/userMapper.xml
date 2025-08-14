@@ -40,7 +40,7 @@
   
   <!-- 로그인(아이디, 비밀번호) -->
   <select id="getUserByaccountId" parameterType="String" resultType="UserDTO">
-    SELECT account_id, user_password, salt ,user_id
+    SELECT user_id, account_id, nick_name, user_name, user_password, salt
       FROM user
      WHERE account_id = #{accountId}
   </select>

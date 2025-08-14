@@ -101,15 +101,16 @@ public class ProductController {
     @GetMapping("/myproduct")
     public String myProduct(HttpSession session, RedirectAttributes ra, Model model) {
 
+
         Object attr = session.getAttribute("sessionMap");
-        Map<String, Object> map = (Map<String, Object>)attr;
-        Integer sellerId = (Integer) map.get("userId");
-
-
-        if (sellerId == null) {
+        if (attr == null) {
             ra.addFlashAttribute("error", "상품 관리는 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
         }
+
+        Map<String, Object> map = (Map<String, Object>)attr;
+        Integer sellerId = (Integer) map.get("userId");
+
         List<ProductDTO> items = productService.selectMyProducts(sellerId);
         model.addAttribute("items", items);
 
