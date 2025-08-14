@@ -77,12 +77,17 @@
 		  return false;
 	  }
 	     fetch("${contextPath}/user/check?accountId=" + accountId)
-         .then(response => {
-            if(response.status == '409') {
-            	alert('중복된 아이디입니다.');
-            }
-            else alert('사용 가능한 아이디 입니다.');
-         })
+	     .then(response => {
+	    	 if(response.status === 200) {
+	    		 alert("사용 가능한 아이디 입니다");
+	    		 console.log("200");
+	    		 return;
+	    	 } else if(response.status === 409) {
+	    		 alert("중복 된 아이디 입니다");
+	    		 console.log("409");
+	    		 return;
+	    	 }
+	     })
   })
 	// 닉네임 중복 검사
   	document.getElementById("checkNickNameBtn").addEventListener("click", function(e) {
@@ -100,7 +105,7 @@
 	  } */
 	     fetch("${contextPath}/user/check?nickName=" + nickName)
          .then(response => {
-            if(response.status == '409') {
+            if(response.status === 409) {
             	alert('중복된 닉네임입니다.');
             }
             else alert('사용 가능한 닉네임 입니다.');
@@ -108,16 +113,16 @@
   	})
   	// 이메일 중복 검사
   	document.getElementById("checkEmailBtn").addEventListener("click", function(e) {
-  		const email = document.getElementById("userEmail").value.trim();
+  		const userEmail = document.getElementById("userEmail").value.trim();
   		if(!email) {
-  			alett("이메일을 입력 해주세요");
+  			alert("이메일을 입력 해주세요");
   			return;
   		}
   		// 이메일 정규식 검사
   		
   	  fetch("${contextPath}/user/check?userEmail=" + userEmail)
   	  .then(response => {
-  		  if(response.status == '409') {
+  		  if(response.status === 409) {
   			  alert('중복된 이메일 입니다');
   		  }
   		  else alert('사용 가능한 이메일 입니다');
