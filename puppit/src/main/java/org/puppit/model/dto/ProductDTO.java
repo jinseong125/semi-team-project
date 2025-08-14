@@ -37,8 +37,6 @@ public class ProductDTO {
           + ", productCreatedAt=" + productCreatedAt + ", productUpdatedAt=" + productUpdatedAt + "]";
     }
     
-    
-
 
     private CategoryDTO      category;
     private ProductStatusDTO  status;
