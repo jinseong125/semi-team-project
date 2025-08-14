@@ -134,5 +134,5 @@
 
 <script>
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
-document.getElementById('btnPay')?.addEventListener('click',()=>alert('결제 페이지로 이동(구현 예정)'));
+document.getElementById('btnPay')?.addEventListener('click',()=>alert('채팅 페이지로 이동(구현 예정)'));
 </script>
