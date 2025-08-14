@@ -68,10 +68,10 @@
 		  alert("아이디를 입력 해주세요");
 		  return;
 	  }
-	  // 아이디 형식 (정규식 검사)
+	  // 아이디 형식 (정규식 검사) 소문자, 숫자 4~12자리
 	  const isRegex = /^[a-z0-9]{4,12}$/;
 	  if(!isRegex.test(accountId)) {
-		  alert("아이디 형식이 올바르지 않습니다");
+		  alert("아이디 형식이 올바르지 않습니다 다시 입력 해주세요");
 		  return false;
 	  }
 	     fetch("${contextPath}/user/check?accountId=" + accountId)
@@ -93,12 +93,12 @@
 		  alert("닉네임을 입력 해주세요");
 		  return;
 	  }
-	  // 닉네임 형식 (정규식 검사)
-/* 	  const isRegex = /^[a-z0-9]{4,12}$/;
+	  // 닉네임 형식 (정규식 검사) 한글,영문,숫자 최소 4~8자리
+ 	  const isRegex = /^[A-Za-z0-9\uAC00-\uD7A3]{4,8}$/;
 	  if(!isRegex.test(nickName)) {
 		  alert("닉네임 형식이 올바르지 않습니다");
 		  return false;
-	  } */
+	  }
 	     fetch("${contextPath}/user/check?nickName=" + nickName)
          .then(response => {
             if(response.status === 200) {
@@ -131,6 +131,12 @@
 	  
   	const password = document.getElementById("userPassword").value;
   	const checkPwd = document.getElementById("checkPwd").value;
+  	// 비밀번호 정규식 대문자 최소1개, 소문자, 숫자, 특수문자(!@#만 포함)포함 최소 6~10자리 
+  	const isRegex = /^(?=.*[A-Z])[A-Za-z0-9!@#]{6,10}$/;
+  	if(!isRegex.test(password)) {
+  		alert("비밀번호 형식에 맞지 않습니다 다시 입력 해주세요");
+  		return false;
+  	}
   	if(password === "" || checkPwd === "") {
   		alert("비밀번호를 모두 입력해 주세요");
   		return false;
