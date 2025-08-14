@@ -200,6 +200,7 @@
         .then(result => {
           if (result.success) {
             alert("충전 성공!");
+            window.location.href = "${contextPath}/user/mypage";
           } else {
             alert("결제는 성공했지만 검증에 실패했습니다.");
           }

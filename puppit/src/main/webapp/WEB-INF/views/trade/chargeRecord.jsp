@@ -25,7 +25,7 @@ body {
 }
 
 .wrap {
-  max-width: 920px;
+  max-width: 1200px;
   margin: 24px auto;
   padding: 0 20px 24px;
 }

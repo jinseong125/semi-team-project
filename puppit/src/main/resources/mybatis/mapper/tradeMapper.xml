@@ -35,6 +35,7 @@
          , buyer.nick_name AS buyer_nickname
          , seller.nick_name AS seller_nickname
          , p.product_name AS product_name
+         , p.product_price AS product_price
       FROM trade_payment t 
       INNER JOIN user buyer ON t.buyer_id = buyer.user_id  
       INNER JOIN user seller ON t.seller_id = seller.user_id 
