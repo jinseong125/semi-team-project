@@ -2,6 +2,7 @@ package org.puppit.service;
 
 import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductSearchDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,7 +31,9 @@ public interface ProductService {
 
     public List<ProductDTO> selectMyProducts(Integer sellerId);
 
-
+    public List<ProductSearchDTO> searchByNew(String searchName);
+    
+    public List<ProductDTO> getProducts(int offset, int size);
     
 
 }

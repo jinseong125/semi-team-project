@@ -70,10 +70,17 @@ public class ProductDAO {
       params.put("size", size);
       return sqlSession.selectList("product.findProductsAfter", params);
     }
-    /*
-     * public List<ProductDTO> searchByNew(String q, String cursorCreatedAt,Long
-     * cursorid, int size) { Map<String, Object> params = new HashMap<String,
-     * Object>(); params.put("q", q); params.put("cursorCreatedAt",
-     * cursorCreatedAt); params.put("cursorCreatedAt") }
-     */
+    
+     public List<ProductSearchDTO> searchByNew(String searchName) {
+       return sqlSession.selectList("search.searchByNew", searchName);
+     }
+
+     public List<ProductDTO> selectProducts(int offset, int size) {
+       Map<String, Object> params = new HashMap<>();
+       params.put("offset", offset);
+       params.put("size", size);
+       return sqlSession.selectList("product.selectProducts", params);
+   }
+     
+     
 }
