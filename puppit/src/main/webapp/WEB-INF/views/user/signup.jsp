@@ -21,9 +21,9 @@
     <label>아이디: <input type="text" id="accountId"
       name="accountId"></label>
     <button type="button" class="checkId" id="checkIdBtn">중복검사</button>
-    <c:if test="${not empty error}">
+<%--     <c:if test="${not empty error}">
       <div style="font-size: 12px; color: red;">${error}</div>
-    </c:if>
+    </c:if> --%>
     <br> <label>비밀번호: <input type="password"
       id="userPassword" name="userPassword"></label> <br> <label>비밀번호
       확인: <input type="password" id="checkPwd" name="checkPwd">
@@ -41,6 +41,7 @@
 
   <script>
   document.getElementById("signupForm").addEventListener("submit", function (e) {
+	  console.log(requiredFields);
     const requiredFields = [
       { id: "accountId", name: "아이디" },
       { id: "userPassword", name: "비밀번호" },
@@ -147,11 +148,11 @@
   	}
   		return true;
     }
-  	// controller에서 메시지 전송 받기
+/*   	// controller에서 메시지 전송 받기
 	 const msg = "${msg}";
      if (msg && msg.trim() !== "") {
          alert(msg);
-     }
+     } */
 </script>
 
 </body>
