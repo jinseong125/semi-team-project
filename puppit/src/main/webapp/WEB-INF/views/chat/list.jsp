@@ -88,7 +88,6 @@ if (sessionMap != null) {
         </div>
     </div>
 </div>
-<!-- 반드시 SockJS, Stomp.js 라이브러리 CDN 추가 -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
@@ -96,7 +95,6 @@ const contextPath = "${contextPath}";
 const loginUserId = "${loginUserId}";
 const userId = "${userId}";
 
-//파일 맨 위에 한 번만 선언!
 let stompClient = null;
 let currentRoomId = null;
 let currentSubscription = null;
@@ -104,17 +102,15 @@ let isConnected = false;
 let productId = null;
 let buyerId = null;
 
-
-// DOMContentLoaded에서 요소가 있는지 체크!
 document.addEventListener('DOMContentLoaded', function() {
     const chatlist = document.querySelector('.chatlist-container');
     if (chatlist) {
         chatlist.addEventListener('click', function(e) {
             const chatDiv = e.target.closest('.chatList');
             if (chatDiv) {
-               const  roomId = chatDiv.dataset.roomId;
-				currentRoomId = roomId;  
-				console.log("currentRoomId: ", currentRoomId);
+                const roomId = chatDiv.dataset.roomId;
+                currentRoomId = roomId;  
+                console.log("currentRoomId: ", currentRoomId);
                 if (roomId) {
                     loadChatHistory(roomId).then(() => {
                         connectAndSubscribe(roomId);
@@ -142,313 +138,93 @@ function loadChatHistory(roomId) {
             return response.json();
         })
         .then(data => {
-            console.log('data: ', data);
+            console.log('채팅방 데이터:', data);
+
             if (data.product) {
-                renderProductInfo(data.product, data.chatMessages);
+                renderProductInfo(data.product, data.chatMessages || []);
             } else {
                 document.getElementById('product-info-area').innerHTML = '';
             }
+
             const chatHistoryElem = document.getElementById('chat-history');
             chatHistoryElem.innerHTML = "";
-            if (Array.isArray(data.chatMessages)) {
-                data.chatMessages.forEach(chat => addChatMessageToHistory(chat));
-            }
+            const messages = Array.isArray(data.chatMessages) ? data.chatMessages : [];
+            messages.forEach(chat => addChatMessageToHistory(chat));
         })
         .catch(err => {
             console.error("채팅 내역 불러오기 실패:", err);
         });
 }
 
-// 상품 정보 표시 함수 (최종 예시)
+// 수정: 매개변수에서 chatSellerAccountId 제거
 function renderProductInfo(product, chatMessages) {
     const area = document.getElementById('product-info-area');
     if (!area || !product) return;
     const price = Number(product.productPrice);
 
-    // 함수 호출 확인 로그
-    console.log('[renderProductInfo] called', product, chatMessages);
-
-    // chatMessages에서 buyerId 추출
-    let buyerId = null;
+    // chatSellerAccountId를 chatMessages에서 가져온다!
+    let chatSellerAccountId = '';
     if (Array.isArray(chatMessages) && chatMessages.length > 0) {
-        buyerId = chatMessages[0].buyerId || null;
-        if (!buyerId) {
-            const validMsg = chatMessages.find(msg => msg.buyerId != null && msg.buyerId !== "");
-            if (validMsg) buyerId = validMsg.buyerId;
+        if ('chatSellerAccountId' in chatMessages[0]) {
+            chatSellerAccountId = chatMessages[0].chatSellerAccountId || '';
         }
     }
+    
+    // 만약 값이 없으면 product.sellerAccountId로 대체 (백엔드에서 내려주는 경우)
+    if (!chatSellerAccountId && product.sellerAccountId) {
+        chatSellerAccountId = product.sellerAccountId;
+    }
+    
+    console.log("render - chatSellerAccountId: ", chatSellerAccountId);
 
-    // 디버깅
-    console.log('userId:', userId, 'buyerId:', buyerId, 'product:', product);
+    let resolvedBuyerId = null;
+    if (Array.isArray(chatMessages) && chatMessages.length > 0) {
+        resolvedBuyerId = chatMessages[0].buyerId || null;
+        if (!resolvedBuyerId) {
+            const validMsg = chatMessages.find(msg => msg.buyerId != null && msg.buyerId !== "");
+            if (validMsg) resolvedBuyerId = validMsg.buyerId;
+        }
+    }
 
     let html =
         '<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:12px;">'
         + '<strong>상품명:</strong> ' + product.productName + '<br>'
         + '<strong>가격:</strong> ' + (isNaN(price) ? product.productPrice : price.toLocaleString()) + '원 <br>';
 
-    // userId와 buyerId가 일치하면 결제 버튼 추가
-    if (userId == buyerId) {
-        console.log('[버튼 data-속성]', product.sellerId, product.productName, product.productId);
+    if (userId == resolvedBuyerId) {
         html += `<button
             id="pay-btn"
-            data-buyer-id="${buyerId}"
-            data-seller-id="${product.sellerId}"
-            data-product-name="${product.productName}"
-            data-product-id="${product.productId}"
+            data-buyer-id="\${resolvedBuyerId}"
+            data-seller-id="\${product.sellerId}"
+            data-seller-account-id="\${chatSellerAccountId}"
+            data-product-name="\${product.productName}"
+            data-product-id="\${product.productId}"
         >결제하기</button>`;
     }
 
     html += '</div>';
     area.innerHTML = html;
 
-    console.log('buyerId: 여기1 ', buyerId);
-    console.log('buyerId: 여기2 ', buyerId);
-    console.log('buyerId:', buyerId, 'sellerId:', product.sellerId, 'productName:', product.productName, 'productId:', product.productId);
     const payBtn = document.getElementById('pay-btn');
     if (payBtn) {
         payBtn.onclick = function(e) {
-            // 반드시 모두 this.getAttribute로 읽으세요!
-             const btn = e.currentTarget;
-            console.log('btn: ', btn);
+            const btn = e.currentTarget;
+            console.log(btn);
+            console.log(btn.dataset)
+            // 반드시 data-seller-account-id를 읽어서 콘솔에 찍음!
+            chatSellerAccountId =  btn.dataset.sellerAccountId;
+            console.log('결제버튼 클릭 - chatSellerAccountId:', chatSellerAccountId); // 여기서 찍힘
             quantity = 1;
             productId = product.productId;
-            buyerId = buyerId;
-            console.log("buyerId: ", buyerId);
-            console.log("sellerId: ",  product.sellerId);
-            console.log("productName: ", product.productName);
-            console.log("productId: ", product.productId);
-            console.log("quantity: ", quantity);
-            // 결제 로직
+            buyerId = resolvedBuyerId;
             var payUrl = contextPath + '/order/pay'
-            + '?buyerId=' + encodeURIComponent(buyerId)		
-            + '&sellerId=' + encodeURIComponent(product.sellerId)
-            + '&productName=' + encodeURIComponent(product.productName)
-            + '&productId=' + encodeURIComponent(product.productId)
-            + '&quantity=' + encodeURIComponent(quantity);
-        window.location.href = payUrl;
-            
-            
-            
-        };
-    }
-}
-
-function addChatMessageToHistory(chat) {
-    const chatHistoryElem = document.getElementById('chat-history');
-    let alignClass = "";
-    if (chat.senderRole === "SELLER") {
-        alignClass = "left";
-    } else if (chat.senderRole === "BUYER") {
-        alignClass = "right";
-    } else {
-        alignClass = "left";
-    }
-    let msg = (chat.message !== undefined && chat.message !== null) ? chat.message : chat.chatMessage;
-    let formattedTime = formatDateTime(chat.chatCreatedAt);
-    let html =
-        '<div class="chat-message ' + alignClass + '">' +
-            '<div class="chat-userid">'
-                + chat.chatSenderAccountId + ' (' + chat.chatSenderUserName + ') (' + chat.senderRole + ')' +
-            '</div>' +
-            '<div class="chat-text">' + (msg ? msg : "") + '</div>' +
-            '<div class="chat-text">' + formattedTime + '</div>' 
-        '</div>';
-    chatHistoryElem.innerHTML += html;
-    chatHistoryElem.scrollTop = chatHistoryElem.scrollHeight;
-}
-function formatDateTime(chatCreatedAt) {
-	 if (!chatCreatedAt) return "";
-	    // chatCreatedAt이 숫자(밀리초)라면 바로 Date 생성, 아니면 파싱
-	    const date = new Date(Number(chatCreatedAt));
-	    if (isNaN(date.getTime())) return "";
-	    const yyyy = date.getFullYear();
-	    const mm = String(date.getMonth() + 1).padStart(2, '0');
-	    const dd = String(date.getDate()).padStart(2, '0');
-	    const HH = String(date.getHours()).padStart(2, '0');
-	    const min = String(date.getMinutes()).padStart(2, '0');
-	    console.log("yyyy: ", yyyy , "mm: ", mm , "dd: ", "HH: ", HH, "min: ", min);
-	    return yyyy + "-" + mm + "-" + dd + " " + HH + ":" + min;
-}
-
-
-
-function connectAndSubscribe(currentRoomId) {
-    if (!stompClient) {
-        const socketUrl = contextPath + '/ws-chat';
-        console.log("SockJS endpoint 연결 시도:", socketUrl);
-        const socket = new SockJS(socketUrl);
-        stompClient = Stomp.over(socket);
-        isConnected = false;
-        enableChatInput(false);
-        stompClient.connect({}, function(frame) {
-            isConnected = true;
-            subscribeRoom(currentRoomId);
-            enableChatInput(true); // <== 연결 성공시 활성화!
-            console.log("WebSocket 연결 성공:", frame);
-        }, function(error) {
-            isConnected = false;
-            enableChatInput(false);
-            console.error("WebSocket 연결 실패:", error);
-            alert("채팅 서버 연결에 실패했습니다.");
-        });
-    } else {
-        subscribeRoom(currentRoomId);
-        enableChatInput(isConnected);
-    }
-}
-
-function subscribeRoom(currentRoomId) {
-    if (currentSubscription) {
-        currentSubscription.unsubscribe();
-    }
-   
-    currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function(msg) {
-        try {
-            const chat = JSON.parse(msg.body);
-            addChatMessageToHistory(chat);
-        } catch (e) {
-            console.error("메시지 파싱 실패:", e, msg.body);
-        }
-    });
-}
-
-//let stompClient = null;
-//let currentRoomId = null;
-//let currentSubscription = null;
-//let isConnected = false;
-//let productId = null;
-//let buyerId = null;
-
-
-// DOMContentLoaded에서 요소가 있는지 체크!
-document.addEventListener('DOMContentLoaded', function() {
-    const chatlist = document.querySelector('.chatlist-container');
-    if (chatlist) {
-        chatlist.addEventListener('click', function(e) {
-            const chatDiv = e.target.closest('.chatList');
-            if (chatDiv) {
-               const  roomId = chatDiv.dataset.roomId;
-				currentRoomId = roomId;                 
-                if (roomId) {
-                    loadChatHistory(roomId).then(() => {
-                        connectAndSubscribe(roomId);
-                    });
-                }
-            }
-        });
-    }
-
-    const sendBtn = document.querySelector('button[type="submit"]');
-    if (sendBtn) {
-        sendBtn.addEventListener('click', function(e){
-            e.preventDefault();
-            sendMessage(currentRoomId);
-        });
-    }
-
-    enableChatInput(false);
-});
-
-function loadChatHistory(roomId) {
-    return fetch(contextPath + '/chat/message?roomId=' + roomId)
-        .then(response => {
-            if (!response.ok) throw new Error('채팅 내역 응답 오류');
-            return response.json();
-        })
-        .then(data => {
-            console.log('data: ', data);
-            if (data.product) {
-                renderProductInfo(data.product, data.chatMessages);
-            } else {
-                document.getElementById('product-info-area').innerHTML = '';
-            }
-            const chatHistoryElem = document.getElementById('chat-history');
-            chatHistoryElem.innerHTML = "";
-            if (Array.isArray(data.chatMessages)) {
-                data.chatMessages.forEach(chat => addChatMessageToHistory(chat));
-            }
-        })
-        .catch(err => {
-            console.error("채팅 내역 불러오기 실패:", err);
-        });
-}
-
-// 상품 정보 표시 함수 (최종 예시)
-function renderProductInfo(product, chatMessages) {
-	console.log('product: ', product);
-	console.log('chatMessages: ', chatMessages);
-	const area = document.getElementById('product-info-area');
-    if (!area || !product) return;
-    const price = Number(product.productPrice);
-
-    let buyerId = null;
-    if (Array.isArray(chatMessages) && chatMessages.length > 0) {
-        buyerId = chatMessages[0].buyerId || null;
-        console.log('여기 buyerId: ', buyerId);
-        if (!buyerId) {
-            const validMsg = chatMessages.find(msg => msg.buyerId != null && msg.buyerId !== "");
-            if (validMsg) buyerId = validMsg.buyerId;
-        }
-    }
-
- // userId 값 타입 확인
-    console.log('userId:', userId, typeof userId);
-
-    // 숫자 변환
-    const userIdNum = Number(userId);
-    const buyerIdNum = Number(buyerId);
-    console.log('userIdNum:', userIdNum, 'buyerIdNum:', buyerIdNum);
-    
-    
-    let html =
-        '<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:12px;">'
-        + '<strong>상품명:</strong> ' + product.productName + '<br>'
-        + '<strong>가격:</strong> ' + (isNaN(price) ? product.productPrice : price.toLocaleString()) + '원 <br>';
-
-    // 구매자일 때만 결제버튼 노출!
-    if (parseInt(userId, 10) === parseInt(buyerId, 10)) {
-    	console.log('구매자');
-        html += `<button
-            id="pay-btn"
-            data-buyer-id="${buyerId}"
-            data-seller-id="${product.sellerId}"
-            data-product-name="${product.productName}"
-            data-product-id="${product.productId}"
-        >결제하기</button>`;
-    }
-
-    html += '</div>';
-    area.innerHTML = html;
-
-
-    console.log('buyerId: 여기1 ', buyerId);
-    console.log('buyerId: 여기2 ', buyerId);
-    console.log('buyerId:', buyerId, 'sellerId:', product.sellerId, 'productName:', product.productName, 'productId:', product.productId);
-    const payBtn = document.getElementById('pay-btn');
-    if (payBtn) {
-        payBtn.onclick = function(e) {
-            // 반드시 모두 this.getAttribute로 읽으세요!
-             const btn = e.currentTarget;
-            console.log('btn: ', btn);
-            quantity = 1;
-            productId = product.productId;
-            buyerId = buyerId;
-            console.log("buyerId: ", buyerId);
-            console.log("sellerId: ",  product.sellerId);
-            console.log("productName: ", product.productName);
-            console.log("productId: ", product.productId);
-            console.log("quantity: ", quantity);
-            // 결제 로직
-            var payUrl = contextPath + '/order/pay'
-            + '?buyerId=' + encodeURIComponent(buyerId)		
-            + '&sellerId=' + encodeURIComponent(product.sellerId)
-            + '&productName=' + encodeURIComponent(product.productName)
-            + '&productId=' + encodeURIComponent(product.productId)
-            + '&quantity=' + encodeURIComponent(quantity);
-        window.location.href = payUrl;
-            
-            
-            
+                + '?buyerId=' + encodeURIComponent(resolvedBuyerId)
+                + '&sellerId=' + encodeURIComponent(product.sellerId)
+                + '&chatSellerAccountId=' + encodeURIComponent(chatSellerAccountId)
+                + '&productName=' + encodeURIComponent(product.productName)
+                + '&productId=' + encodeURIComponent(product.productId)
+                + '&quantity=' + encodeURIComponent(quantity);
+            window.location.href = payUrl;
         };
     }
 }
@@ -458,35 +234,29 @@ function addChatMessageToHistory(chat) {
     let alignClass = (chat.senderRole === "BUYER") ? "right" : "left";
     let msg = (chat.message !== undefined && chat.message !== null) ? chat.message : chat.chatMessage;
     let formattedTime = formatDateTime(chat.chatCreatedAt);
-    console.log("formattedTime: ", formattedTime);
-    console.log('msg: ', msg);
     let html =
         '<div class="chat-message ' + alignClass + '">' +
             '<div class="chat-userid">'
-                + chat.chatSenderAccountId + ' (' + chat.chatSenderUserName + ') (' + chat.senderRole + ')' +
+                + (chat.chatSenderAccountId || "") + ' (' + (chat.chatSenderUserName || "") + ') (' + (chat.senderRole || "") + ')' +
             '</div>' +
             '<div class="chat-text">' + (msg ? msg : "") + '</div>' +
-            '<div class="chat-text">' + formattedTime + '</div>' 
+            '<div class="chat-text">' + formattedTime + '</div>' +
         '</div>';
     chatHistoryElem.innerHTML += html;
     chatHistoryElem.scrollTop = chatHistoryElem.scrollHeight;
 }
 
 function formatDateTime(chatCreatedAt) {
-	 if (!chatCreatedAt) return "";
-	    // chatCreatedAt이 숫자(밀리초)라면 바로 Date 생성, 아니면 파싱
-	    const date = new Date(Number(chatCreatedAt));
-	    if (isNaN(date.getTime())) return "";
-	    const yyyy = date.getFullYear();
-	    const mm = String(date.getMonth() + 1).padStart(2, '0');
-	    const dd = String(date.getDate()).padStart(2, '0');
-	    const HH = String(date.getHours()).padStart(2, '0');
-	    const min = String(date.getMinutes()).padStart(2, '0');
-	    console.log("yyyy: ", yyyy , "mm: ", mm , "dd: ", "HH: ", HH, "min: ", min);
-	    return yyyy + "-" + mm + "-" + dd + " " + HH + ":" + min;
+    if (!chatCreatedAt) return "";
+    const date = new Date(Number(chatCreatedAt));
+    if (isNaN(date.getTime())) return "";
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const HH = String(date.getHours() + 1).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    return yyyy + "-" + mm + "-" + dd + " " + HH + ":" + min;
 }
-
-
 
 function connectAndSubscribe(currentRoomId) {
     if (!stompClient) {
@@ -499,7 +269,7 @@ function connectAndSubscribe(currentRoomId) {
         stompClient.connect({}, function(frame) {
             isConnected = true;
             subscribeRoom(currentRoomId);
-            enableChatInput(true); // <== 연결 성공시 활성화!
+            enableChatInput(true);
             console.log("WebSocket 연결 성공:", frame);
         }, function(error) {
             isConnected = false;
@@ -517,7 +287,7 @@ function subscribeRoom(currentRoomId) {
     if (currentSubscription) {
         currentSubscription.unsubscribe();
     }
-   
+
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function(msg) {
         try {
             const chat = JSON.parse(msg.body);
@@ -527,7 +297,6 @@ function subscribeRoom(currentRoomId) {
         }
     });
 }
-
 
 function enableChatInput(enable) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
@@ -546,11 +315,20 @@ function sendMessage(currentRoomId) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value;
     if (!message.trim() || !currentRoomId) return;
+
+    // pay-btn에서 chatSellerAccountId 읽기
+    let chatSellerAccountId = "";
+    const payBtn = document.getElementById('pay-btn');
+    if (payBtn) {
+        chatSellerAccountId = payBtn.getAttribute("data-seller-account-id") || "";
+    }
+    console.log('chatSellerAccountId: ', chatSellerAccountId);
     try {
         stompClient.send("/app/chat.send", {}, JSON.stringify({
             chatRoomId: currentRoomId,
             chatMessage: message,
-            chatSenderAccountId: loginUserId, 
+            chatSenderAccountId: loginUserId,
+            chatSellerAccountId: chatSellerAccountId,
             productId: productId,
             buyerId: buyerId
         }));
@@ -562,6 +340,5 @@ function sendMessage(currentRoomId) {
     }
 }
 </script>
-
 </body>
 </html>
