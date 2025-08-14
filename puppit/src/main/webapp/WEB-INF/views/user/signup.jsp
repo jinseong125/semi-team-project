@@ -17,12 +17,16 @@
     <form action="${contextPath}/user/signup"
           method="post"
           id="signupForm">
+     
     <label>아이디: <input type="text" id="accountId" name="accountId"></label>
     <button type="button"  class="checkId" id="checkIdBtn">중복검사</button>
+      <c:if test="${not empty error}">
+        <div style="font-size: 12px; color: red;">${error}</div>
+      </c:if>
     <br>
     <label>비밀번호: <input type="password" id="userPassword" name="userPassword"></label>
     <br>
-    <label>비밀번호 확인: <input type="password" id="checkpwd" name="checkpwd"></label>
+    <label>비밀번호 확인: <input type="password" id="checkPwd" name="checkPwd"></label>
     <br>
     <label>이름 : <input type="text" id="userName" name="userName"></label>
     <br>
@@ -31,9 +35,10 @@
     <br>
     <label>휴대전화 : <input type="text" id="userPhone" name="userPhone"></label>
     <br>
-    <label>이메일 : <input type="text" id="userEmail" name="userEmail"></label>  
+    <label>이메일 : <input type="text" id="userEmail" name="userEmail"></label> 
+    <button type="button"  class="checkEmail" id="checkEmailBtn">중복검사</button>
     <br>
-    <button type="submit">가입하기</button>
+    <button type="submit" onclick="return vailablePassword()">가입하기</button>
     </form>
 
 <script>
@@ -101,6 +106,43 @@
             else alert('사용 가능한 닉네임 입니다.');
          })
   	})
+  	// 이메일 중복 검사
+  	document.getElementById("checkEmailBtn").addEventListener("click", function(e) {
+  		const email = document.getElementById("userEmail").value.trim();
+  		if(!email) {
+  			alett("이메일을 입력 해주세요");
+  			return;
+  		}
+  		// 이메일 정규식 검사
+  		
+  	  fetch("${contextPath}/user/check?userEmail=" + userEmail)
+  	  .then(response => {
+  		  if(response.status == '409') {
+  			  alert('중복된 이메일 입니다');
+  		  }
+  		  else alert('사용 가능한 이메일 입니다');
+  	  })
+  	})
+  	// 비밀번호 체크
+  	function vailablePassword() {
+	  
+  	const password = document.getElementById("userPassword").value;
+  	const checkPwd = document.getElementById("checkPwd").value;
+  	if(password === "" || checkPwd === "") {
+  		alert("비밀번호를 모두 입력해 주세요");
+  		return false;
+  	}
+  	if(password != checkPwd) {
+  		alert("비밀번호가 일치하지 않습니다");
+  		return false;
+  	}
+  		return true;
+    }
+  	// controller에서 메시지 전송 받기
+	 const msg = "${msg}";
+     if (msg && msg.trim() !== "") {
+         alert(msg);
+     }
 </script>
 	
 </body>
