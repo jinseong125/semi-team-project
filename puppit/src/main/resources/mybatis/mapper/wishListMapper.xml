@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.wishListMapper">
+
+  <select id="getWishListByUserId" parameterType="java.lang.Integer" resultType="org.puppit.model.dto.WishListDTO">
+    SELECT wishlist_id, user_id, product_id
+    FROM wishlist
+    WHERE user_id = #{userId}
+  </select>
+  
+  <select id="getProductById" resultType="org.puppit.model.dto.ProductDTO">
+    SELECT product_id, product_name, product_price, product_description
+    FROM product
+    WHERE product_id = #{productId}
+  </select>
+  
+</mapper>

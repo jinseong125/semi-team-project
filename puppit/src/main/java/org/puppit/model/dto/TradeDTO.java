@@ -20,6 +20,7 @@ public class TradeDTO {
   private String buyerNickname;
   private String sellerNickname;
   private String productName;
+  private String productPrice;
   private String status; 
   private Timestamp createdAt;
 }

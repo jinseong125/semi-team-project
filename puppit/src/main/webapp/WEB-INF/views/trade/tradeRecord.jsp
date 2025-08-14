@@ -25,7 +25,7 @@ body {
 }
 
 .wrap {
-  max-width: 920px;
+  max-width: 1200px;
   margin: 24px auto;
   padding: 0 20px 24px;
 }
@@ -136,6 +136,7 @@ body {
             <tr>
               <th>거래 일시</th>
               <th>상품명</th>
+              <th>상품가격</th>
               <th>구매자</th>
               <th>판매자</th>
               <th>상태</th>
@@ -150,6 +151,8 @@ body {
                 </td>
                 <!-- 상품명 -->
                 <td class="mono">${tradeDTO.productName}</td>
+                <!-- 상품가격 -->
+                <td>${tradeDTO.productPrice} P</td>
                 <!-- 구매자 / 판매자 -->
                 <td>${tradeDTO.buyerNickname}</td>
                 <td>${tradeDTO.sellerNickname}</td>
