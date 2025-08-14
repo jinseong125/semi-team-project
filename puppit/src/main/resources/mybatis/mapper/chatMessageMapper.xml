@@ -35,21 +35,26 @@ SELECT
     CASE WHEN c.chat_sender   = p.seller_id THEN 'SELLER' ELSE 'BUYER' END AS sender_role,
     CASE WHEN c.chat_receiver = p.seller_id THEN 'SELLER' ELSE 'BUYER' END AS receiver_role,
 
-    -- 상품의 seller_id (항상 제공)
+   
     p.seller_id AS product_seller_id,
 
-    -- 구매자(buyer_id) - 이 방의 user_id가 구매자
+   
     r.user_id AS buyer_id,
 
-    -- 역할이 '판매자'일 때만 해당 컬럼에 seller_id 채움(아니면 NULL)
+    
     CASE WHEN c.chat_sender   = p.seller_id THEN p.seller_id ELSE NULL END AS sender_seller_id,
-    CASE WHEN c.chat_receiver = p.seller_id THEN p.seller_id ELSE NULL END AS receiver_seller_id
+    CASE WHEN c.chat_receiver = p.seller_id THEN p.seller_id ELSE NULL END AS receiver_seller_id,
+
+   
+    seller.account_id AS chat_seller_account_id
 
 FROM chat c
 JOIN room    r ON c.chat_room_id = r.room_id
 JOIN product p ON r.product_id   = p.product_id
 JOIN user sender   ON c.chat_sender   = sender.user_id
 JOIN user receiver ON c.chat_receiver = receiver.user_id
+JOIN user seller   ON p.seller_id     = seller.user_id -- ★ 판매자 accountId 조회용 추가
+
 WHERE c.chat_room_id = #{roomId}
 ORDER BY c.chat_created_at ASC;
 </select>
