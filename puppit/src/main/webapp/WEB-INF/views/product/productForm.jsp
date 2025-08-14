@@ -131,6 +131,9 @@
       const tile = document.createElement('div');
       tile.className = 'tile';
 
+
+
+      
       const input = document.createElement('input');
       input.type = 'file';
       input.name = 'imageFiles';       // 컨트롤러 @RequestParam("imageFiles")
@@ -196,7 +199,6 @@
         firstPreviewTile.appendChild(badge);
       }
     }
-
     // 초기 1개 빈 타일
     createAddTile();
   })();
