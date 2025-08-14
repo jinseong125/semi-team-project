@@ -1,8 +1,9 @@
 package org.puppit.controller;
 
-import lombok.RequiredArgsConstructor;
+
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductImageDTO;
+import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.service.ProductService;
 import org.puppit.service.S3Service;
 import org.springframework.stereotype.Controller;
@@ -10,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import lombok.RequiredArgsConstructor;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -125,4 +128,13 @@ public class ProductController {
 
         return "product/myproduct";
     }
+    
+    @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
+        return productService.searchByNew(searchName);
+    }
+
+
+    
 }

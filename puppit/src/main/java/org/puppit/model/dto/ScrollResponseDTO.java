@@ -6,7 +6,16 @@ import lombok.Data;
 
 @Data
 public class ScrollResponseDTO<T> {
-  private List<T> item;
-  private Long nextCursor;
-  private boolean hasMore;
+  private Integer productId;
+  private String productName;
+  private String productDescription;
+  private Integer productPrice;
+  
+  @Override
+  public String toString() {
+    return "ScrollResponseDTO [productId=" + productId + ", productName=" + productName + ", productDescription="
+        + productDescription + ", productPrice=" + productPrice + "]";
+  }
+  
+  
 }

@@ -3,6 +3,7 @@ package org.puppit.service;
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductImageDTO;
+import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
 import org.springframework.stereotype.Service;
@@ -97,25 +98,36 @@ public class ProductServiceImpl implements ProductService {
       return null;
     }
 
-    @Transactional(readOnly = true)
-    public ScrollResponseDTO<ProductDTO> getProductsForScroll(Long cursor, int size) {
-      List<ProductDTO> list = productDAO.findProductsAfter(cursor, size);
+//    @Transactional(readOnly = true)
+//    public ScrollResponseDTO<ProductDTO> getProductsForScroll(Long cursor, int size) {
+//      List<ProductDTO> list = productDAO.findProductsAfter(cursor, size);
+//
+//      ScrollResponseDTO<ProductDTO> responseDTO = new ScrollResponseDTO<ProductDTO>();
+//      responseDTO.setItem(list);
+//
+//      if(list.isEmpty()) {
+//        responseDTO.setHasMore(false);
+//        responseDTO.setNextCursor(null);
+//        return responseDTO;
+//      }
+//
+//      Long next = list.get(list.size() - 1).getProductId().longValue();
+//      responseDTO.setNextCursor(next);
+//
+//      responseDTO.setHasMore(list.size() == size);
+//        return responseDTO;
+//
+//    }
 
-      ScrollResponseDTO<ProductDTO> responseDTO = new ScrollResponseDTO<ProductDTO>();
-      responseDTO.setItem(list);
+    @Override
+    public List<ProductSearchDTO> searchByNew(String searchName) {
+      return productDAO.searchByNew(searchName);
+    }
 
-      if(list.isEmpty()) {
-        responseDTO.setHasMore(false);
-        responseDTO.setNextCursor(null);
-        return responseDTO;
-      }
-
-      Long next = list.get(list.size() - 1).getProductId().longValue();
-      responseDTO.setNextCursor(next);
-
-      responseDTO.setHasMore(list.size() == size);
-        return responseDTO;
-
+    @Override
+    public List<ProductDTO> getProducts(int offset, int size) {
+      
+      return productDAO.selectProducts(offset, size);
     }
 
 
