@@ -2,11 +2,14 @@ package org.puppit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,29 +21,43 @@ import javax.servlet.http.HttpServletRequest;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductDAO productDAO;
+    private final S3Service s3Service;
 
     @Transactional
     @Override
-    public int registerProduct(ProductDTO productDTO) {
+    public int registerProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
+        // 1. 상품 저장
+        productDAO.insertProduct(productDTO);
 
-        if (productDTO == null) {
-            throw new IllegalArgumentException("요청 데이터가 비어 있습니다.");
-        }
-        if (productDTO.getProductName() == null || productDTO.getProductName().isBlank()) {
-            throw new IllegalArgumentException("상품명은 필수입니다.");
-        }
-        if (productDTO.getProductDescription() == null || productDTO.getProductDescription().isBlank()) {
-            throw new IllegalArgumentException("상품 설명은 필수입니다.");
-        }
-        if (productDTO.getProductPrice() < 0) {
-            throw new IllegalArgumentException("가격은 음수가 될 수 없습니다.");
-        }
-        // 로그인 연동된 경우: Controller에서 sellerId 세팅해옴
-        if (productDTO.getSellerId() <= 0) {
-            throw new IllegalArgumentException("판매자 정보가 유효하지 않습니다.");
+        // 상태값 기본 지정 (null이면 1=판매중)
+        if (productDTO.getStatusId() == null) {
+            productDTO.setStatusId(1);
         }
 
-        return productDAO.insertProduct(productDTO); // useGeneratedKeys로 PK 세팅됨
+        // 2. 이미지 저장 (첫 번째 이미지만 썸네일)
+        for (int i = 0; i < imageFiles.size(); i++) {
+            MultipartFile file = imageFiles.get(i);
+            if (!file.isEmpty()) {
+                try {
+                    // S3 업로드
+                    Map<String, String> uploadResult = s3Service.uploadFile(file, "product");
+
+                    ProductImageDTO imageDTO = new ProductImageDTO();
+                    imageDTO.setProductId(productDTO.getProductId());
+                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));   // ✅ S3Service 반환 key와 일치
+                    imageDTO.setImageKey(uploadResult.get("fileName"));  // ✅ S3Service 반환 key와 일치
+                    imageDTO.setThumbnail(i == 0); // 첫 번째 이미지만 썸네일
+
+                    // DB 저장
+                    productDAO.insertProductImage(imageDTO);
+
+                } catch (IOException e) {
+                    throw new RuntimeException("이미지 업로드 실패", e);
+                }
+            }
+        }
+
+        return productDTO.getProductId();
     }
 
     // org.puppit.service.ProductServiceImpl
@@ -73,6 +90,8 @@ public class ProductServiceImpl implements ProductService {
       return productDAO.getProductDetail(productId);
     }
 
+  
+
     @Override
     public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
       return null;
@@ -81,22 +100,22 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ScrollResponseDTO<ProductDTO> getProductsForScroll(Long cursor, int size) {
       List<ProductDTO> list = productDAO.findProductsAfter(cursor, size);
-      
+
       ScrollResponseDTO<ProductDTO> responseDTO = new ScrollResponseDTO<ProductDTO>();
       responseDTO.setItem(list);
-      
+
       if(list.isEmpty()) {
         responseDTO.setHasMore(false);
         responseDTO.setNextCursor(null);
         return responseDTO;
       }
-      
+
       Long next = list.get(list.size() - 1).getProductId().longValue();
       responseDTO.setNextCursor(next);
-        
+
       responseDTO.setHasMore(list.size() == size);
         return responseDTO;
-      
+
     }
 
 

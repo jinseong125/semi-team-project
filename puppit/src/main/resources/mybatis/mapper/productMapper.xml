@@ -45,9 +45,9 @@
     <insert id="insertProductImage" parameterType="org.puppit.model.dto.ProductImageDTO"
             useGeneratedKeys="true" keyProperty="imageId" >
         INSERT INTO product_image
-        (product_id, image_url, image_id is_thumbnail)
+        (product_id, image_url, image_id, image_key, is_thumbnail)
         VALUES
-            (#{productId} , #{imageUrl},#{image_id},#{isThumbnail})
+            (#{productId} , #{imageUrl},#{imageId},#{imageKey},#{isThumbnail})
     </insert>
 
     <!-- 상품 이미지 조회-->
@@ -66,8 +66,9 @@
             parameterType="int"
             resultType="org.puppit.model.dto.ProductDTO">
 
-      SELECT product_id AS productId,
-             product_price AS productPrice
+      SELECT product_id ,
+             product_price ,
+             product_name
         FROM product
         WHERE product_id = #{productId}
     </select>

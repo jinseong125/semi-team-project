@@ -2,12 +2,13 @@ package org.puppit.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
-import org.puppit.model.dto.ScrollResponseDTO;
+import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.service.ProductService;
-import org.springframework.http.MediaType;
+import org.puppit.service.S3Service;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
@@ -20,6 +21,7 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final S3Service s3Service;
 
     /** 상품 등록 폼 */
     @GetMapping("/new")
@@ -49,39 +51,44 @@ public class ProductController {
     }
 
     @PostMapping("/new")
-    public String create(@ModelAttribute ProductDTO productDTO,
+    public String create(@ModelAttribute ProductDTO product,
+                         @RequestParam("imageFiles") List<MultipartFile> imageFiles,
                          HttpSession session,
                          RedirectAttributes ra) {
 
-
+        // 1. 로그인 사용자 확인
         Object attr = session.getAttribute("sessionMap");
         Map<String, Object> map = (Map<String, Object>)attr;
         Integer sellerId = (Integer) map.get("userId");
+
         if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
         }
 
-        // 로그인 한 경우 → sellerId 주입
-        productDTO.setSellerId(sellerId);
+        // 2. 판매자 ID 설정
+        product.setSellerId(sellerId);
 
-        // 기본 상태값 (예: 1=ACTIVE)
-        // 수정: null 체크 후 비교
-        if (productDTO.getStatusId() == null || productDTO.getStatusId() == 0) { // 수정
-            productDTO.setStatusId(1);
+        // 3. 상태 기본값 지정 (판매중)
+        if (product.getStatusId() == null) {
+            product.setStatusId(1);
         }
 
-        // 수정: productService가 null인지 방어
-        if (productService == null) { // 수정
-            ra.addFlashAttribute("error", "상품 등록 서비스가 준비되지 않았습니다.");
+        try {
+            // 4. 서비스 호출 (상품 + 이미지 등록)
+            productService.registerProduct(product, imageFiles);
+
+            // 5. 성공 메시지
+            ra.addFlashAttribute("success", "상품이 등록되었습니다.");
+            return "redirect:/product/myproduct";
+
+        } catch (RuntimeException e) {
+            // 6. 실패 처리
+            ra.addFlashAttribute("error", "상품 등록 중 오류가 발생했습니다: " + e.getMessage());
             return "redirect:/product/new";
         }
-
-        int id = productService.registerProduct(productDTO);
-
-        ra.addFlashAttribute("msg", "상품 등록 완료 #" + id);
-        return "redirect:/product/myproduct";
     }
+
 
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, Model model) {
@@ -118,12 +125,4 @@ public class ProductController {
 
         return "product/myproduct";
     }
-    
-    @GetMapping(value="/scroll", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ScrollResponseDTO<ProductDTO> scroll(
-        @RequestParam(value = "cursor", required = false) Long cursor,
-        @RequestParam(value = "size", defaultValue = "20") int size
-    ) {
-      return productService.getProductsForScroll(cursor, size);
-    }
-  }
+}
