@@ -100,9 +100,9 @@
   </div>
 
   <div class="space">
-    <input type="hidden" id="uid" value="${sessionScope.userId}">
-    <input type="hidden" id="name" value="${sessionScope.userName}">
-    <input type="hidden" id="email" value="${sessionScope.userEmail}">
+    <input type="hidden" id="uid" value="${sessionScope.sessionMap.userId}">
+    <input type="hidden" id="name" value="${sessionScope.sessionMap.userName}">
+    <input type="hidden" id="email" value="${sessionScope.sessionMap.userEmail}">
   </div>
   
   <div class="charge-btn-wrap">
