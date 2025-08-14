@@ -18,7 +18,7 @@ public class TradeDTO {
   private Integer sellerId;  
   private Integer productId;
   private String buyerNickname;
-  private String sellerNickname;
+  private String sellernickname;
   private String productName;
   private String status; 
   private Timestamp createdAt;

@@ -10,9 +10,7 @@ import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
-import org.puppit.model.dto.UserDTO;
 import org.puppit.service.ChatService;
-import org.puppit.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,23 +25,13 @@ import lombok.RequiredArgsConstructor;
 @Controller
 public class ChatController {
 	
-	private final UserService userService;
 	private final ChatService chatService;
 	
 	@GetMapping("/list")
 	public String chats(Model model, HttpSession session) {
-		Object attr = session.getAttribute("sessionMap");
-	    Map<String, Object> map = (Map<String, Object>)attr;
-	    Object userId = map.get("userId");
-	    String userIdResult = userId.toString();
-	    
-	    
-	   
-		List<ChatListDTO> chatList = chatService.getChatRooms(Integer.parseInt(userIdResult));
-		 System.out.println("chatList: " + chatList);
-	
-		
-		
+		int userId = (Integer) session.getAttribute("userId");
+		List<ChatListDTO> chatList = chatService.getChatRooms(userId);
+		System.out.println("chatList: " + chatList);
 		model.addAttribute("chatList", chatList);		
 		return "chat/list";
 	}

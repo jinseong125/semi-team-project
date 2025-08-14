@@ -10,7 +10,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,18 +22,11 @@ public class ProductController {
     @GetMapping("/new")
     public String newForm(ProductDTO productDTO, Model model, HttpSession session,
                           RedirectAttributes ra) {
-        Object attr = session.getAttribute("sessionMap");
-        Map<String, Object> map = (Map<String, Object>)attr;
-        Integer sellerId = (Integer) map.get("userId");
-
-
-
+        Integer sellerId = (Integer) session.getAttribute("userId");
         if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
         }
-
-
 
         // 셀렉트 박스 데이터
         var formData = productService.getProductFormData();
@@ -51,10 +43,7 @@ public class ProductController {
                          HttpSession session,
                          RedirectAttributes ra) {
 
-
-        Object attr = session.getAttribute("sessionMap");
-        Map<String, Object> map = (Map<String, Object>)attr;
-        Integer sellerId = (Integer) map.get("userId");
+        Integer sellerId = (Integer) session.getAttribute("userId");
         if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
@@ -100,17 +89,12 @@ public class ProductController {
 
     @GetMapping("/myproduct")
     public String myProduct(HttpSession session, RedirectAttributes ra, Model model) {
+        Integer sellerId = (Integer) session.getAttribute("userId");
 
-
-        Object attr = session.getAttribute("sessionMap");
-        if (attr == null) {
+        if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 관리는 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
         }
-
-        Map<String, Object> map = (Map<String, Object>)attr;
-        Integer sellerId = (Integer) map.get("userId");
-
         List<ProductDTO> items = productService.selectMyProducts(sellerId);
         model.addAttribute("items", items);
 
