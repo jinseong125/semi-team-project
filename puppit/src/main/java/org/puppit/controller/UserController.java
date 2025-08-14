@@ -3,7 +3,10 @@ package org.puppit.controller;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.puppit.model.dto.UserDTO;
@@ -38,7 +41,6 @@ public class UserController {
     return "user/mypage";
   }
   
-  
   // 회원가입 폼 보여주기
   @GetMapping("/signup")
   public String showSignupForm() {
@@ -50,6 +52,7 @@ public class UserController {
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
     // 회원가입
     boolean signupResult = userService.signup(user);
+    System.out.println("singnupResult" + signupResult);
     // 회원가입 실패
     if(!signupResult) {
       redirectAttr.addFlashAttribute("error", "아이디를 입력 해주세요");
@@ -60,12 +63,12 @@ public class UserController {
     return "redirect:/";
   }
   
-  // 아이디 중복 검사
+  // 중복 검사
   @SuppressWarnings("unchecked")
   @GetMapping("/check")
   public ResponseEntity<Void> check(UserDTO userDTO) {
     if(userDTO.getNickName() != null && userService.isNickNameAvailable(userDTO.getNickName())) {
-        return (ResponseEntity<Void>) ResponseEntity.ok();
+      return (ResponseEntity<Void>) ResponseEntity.ok();
     } else if(userDTO.getAccountId() != null && userService.isAccountIdAvailable(userDTO.getAccountId())) {
       return (ResponseEntity<Void>) ResponseEntity.ok();
     } else if(userDTO.getUserEmail() != null && userService.isUserEmailAvailable(userDTO.getUserEmail())) {
@@ -73,7 +76,7 @@ public class UserController {
     } else {
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
-    
+
   }
   
   // 로그인 폼 보여주기
@@ -83,9 +86,30 @@ public class UserController {
   }
   
   @PostMapping("/login")
-  public String login(UserDTO user, HttpSession session, RedirectAttributes redirectAttr) {
+  public String login(UserDTO user, HttpSession session, RedirectAttributes redirectAttr, HttpServletRequest request) {
     try {
-      boolean loginResult = userService.login(user);
+      UserDTO loginResult = userService.login(user);
+
+      if (loginResult == null) {
+          // 실패: 아이디나 비밀번호가 틀림
+          redirectAttr.addFlashAttribute("error", "아이디나 비밀번호를 확인 해주세요");
+          return "redirect:/user/login";
+      }
+      
+      HttpSession oldSession = request.getSession(false);
+      if(oldSession != null) {
+       oldSession.invalidate(); 
+      }
+      // 성공: 세션 저장 (db에서 가져온 loginResult 사용)
+      Map<String, Object> sessionmap = new HashMap<String, Object>();
+      sessionmap.put("userId", loginResult.getUserId());
+      sessionmap.put("accountId", loginResult.getAccountId());
+      sessionmap.put("userName", loginResult.getUserName());
+      sessionmap.put("nickName", loginResult.getNickName());
+      sessionmap.put("userEmail", loginResult.getUserEmail());
+      
+      session = request.getSession(true);
+      session.setAttribute("sessionMap", sessionmap);
       
       // timeStamp 생성
       Date now = new Date();
@@ -93,28 +117,18 @@ public class UserController {
       String dateTimeStr = stf.format(now);
       Date date = stf.parse(dateTimeStr);
       Timestamp timestamp = new Timestamp(date.getTime());
-      
-      UserDTO userDTO = userService.getUserId(user.getAccountId());
-      UserStatusDTO userLog = new UserStatusDTO(user.getAccountId(), userDTO.getUserId(), timestamp);
-      if(!loginResult) {
-        redirectAttr.addFlashAttribute("error", "아이디나 비밀번호를 확인 해주세요");
-        return "redirect:/user/login";
-      }
-      // 세션 저장
-      session.setAttribute("userId", userDTO.getUserId());
-      session.setAttribute("accountId", user.getAccountId());
-      session.setAttribute("userName", userDTO.getUserName());
-      session.setAttribute("userEmail", userDTO.getUserEmail());
-      // 로그 기록
+
+      UserStatusDTO userLog = new UserStatusDTO(loginResult.getAccountId(), loginResult.getUserId(), timestamp);
       userService.insertLogStatus(userLog);
-      // 로그 기록 후 메시지 띄우기
+
       redirectAttr.addFlashAttribute("msg", "로그인 성공!");
       return "redirect:/";
-    } catch (Exception e) {
-       e.printStackTrace();
-       return "redirect:/user/login";
-    }
+  } catch (Exception e) {
+     e.printStackTrace();
+     redirectAttr.addFlashAttribute("error", "로그인 중 오류가 발생했습니다.");
+     return "redirect:/user/login";
   }
+}
   @GetMapping("/logout")
   public String logout(HttpSession session) {
     session.invalidate();
