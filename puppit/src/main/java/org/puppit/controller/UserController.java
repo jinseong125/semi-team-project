@@ -30,7 +30,6 @@ public class UserController {
   
   private final UserService userService;
   
-  @SuppressWarnings("unchecked")
   @GetMapping("/mypage")
   public String myPage(HttpSession session, Model model) {
     Object attr = session.getAttribute("sessionMap");
@@ -102,16 +101,17 @@ public class UserController {
        oldSession.invalidate(); 
       }
       // 성공: 세션 저장 (db에서 가져온 loginResult 사용)
-      Map<String, Object> sessionMap = new HashMap<String, Object>();
-      sessionMap.put("userId", loginResult.getUserId());
-      sessionMap.put("accountId", loginResult.getAccountId());
-      sessionMap.put("userName", loginResult.getUserName());
-      sessionMap.put("nickName", loginResult.getNickName());
-      sessionMap.put("userEmail", loginResult.getUserEmail());
+      Map<String, Object> sessionmap = new HashMap<String, Object>();
+      sessionmap.put("userId", loginResult.getUserId());
+      sessionmap.put("accountId", loginResult.getAccountId());
+      sessionmap.put("userName", loginResult.getUserName());
+      sessionmap.put("nickName", loginResult.getNickName());
+      sessionmap.put("userEmail", loginResult.getUserEmail());
       
       session = request.getSession(true);
-      session.setAttribute("sessionMap", sessionMap);
-      
+      session.setAttribute("sessionMap", sessionmap);
+
+
       // timeStamp 생성
       Date now = new Date();
       SimpleDateFormat stf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
