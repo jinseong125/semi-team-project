@@ -40,8 +40,8 @@ public class ProductDAO {
 
 
     public int insertProductImage(org.puppit.model.dto.ProductImageDTO productImageDTO) {
-        sqlSession.insert("product.insertProductImage", productImageDTO);
-        return productImageDTO.getImageId();
+
+        return   sqlSession.insert("product.insertProductImage", productImageDTO);
     }
     public List<ProductImageDTO> getProductImages(int productId){
         return sqlSession.selectList("product.getProductImages", productId);

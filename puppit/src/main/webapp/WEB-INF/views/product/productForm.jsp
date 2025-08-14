@@ -1,5 +1,7 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +10,7 @@
   <style>
     form { max-width: 560px; margin: 24px auto; display: grid; gap: 12px; }
     label { display: block; margin-bottom: 6px; font-weight: 600; }
-    input[type=text], input[type=number], textarea {
+    input[type=text], input[type=number], textarea, select {
       width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
     }
     button { padding: 10px 16px; border: 0; border-radius: 8px; cursor: pointer; }
@@ -18,10 +20,7 @@
 <body>
 <h2 style="text-align:center;">상품 등록</h2>
 
-<form action="<c:url value='/product/new'/>" method="post">
-
-
-
+<form action="<c:url value='/product/new'/>" method="post" enctype="multipart/form-data">
   <div>
     <label>상품명</label>
     <input type="text" name="productName" required />
@@ -37,13 +36,11 @@
     <textarea name="productDescription" rows="5" required></textarea>
   </div>
 
-
   <!-- 카테고리 -->
   <div>
     <label>카테고리</label>
     <select name="categoryId" required>
       <c:forEach var="c" items="${categories}">
-        <!-- CategoryDTO: categoryId, categoryName -->
         <option value="${c.categoryId}">${c.categoryName}</option>
       </c:forEach>
     </select>
@@ -54,7 +51,6 @@
     <label>지역</label>
     <select name="locationId" required>
       <c:forEach var="l" items="${locations}">
-        <!-- LocationDTO: locationId, region -->
         <option value="${l.locationId}">${l.region}</option>
       </c:forEach>
     </select>
@@ -65,15 +61,17 @@
     <label>상품 상태</label>
     <select name="conditionId" required>
       <c:forEach var="cn" items="${conditions}">
-        <!-- ConditionDTO: conditionId, conditionName -->
         <option value="${cn.conditionId}">${cn.conditionName}</option>
       </c:forEach>
     </select>
   </div>
 
-
-
-
+  <!-- 썸네일 이미지 업로드 -->
+  <div>
+    <label>사진 첨부</label>
+    <input type="file" name="imageFiles" multiple />
+  </div>
+  <input type="hidden" name="statusId" value="1" />
   <div style="display:flex; gap:8px; justify-content:flex-end;">
     <button type="reset">초기화</button>
     <button type="submit" class="submit">등록</button>

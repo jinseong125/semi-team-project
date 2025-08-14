@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="
-         http://www.springframework.org/schema/beans    http://www.springframework.org/schema/beans/spring-beans.xsd
-         http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd
-         http://www.springframework.org/schema/tx       http://www.springframework.org/schema/tx/spring-tx.xsd">
+         http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx.xsd">
 
     <!-- @Component/@Configuration 스캔 -->
-    <context:component-scan base-package="org.puppit"/>
+    <context:component-scan base-package="org.puppit" />
+    <context:annotation-config />
 
     <!-- 1) HikariConfig -->
     <bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
@@ -54,22 +58,7 @@
         <property name="maxUploadSize" value="104857600"/> <!-- 100MB -->
         <property name="maxUploadSizePerFile" value="10485760"/> <!-- 10MB -->
     </bean>
+    
 
-    <!-- 6) AWS S3 프로퍼티 -->
-    <bean id="awsProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-        <property name="properties">
-            <props>
-                <prop key="aws.region">ap-northeast-2</prop>
-                <prop key="aws.s3.bucket">jscode-upload-images</prop>
-            </props>
-        </property>
-    </bean>
-
-    <!-- @Value 바인딩: AWS 프로퍼티 + application-secret.properties -->
-    <context:property-placeholder properties-ref="awsProperties"
-                                  ignore-unresolvable="true"/>
-    <context:property-placeholder location="classpath:application-secret.properties"
-                                  system-properties-mode="OVERRIDE"
-                                  ignore-unresolvable="true"/>
 
  </beans>
