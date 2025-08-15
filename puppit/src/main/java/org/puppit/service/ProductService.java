@@ -12,7 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 public interface ProductService {
-    /** 상품 등록 후 생성된 productId 반환 */
+    /** �긽�뭹 �벑濡� �썑 �깮�꽦�맂 productId 諛섑솚 */
     int registerProduct(ProductDTO productDTO, List<MultipartFile> imageFiles);
 
     // org.puppit.service.ProductService
@@ -33,7 +33,7 @@ public interface ProductService {
 
     public List<ProductSearchDTO> searchByNew(String searchName);
     
-    public List<ProductDTO> getProducts(int offset, int size);
+    Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
     
 
 }

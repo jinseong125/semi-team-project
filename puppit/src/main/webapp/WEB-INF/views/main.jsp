@@ -30,6 +30,11 @@
 </style>
 
 <div class="container">
+  <!-- 검색 박스 -->
+  <div class="search-box">
+    <input type="text" id="search-input" class="search-input" placeholder="상품명 검색">
+    <button id="do-search" class="search-btn">검색</button>
+  </div>
   <!-- 상품 리스트 -->
   <c:if test="${not empty products}">
     <div class="product-grid" id="productGrid">
@@ -54,6 +59,12 @@
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var mainGrid = document.getElementById('productGrid');
+  var size = 16;
+  var loading = false;
+  var endOfData = false;
+
+  // offset을 직접 관리 (최초 렌더링된 상품 개수로 초기화)
+  var offset = mainGrid ? mainGrid.children.length : 0;
 
   function formatPrice(v) {
     if (v === null || v === undefined) return '';
@@ -133,56 +144,62 @@
   });
 
   // ------- 무한 스크롤 기능 -------
-  var offset = Number(document.querySelectorAll('#productGrid .product-card').length) || 0;
-  var size = 8;
-  var loading = false;
-  var endOfData = false;
-
   function appendProducts(list) {
-    if (!Array.isArray(list) || !list.length) return;
+    if (!Array.isArray(list) || !list.length) {
+      console.log("appendProducts: 추가할 상품 없음");
+      return;
+    }
     var cards = list.map(function (p) {
       var id = p.productId;
       var name = p.productName || '';
       var price = p.productPrice ? new Intl.NumberFormat('ko-KR').format(p.productPrice) + '원' : '';
       var desc = p.productDescription || '';
-      return `
-        <a class="product-card" href="${contextPath}/product/detail/${id}">
-          <div class="title">${name}</div>
-          <div class="desc">${desc}</div>
-          <div class="price">${price}</div>
-        </a>
-      `;
+      return (
+        '<a class="product-card" href="' + contextPath + '/product/detail/' + id + '">' +
+        '<div class="title">' + name + '</div>' +
+        '<div class="desc">' + desc + '</div>' +
+        '<div class="price">' + price + '</div>' +
+        '</a>'
+      );
     }).join('');
     mainGrid.insertAdjacentHTML('beforeend', cards);
-    offset = Number(document.querySelectorAll('#productGrid .product-card').length) || 0;
   }
 
   window.addEventListener('scroll', async function () {
-    if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
-    if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-      loading = true;
-      var safeOffset = Number(offset) || 0;
-      var safeSize = Number(size) || 8;
-      const url = `${contextPath}/product/list?offset=${safeOffset}&size=${safeSize}`;
-      console.log("Fetching:", url);
-      try {
-        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-        console.log("Response status:", res.status);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        console.log("Fetched data:", data);
-        if (Array.isArray(data) && data.length > 0) {
-          appendProducts(data);
-          if (data.length < safeSize) endOfData = true;
-        } else {
-          endOfData = true;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      loading = false;
-    }
-  });
+	  if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
+	  if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
+
+	  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
+	    loading = true;
+
+	    // 스크롤 시점에서 최신 offset 계산
+	    offset = mainGrid ? mainGrid.children.length : offset;
+	    console.log("offset:", offset);
+
+	    const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
+	    console.log("Fetching:", url);
+
+	    try {
+	      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	      if (!res.ok) throw new Error("HTTP " + res.status);
+	      
+	      const data = await res.json();
+	      const products = Array.isArray(data.products) ? data.products : [];
+	      console.log("products.length:", products.length);
+
+	      if (products.length > 0) {
+	        appendProducts(products);
+	        // fetch 성공 후 offset 업데이트
+	        offset = mainGrid.children.length;
+	        if (products.length < size) endOfData = true;
+	      } else {
+	        endOfData = true;
+	      }
+	    } catch (e) {
+	      console.error(e);
+	    }
+	    loading = false;
+	  }
+	});
 })();
 </script>
