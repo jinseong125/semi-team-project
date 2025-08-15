@@ -26,22 +26,15 @@ public class ChatMessageDTO {
 	private String chatSenderUserName;
 	private Integer chatReceiver;
 
-	private String chatSender;
-	private String chatSenderAccountId;
-	private String chatSenderUserName;
-	private String chatReceiver;
-
 	private String chatReceiverAccountId;
 	private String chatReceiverUserName;
 	private String chatMessage;
 	private Timestamp chatCreatedAt;
 	private String senderRole;
 	private String receiverRole;
-
-	
-
+	private String chatSellerAccountId;
 	private String buyerId;
-
+	
 	@Override
 	public String toString() {
 		return "ChatMessageDTO [messageId=" + messageId + ", chatRoomId=" + chatRoomId + ", productId=" + productId
@@ -49,15 +42,11 @@ public class ChatMessageDTO {
 				+ ", chatSenderUserName=" + chatSenderUserName + ", chatReceiver=" + chatReceiver
 				+ ", chatReceiverAccountId=" + chatReceiverAccountId + ", chatReceiverUserName=" + chatReceiverUserName
 				+ ", chatMessage=" + chatMessage + ", chatCreatedAt=" + chatCreatedAt + ", senderRole=" + senderRole
-
-				+ ", receiverRole=" + receiverRole + "]";
-
-				+ ", receiverRole=" + receiverRole + ", buyerId=" + buyerId + "]";
-
+				+ ", receiverRole=" + receiverRole + ", chatSellerAccountId=" + chatSellerAccountId + ", buyerId="
+				+ buyerId + "]";
 	}
-	
 
-	
-	
-	
+
+
+
 }

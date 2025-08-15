@@ -19,16 +19,16 @@
     <select id="getCategories" resultType="org.puppit.model.dto.CategoryDTO">
         SELECT category_id   AS categoryId,
                category_name AS categoryName
-        FROM product_category
-        ORDER BY category_id
+          FROM product_category
+         ORDER BY category_id
     </select>
 
     <!-- 지역 -->
     <select id="getLocations" resultType="org.puppit.model.dto.LocationDTO">
         SELECT location_id AS locationId,
                region
-        FROM location
-        ORDER BY location_id
+          FROM location
+         ORDER BY location_id
     </select>
 
     <!-- 컨디션 -->
@@ -41,13 +41,13 @@
 
 
 
-    <!-- 상품 이미지 -->
+    <!-- 상품 이미지 삽입 -->
     <insert id="insertProductImage" parameterType="org.puppit.model.dto.ProductImageDTO"
-            useGeneratedKeys="true" keyProperty="imageId" keyColumn="image_id">
+            useGeneratedKeys="true" keyProperty="imageId" >
         INSERT INTO product_image
-        (product_id, image_url, is_thumbnail)
+        (product_id, image_url, image_id, image_key, is_thumbnail)
         VALUES
-            (#{productId} , #{imageUrl},#{isThumbnail})
+            (#{productId} , #{imageUrl},#{imageId},#{imageKey},#{isThumbnail})
     </insert>
 
     <!-- 상품 이미지 조회-->
@@ -66,8 +66,9 @@
             parameterType="int"
             resultType="org.puppit.model.dto.ProductDTO">
 
-      SELECT product_id AS productId,
-             product_price AS productPrice
+      SELECT product_id ,
+             product_price ,
+             product_name
         FROM product
         WHERE product_id = #{productId}
     </select>
@@ -161,7 +162,49 @@
             AND t.is_thumbnail = 1
 
             WHERE p.seller_id = #{value}   <!-- DAO가 Integer 하나를 그대로 넘기면 #{value} -->
-            ORDER BY p.product_updated_at DESC, p.product_created_at DESC
+            ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
         </select>
-
+        <select id="findProductsAfter" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
+              SELECT    p.product_id      	 AS productId  , 
+            			p.product_name 		 AS productName,
+            			p.product_price      AS productPrice,
+                        p.product_created_at AS productCreatedAt
+                FROM product p
+               WHERE 1=1
+               <if test="cursor != null">
+                 AND p.product_id &lt; #{cursor}
+               </if>
+               ORDER BY p.product_id DESC
+               LIMIT #{size}
+        </select>
+        
+<!--         
+       <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
+  SELECT 
+    product_id AS productId,
+    product_name AS productName,
+    product_description AS productDescription,
+    product_price AS productPrice
+  FROM product
+  ORDER BY product_created_at DESC
+  LIMIT #{size} OFFSET #{offset}
+</select>
+      -->   
+        
+          <select id="getProducts" parameterType="Map" resultType="org.puppit.model.dto.ProductDTO">
+    SELECT 
+    product_id AS productId,
+    product_name AS productName,
+    product_description AS productDescription,
+    product_price AS productPrice
+  FROM product
+  ORDER BY product_created_at DESC
+   LIMIT #{offset}, #{size}
+  </select>
+  
+  <select id="getProductCount" resultType="java.lang.Integer">
+    SELECT COUNT(*)
+      FROM product
+  </select>
+        
 </mapper>

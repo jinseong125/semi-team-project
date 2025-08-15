@@ -1,16 +1,22 @@
 package org.puppit.controller;
 
-import lombok.RequiredArgsConstructor;
+
 import org.puppit.model.dto.ProductDTO;
-import org.puppit.model.dto.UserDTO; // ì„¸ì…˜ì— ë„£ì–´ë‘” ë¡œê·¸ì¸ ì‚¬ìš©ì íƒ€ì…(í”„ë¡œì íŠ¸ì— ë§ê²Œ ìˆ˜ì •)
+import org.puppit.model.dto.ProductImageDTO;
+import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.service.ProductService;
+import org.puppit.service.S3Service;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import lombok.RequiredArgsConstructor;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -18,22 +24,28 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final S3Service s3Service;
 
-    /** ìƒí’ˆ ë“±ë¡ í¼ */
+    /** »óÇ° µî·Ï Æû */
     @GetMapping("/new")
-    public String newForm(ProductDTO productDTO , Model model , HttpSession session,
+    public String newForm(ProductDTO productDTO, Model model, HttpSession session,
                           RedirectAttributes ra) {
-        Integer sellerId = (Integer) session.getAttribute("userId");
+        Object attr = session.getAttribute("sessionMap");
+        Map<String, Object> map = (Map<String, Object>)attr;
+        Integer sellerId = (Integer) map.get("userId");
+
+
         if (sellerId == null) {
-            // ë¡œê·¸ì¸ ì•ˆ í•œ ê²½ìš° â†’ ë¡œê·¸ì¸ í˜ì´ì§€ë¡œ ë¦¬ë‹¤ì´ë ‰íŠ¸
-            ra.addFlashAttribute("error", "ìƒí’ˆ ë“±ë¡ì€ ë¡œê·¸ì¸ í›„ ì´ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤.");
+            ra.addFlashAttribute("error", "»óÇ° µî·ÏÀº ·Î±×ÀÎ ÈÄ ÀÌ¿ë °¡´ÉÇÕ´Ï´Ù.");
             return "redirect:/user/login";
         }
 
-        // ì…€ë ‰íŠ¸ ë°•ìŠ¤ ë°ì´í„°
+
+
+        // ¼¿·ºÆ® ¹Ú½º µ¥ÀÌÅÍ
         var formData = productService.getProductFormData();
         model.addAttribute("categories", formData.get("categories"));
-        model.addAttribute("locations",  formData.get("locations"));
+        model.addAttribute("locations", formData.get("locations"));
         model.addAttribute("conditions", formData.get("conditions"));
         model.addAttribute("product", new ProductDTO());
 
@@ -42,57 +54,87 @@ public class ProductController {
 
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
+                         @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                         @RequestParam(value="attachment", required=false) MultipartFile attachment,
                          HttpSession session,
                          RedirectAttributes ra) {
 
-        Integer sellerId =  (Integer) session.getAttribute("userId");
+        // 1. ·Î±×ÀÎ »ç¿ëÀÚ È®ÀÎ
+        Object attr = session.getAttribute("sessionMap");
+        Map<String, Object> map = (Map<String, Object>)attr;
+        Integer sellerId = (Integer) map.get("userId");
+
         if (sellerId == null) {
-            // ë¡œê·¸ì¸ ì•ˆ í•œ ê²½ìš° â†’ ë¡œê·¸ì¸ í˜ì´ì§€ë¡œ ë¦¬ë‹¤ì´ë ‰íŠ¸
-            ra.addFlashAttribute("error", "ìƒí’ˆ ë“±ë¡ì€ ë¡œê·¸ì¸ í›„ ì´ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤.");
+            ra.addFlashAttribute("error", "»óÇ° µî·ÏÀº ·Î±×ÀÎ ÈÄ ÀÌ¿ë °¡´ÉÇÕ´Ï´Ù.");
             return "redirect:/user/login";
         }
 
-        // ë¡œê·¸ì¸ í•œ ê²½ìš° â†’ sellerId ì£¼ì…
+        // 2. ÆÇ¸ÅÀÚ ID ¼³Á¤
         product.setSellerId(sellerId);
 
-        // ê¸°ë³¸ ìƒíƒœê°’ (ì˜ˆ: 1=ACTIVE)
-        if (product.getStatusId() == 0) {
+        // 3. »óÅÂ ±âº»°ª ÁöÁ¤ (ÆÇ¸ÅÁß)
+        if (product.getStatusId() == null) {
             product.setStatusId(1);
         }
 
-        int id = productService.registerProduct(product);
-        ra.addFlashAttribute("msg", "ìƒí’ˆ ë“±ë¡ ì™„ë£Œ #" + id);
-        return "redirect:/product/myproduct";
+        try {
+            // 4. ¼­ºñ½º È£Ãâ (»óÇ° + ÀÌ¹ÌÁö µî·Ï)
+            productService.registerProduct(product, imageFiles);
+
+            // 5. ¼º°ø ¸Ş½ÃÁö
+            ra.addFlashAttribute("success", "»óÇ°ÀÌ µî·ÏµÇ¾ú½À´Ï´Ù.");
+            return "redirect:/product/myproduct";
+
+        } catch (RuntimeException e) {
+            // 6. ½ÇÆĞ Ã³¸®
+            ra.addFlashAttribute("error", "»óÇ° µî·Ï Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: " + e.getMessage());
+            return "redirect:/product/new";
+        }
     }
-    
-    
+
+
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, Model model) {
-    System.out.println("product" + productService.getProductDetail(productId).toString());
-     model.addAttribute("product", productService.getProductDetail(productId));
-      return "product/detail";
-    }
-      
-      @GetMapping("/user/scroll")
-      public String scrollList() {
-        return "user/scroll";
+        var productDetail = productService.getProductDetail(productId); // ¼öÁ¤
+        if (productDetail == null) { // ¼öÁ¤
+            model.addAttribute("error", "ÇØ´ç »óÇ°À» Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+            return "error/404";
+        }
+        System.out.println("product: " + productDetail.toString());
+        model.addAttribute("product", productDetail);
+        return "product/detail";
     }
 
+    @GetMapping("/product/scroll")
+    public String scrollList() {
+        return "product/scroll";
+    }
 
     @GetMapping("/myproduct")
-    public String myProduct(HttpSession session, RedirectAttributes ra, Model model){
-        Integer sellerId = (Integer)session.getAttribute("userId");
+    public String myProduct(HttpSession session, RedirectAttributes ra, Model model) {
 
-        if (sellerId == null) {
-            ra.addFlashAttribute("error", "ìƒí’ˆ ê´€ë¦¬ëŠ” ë¡œê·¸ì¸ í›„ ì´ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤.");
+
+        Object attr = session.getAttribute("sessionMap");
+        if (attr == null) {
+            ra.addFlashAttribute("error", "»óÇ° °ü¸®´Â ·Î±×ÀÎ ÈÄ ÀÌ¿ë °¡´ÉÇÕ´Ï´Ù.");
             return "redirect:/user/login";
         }
+
+        Map<String, Object> map = (Map<String, Object>)attr;
+        Integer sellerId = (Integer) map.get("userId");
+
         List<ProductDTO> items = productService.selectMyProducts(sellerId);
-        System.out.println(items.toString());
         model.addAttribute("items", items);
 
         return "product/myproduct";
     }
+    
+    @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
+        return productService.searchByNew(searchName);
+    }
 
 
+    
 }

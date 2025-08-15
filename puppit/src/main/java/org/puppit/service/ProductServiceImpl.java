@@ -1,11 +1,19 @@
 package org.puppit.service;
 
 import lombok.RequiredArgsConstructor;
+
+import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductImageDTO;
+import org.puppit.model.dto.ProductSearchDTO;
+import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
+import org.puppit.util.PageUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,29 +25,44 @@ import javax.servlet.http.HttpServletRequest;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductDAO productDAO;
+    private final S3Service s3Service;
+    private final PageUtil pageUtil;
 
     @Transactional
     @Override
-    public int registerProduct(ProductDTO productDTO) {
+    public int registerProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
+        // 1. �긽�뭹 ���옣
+        productDAO.insertProduct(productDTO);
 
-        if (productDTO == null) {
-            throw new IllegalArgumentException("요청 데이터가 비어 있습니다.");
-        }
-        if (productDTO.getProductName() == null || productDTO.getProductName().isBlank()) {
-            throw new IllegalArgumentException("상품명은 필수입니다.");
-        }
-        if (productDTO.getProductDescription() == null || productDTO.getProductDescription().isBlank()) {
-            throw new IllegalArgumentException("상품 설명은 필수입니다.");
-        }
-        if (productDTO.getProductPrice() < 0) {
-            throw new IllegalArgumentException("가격은 음수가 될 수 없습니다.");
-        }
-        // 로그인 연동된 경우: Controller에서 sellerId 세팅해옴
-        if (productDTO.getSellerId() <= 0) {
-            throw new IllegalArgumentException("판매자 정보가 유효하지 않습니다.");
+        // �긽�깭媛� 湲곕낯 吏��젙 (null�씠硫� 1=�뙋留ㅼ쨷)
+        if (productDTO.getStatusId() == null) {
+            productDTO.setStatusId(1);
         }
 
-        return productDAO.insertProduct(productDTO); // useGeneratedKeys로 PK 세팅됨
+        // 2. �씠誘몄� ���옣 (泥� 踰덉㎏ �씠誘몄�留� �뜽�꽕�씪)
+        for (int i = 0; i < imageFiles.size(); i++) {
+            MultipartFile file = imageFiles.get(i);
+            if (!file.isEmpty()) {
+                try {
+                    // S3 �뾽濡쒕뱶
+                    Map<String, String> uploadResult = s3Service.uploadFile(file, "product");
+
+                    ProductImageDTO imageDTO = new ProductImageDTO();
+                    imageDTO.setProductId(productDTO.getProductId());
+                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));   // �쐟 S3Service 諛섑솚 key�� �씪移�
+                    imageDTO.setImageKey(uploadResult.get("fileName"));  // �쐟 S3Service 諛섑솚 key�� �씪移�
+                    imageDTO.setThumbnail(i == 0); // 泥� 踰덉㎏ �씠誘몄�留� �뜽�꽕�씪
+
+                    // DB ���옣
+                    productDAO.insertProductImage(imageDTO);
+
+                } catch (IOException e) {
+                    throw new RuntimeException("�씠誘몄� �뾽濡쒕뱶 �떎�뙣", e);
+                }
+            }
+        }
+
+        return productDTO.getProductId();
     }
 
     // org.puppit.service.ProductServiceImpl
@@ -72,16 +95,59 @@ public class ProductServiceImpl implements ProductService {
       return productDAO.getProductDetail(productId);
     }
 
-    @Override
-    public Map<String, Object> getScrollUsers(ProductDTO dto, HttpServletRequest request) {
-      
-      return null;
-
-    }
+  
 
     @Override
     public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
       return null;
     }
+
+//    @Transactional(readOnly = true)
+//    public ScrollResponseDTO<ProductDTO> getProductsForScroll(Long cursor, int size) {
+//      List<ProductDTO> list = productDAO.findProductsAfter(cursor, size);
+//
+//      ScrollResponseDTO<ProductDTO> responseDTO = new ScrollResponseDTO<ProductDTO>();
+//      responseDTO.setItem(list);
+//
+//      if(list.isEmpty()) {
+//        responseDTO.setHasMore(false);
+//        responseDTO.setNextCursor(null);
+//        return responseDTO;
+//      }
+//
+//      Long next = list.get(list.size() - 1).getProductId().longValue();
+//      responseDTO.setNextCursor(next);
+//
+//      responseDTO.setHasMore(list.size() == size);
+//        return responseDTO;
+//
+//    }
+
+    @Override
+    public List<ProductSearchDTO> searchByNew(String searchName) {
+      return productDAO.searchByNew(searchName);
+    }
+
+    @Override
+    public Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request) {
+    	 //----- 파라미터 sort 받기 (디폴트 DESC)
+        String sort = request.getParameter("sort");
+        if (sort == null || !(sort.equalsIgnoreCase("ASC") || sort.equalsIgnoreCase("DESC"))) 
+          sort = "DESC";
+        //----- 전체 항목의 개수를 PageDTO 객체에 저장하기
+        int itemCount = productDAO.getProductCount();
+        dto.setItemCount(itemCount);
+        //----- 한 번에 9개씩 가져오기
+        //dto.setSize(16);
+        //----- 페이징 정보 계산해서 PageDTO 객체에 저장하기 (PageDTO 객체에 페이징 위한 모든 정보가 저장됩니다.)
+        //pageUtil.calculatePaging(dto);
+        //----- 목록 가져오기
+        List<ProductDTO> products =  productDAO.getProducts(Map.of("offset", dto.getOffset(), "size", dto.getSize(), "sort", sort));
+        
+        
+        //----- 결과 반환 (회원 목록과 전체 페이지 개수)
+        return Map.of("products", products, "pageCount", dto.getPageCount());
+    }
+
 
 }

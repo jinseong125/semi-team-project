@@ -1,8 +1,6 @@
 package org.puppit.model.dto;
 
 
-public class ChatMessageProductDTO {
-
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

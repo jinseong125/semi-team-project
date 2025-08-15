@@ -1,24 +1,19 @@
 package org.puppit.config;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
 
-/** S3Client ë¹ˆ ìƒì„± */
 @Configuration
 public class AwsConfig {
 
-    @Value("${aws.region}")  // rootxmlì— ìˆëŠ” bucket region
-    private String region;
-
     @Bean
-    public S3Client s3Client() {
-        return S3Client.builder()
-                .region(Region.of(region))  //s3 region
-                .credentialsProvider(DefaultCredentialsProvider.create()) // ~/.aws/credentials ë“± ìë™ íƒìƒ‰   // IAM PW
+    public AmazonS3 amazonS3() {
+        return AmazonS3ClientBuilder.standard()
+                .withCredentials(new EnvironmentVariableCredentialsProvider())
+                .withRegion(System.getenv("AWS_REGION")) // È¯°æº¯¼ö¿¡ ³Ö¾îµĞ °ª
                 .build();
     }
 }
