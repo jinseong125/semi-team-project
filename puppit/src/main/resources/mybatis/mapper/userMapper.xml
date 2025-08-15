@@ -11,10 +11,10 @@
     3. resultType : 쿼리문이 메소드로 반환하는 값의 타입이다. <select> 태그만 작성 한다.
    -->
 
-  <!-- 회원가입 -->
+ <!-- 회원가입 -->
   <insert id="userSignUp" parameterType="UserDTO">
-     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at)
-     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW())
+     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at, salt)
+     VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW(), #{salt})
   </insert>
   
   <!-- 아이디 중복 검사 -->
@@ -39,10 +39,10 @@
   </select>
   
   <!-- 로그인(아이디, 비밀번호) -->
-  <select id="getUserByIdAndPassword" parameterType="UserDTO" resultType="UserDTO">
-    SELECT account_id, user_password
+  <select id="getUserByaccountId" parameterType="String" resultType="UserDTO">
+    SELECT user_id, account_id, nick_name, user_name, user_password, salt
       FROM user
-     WHERE account_id = #{accountId} AND user_password = #{userPassword}
+     WHERE account_id = #{accountId}
   </select>
   
   <!-- account 사용해서 user_id(PK) 조회 -->
@@ -65,5 +65,4 @@
   	FROM user
   	WHERE account_id = #{account_id}
   </select>
-
 </mapper>

@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PageUtil {
-	  //----- ÇÑ ºí·Ï ´ç Ç¥½ÃÇÒ ÆäÀÌÁöÀÇ °³¼ö
+	  //----- í•œ ë¸”ë¡ ë‹¹ í‘œì‹œí•  í˜ì´ì§€ì˜ ê°œìˆ˜
 	  private static final int PAGE_PER_BLOCK = 10;
 	 
 	  /**
-	   * ÆäÀÌÂ¡ Á¤º¸¸¦ °è»êÇØ¼­ PageDTO¿¡ ÀúÀåÇÏ´Â ¸Ş¼Òµå
+	   * í˜ì´ì§• ì •ë³´ë¥¼ ê³„ì‚°í•´ì„œ PageDTOì— ì €ì¥í•˜ëŠ” ë©”ì†Œë“œ
 	   */
 	  public void calculatePaging(PageDTO dto) {
 	    int page = dto.getPage();
@@ -30,17 +30,17 @@ public class PageUtil {
 	  }
 	  
 	  /**
-	   * ÆäÀÌÁö ÀÌµ¿ ¸µÅ©(HTML) »ı¼º
+	   * í˜ì´ì§€ ì´ë™ ë§í¬(HTML) ìƒì„±
 	   */
 	  public String getPagingHtml(PageDTO dto, String requestURL, Map<String, Object> params) {
 	    
-	    //----- ÆäÀÌÁö ÀÌµ¿ ¸µÅ© »ı¼º¿¡ ÇÊ¿äÇÑ º¯¼ö
+	    //----- í˜ì´ì§€ ì´ë™ ë§í¬ ìƒì„±ì— í•„ìš”í•œ ë³€ìˆ˜
 	    int page = dto.getPage();
 	    int pageCount = dto.getPageCount();
 	    int beginPage = dto.getBeginPage();
 	    int endPage = dto.getEndPage();
 	    
-	    //----- Äõ¸® ½ºÆ®¸µ ¸¸µé±â
+	    //----- ì¿¼ë¦¬ ìŠ¤íŠ¸ë§ ë§Œë“¤ê¸°
 	    String queryString = "";
 	    if (params != null) {
 	      StringBuilder queryStringBuilder = new StringBuilder();
@@ -55,7 +55,7 @@ public class PageUtil {
 	    
 	    StringBuilder builder = new StringBuilder();
 	    
-	    //----- ½ºÅ¸ÀÏ Àû¿ë ¿¹½Ã
+	    //----- ìŠ¤íƒ€ì¼ ì ìš© ì˜ˆì‹œ
 	    builder.append("<style>");
 	    builder.append(".pagination { display: flex; justify-content: center; width: 400px; margin: 0 auto; }");
 	    builder.append(".pagination button { display: block; border: none; background-color: #fff; text-align: center; width: 30px; height: 30px; line-height: 30px; cursor: pointer; }");
@@ -66,13 +66,13 @@ public class PageUtil {
 	    //----- <div class="pagination">
 	    builder.append("<div class=\"pagination\">");
 	    
-	    //----- ÀÌÀü ºí·Ï ( < )
+	    //----- ì´ì „ ë¸”ë¡ ( < )
 	    if(beginPage == 1)
 	      builder.append("<button type=\"button\" class=\"disabled-button\">&lt;</button>");
 	    else
 	      builder.append("<button type=\"button\" onclick=\"location.href='" + requestURL + "?page=" + (beginPage - 1) + queryString + "'\">&lt;</button>");
 	    
-	    //----- ÆäÀÌÁö ( 1 2 3 4 5 6 7 8 9 10 )
+	    //----- í˜ì´ì§€ ( 1 2 3 4 5 6 7 8 9 10 )
 	    for (int p = beginPage; p <= endPage; p++) {
 	      if (p == page)
 	        builder.append("<button type=\"button\" class=\"focus-page\" onclick=\"location.href='" + requestURL + "?page=" + (p) + queryString + "'\">" + p + "</button>");
@@ -80,7 +80,7 @@ public class PageUtil {
 	        builder.append("<button type=\"button\" onclick=\"location.href='" + requestURL + "?page=" + (p) + queryString + "'\">" + p + "</button>");        
 	    }
 	    
-	    //----- ´ÙÀ½ ºí·Ï ( > )
+	    //----- ë‹¤ìŒ ë¸”ë¡ ( > )
 	    if(endPage == pageCount)
 	      builder.append("<button type=\"button\" class=\"disabled-button\">&gt;</button>");
 	    else

@@ -100,9 +100,9 @@
   </div>
 
   <div class="space">
-    <input type="hidden" id="uid" value="${sessionScope.userId}">
-    <input type="hidden" id="name" value="${sessionScope.userName}">
-    <input type="hidden" id="email" value="${sessionScope.userEmail}">
+    <input type="hidden" id="uid" value="${sessionScope.sessionMap.userId}">
+    <input type="hidden" id="name" value="${sessionScope.sessionMap.userName}">
+    <input type="hidden" id="email" value="${sessionScope.sessionMap.userEmail}">
   </div>
   
   <div class="charge-btn-wrap">
@@ -200,6 +200,7 @@
         .then(result => {
           if (result.success) {
             alert("충전 성공!");
+            window.location.href = "${contextPath}/user/mypage";
           } else {
             alert("결제는 성공했지만 검증에 실패했습니다.");
           }

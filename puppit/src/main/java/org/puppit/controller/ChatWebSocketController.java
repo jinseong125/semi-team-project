@@ -31,9 +31,9 @@ import lombok.RequiredArgsConstructor;
 public class ChatWebSocketController {
 	
 	private final SimpMessagingTemplate messagingTemplate;
-
 	private final UserService userService;
 	private final ChatService chatService;
+
 
 	
 	 // 클라이언트가 /app/chat.send로 메시지 전송
@@ -54,9 +54,6 @@ public class ChatWebSocketController {
 ```````````senderAccountId: user02
 ```````````chatMessage: test
 ```````````chatRoomID: 5
-         * 
-         * 
-         * 
          * */
         
         

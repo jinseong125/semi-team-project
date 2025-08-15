@@ -18,7 +18,8 @@ public class S3Service {
     private final AmazonS3 amazonS3;
 
     public Map<String, String> uploadFile(MultipartFile file, String folderName) throws IOException {
-        String bucketName = "jscode-upload-images" ;// È¯°æº¯¼ö¿¡ ¹öÅ¶¸í
+        String bucketName = "jscode-upload-images" ;// í™˜ê²½ë³€ìˆ˜ì— ë²„í‚·ëª…
+
         String fileName = folderName + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         ObjectMetadata metadata = new ObjectMetadata();
@@ -35,4 +36,6 @@ public class S3Service {
 
         return result;
     }
+
 }
+

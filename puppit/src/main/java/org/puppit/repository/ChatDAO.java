@@ -14,7 +14,12 @@ import org.puppit.model.dto.ChatRoomPeopleDTO;
 
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
+import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
+
+import org.puppit.model.dto.ChatRoomPeopleDTO;
+
+
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

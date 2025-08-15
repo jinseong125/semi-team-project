@@ -31,7 +31,7 @@ body {
 }
 
 .wrap {
-  max-width: 720px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -205,7 +205,7 @@ body {
 /* 액션 카드 (내역 보기) */
 .action-grid {
   width: 100%;
-  max-width: 680px;
+  max-width: 1200px;
   display: grid;
   gap: 12px;
 }
@@ -268,6 +268,16 @@ body {
     </div>
     <button class="edit" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
   </div>
+  
+    <!-- 찜 목록 카드 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title"><i class="fa-solid fa-heart"></i> 찜 목록</div>
+      <div class="action-desc">내가 찜한 상품을 확인해보세요</div>
+    </div>
+    <button class="action-btn" type="button" onclick="location.href='${contextPath}/wish/list?userId=${user.userId}'">목록 보기</button>
+  </div>
+  
 
   <!-- 포인트 카드 (컴팩트) -->
   <div class="point-card">

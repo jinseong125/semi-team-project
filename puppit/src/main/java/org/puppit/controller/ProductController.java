@@ -26,7 +26,7 @@ public class ProductController {
     private final ProductService productService;
     private final S3Service s3Service;
 
-    /** »óÇ° µî·Ï Æû */
+    /** ìƒí’ˆ ë“±ë¡ í¼ */
     @GetMapping("/new")
     public String newForm(ProductDTO productDTO, Model model, HttpSession session,
                           RedirectAttributes ra) {
@@ -36,13 +36,13 @@ public class ProductController {
 
 
         if (sellerId == null) {
-            ra.addFlashAttribute("error", "»óÇ° µî·ÏÀº ·Î±×ÀÎ ÈÄ ÀÌ¿ë °¡´ÉÇÕ´Ï´Ù.");
+            ra.addFlashAttribute("error", "ìƒí’ˆ ë“±ë¡ì€ ë¡œê·¸ì¸ í›„ ì´ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤.");
             return "redirect:/user/login";
         }
 
 
 
-        // ¼¿·ºÆ® ¹Ú½º µ¥ÀÌÅÍ
+        // ì…€ë ‰íŠ¸ ë°•ìŠ¤ ë°ì´í„°
         var formData = productService.getProductFormData();
         model.addAttribute("categories", formData.get("categories"));
         model.addAttribute("locations", formData.get("locations"));
@@ -59,35 +59,35 @@ public class ProductController {
                          HttpSession session,
                          RedirectAttributes ra) {
 
-        // 1. ·Î±×ÀÎ »ç¿ëÀÚ È®ÀÎ
+        // 1. ë¡œê·¸ì¸ ì‚¬ìš©ì í™•ì¸
         Object attr = session.getAttribute("sessionMap");
         Map<String, Object> map = (Map<String, Object>)attr;
         Integer sellerId = (Integer) map.get("userId");
 
         if (sellerId == null) {
-            ra.addFlashAttribute("error", "»óÇ° µî·ÏÀº ·Î±×ÀÎ ÈÄ ÀÌ¿ë °¡´ÉÇÕ´Ï´Ù.");
+            ra.addFlashAttribute("error", "ìƒí’ˆ ë“±ë¡ì€ ë¡œê·¸ì¸ í›„ ì´ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤.");
             return "redirect:/user/login";
         }
 
-        // 2. ÆÇ¸ÅÀÚ ID ¼³Á¤
+        // 2. íŒë§¤ì ID ì„¤ì •
         product.setSellerId(sellerId);
 
-        // 3. »óÅÂ ±âº»°ª ÁöÁ¤ (ÆÇ¸ÅÁß)
+        // 3. ìƒíƒœ ê¸°ë³¸ê°’ ì§€ì • (íŒë§¤ì¤‘)
         if (product.getStatusId() == null) {
             product.setStatusId(1);
         }
 
         try {
-            // 4. ¼­ºñ½º È£Ãâ (»óÇ° + ÀÌ¹ÌÁö µî·Ï)
+            // 4. ì„œë¹„ìŠ¤ í˜¸ì¶œ (ìƒí’ˆ + ì´ë¯¸ì§€ ë“±ë¡)
             productService.registerProduct(product, imageFiles);
 
-            // 5. ¼º°ø ¸Ş½ÃÁö
-            ra.addFlashAttribute("success", "»óÇ°ÀÌ µî·ÏµÇ¾ú½À´Ï´Ù.");
+            // 5. ì„±ê³µ ë©”ì‹œì§€
+            ra.addFlashAttribute("success", "ìƒí’ˆì´ ë“±ë¡ë˜ì—ˆìŠµë‹ˆë‹¤.");
             return "redirect:/product/myproduct";
 
         } catch (RuntimeException e) {
-            // 6. ½ÇÆĞ Ã³¸®
-            ra.addFlashAttribute("error", "»óÇ° µî·Ï Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: " + e.getMessage());
+            // 6. ì‹¤íŒ¨ ì²˜ë¦¬
+            ra.addFlashAttribute("error", "ìƒí’ˆ ë“±ë¡ ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤: " + e.getMessage());
             return "redirect:/product/new";
         }
     }
@@ -95,9 +95,9 @@ public class ProductController {
 
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, Model model) {
-        var productDetail = productService.getProductDetail(productId); // ¼öÁ¤
-        if (productDetail == null) { // ¼öÁ¤
-            model.addAttribute("error", "ÇØ´ç »óÇ°À» Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+        var productDetail = productService.getProductDetail(productId); // ìˆ˜ì •
+        if (productDetail == null) { // ìˆ˜ì •
+            model.addAttribute("error", "í•´ë‹¹ ìƒí’ˆì„ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return "error/404";
         }
         System.out.println("product: " + productDetail.toString());
@@ -116,7 +116,7 @@ public class ProductController {
 
         Object attr = session.getAttribute("sessionMap");
         if (attr == null) {
-            ra.addFlashAttribute("error", "»óÇ° °ü¸®´Â ·Î±×ÀÎ ÈÄ ÀÌ¿ë °¡´ÉÇÕ´Ï´Ù.");
+            ra.addFlashAttribute("error", "ìƒí’ˆ ê´€ë¦¬ëŠ” ë¡œê·¸ì¸ í›„ ì´ìš© ê°€ëŠ¥í•©ë‹ˆë‹¤.");
             return "redirect:/user/login";
         }
 

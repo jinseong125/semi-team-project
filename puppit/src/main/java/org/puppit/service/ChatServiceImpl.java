@@ -49,11 +49,11 @@ public class ChatServiceImpl implements ChatService{
 	        dto.setChatMessage(String.valueOf(message.get("chat_message")));
 	        dto.setBuyerId(String.valueOf(message.get("buyer_id")));
 	        dto.setChatSellerAccountId(String.valueOf(message.get("chat_seller_account_id")));
-	        // chat_created_atÀº Timestamp·Î Ä³½ºÆÃ ÇÊ¿ä
-	        
+
+	        // chat_created_atì€ Timestampë¡œ ìºìŠ¤íŒ… í•„ìš”	        
 	        Object createdAt = message.get("chat_created_at");
 	        if (createdAt instanceof Timestamp) {
-	            dto.setChatCreatedAt((Timestamp) createdAt); // Á¤»ó µ¿ÀÛ
+	            dto.setChatCreatedAt((Timestamp) createdAt); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	        }
 	        dto.setSenderRole(String.valueOf(message.get("sender_role")));
 	        dto.setReceiverRole(String.valueOf(message.get("receiver_role")));
