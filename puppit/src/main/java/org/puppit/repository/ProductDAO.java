@@ -94,4 +94,5 @@ public class ProductDAO {
 	  public Integer getProductCount() {
 	    return sqlSession.selectOne("product.getProductCount");
 	  }  
+
 }

@@ -21,4 +21,6 @@ public interface ChatService {
 
 	public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO);	
 
+
 }
+
