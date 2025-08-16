@@ -230,5 +230,31 @@ ORDER BY c.chat_created_at ASC;
         WHERE r.room_id = #{roomId}
     </select>
 
+<select id="getProductWithSellerAccountId" resultType="org.puppit.model.dto.ChatMessageProductDTO" parameterType="java.lang.Integer">
+    SELECT 
+        product.product_id, 
+        product.product_name, 
+        product.product_price, 
+        product.seller_id,
+        user.account_id AS chat_seller_account_id
+    FROM 
+        product
+    JOIN 
+        user 
+    ON 
+        product.seller_id = user.user_id
+    WHERE 
+        product.product_id = #{productId}
+</select>
+  
+  
+
+    <!-- 상품 ID로 판매자 AccountId 조회 -->
+    <select id="getSellerAccountIdByProductId" parameterType="int" resultType="org.puppit.model.dto.ChatUserDTO">
+        SELECT u.account_id
+        FROM product p
+        INNER JOIN user u ON p.seller_id = u.user_id
+        WHERE p.product_id = #{productId}
+    </select>
   
 </mapper>

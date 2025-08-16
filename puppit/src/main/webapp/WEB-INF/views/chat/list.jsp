@@ -156,6 +156,7 @@ function loadChatHistory(roomId) {
     return fetch(contextPath + '/chat/message?roomId=' + roomId)
         .then(response => response.json())
         .then(data => {
+        	console.log('Server Response:', data); // 서버 응답 로그 출력
             if (data.product) {
                 renderProductInfo(data.product, data.chatMessages || []);
             } else {
@@ -175,6 +176,7 @@ function loadChatHistory(roomId) {
 }
 
 function renderProductInfo(product, chatMessages) {
+	  console.log('Rendering Product Info:', product); // 서버에서 전달된 product 확인
     const price = Number(product.productPrice);
     let html =
         '<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:12px;">'
@@ -185,9 +187,9 @@ function renderProductInfo(product, chatMessages) {
     if (String(userId) !== String(product.sellerId)) {
         html += `<button
             id="pay-btn"
-            	data-buyer-id="\${resolvedBuyerId}"
+            	    data-buyer-id="\${userId}" // 로그인된 사용자를 buyerId로 설정
                     data-seller-id="\${product.sellerId}"
-                    data-seller-account-id="\${chatSellerAccountId}"
+                    data-seller-account-id="\${product.chatSellerAccountId}" // Fix: Bind chatSellerAccountId directly from product object
                     data-product-name="\${product.productName}"
                     data-product-id="\${product.productId}"
         >결제하기</button>`;
@@ -200,16 +202,16 @@ function renderProductInfo(product, chatMessages) {
     if (payBtn) {
         payBtn.onclick = function(e) {
             const btn = e.currentTarget;
-            console.log(btn);
-            console.log(btn.dataset)
+            console.log("btn.dataset: ", btn.dataset); // 버튼 데이터 확인
+            const buyerId = btn.dataset.buyerId; // buyerId 가져오기
+
             // 반드시 data-seller-account-id를 읽어서 콘솔에 찍음!
-            chatSellerAccountId =  btn.dataset.sellerAccountId;
-            console.log('결제버튼 클릭 - chatSellerAccountId:', chatSellerAccountId); // 여기서 찍힘
-            quantity = 1;
-            productId = product.productId;
-            buyerId = resolvedBuyerId;
-            var payUrl = contextPath + '/order/pay'
-                + '?buyerId=' + encodeURIComponent(resolvedBuyerId)
+            const chatSellerAccountId = btn.dataset.sellerAccountId; // Fix: Access chatSellerAccountId from dataset
+            console.log('결제버튼 클릭 - chatSellerAccountId:', chatSellerAccountId);
+            const quantity = 1;
+            const productId = product.productId;
+            const payUrl = contextPath + '/order/pay'
+            	+ '?buyerId=' + encodeURIComponent(buyerId)
                 + '&sellerId=' + encodeURIComponent(product.sellerId)
                 + '&chatSellerAccountId=' + encodeURIComponent(chatSellerAccountId)
                 + '&productName=' + encodeURIComponent(product.productName)
@@ -273,12 +275,17 @@ function sendMessage(currentRoomId) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value;
     if (!message.trim() || !currentRoomId) return;
+
+    // productId와 buyerId를 설정
+    const productId = document.querySelector('#pay-btn')?.dataset.productId; // 버튼에서 productId 가져오기
+    const buyerId = userId; // 로그인된 사용자의 userId를 buyerId로 설정
+
     stompClient.send("/app/chat.send", {}, JSON.stringify({
         chatRoomId: currentRoomId,
         chatMessage: message,
         chatSenderAccountId: loginUserId,
-        productId: productId,
-        buyerId: buyerId
+        productId: productId, // productId 설정
+        buyerId: buyerId // buyerId 설정
     }));
     input.value = "";
 }

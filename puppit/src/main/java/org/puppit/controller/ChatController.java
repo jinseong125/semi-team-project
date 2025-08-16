@@ -70,7 +70,7 @@ public class ChatController {
 	    ChatMessageProductDTO product = null;
 	    try {
 	        if (productId != null) {
-	            product = chatService.getProduct(productId);
+	            product = chatService.getProductWithSellerAccountId(productId); // Fetch product with seller's account ID
 	            System.out.println("product: " + (product != null ? product.toString() : "null"));
 	        } else {
 	            System.err.println("productId가 null입니다.");

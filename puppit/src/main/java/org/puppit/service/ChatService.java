@@ -11,6 +11,7 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
+import org.puppit.model.dto.ChatUserDTO;
 
 
 public interface ChatService {
@@ -25,6 +26,8 @@ public interface ChatService {
 	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId);              // 추가
 	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size);
 	public Integer getProductIdByRoomId(int roomId);
+	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId);
+	public ChatUserDTO getSellerByProductId(Integer productId);
 
 }
 

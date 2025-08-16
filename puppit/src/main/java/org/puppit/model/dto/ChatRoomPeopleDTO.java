@@ -27,6 +27,7 @@ public class ChatRoomPeopleDTO {
 	private String senderRole;
 	private String receiverRole;
 	private Integer productSellerId;
+	private Integer buyerId;
 	
 	@Override
 	public String toString() {
@@ -35,8 +36,10 @@ public class ChatRoomPeopleDTO {
 				+ senderUserName + ", receiverAccountId=" + receiverAccountId + ", receiverUserName=" + receiverUserName
 				+ ", chatMessage=" + chatMessage + ", chatCreatedAt=" + chatCreatedAt + ", senderIsMe=" + senderIsMe
 				+ ", receiverIsMe=" + receiverIsMe + ", senderRole=" + senderRole + ", receiverRole=" + receiverRole
-				+ ", productSellerId=" + productSellerId + "]";
+				+ ", productSellerId=" + productSellerId + ", buyerId=" + buyerId + "]";
 	}
+	
+
 
 	
 	

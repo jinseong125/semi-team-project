@@ -12,8 +12,7 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
-
-
+import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
@@ -103,6 +102,17 @@ public class ChatServiceImpl implements ChatService{
 	@Override
 	public Integer getProductIdByRoomId(int roomId) {
 		 return chatDAO.findProductIdByRoomId(roomId);
+	}
+
+	@Override
+	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId) {
+		return chatDAO.getProductWithSellerAccountId(productId);
+	}
+
+	@Override
+	public ChatUserDTO getSellerByProductId(Integer productId) {
+		// TODO Auto-generated method stub
+		return chatDAO.getSellerByProductId(productId);
 	}
 	
 	  // 페이징된 채팅방 목록 조회

@@ -13,7 +13,7 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
-
+import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
@@ -103,6 +103,14 @@ public class ChatDAO {
    public Integer findProductIdByRoomId(int roomId) {
        return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.findProductIdByRoomId", roomId);
    }
+
+public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId) {
+	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getProductWithSellerAccountId", productId);
+}
+
+public ChatUserDTO getSellerByProductId(Integer productId) {
+    return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getSellerAccountIdByProductId", productId);
+}
    
    
    
