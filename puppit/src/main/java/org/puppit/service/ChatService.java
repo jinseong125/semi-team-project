@@ -14,13 +14,17 @@ import org.puppit.model.dto.ChatRoomPeopleDTO;
 
 
 public interface ChatService {
-	public List<ChatListDTO> getChatRooms(int userId);
+	public List<ChatListDTO> getChatRooms(int userId, Integer highlightRoomId); // highlightRoomId 인자 삭제!
 	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO chatMessageSelectDTO);
 	public ChatMessageProductDTO getProduct(Integer productId);
 	public Integer saveChatMessage(ChatMessageDTO chatMessageDTO);
 
 	public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO);	
-
+	public Integer findExistingRoom(int productId, int buyerId, int sellerId);
+	public Integer createRoom(int productId, int buyerId, int sellerId);
+	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId);              // 추가
+	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size);
+	public Integer getProductIdByRoomId(int roomId);
 
 }
 

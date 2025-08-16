@@ -17,6 +17,8 @@ public class ChatListDTO {
 	private Integer productId;
 	private String productName;
 	private Integer productPrice;
+	private Integer sellerId;
+	private String sellerName;
 	private Integer otherUserId;
 	private String otherAccountId;
 	private String otherUserName;
@@ -28,18 +30,22 @@ public class ChatListDTO {
 	private Integer lastMessageReceiverId;
 	private String lastMessageReceiverAccountId;
 	private String lastMessageReceiverName;
+	private Timestamp sortTime;
 	
 	@Override
 	public String toString() {
 		return "ChatListDTO [roomId=" + roomId + ", productId=" + productId + ", productName=" + productName
-				+ ", productPrice=" + productPrice + ", otherUserId=" + otherUserId + ", otherAccountId="
-				+ otherAccountId + ", otherUserName=" + otherUserName + ", lastMessage=" + lastMessage
-				+ ", lastMessageAT=" + lastMessageAT + ", lastMessageSenderId=" + lastMessageSenderId
-				+ ", lastMessageSenderAccountId=" + lastMessageSenderAccountId + ", lastMessageSenderName="
-				+ lastMessageSenderName + ", lastMessageReceiverId=" + lastMessageReceiverId
-				+ ", lastMessageReceiverAccountId=" + lastMessageReceiverAccountId + ", lastMessageReceiverName="
-				+ lastMessageReceiverName + "]";
+				+ ", productPrice=" + productPrice + ", sellerId=" + sellerId + ", sellerName=" + sellerName
+				+ ", otherUserId=" + otherUserId + ", otherAccountId=" + otherAccountId + ", otherUserName="
+				+ otherUserName + ", lastMessage=" + lastMessage + ", lastMessageAT=" + lastMessageAT
+				+ ", lastMessageSenderId=" + lastMessageSenderId + ", lastMessageSenderAccountId="
+				+ lastMessageSenderAccountId + ", lastMessageSenderName=" + lastMessageSenderName
+				+ ", lastMessageReceiverId=" + lastMessageReceiverId + ", lastMessageReceiverAccountId="
+				+ lastMessageReceiverAccountId + ", lastMessageReceiverName=" + lastMessageReceiverName + ", sortTime="
+				+ sortTime + "]";
 	}
+	
+
 	
 	
 	

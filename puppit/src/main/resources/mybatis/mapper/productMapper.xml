@@ -86,17 +86,23 @@
 	</select>
 	
 	<!-- 상품 상세 조회 -->
-		<select id="getProductDetail"
-	resultType="org.puppit.model.dto.ProductDTO"
-	parameterType="java.lang.Integer">
-	SELECT p.product_id AS productId, p.product_name AS productName, p.product_price AS productPrice,
-				 c.category_name AS categoryName, s.status_name AS statusName, p.product_description AS productDescription
-	  FROM product p
-	  JOIN product_category c    ON p.category_id  = c.category_id
-      JOIN product_condition con ON p.condition_id = con.condition_id
-	  JOIN product_status s      ON p.status_id    = s.status_id
-	 WHERE p.product_id = #{productId}  
-	</select>
+<select id="getProductDetail"
+    resultType="org.puppit.model.dto.ProductDTO"
+    parameterType="java.lang.Integer">
+    SELECT
+        p.product_id        AS productId,
+        p.product_name      AS productName,
+        p.product_price     AS productPrice,
+        p.seller_id         AS sellerId,           -- 추가된 부분
+        c.category_name     AS categoryName,
+        s.status_name       AS statusName,
+        p.product_description AS productDescription
+    FROM product p
+        JOIN product_category c    ON p.category_id  = c.category_id
+        JOIN product_condition con ON p.condition_id = con.condition_id
+        JOIN product_status s      ON p.status_id    = s.status_id
+    WHERE p.product_id = #{productId}
+</select>
 	
 	<select id="getScrollProduct" resultType="org.puppit.model.dto.ProductDTO">
 	SELECT COUNT(*)

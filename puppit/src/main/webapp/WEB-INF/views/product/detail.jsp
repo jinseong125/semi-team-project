@@ -1,7 +1,25 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" trimDirectiveWhitespaces="true"%>
+<%@ page import="java.util.Map" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%
+Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
+String accountId = "";
+Integer userId = 0;
+if (sessionMap != null) {
+    Object accountIdObj = sessionMap.get("accountId");
+    if (accountIdObj != null) {
+        accountId = accountIdObj.toString();
+    }
+    Object userIdObj = sessionMap.get("userId");
+    if (userIdObj != null) {
+        userId = Integer.parseInt(userIdObj.toString());
+    }
+}
+%>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<c:set var="userId" value="<%= userId %>" />
+
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 
@@ -133,6 +151,18 @@
 </style>
 
 <script>
+var contextPath = "${contextPath}"; // <-- 반드시 선언!
+
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
-document.getElementById('btnPay')?.addEventListener('click',()=>alert('채팅 페이지로 이동(구현 예정)'));
+document.getElementById('btnPay')?.addEventListener('click',function() {
+	const productId = "${product.productId}";
+    const buyerId = "${userId}";
+    const sellerId = "${product.sellerId}";
+    // chat/createRoom?productId=xxx&buyerId=xxx&sellerId=xxx 로 요청
+    window.location.href = contextPath + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;
+	
+	
+	
+	
+});
 </script>
