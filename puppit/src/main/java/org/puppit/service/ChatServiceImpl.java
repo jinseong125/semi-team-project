@@ -1,6 +1,7 @@
 package org.puppit.service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,11 +79,40 @@ public class ChatServiceImpl implements ChatService{
 		return chatDAO.getUserRoleANDAboutChatMessagePeople(chatMessageSearchDTO);
 	}
 
+ 
 	@Override
-	public List<ChatListDTO> getChatRooms(int userId) {
-		// TODO Auto-generated method stub
-		return chatDAO.getChatList(userId);
+	public Integer findExistingRoom(int productId, int buyerId, int sellerId) {
+	    return chatDAO.selectRoomIdByParticipants(productId, buyerId, sellerId);
 	}
 
+	@Override
+	public Integer createRoom(int productId, int buyerId, int sellerId) {
+	    return chatDAO.insertRoom(productId, buyerId, sellerId);
+	}
+
+	@Override
+	public List<ChatListDTO> getChatRooms(int userId,  Integer highlightRoomId) {
+		 return chatDAO.getChatList(userId, highlightRoomId);
+	}
+
+	@Override
+	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId) {
+	    return chatDAO.getChatListByCreatedDesc(userId);
+	}
+
+	@Override
+	public Integer getProductIdByRoomId(int roomId) {
+		 return chatDAO.findProductIdByRoomId(roomId);
+	}
+	
+	  // 페이징된 채팅방 목록 조회
+
+	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size) {
+	//    Map<String, Object> param = new HashMap<>();
+	//    param.put("userId", userId);
+	//    param.put("offset", offset); // int 값
+	//    param.put("size", size);     // int 값
+	//    return chatDAO.getChatRoomsByCreatedDescPaged(param);
+	//}
 
 }
