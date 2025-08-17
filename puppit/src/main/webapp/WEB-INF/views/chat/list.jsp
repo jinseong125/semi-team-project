@@ -75,15 +75,16 @@ if (sessionMap != null) {
                     </span>
                     <div class="chat-info-area" style="cursor:pointer;">
                         <div class="chat-nickname">
-                            <c:choose>
-                                <c:when test="${not empty chat.lastMessage}">
-                                    <c:out value="${chat.lastMessageSenderName}" />
+                             <c:choose>
+                                <c:when test="${not empty chat.productName}">
+                                    <c:out value="${chat.productName}" />  (<c:out value="${chat.sellerAccountId}" />)
                                 </c:when>
                                 <c:otherwise>
-                                    <c:out value="${chat.productName}" /> (<c:out value="${chat.sellerName}" />)
+                                    상품판매자와 채팅을 시작해보세요
                                 </c:otherwise>
                             </c:choose>
                         </div>
+                         
                         <div class="chat-message">
                             <c:choose>
                                 <c:when test="${not empty chat.lastMessage}">
@@ -100,6 +101,9 @@ if (sessionMap != null) {
         </div>
     </div>
     <div class="chat-container">
+	   <!--   <div class="chat-header" id="chat-header" style="padding: 10px; font-size: 16px; font-weight: bold; background: #f5f5f5; border-bottom: 1px solid #ddd;">
+	        
+	    </div>  -->
         <div class="product-info-area" id="product-info-area"></div>
         <div class="center-message" id="center-message">상품 판매자와 채팅을 시작해보세요</div>
         <div class="chat-history" id="chat-history"></div>
@@ -152,15 +156,53 @@ document.addEventListener('DOMContentLoaded', function() {
     enableChatInput(false);
 });
 
+function loadChatHeader(product, buyerId, sellerId, sellerAccountId, buyerAccountId) {
+    const chatHeader = document.getElementById('chat-header');
+    console.log('loadChatHeader 호출됨');
+    console.log('chatHeader:', chatHeader);
+    console.log('buyerId:', buyerId, 'sellerId:', sellerId, 'sellerAccountId:', sellerAccountId, 'buyerAccountId:', buyerAccountId);
+
+    // sellerAccountId와 buyerAccountId를 안전하게 처리
+    const sellerText = typeof sellerAccountId === 'string' && sellerAccountId.trim() !== '' ? sellerAccountId : "정보 없음";
+    const buyerText = typeof buyerAccountId === 'string' && buyerAccountId.trim() !== '' ? buyerAccountId : "구매자 계정 정보 없음";
+
+    if (String(userId) === String(buyerId)) {
+        // 현재 사용자가 구매자인 경우
+        chatHeader.innerHTML = `<strong>상품 판매자:</strong> ${sellerText}`;
+    } else if (String(userId) === String(sellerId)) {
+        // 현재 사용자가 판매자인 경우
+        chatHeader.innerHTML = `<strong>구매자:</strong> ${buyerText}`;
+    } else {
+        // 알 수 없는 역할일 경우 기본 메시지 표시
+        chatHeader.innerHTML = `<strong>채팅 상대 정보를 불러올 수 없습니다.</strong>`;
+    }
+}
+
 function loadChatHistory(roomId) {
     return fetch(contextPath + '/chat/message?roomId=' + roomId)
         .then(response => response.json())
         .then(data => {
-            if (data.product) {
-                renderProductInfo(data.product, data.chatMessages || []);
-            } else {
-                productInfoArea.innerHTML = '';
+            console.log('Server Response:', data); // 서버 응답 로그 출력
+
+            let buyerId = null; // 구매자 ID 초기화
+            const sellerId = data.product.sellerId || null; // 판매자 ID
+            const sellerAccountId = data.product.chatSellerAccountId || ""; // 판매자의 accountId
+            let buyerAccountId = ""; // 구매자의 accountId 초기화
+
+            // 🔥 buyerId와 buyerAccountId 추출
+            if (data.chatMessages && data.chatMessages.length > 0) {
+                const buyerMessage = data.chatMessages.find(msg => msg.senderRole === "BUYER");
+                if (buyerMessage) {
+                    buyerId = buyerMessage.buyerId || null;
+                    buyerAccountId = buyerMessage.chatSenderAccountId || ""; // 구매자의 accountId 추출
+                }
             }
+
+            console.log("buyerId: ", buyerId, " sellerId: ", sellerId, " sellerAccountId: ", sellerAccountId, " buyerAccountId: ", buyerAccountId);
+
+            //loadChatHeader(data.product, buyerId, sellerId, sellerAccountId, buyerAccountId);
+            renderProductInfo(data.product, data.chatMessages || []);
+
             chatHistory.innerHTML = "";
             const messages = Array.isArray(data.chatMessages) ? data.chatMessages : [];
             messages.forEach(chat => addChatMessageToHistory(chat));
@@ -173,8 +215,8 @@ function loadChatHistory(roomId) {
             }
         });
 }
-
 function renderProductInfo(product, chatMessages) {
+	  console.log('Rendering Product Info:', product); // 서버에서 전달된 product 확인
     const price = Number(product.productPrice);
     let html =
         '<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:12px;">'
@@ -185,9 +227,9 @@ function renderProductInfo(product, chatMessages) {
     if (String(userId) !== String(product.sellerId)) {
         html += `<button
             id="pay-btn"
-            	data-buyer-id="\${resolvedBuyerId}"
+            	    data-buyer-id="\${userId}" // 로그인된 사용자를 buyerId로 설정
                     data-seller-id="\${product.sellerId}"
-                    data-seller-account-id="\${chatSellerAccountId}"
+                    data-seller-account-id="\${product.chatSellerAccountId}" // Fix: Bind chatSellerAccountId directly from product object
                     data-product-name="\${product.productName}"
                     data-product-id="\${product.productId}"
         >결제하기</button>`;
@@ -200,16 +242,16 @@ function renderProductInfo(product, chatMessages) {
     if (payBtn) {
         payBtn.onclick = function(e) {
             const btn = e.currentTarget;
-            console.log(btn);
-            console.log(btn.dataset)
+            console.log("btn.dataset: ", btn.dataset); // 버튼 데이터 확인
+            const buyerId = btn.dataset.buyerId; // buyerId 가져오기
+
             // 반드시 data-seller-account-id를 읽어서 콘솔에 찍음!
-            chatSellerAccountId =  btn.dataset.sellerAccountId;
-            console.log('결제버튼 클릭 - chatSellerAccountId:', chatSellerAccountId); // 여기서 찍힘
-            quantity = 1;
-            productId = product.productId;
-            buyerId = resolvedBuyerId;
-            var payUrl = contextPath + '/order/pay'
-                + '?buyerId=' + encodeURIComponent(resolvedBuyerId)
+            const chatSellerAccountId = btn.dataset.sellerAccountId; // Fix: Access chatSellerAccountId from dataset
+            console.log('결제버튼 클릭 - chatSellerAccountId:', chatSellerAccountId);
+            const quantity = 1;
+            const productId = product.productId;
+            const payUrl = contextPath + '/order/pay'
+            	+ '?buyerId=' + encodeURIComponent(buyerId)
                 + '&sellerId=' + encodeURIComponent(product.sellerId)
                 + '&chatSellerAccountId=' + encodeURIComponent(chatSellerAccountId)
                 + '&productName=' + encodeURIComponent(product.productName)
@@ -221,17 +263,63 @@ function renderProductInfo(product, chatMessages) {
 }
 
 function addChatMessageToHistory(chat) {
-    let alignClass = (chat.senderRole === "BUYER") ? "right" : "left";
-    let msg = chat.message || chat.chatMessage || "";
-    let formattedTime = chat.chatCreatedAt || "";
-    let html =
-        '<div class="chat-message ' + alignClass + '">' +
-            '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-            '<div class="chat-text">' + msg + '</div>' +
-            '<div class="chat-time">' + formattedTime + '</div>' +
-        '</div>';
-    chatHistory.innerHTML += html;
+    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
+    const currentUserRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // 현재 사용자 역할 결정
+
+    // 메시지를 보낸 사람과 현재 사용자를 비교하여 영역 결정
+    if (String(chat.chatSenderAccountId) === String(loginUserId)) {
+        // 현재 사용자가 메시지를 보낸 경우
+        let alignClass = "right"; // 오른쪽 정렬
+        let msg = chat.message || chat.chatMessage || "";
+
+        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
+        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
+
+        let html =
+            '<div class="chat-message ' + alignClass + '">' +
+                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
+                '<div class="chat-text">' + msg + '</div>' +
+                '<div class="chat-time">' + formattedTime + '</div>' +
+            '</div>';
+        chatHistory.innerHTML += html;
+    } else {
+        // 상대방이 메시지를 보낸 경우
+        let alignClass = "left"; // 왼쪽 정렬
+        let msg = chat.message || chat.chatMessage || "";
+
+        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
+        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
+
+        let html =
+            '<div class="chat-message ' + alignClass + '">' +
+                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
+                '<div class="chat-text">' + msg + '</div>' +
+                '<div class="chat-time">' + formattedTime + '</div>' +
+            '</div>';
+        chatHistory.innerHTML += html;
+    }
+
+    // 스크롤을 최신 메시지로 이동
     chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+
+//시간 형식 변환 함수 추가
+function formatChatTime(timeString) {
+ if (!timeString) return "시간 정보 없음"; // 시간이 없는 경우 기본 메시지 반환
+
+ const date = new Date(timeString);
+ const options = {
+     year: "numeric",
+     month: "2-digit",
+     day: "2-digit",
+     hour: "2-digit",
+     minute: "2-digit",
+     second: "2-digit",
+     hour12: true, // 오전/오후 표시
+ };
+
+ return new Intl.DateTimeFormat("ko-KR", options).format(date);
 }
 
 function connectAndSubscribe(currentRoomId) {
@@ -273,13 +361,33 @@ function sendMessage(currentRoomId) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value;
     if (!message.trim() || !currentRoomId) return;
-    stompClient.send("/app/chat.send", {}, JSON.stringify({
+
+    const productId = document.querySelector('#pay-btn')?.dataset.productId; // 버튼에서 productId 가져오기
+    const buyerId = userId; // 로그인된 사용자의 userId를 buyerId로 설정
+
+    // senderRole을 동적으로 설정 (로그인한 사용자와 상품 판매자 비교)
+    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
+    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // SELLER 또는 BUYER 여부 확인
+
+    const chatMessage = {
         chatRoomId: currentRoomId,
         chatMessage: message,
         chatSenderAccountId: loginUserId,
         productId: productId,
-        buyerId: buyerId
-    }));
+        buyerId: buyerId,
+        senderRole: senderRole // 동적으로 계산된 senderRole 설정
+    };
+
+    stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+
+    // 메시지를 채팅 창에 즉시 추가
+    addChatMessageToHistory({
+        chatSenderAccountId: loginUserId,
+        message: message,
+        senderRole: senderRole, // 동적으로 설정된 senderRole 사용
+        chatCreatedAt: new Date().toLocaleString() // 현재 시간
+    });
+
     input.value = "";
 }
 </script>

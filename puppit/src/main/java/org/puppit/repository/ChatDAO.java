@@ -1,6 +1,8 @@
 package org.puppit.repository;
 
+import com.google.common.hash.Hashing;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +15,7 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
-
+import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
@@ -103,6 +105,45 @@ public class ChatDAO {
    public Integer findProductIdByRoomId(int roomId) {
        return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.findProductIdByRoomId", roomId);
    }
+
+public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId) {
+	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getProductWithSellerAccountId", productId);
+}
+
+public ChatUserDTO getSellerByProductId(Integer productId) {
+    return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getSellerAccountIdByProductId", productId);
+}
+
+public boolean isFirstChat(Integer roomId, Integer senderId, Integer receiverId) {
+	Map<String, Object> params = new HashMap<>();
+    params.put("roomId", roomId);
+    params.put("senderId", senderId);
+    params.put("receiverId", receiverId);
+	return  sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getChatParticipants", params);
+}
+
+
+/**
+ * 특정 채팅방에서 기존 채팅 메시지의 개수를 조회하는 메서드
+ * @param roomId 채팅방 ID
+ * @return 채팅 메시지 개수
+ */
+public Integer getChatCountByRoomId(Integer roomId) {
+    return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getChatCountByRoomId", roomId);
+}
+
+public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
+	 Map<String, Object> params = new HashMap<>();
+	    params.put("chatRoomId", chatMessageDTO.getChatRoomId());
+	    params.put("chatSenderAccountId", chatMessageDTO.getChatSenderAccountId());
+	    params.put("chatMessage", chatMessageDTO.getChatMessage());
+	    params.put("chatSender", chatMessageDTO.getChatSender()); // Integer로 전달
+	    params.put("chatCreatedAt", chatMessageDTO.getChatCreatedAt());
+	 Integer count = sqlSession.selectOne("mybatis.mapper.chatMessageMapper.checkMessageDuplicate", params);
+	    return count != null && count > 0;
+}
+
+
    
    
    

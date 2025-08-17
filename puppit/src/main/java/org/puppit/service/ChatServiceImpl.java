@@ -12,8 +12,7 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
-
-
+import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
@@ -103,6 +102,34 @@ public class ChatServiceImpl implements ChatService{
 	@Override
 	public Integer getProductIdByRoomId(int roomId) {
 		 return chatDAO.findProductIdByRoomId(roomId);
+	}
+
+	@Override
+	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId) {
+		return chatDAO.getProductWithSellerAccountId(productId);
+	}
+
+	@Override
+	public ChatUserDTO getSellerByProductId(Integer productId) {
+		// TODO Auto-generated method stub
+		return chatDAO.getSellerByProductId(productId);
+	}
+
+	 /**
+     * 첫 채팅 여부를 확인하는 메서드
+     * @param chatRoomId 채팅방 ID
+     * @return 첫 채팅일 경우 true, 아닐 경우 false
+     */
+	@Override
+    public boolean isFirstChat(Integer chatRoomId) {
+        Integer chatCount = chatDAO.getChatCountByRoomId(chatRoomId);
+        return chatCount == null || chatCount == 0;
+    }
+
+	@Override
+	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
+		  // 메시지 중복 여부 확인 로직
+	    return chatDAO.isMessageDuplicate(chatMessageDTO);
 	}
 	
 	  // 페이징된 채팅방 목록 조회
