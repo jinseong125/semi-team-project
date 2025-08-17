@@ -272,7 +272,7 @@ function addChatMessageToHistory(chat) {
         let alignClass = "right"; // 오른쪽 정렬
         let msg = chat.message || chat.chatMessage || "";
 
-        // 시간 형식을 yyyy-MM-dd a hh:mm:ss로 변환
+        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
         let formattedTime = formatChatTime(chat.chatCreatedAt || "");
 
         let html =
@@ -287,7 +287,7 @@ function addChatMessageToHistory(chat) {
         let alignClass = "left"; // 왼쪽 정렬
         let msg = chat.message || chat.chatMessage || "";
 
-        // 시간 형식을 yyyy-MM-dd a hh:mm:ss로 변환
+        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
         let formattedTime = formatChatTime(chat.chatCreatedAt || "");
 
         let html =
@@ -303,25 +303,24 @@ function addChatMessageToHistory(chat) {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
+
 //시간 형식 변환 함수 추가
 function formatChatTime(timeString) {
-    if (!timeString) return "시간 정보 없음"; // 시간이 없는 경우 기본 메시지 반환
+ if (!timeString) return "시간 정보 없음"; // 시간이 없는 경우 기본 메시지 반환
 
-    const date = new Date(timeString);
-    const options = {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true, // 오전/오후 표시
-    };
+ const date = new Date(timeString);
+ const options = {
+     year: "numeric",
+     month: "2-digit",
+     day: "2-digit",
+     hour: "2-digit",
+     minute: "2-digit",
+     second: "2-digit",
+     hour12: true, // 오전/오후 표시
+ };
 
-    return new Intl.DateTimeFormat("ko-KR", options).format(date);
+ return new Intl.DateTimeFormat("ko-KR", options).format(date);
 }
-
-
 
 function connectAndSubscribe(currentRoomId) {
     if (!stompClient) {
