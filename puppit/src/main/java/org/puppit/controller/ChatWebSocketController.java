@@ -41,16 +41,17 @@ public class ChatWebSocketController {
 	@MessageMapping("/chat.send")
 	public void sendMessage(@Payload ChatMessageDTO chatMessageDTO,
 	                        SimpMessageHeaderAccessor headerAccessor) {
+		System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
 
-	    System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
+        ChatUserDTO receiver = null;
 
-	    ChatUserDTO receiver = null;
         // Sender 정보 조회
         ChatUserDTO sender = userService.getUserByUserId(chatMessageDTO.getChatSenderAccountId());
         if (sender == null) {
             System.out.println("Sender 정보를 찾을 수 없습니다. 메시지 처리 중단.");
             return;
         }
+
         System.out.println("sender: " + sender.toString());
 
         // ChatRoomId 확인 및 파싱
@@ -64,9 +65,16 @@ public class ChatWebSocketController {
         }
 
         System.out.println("isFirstChat: " + chatService.isFirstChat(chatRoomId));
+
+        // 메시지 중복 확인
+        chatMessageDTO.setChatSender(sender.getUserId());
+        if (chatService.isMessageDuplicate(chatMessageDTO)) {
+            System.out.println("중복 메시지입니다. 저장하지 않습니다.");
+            return;
+        }
+
         // 첫 채팅일 경우 처리
         if (chatService.isFirstChat(chatRoomId)) {
-        	
             Integer productId = chatService.getProductIdByRoomId(chatRoomId);
             System.out.println("productId: " + productId);
             receiver = chatService.getSellerByProductId(productId);
@@ -77,7 +85,7 @@ public class ChatWebSocketController {
             }
 
             String senderRole = sender.getUserId().equals(receiver.getUserId()) ? "SELLER" : "BUYER";
-            System.out.println("snederRole: " + senderRole);
+            System.out.println("senderRole: " + senderRole);
             String receiverRole = receiver.getUserId().equals(sender.getUserId()) ? "SELLER" : "BUYER";
 
             chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
@@ -89,11 +97,11 @@ public class ChatWebSocketController {
             chatMessageDTO.setReceiverRole(receiverRole);
 
             chatMessageDTO.setProductId(productId.toString());
-            
+
             System.out.println("sender userId: " + sender.getUserId());
             chatMessageDTO.setChatSender(sender.getUserId());
             chatMessageDTO.setChatReceiver(receiver.getUserId());
-            
+
         } else {
             // 기존 채팅 정보 조회 및 설정
             ChatMessageSearchDTO messageSearchDTO = new ChatMessageSearchDTO(sender.getUserId(), chatRoomId);
@@ -115,13 +123,13 @@ public class ChatWebSocketController {
             chatMessageDTO.setProductId(latest.getProductId().toString());
             System.out.println("sender userId: " + sender.getUserId());
             chatMessageDTO.setChatSender(sender.getUserId());
-            // 기존 메시지의 마지막 요소에서 chatSender를 가져와 chatReceiver로 설정
             chatMessageDTO.setChatReceiver(Integer.parseInt(latest.getChatSender()));
-            
+            chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
+
             System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
         }
 
-        // 메시지 저장
+        // 메시지 저장 (트랜잭션 처리)
         try {
             Integer insertedRow = chatService.saveChatMessage(chatMessageDTO);
             System.out.println("insertedRow: " + insertedRow);

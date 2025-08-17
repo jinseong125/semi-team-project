@@ -29,5 +29,6 @@ public interface ChatService {
 	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId);
 	public ChatUserDTO getSellerByProductId(Integer productId);
 	public boolean isFirstChat(Integer chatRoomId);
+	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO);
 }
 

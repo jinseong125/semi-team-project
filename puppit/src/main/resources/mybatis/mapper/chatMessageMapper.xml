@@ -300,4 +300,16 @@ WHERE p.product_id = #{productId};
     	    
     </select>
   
+  
+  	<select id="checkMessageDuplicate" parameterType="map" resultType="int">
+  		  SELECT COUNT(*) 
+        FROM chat 
+        WHERE chat_room_id = #{chatRoomId}
+          AND chat_sender = #{chatSender}
+          AND chat_message = #{chatMessage}
+          AND chat_created_at = #{chatCreatedAt}
+  	
+  	
+  	</select>
+  
 </mapper>

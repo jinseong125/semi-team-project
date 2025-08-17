@@ -276,17 +276,32 @@ function sendMessage(currentRoomId) {
     const message = input.value;
     if (!message.trim() || !currentRoomId) return;
 
-    // productId와 buyerId를 설정
     const productId = document.querySelector('#pay-btn')?.dataset.productId; // 버튼에서 productId 가져오기
     const buyerId = userId; // 로그인된 사용자의 userId를 buyerId로 설정
 
-    stompClient.send("/app/chat.send", {}, JSON.stringify({
+    // senderRole을 동적으로 설정 (로그인한 사용자와 상품 판매자 비교)
+    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
+    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // SELLER 또는 BUYER 여부 확인
+
+    const chatMessage = {
         chatRoomId: currentRoomId,
         chatMessage: message,
         chatSenderAccountId: loginUserId,
-        productId: productId, // productId 설정
-        buyerId: buyerId // buyerId 설정
-    }));
+        productId: productId,
+        buyerId: buyerId,
+        senderRole: senderRole // 동적으로 계산된 senderRole 설정
+    };
+
+    stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+
+    // 메시지를 채팅 창에 즉시 추가
+    addChatMessageToHistory({
+        chatSenderAccountId: loginUserId,
+        message: message,
+        senderRole: senderRole, // 동적으로 설정된 senderRole 사용
+        chatCreatedAt: new Date().toLocaleString() // 현재 시간
+    });
+
     input.value = "";
 }
 </script>

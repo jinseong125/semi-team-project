@@ -1,6 +1,8 @@
 package org.puppit.repository;
 
+import com.google.common.hash.Hashing;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +131,19 @@ public boolean isFirstChat(Integer roomId, Integer senderId, Integer receiverId)
 public Integer getChatCountByRoomId(Integer roomId) {
     return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getChatCountByRoomId", roomId);
 }
+
+public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
+	 Map<String, Object> params = new HashMap<>();
+	    params.put("chatRoomId", chatMessageDTO.getChatRoomId());
+	    params.put("chatSenderAccountId", chatMessageDTO.getChatSenderAccountId());
+	    params.put("chatMessage", chatMessageDTO.getChatMessage());
+	    params.put("chatSender", chatMessageDTO.getChatSender()); // Integer로 전달
+	    params.put("chatCreatedAt", chatMessageDTO.getChatCreatedAt());
+	 Integer count = sqlSession.selectOne("mybatis.mapper.chatMessageMapper.checkMessageDuplicate", params);
+	    return count != null && count > 0;
+}
+
+
    
    
    

@@ -125,6 +125,12 @@ public class ChatServiceImpl implements ChatService{
         Integer chatCount = chatDAO.getChatCountByRoomId(chatRoomId);
         return chatCount == null || chatCount == 0;
     }
+
+	@Override
+	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
+		  // 메시지 중복 여부 확인 로직
+	    return chatDAO.isMessageDuplicate(chatMessageDTO);
+	}
 	
 	  // 페이징된 채팅방 목록 조회
 
