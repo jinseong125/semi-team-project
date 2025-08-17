@@ -123,11 +123,7 @@ public class ChatController {
 	    List<ChatListDTO> chatList = chatService.getChatRoomsByCreatedDesc(userId);
 	   System.out.println("chatList: " + chatList);
 	   
-	   // 🔥 추가된 부분: ChatListDTO 객체 설정
-//	    for (ChatListDTO chatListDTO : chatList) {
-//	        chatListDTO.setProductName("상품명"); // 실제 상품명을 설정해야 함
-//	        chatListDTO.setSelletAccountId("상품 판매자 ID");
-//	    }
+
 
 	    model.addAttribute("chatList", chatList);
 	    model.addAttribute("highlightRoomId", highlightRoomId);

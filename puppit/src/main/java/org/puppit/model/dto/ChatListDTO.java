@@ -32,6 +32,7 @@ public class ChatListDTO {
 	private String lastMessageReceiverAccountId;
 	private String lastMessageReceiverName;
 	private Timestamp sortTime;
+	private Timestamp chatCreatedAt; // 마지막 메시지 생성 시간 추가
 	
 	@Override
 	public String toString() {
@@ -43,8 +44,10 @@ public class ChatListDTO {
 				+ ", lastMessageSenderAccountId=" + lastMessageSenderAccountId + ", lastMessageSenderName="
 				+ lastMessageSenderName + ", lastMessageReceiverId=" + lastMessageReceiverId
 				+ ", lastMessageReceiverAccountId=" + lastMessageReceiverAccountId + ", lastMessageReceiverName="
-				+ lastMessageReceiverName + ", sortTime=" + sortTime + "]";
+				+ lastMessageReceiverName + ", sortTime=" + sortTime + ", chatCreatedAt=" + chatCreatedAt + "]";
 	}
+	
+
 	
 	
 
