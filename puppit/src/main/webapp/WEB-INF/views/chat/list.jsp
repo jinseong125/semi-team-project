@@ -75,12 +75,12 @@ if (sessionMap != null) {
                     </span>
                     <div class="chat-info-area" style="cursor:pointer;">
                         <div class="chat-nickname">
-                            <c:choose>
-                                <c:when test="${not empty chat.lastMessage}">
-                                    <c:out value="${chat.lastMessageSenderName}" />
+                             <c:choose>
+                                <c:when test="${not empty chat.productName}">
+                                    <c:out value="${chat.productName}" />  (<c:out value="${chat.sellerAccountId}" />)
                                 </c:when>
                                 <c:otherwise>
-                                    <c:out value="${chat.productName}" /> (<c:out value="${chat.sellerName}" />)
+                                    상품판매자와 채팅을 시작해보세요
                                 </c:otherwise>
                             </c:choose>
                         </div>
