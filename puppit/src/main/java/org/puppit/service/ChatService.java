@@ -28,6 +28,6 @@ public interface ChatService {
 	public Integer getProductIdByRoomId(int roomId);
 	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId);
 	public ChatUserDTO getSellerByProductId(Integer productId);
-
+	public boolean isFirstChat(Integer chatRoomId);
 }
 

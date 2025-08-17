@@ -111,6 +111,24 @@ public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId) {
 public ChatUserDTO getSellerByProductId(Integer productId) {
     return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getSellerAccountIdByProductId", productId);
 }
+
+public boolean isFirstChat(Integer roomId, Integer senderId, Integer receiverId) {
+	Map<String, Object> params = new HashMap<>();
+    params.put("roomId", roomId);
+    params.put("senderId", senderId);
+    params.put("receiverId", receiverId);
+	return  sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getChatParticipants", params);
+}
+
+
+/**
+ * 특정 채팅방에서 기존 채팅 메시지의 개수를 조회하는 메서드
+ * @param roomId 채팅방 ID
+ * @return 채팅 메시지 개수
+ */
+public Integer getChatCountByRoomId(Integer roomId) {
+    return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getChatCountByRoomId", roomId);
+}
    
    
    

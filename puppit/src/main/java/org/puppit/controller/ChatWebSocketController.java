@@ -37,120 +37,103 @@ public class ChatWebSocketController {
 
 	
 	 // 클라이언트가 /app/chat.send로 메시지 전송
+
 	@MessageMapping("/chat.send")
 	public void sendMessage(@Payload ChatMessageDTO chatMessageDTO,
 	                        SimpMessageHeaderAccessor headerAccessor) {
 
-
 	    System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
 
-	    // Sender 정보 조회
-	    ChatUserDTO sender = userService.getUserByUserId(chatMessageDTO.getChatSenderAccountId());
-	    if (sender == null) {
-	        System.out.println("Sender 정보를 찾을 수 없습니다. 메시지 처리 중단.");
-	        return;
-	    }
+	    ChatUserDTO receiver = null;
+        // Sender 정보 조회
+        ChatUserDTO sender = userService.getUserByUserId(chatMessageDTO.getChatSenderAccountId());
+        if (sender == null) {
+            System.out.println("Sender 정보를 찾을 수 없습니다. 메시지 처리 중단.");
+            return;
+        }
+        System.out.println("sender: " + sender.toString());
 
-	    // ChatRoomId 확인 및 파싱
-	    Integer chatRoomId = null;
-	    try {
-	        chatRoomId = chatMessageDTO.getChatRoomId() != null ? Integer.parseInt(chatMessageDTO.getChatRoomId()) : null;
-	    } catch (NumberFormatException e) {
-	        System.out.println("chatRoomId가 유효하지 않습니다: " + chatMessageDTO.getChatRoomId());
-	        return;
-	    }
+        // ChatRoomId 확인 및 파싱
+        Integer chatRoomId = null;
+        try {
+            chatRoomId = chatMessageDTO.getChatRoomId() != null ? Integer.parseInt(chatMessageDTO.getChatRoomId()) : null;
+            System.out.println("chatRoomId: " + chatRoomId);
+        } catch (NumberFormatException e) {
+            System.out.println("chatRoomId가 유효하지 않습니다: " + chatMessageDTO.getChatRoomId());
+            return;
+        }
 
-	    // ChatRoomPeople 정보 조회
-	    ChatMessageSearchDTO messageSearchDTO = new ChatMessageSearchDTO(sender.getUserId(), chatRoomId);
-	    List<ChatRoomPeopleDTO> chatRoomPeoples = chatService.getUserRoleANDAboutChatMessagePeople(messageSearchDTO);
+        System.out.println("isFirstChat: " + chatService.isFirstChat(chatRoomId));
+        // 첫 채팅일 경우 처리
+        if (chatService.isFirstChat(chatRoomId)) {
+        	
+            Integer productId = chatService.getProductIdByRoomId(chatRoomId);
+            System.out.println("productId: " + productId);
+            receiver = chatService.getSellerByProductId(productId);
+            System.out.println("receiver: " + receiver.toString());
+            if (receiver == null) {
+                System.out.println("Receiver 정보를 찾을 수 없습니다. 메시지 처리 중단.");
+                return;
+            }
 
-	    if (chatRoomPeoples == null || chatRoomPeoples.isEmpty()) {
-	        System.out.println("chatRoomPeoples가 비어 있습니다. 메시지 처리 중단.");
-	        return;
-	    }
+            String senderRole = sender.getUserId().equals(receiver.getUserId()) ? "SELLER" : "BUYER";
+            System.out.println("snederRole: " + senderRole);
+            String receiverRole = receiver.getUserId().equals(sender.getUserId()) ? "SELLER" : "BUYER";
 
-	    System.out.println("chatRoomPeoples 리스트: " + chatRoomPeoples.toString());
+            chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
+            chatMessageDTO.setChatSenderUserName(sender.getUserName());
+            chatMessageDTO.setSenderRole(senderRole);
 
-	    // 가장 최근 메시지 찾기 또는 기본값 설정
-	    ChatRoomPeopleDTO latest = null;
-	    for (int i = chatRoomPeoples.size() - 1; i >= 0; i--) {
-	        ChatRoomPeopleDTO msg = chatRoomPeoples.get(i);
-	        System.out.println("현재 메시지의 SenderAccountId: " + msg.getSenderAccountId());
-	        System.out.println("현재 Sender의 AccountId: " + sender.getAccountId());
+            chatMessageDTO.setChatReceiverAccountId(receiver.getAccountId());
+            chatMessageDTO.setChatReceiverUserName(receiver.getUserName());
+            chatMessageDTO.setReceiverRole(receiverRole);
 
-	        if (msg.getSenderAccountId().equals(sender.getAccountId())) {
-	            latest = msg;
-	            System.out.println("latest 메시지 설정: " + latest.toString());
-	            break;
-	        }
-	    }
+            chatMessageDTO.setProductId(productId.toString());
+            
+            System.out.println("sender userId: " + sender.getUserId());
+            chatMessageDTO.setChatSender(sender.getUserId());
+            chatMessageDTO.setChatReceiver(receiver.getUserId());
+            
+        } else {
+            // 기존 채팅 정보 조회 및 설정
+            ChatMessageSearchDTO messageSearchDTO = new ChatMessageSearchDTO(sender.getUserId(), chatRoomId);
+            List<ChatRoomPeopleDTO> chatRoomPeoples = chatService.getUserRoleANDAboutChatMessagePeople(messageSearchDTO);
+            if (chatRoomPeoples == null || chatRoomPeoples.isEmpty()) {
+                System.out.println("chatRoomPeoples가 비어 있습니다.");
+                return;
+            }
+            System.out.println("messageSearchDTO: " + messageSearchDTO.toString());
+            System.out.println("chatRoomPeoples: " + chatRoomPeoples.toString());
 
-	    if (latest == null) {
-	        System.out.println("latest가 null입니다. 초기 정보를 기반으로 설정합니다.");
+            ChatRoomPeopleDTO latest = chatRoomPeoples.get(chatRoomPeoples.size() - 1);
+            chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
+            chatMessageDTO.setChatSenderUserName(sender.getUserName());
+            chatMessageDTO.setSenderRole(latest.getSenderRole());
+            chatMessageDTO.setChatReceiverAccountId(latest.getReceiverAccountId());
+            chatMessageDTO.setChatReceiverUserName(latest.getReceiverUserName());
+            chatMessageDTO.setReceiverRole(latest.getReceiverRole());
+            chatMessageDTO.setProductId(latest.getProductId().toString());
+            System.out.println("sender userId: " + sender.getUserId());
+            chatMessageDTO.setChatSender(sender.getUserId());
+            // 기존 메시지의 마지막 요소에서 chatSender를 가져와 chatReceiver로 설정
+            chatMessageDTO.setChatReceiver(Integer.parseInt(latest.getChatSender()));
+            
+            System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
+        }
 
-	        Integer productId = null;
-	        try {
-	            productId = chatMessageDTO.getProductId() != null ? Integer.parseInt(chatMessageDTO.getProductId()) : null;
-	        } catch (NumberFormatException e) {
-	            System.out.println("productId가 유효하지 않습니다: " + chatMessageDTO.getProductId());
-	        }
+        // 메시지 저장
+        try {
+            Integer insertedRow = chatService.saveChatMessage(chatMessageDTO);
+            System.out.println("insertedRow: " + insertedRow);
+        } catch (Exception e) {
+            System.out.println("채팅 메시지 저장 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
 
-	        if (productId == null) {
-	            System.out.println("productId가 없습니다. 채팅방 ID로 조회합니다.");
-	            productId = chatService.getProductIdByRoomId(chatRoomId);
-	        }
-
-	        ChatUserDTO receiver = chatService.getSellerByProductId(productId);
-	        if (receiver == null) {
-	            System.out.println("Receiver 정보를 찾을 수 없습니다. 메시지 처리 중단.");
-	            return;
-	        }
-
-	        latest = new ChatRoomPeopleDTO();
-	        latest.setSenderRole("BUYER");
-	        latest.setReceiverAccountId(receiver.getAccountId());
-	        latest.setReceiverUserName(receiver.getUserName());
-	        latest.setReceiverRole("SELLER");
-	        latest.setProductId(productId);
-	    }
-
-	    // Receiver 정보 조회
-	    String receiverAccountId = latest.getReceiverAccountId();
-	    ChatUserDTO receiverInfo = userService.getUserByUserId(receiverAccountId);
-	    if (receiverInfo == null) {
-	        System.out.println("Receiver 정보를 찾을 수 없습니다. 메시지 처리 중단.");
-	        return;
-	    }
-
-	    // chatMessageDTO에 정보 설정
-	    chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
-	    chatMessageDTO.setChatSenderUserName(sender.getUserName());
-	    chatMessageDTO.setSenderRole(latest.getSenderRole());
-	    chatMessageDTO.setChatReceiverAccountId(receiverInfo.getAccountId());
-	    chatMessageDTO.setChatReceiverUserName(receiverInfo.getUserName());
-	    chatMessageDTO.setReceiverRole(latest.getReceiverRole());
-	    chatMessageDTO.setProductId(latest.getProductId() != null ? latest.getProductId().toString() : chatMessageDTO.getProductId());
-	    chatMessageDTO.setBuyerId(latest.getBuyerId() != null ? latest.getBuyerId().toString() : chatMessageDTO.getBuyerId());
-
-	    // Sender ID 설정
-	    chatMessageDTO.setChatSender(sender.getUserId());
-
-	    // Receiver ID 설정
-	    chatMessageDTO.setChatReceiver(receiverInfo.getUserId());
-
-	    // 메시지 저장
-	    try {
-	        Integer insertedRow = chatService.saveChatMessage(chatMessageDTO);
-	        System.out.println("insertedRow: " + insertedRow);
-	    } catch (Exception e) {
-	        System.out.println("채팅 메시지 저장 중 오류 발생: " + e.getMessage());
-	        e.printStackTrace();
-	    }
-
-	    // 메시지 전송
-	    String destination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
-	    messagingTemplate.convertAndSend(destination, chatMessageDTO);
+        // 메시지 전송
+        String destination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
+        messagingTemplate.convertAndSend(destination, chatMessageDTO);
 	}
-	
-	
 }
+	
+	

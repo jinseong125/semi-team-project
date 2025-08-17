@@ -114,6 +114,17 @@ public class ChatServiceImpl implements ChatService{
 		// TODO Auto-generated method stub
 		return chatDAO.getSellerByProductId(productId);
 	}
+
+	 /**
+     * 첫 채팅 여부를 확인하는 메서드
+     * @param chatRoomId 채팅방 ID
+     * @return 첫 채팅일 경우 true, 아닐 경우 false
+     */
+	@Override
+    public boolean isFirstChat(Integer chatRoomId) {
+        Integer chatCount = chatDAO.getChatCountByRoomId(chatRoomId);
+        return chatCount == null || chatCount == 0;
+    }
 	
 	  // 페이징된 채팅방 목록 조회
 
