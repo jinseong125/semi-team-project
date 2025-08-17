@@ -223,16 +223,37 @@ function renderProductInfo(product, chatMessages) {
 }
 
 function addChatMessageToHistory(chat) {
-    let alignClass = (chat.senderRole === "BUYER") ? "right" : "left";
-    let msg = chat.message || chat.chatMessage || "";
-    let formattedTime = chat.chatCreatedAt || "";
-    let html =
-        '<div class="chat-message ' + alignClass + '">' +
-            '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-            '<div class="chat-text">' + msg + '</div>' +
-            '<div class="chat-time">' + formattedTime + '</div>' +
-        '</div>';
-    chatHistory.innerHTML += html;
+    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
+    const currentUserRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // 현재 사용자 역할 결정
+
+    // 메시지를 보낸 사람과 현재 사용자를 비교하여 영역 결정
+    if (String(chat.chatSenderAccountId) === String(loginUserId)) {
+        // 현재 사용자가 메시지를 보낸 경우
+        let alignClass = "right"; // 오른쪽 정렬
+        let msg = chat.message || chat.chatMessage || "";
+        let formattedTime = chat.chatCreatedAt || "";
+        let html =
+            '<div class="chat-message ' + alignClass + '">' +
+                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
+                '<div class="chat-text">' + msg + '</div>' +
+                '<div class="chat-time">' + formattedTime + '</div>' +
+            '</div>';
+        chatHistory.innerHTML += html;
+    } else {
+        // 상대방이 메시지를 보낸 경우
+        let alignClass = "left"; // 왼쪽 정렬
+        let msg = chat.message || chat.chatMessage || "";
+        let formattedTime = chat.chatCreatedAt || "";
+        let html =
+            '<div class="chat-message ' + alignClass + '">' +
+                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
+                '<div class="chat-text">' + msg + '</div>' +
+                '<div class="chat-time">' + formattedTime + '</div>' +
+            '</div>';
+        chatHistory.innerHTML += html;
+    }
+
+    // 스크롤을 최신 메시지로 이동
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
