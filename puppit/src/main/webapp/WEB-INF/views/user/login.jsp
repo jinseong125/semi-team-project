@@ -31,7 +31,7 @@
 	<c:if test="${not empty error}">
 		<div style="font-size: 12px; color: red;">${error}</div>
 	</c:if>
-  <label>아아디/비밀번호를 잊으셨나요? <a href="">아이디/비밀번호 찾기</a></label><br>
+  <label>아아디/비밀번호를 잊으셨나요? <a href="${contextPath}/user/findId">아이디/비밀번호 찾기</a></label><br>
   <label>Puppit이 처음이신가요? <a href=" ${contextPath}/user/signup">회원가입 하기</a></label>
 	
 </div>

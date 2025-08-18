@@ -17,6 +17,13 @@
      VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW(), #{salt})
   </insert>
   
+  <!-- 로그인(아이디, 비밀번호) -->
+  <select id="getUserByaccountId" parameterType="String" resultType="UserDTO">
+    SELECT user_id, account_id, nick_name, user_name, user_password, user_email, salt
+      FROM user
+     WHERE account_id = #{accountId}
+  </select>
+  
   <!-- 아이디 중복 검사 -->
   <select id="countByAccountId" parameterType="String" resultType="java.lang.Integer">
     SELECT COUNT(*)
@@ -37,12 +44,12 @@
       FROM user
      WHERE user_email = #{userEmail}
   </select>
-  
-  <!-- 로그인(아이디, 비밀번호) -->
-  <select id="getUserByaccountId" parameterType="String" resultType="UserDTO">
-    SELECT user_id, account_id, nick_name, user_name, user_password, user_email, salt
+
+  <!-- 아이디 찾기 -->  
+  <select id="findByAccountId" parameterType="UserDTO" resultType="String">
+    SELECT account_id
       FROM user
-     WHERE account_id = #{accountId}
+     WHERE user_name = #{userName} AND user_email = #{userEmail}
   </select>
   
   <!-- account 사용해서 user_id(PK) 조회 -->

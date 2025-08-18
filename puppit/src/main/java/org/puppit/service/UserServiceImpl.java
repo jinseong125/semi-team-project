@@ -44,18 +44,6 @@ public class UserServiceImpl implements UserService {
     }
   }
   @Override
-  public Boolean isAccountIdAvailable(String accountId) {
-    return userDAO.countByAccountId(accountId.trim()) == 0; 
-  }
-  @Override
-  public Boolean isNickNameAvailable(String nickName) {
-    return userDAO.countByNickName(nickName.trim()) == 0;
-  }
-  @Override
-  public Boolean isUserEmailAvailable(String userEmail) {
-    return userDAO.countByEmail(userEmail.trim()) == 0;
-  }
-  @Override
   public UserDTO login(UserDTO user) {
     try {
       // 빈값 체크
@@ -93,6 +81,23 @@ public class UserServiceImpl implements UserService {
     }
   }
   @Override
+  public String findAccountIdByUserNameUserEmail(UserDTO user) {
+    UserDTO userId = userDAO.findByAccountId(user.getAccountId());
+    return null;
+  }
+  @Override
+  public Boolean isAccountIdAvailable(String accountId) {
+    return userDAO.countByAccountId(accountId.trim().toLowerCase()) == 0; 
+  }
+  @Override
+  public Boolean isNickNameAvailable(String nickName) {
+    return userDAO.countByNickName(nickName.trim()) == 0;
+  }
+  @Override
+  public Boolean isUserEmailAvailable(String userEmail) {
+    return userDAO.countByEmail(userEmail.trim().toLowerCase()) == 0;
+  }
+  @Override
   public Integer insertLogStatus(UserStatusDTO log) {
     return userDAO.insertLogStatus(log);
   }
@@ -104,7 +109,6 @@ public class UserServiceImpl implements UserService {
   // 채팅 보낸 사람의 사용자 정보 조회
   @Override
   public ChatUserDTO getUserByUserId(String senderUserId) {
-
 	return userDAO.getUserByUserId(senderUserId);
   }
 
