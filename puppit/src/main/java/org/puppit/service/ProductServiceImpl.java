@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ProductSearchDTO;
-import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
