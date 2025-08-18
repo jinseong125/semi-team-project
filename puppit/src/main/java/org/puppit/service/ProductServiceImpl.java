@@ -149,5 +149,17 @@ public class ProductServiceImpl implements ProductService {
         return Map.of("products", products, "pageCount", dto.getPageCount());
     }
 
+    @Transactional
+    @Override
+    public int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
+        productDAO.updateProduct(productDTO);
+        return productDTO.getProductId();
+    }
 
-}
+    @Override
+    public int deleteProduct(Integer productId) {
+        return productDAO.deleteProduct(productId);
+    }
+
+    }
+
