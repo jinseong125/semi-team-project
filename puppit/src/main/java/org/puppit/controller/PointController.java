@@ -30,11 +30,6 @@ public class PointController {
   public String getPaymentHistory(Integer userId, Model model) {
     List<PointDTO> pointDTOs = pointService.selectPointRecordById(userId);
     model.addAttribute("pointDTOs", pointDTOs);
-    for(PointDTO pointDTO : pointDTOs) {
-      System.out.println("sellerId: " + pointDTO.getPointChargeAmount());
-      System.out.println("buyerId: " + pointDTO.getPointChargeImpUid());
-      System.out.println("productId: " + pointDTO.getChargeId());
-    }
     return "trade/chargeRecord";
   }
   
