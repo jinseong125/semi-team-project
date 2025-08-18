@@ -130,6 +130,11 @@ public class ChatServiceImpl implements ChatService{
 		  // 메시지 중복 여부 확인 로직
 	    return chatDAO.isMessageDuplicate(chatMessageDTO);
 	}
+
+	@Override
+	public Integer saveAlarmData(Map<String, Object> messageAlarm) {
+		return chatDAO.saveAlarmData(messageAlarm);
+	}
 	
 	  // 페이징된 채팅방 목록 조회
 

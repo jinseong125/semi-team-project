@@ -1,8 +1,8 @@
 package org.puppit.repository;
 
-import com.google.common.hash.Hashing;
+
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +16,6 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
-import org.puppit.model.dto.ChatMessageDTO;
-import org.puppit.model.dto.ChatMessageProductDTO;
-import org.puppit.model.dto.ChatMessageSearchDTO;
-import org.puppit.model.dto.ChatMessageSelectDTO;
-
-import org.puppit.model.dto.ChatRoomPeopleDTO;
 
 
 
@@ -141,6 +135,11 @@ public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
 	    params.put("chatCreatedAt", chatMessageDTO.getChatCreatedAt());
 	 Integer count = sqlSession.selectOne("mybatis.mapper.chatMessageMapper.checkMessageDuplicate", params);
 	    return count != null && count > 0;
+}
+
+public Integer saveAlarmData(Map<String, Object> messageAlarm) {
+	
+	return sqlSession.insert("mybatis.mapper.chatMessageMapper.saveAlarmData", messageAlarm);
 }
 
 
