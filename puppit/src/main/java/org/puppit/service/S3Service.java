@@ -19,6 +19,7 @@ public class S3Service {
 
     public Map<String, String> uploadFile(MultipartFile file, String folderName) throws IOException {
         String bucketName = "jscode-upload-images" ;// 환경변수에 버킷명
+
         String fileName = folderName + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         ObjectMetadata metadata = new ObjectMetadata();
@@ -35,4 +36,6 @@ public class S3Service {
 
         return result;
     }
+
 }
+

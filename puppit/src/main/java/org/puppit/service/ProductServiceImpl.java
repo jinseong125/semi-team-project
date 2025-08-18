@@ -1,10 +1,13 @@
 package org.puppit.service;
 
 import lombok.RequiredArgsConstructor;
+
+import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.repository.ProductDAO;
+import org.puppit.util.PageUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductDAO productDAO;
     private final S3Service s3Service;
+    private final PageUtil pageUtil;
 
     @Transactional
     @Override
@@ -39,12 +43,12 @@ public class ProductServiceImpl implements ProductService {
             MultipartFile file = imageFiles.get(i);
             if (!file.isEmpty()) {
                 try {
-                    // S3 업로드
+                	// S3 업로드
                     Map<String, String> uploadResult = s3Service.uploadFile(file, "product");
 
                     ProductImageDTO imageDTO = new ProductImageDTO();
                     imageDTO.setProductId(productDTO.getProductId());
-                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));   // ✅ S3Service 반환 key와 일치
+                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));    // ✅ S3Service 반환 key와 일치
                     imageDTO.setImageKey(uploadResult.get("fileName"));  // ✅ S3Service 반환 key와 일치
                     imageDTO.setThumbnail(i == 0); // 첫 번째 이미지만 썸네일
 
@@ -124,9 +128,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDTO> getProducts(int offset, int size) {
-      
-      return productDAO.selectProducts(offset, size);
+    public Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request) {
+    	 //----- 파라미터 sort 받기 (디폴트 DESC)
+        String sort = request.getParameter("sort");
+        if (sort == null || !(sort.equalsIgnoreCase("ASC") || sort.equalsIgnoreCase("DESC"))) 
+          sort = "DESC";
+        //----- 전체 항목의 개수를 PageDTO 객체에 저장하기
+        int itemCount = productDAO.getProductCount();
+        dto.setItemCount(itemCount);
+        //----- 한 번에 9개씩 가져오기
+        //dto.setSize(16);
+        //----- 페이징 정보 계산해서 PageDTO 객체에 저장하기 (PageDTO 객체에 페이징 위한 모든 정보가 저장됩니다.)
+        //pageUtil.calculatePaging(dto);
+        //----- 목록 가져오기
+        List<ProductDTO> products =  productDAO.getProducts(Map.of("offset", dto.getOffset(), "size", dto.getSize(), "sort", sort));
+        
+        
+        //----- 결과 반환 (회원 목록과 전체 페이지 개수)
+        return Map.of("products", products, "pageCount", dto.getPageCount());
     }
 
 

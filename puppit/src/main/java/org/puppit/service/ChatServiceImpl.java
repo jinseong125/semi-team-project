@@ -1,6 +1,7 @@
 package org.puppit.service;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,8 +12,7 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
-
-
+import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
@@ -31,7 +31,6 @@ public class ChatServiceImpl implements ChatService{
 
 	private final ChatDAO chatDAO;
 	
-
 	@Override
 	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO  chatMessageSelectDTO) {
 		List<Map<String, Object>> messageList = chatDAO.getChatMessageList(chatMessageSelectDTO);
@@ -48,11 +47,12 @@ public class ChatServiceImpl implements ChatService{
 	        dto.setChatReceiverUserName(String.valueOf(message.get("receiver_user_name")));
 	        dto.setChatMessage(String.valueOf(message.get("chat_message")));
 	        dto.setBuyerId(String.valueOf(message.get("buyer_id")));
-	        // chat_created_at은 Timestamp로 캐스팅 필요
-	        
+	        dto.setChatSellerAccountId(String.valueOf(message.get("chat_seller_account_id")));
+
+	        // chat_created_at은 Timestamp로 캐스팅 필요	        
 	        Object createdAt = message.get("chat_created_at");
 	        if (createdAt instanceof Timestamp) {
-	            dto.setChatCreatedAt((Timestamp) createdAt); // 정상 동작
+	            dto.setChatCreatedAt((Timestamp) createdAt); // ���� ����
 	        }
 	        dto.setSenderRole(String.valueOf(message.get("sender_role")));
 	        dto.setReceiverRole(String.valueOf(message.get("receiver_role")));
@@ -77,11 +77,73 @@ public class ChatServiceImpl implements ChatService{
 		return chatDAO.getUserRoleANDAboutChatMessagePeople(chatMessageSearchDTO);
 	}
 
+ 
 	@Override
-	public List<ChatListDTO> getChatRooms(int userId) {
-		// TODO Auto-generated method stub
-		return chatDAO.getChatList(userId);
+	public Integer findExistingRoom(int productId, int buyerId, int sellerId) {
+	    return chatDAO.selectRoomIdByParticipants(productId, buyerId, sellerId);
 	}
 
+	@Override
+	public Integer createRoom(int productId, int buyerId, int sellerId) {
+	    return chatDAO.insertRoom(productId, buyerId, sellerId);
+	}
+
+	@Override
+	public List<ChatListDTO> getChatRooms(int userId,  Integer highlightRoomId) {
+		 return chatDAO.getChatList(userId, highlightRoomId);
+	}
+
+	@Override
+	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId) {
+	    return chatDAO.getChatListByCreatedDesc(userId);
+	}
+
+	@Override
+	public Integer getProductIdByRoomId(int roomId) {
+		 return chatDAO.findProductIdByRoomId(roomId);
+	}
+
+	@Override
+	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId) {
+		return chatDAO.getProductWithSellerAccountId(productId);
+	}
+
+	@Override
+	public ChatUserDTO getSellerByProductId(Integer productId) {
+		// TODO Auto-generated method stub
+		return chatDAO.getSellerByProductId(productId);
+	}
+
+	 /**
+     * 첫 채팅 여부를 확인하는 메서드
+     * @param chatRoomId 채팅방 ID
+     * @return 첫 채팅일 경우 true, 아닐 경우 false
+     */
+	@Override
+    public boolean isFirstChat(Integer chatRoomId) {
+        Integer chatCount = chatDAO.getChatCountByRoomId(chatRoomId);
+        return chatCount == null || chatCount == 0;
+    }
+
+	@Override
+	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
+		  // 메시지 중복 여부 확인 로직
+	    return chatDAO.isMessageDuplicate(chatMessageDTO);
+	}
+
+	@Override
+	public Integer saveAlarmData(Map<String, Object> messageAlarm) {
+		return chatDAO.saveAlarmData(messageAlarm);
+	}
+	
+	  // 페이징된 채팅방 목록 조회
+
+	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size) {
+	//    Map<String, Object> param = new HashMap<>();
+	//    param.put("userId", userId);
+	//    param.put("offset", offset); // int 값
+	//    param.put("size", size);     // int 값
+	//    return chatDAO.getChatRoomsByCreatedDescPaged(param);
+	//}
 
 }

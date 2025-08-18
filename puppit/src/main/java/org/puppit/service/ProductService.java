@@ -31,7 +31,8 @@ public interface ProductService {
 
     public List<ProductSearchDTO> searchByNew(String searchName);
     
-    public List<ProductDTO> getProducts(int offset, int size);
+    Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
     
+
 
 }

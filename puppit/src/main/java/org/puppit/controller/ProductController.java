@@ -34,7 +34,6 @@ public class ProductController {
         Integer sellerId = (Integer) map.get("userId");
 
 
-
         if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
@@ -55,6 +54,7 @@ public class ProductController {
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
                          @RequestParam("imageFiles") List<MultipartFile> imageFiles,
+                         @RequestParam(value="attachment", required=false) MultipartFile attachment,
                          HttpSession session,
                          RedirectAttributes ra) {
 
@@ -127,6 +127,7 @@ public class ProductController {
 
         return "product/myproduct";
     }
+
     
     @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
     @ResponseBody
@@ -134,6 +135,4 @@ public class ProductController {
         return productService.searchByNew(searchName);
     }
 
-
-    
 }

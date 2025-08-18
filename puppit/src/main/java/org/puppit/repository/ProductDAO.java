@@ -65,7 +65,7 @@ public class ProductDAO {
     }
     
     public List<ProductDTO> findProductsAfter(Long cursor, int size) {
-      Map<String, Object> params = new HashMap<>();         //----- MyBatis로 여러 개의 파라미터를 한 번에 보내기 위해서 HashMap사용.
+      Map<String, Object> params = new HashMap<>();         //----- MyBatis濡� �뿬�윭 媛쒖쓽 �뙆�씪誘명꽣瑜� �븳 踰덉뿉 蹂대궡湲� �쐞�빐�꽌 HashMap�궗�슜.
       params.put("cursor", cursor);
       params.put("size", size);
       return sqlSession.selectList("product.findProductsAfter", params);
@@ -79,8 +79,20 @@ public class ProductDAO {
        Map<String, Object> params = new HashMap<>();
        params.put("offset", offset);
        params.put("size", size);
+       System.out.println("offset: " + params.get("offset"));
+       System.out.println("size: " + params.get("size"));
        return sqlSession.selectList("product.selectProducts", params);
    }
      
-     
+     public List<ProductDTO> getProducts(Map<String, Object> map) {
+    	
+         System.out.println("offset: " + map.get("offset"));
+         System.out.println("size: " + map.get("size"));
+    	    return sqlSession.selectList("product.getProducts", map);
+    	  }
+    	  
+	  public Integer getProductCount() {
+	    return sqlSession.selectOne("product.getProductCount");
+	  }  
+
 }

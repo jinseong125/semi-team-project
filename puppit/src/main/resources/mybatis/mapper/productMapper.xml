@@ -86,17 +86,23 @@
 	</select>
 	
 	<!-- 상품 상세 조회 -->
-		<select id="getProductDetail"
-	resultType="org.puppit.model.dto.ProductDTO"
-	parameterType="java.lang.Integer">
-	SELECT p.product_id AS productId, p.product_name AS productName, p.product_price AS productPrice,
-				 c.category_name AS categoryName, s.status_name AS statusName, p.product_description AS productDescription
-	  FROM product p
-	  JOIN product_category c    ON p.category_id  = c.category_id
-      JOIN product_condition con ON p.condition_id = con.condition_id
-	  JOIN product_status s      ON p.status_id    = s.status_id
-	 WHERE p.product_id = #{productId}  
-	</select>
+<select id="getProductDetail"
+    resultType="org.puppit.model.dto.ProductDTO"
+    parameterType="java.lang.Integer">
+    SELECT
+        p.product_id        AS productId,
+        p.product_name      AS productName,
+        p.product_price     AS productPrice,
+        p.seller_id         AS sellerId,           -- 추가된 부분
+        c.category_name     AS categoryName,
+        s.status_name       AS statusName,
+        p.product_description AS productDescription
+    FROM product p
+        JOIN product_category c    ON p.category_id  = c.category_id
+        JOIN product_condition con ON p.condition_id = con.condition_id
+        JOIN product_status s      ON p.status_id    = s.status_id
+    WHERE p.product_id = #{productId}
+</select>
 	
 	<select id="getScrollProduct" resultType="org.puppit.model.dto.ProductDTO">
 	SELECT COUNT(*)
@@ -162,6 +168,7 @@
             AND t.is_thumbnail = 1
 
             WHERE p.seller_id = #{value}   <!-- DAO가 Integer 하나를 그대로 넘기면 #{value} -->
+
             ORDER BY p.product_updated_at DESC, p.product_created_at DESC
         </select><!-- 주석 -->
         <select id="findProductsAfter" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
@@ -178,18 +185,33 @@
                LIMIT #{size}
         </select>
         
+<!--         
+       <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
+  SELECT 
+    product_id AS productId,
+    product_name AS productName,
+    product_description AS productDescription,
+    product_price AS productPrice
+  FROM product
+  ORDER BY product_created_at DESC
+  LIMIT #{size} OFFSET #{offset}
+</select>
+      -->   
         
-        <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
-          SELECT 
-	            product_id AS productId,
-	            product_name AS productName,
-	            product_description AS productDescription,
-	            product_price AS productPrice
-	        FROM product
-	       ORDER BY product_created_at DESC
-	       LIMIT #{size} OFFSET #{offset}
-        
-        </select>
-        
+          <select id="getProducts" parameterType="Map" resultType="org.puppit.model.dto.ProductDTO">
+    SELECT 
+    product_id AS productId,
+    product_name AS productName,
+    product_description AS productDescription,
+    product_price AS productPrice
+  FROM product
+  ORDER BY product_created_at DESC
+   LIMIT #{offset}, #{size}
+  </select>
+  
+  <select id="getProductCount" resultType="java.lang.Integer">
+    SELECT COUNT(*)
+      FROM product
+  </select>
         
 </mapper>
