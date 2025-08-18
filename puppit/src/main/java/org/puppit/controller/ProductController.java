@@ -2,7 +2,6 @@ package org.puppit.controller;
 
 
 import org.puppit.model.dto.ProductDTO;
-import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.service.ProductService;
 import org.puppit.service.S3Service;

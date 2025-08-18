@@ -6,7 +6,6 @@ import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ProductSearchDTO;
-import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
 import org.puppit.util.PageUtil;
 import org.springframework.stereotype.Service;
