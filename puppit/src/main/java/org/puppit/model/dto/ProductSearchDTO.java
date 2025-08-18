@@ -9,9 +9,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ChatMessageSelectDTO {
-	private Integer userId;
-	private int roomId;
-	private String loginUserId;
-	private Integer productId; // 추가된 필드
+public class ProductSearchDTO {
+  private String productName;
+
+  @Override
+  public String toString() {
+    return "ProductSearchDTO [productName=" + productName + "]";
+  }
+  
+
 }
