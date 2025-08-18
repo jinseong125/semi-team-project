@@ -22,12 +22,6 @@
                   value="jdbc:mysql://puppit.cp2aos8cos6t.ap-southeast-2.rds.amazonaws.com:3306/puppit?serverTimezone=Asia/Seoul&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;sslMode=REQUIRED&amp;allowPublicKeyRetrieval=true"/>
         <property name="username" value="user"/>
         <property name="password" value="puppitgood"/>
-        <!-- 풀 크기: RDS max_connections=60 → 30으로 제한 -->
-        <property name="maximumPoolSize" value="30"/>
-        <property name="minimumIdle" value="10"/>
-        <property name="idleTimeout" value="10000"/>
-        <property name="maxLifetime" value="1800000"/>
-        <property name="connectionTimeout" value="30000"/>
     </bean>
 
     <!-- 2) DataSource -->

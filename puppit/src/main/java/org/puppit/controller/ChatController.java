@@ -11,9 +11,7 @@ import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
-import org.puppit.model.dto.UserDTO;
 import org.puppit.service.ChatService;
-import org.puppit.service.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,9 +28,7 @@ import lombok.RequiredArgsConstructor;
 @Controller
 public class ChatController {
 	
-	private final UserService userService;
 	private final ChatService chatService;
-
 	
 	@GetMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
