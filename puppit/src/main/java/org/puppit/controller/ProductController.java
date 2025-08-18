@@ -212,11 +212,12 @@ public class ProductController {
         Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
         Integer sellerId = (Integer) map.get("userId");
 
-        ProductDTO productDTO = productService.getProductById(productId);
-        if (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
-            ra.addFlashAttribute("error", "권한이 없습니다.");
-            return "redirect:/product/myproduct";
-        }
+        /*
+         * ProductDTO productDTO = productService.getProductById(productId); if
+         * (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
+         * ra.addFlashAttribute("error", "권한이 없습니다."); return
+         * "redirect:/product/myproduct"; }
+         */
 
 
 
