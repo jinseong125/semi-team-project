@@ -2,9 +2,9 @@ package org.puppit.service;
 
 import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductSearchDTO;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +30,10 @@ public interface ProductService {
 
     public List<ProductDTO> selectMyProducts(Integer sellerId);
 
-
+    public List<ProductSearchDTO> searchByNew(String searchName);
     
+    Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
+    
+
 
 }

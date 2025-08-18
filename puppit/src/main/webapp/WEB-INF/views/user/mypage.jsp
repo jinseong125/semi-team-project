@@ -10,11 +10,11 @@
 
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #fff;
   --card: #fff;
   --text: #111;
   --muted: #8a8f98;
-  --primary: #4f86ff;
+  --primary: #333333;
   --line: #dfe3ea;
   --shadow: 0 8px 24px rgba(0, 0, 0, .08);
 }
@@ -45,7 +45,7 @@ body {
 
 .back-btn {
   border: none;
-  background-color: #f7f8fa;
+  background-color: #fff;
   font-size: 20px;
   color: #333;
   cursor: pointer;
@@ -95,7 +95,7 @@ body {
 
 .edit {
   margin-left: auto;
-  background: #8e8e8e;
+  background: #333333;
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -173,7 +173,6 @@ body {
   font-weight: 800;
   font-size: 18px;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(79, 134, 255, .35);
   transition: transform .05s ease;
 }
 
