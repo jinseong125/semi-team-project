@@ -356,14 +356,28 @@ function connectAndSubscribe(currentRoomId) {
 
 function subscribeRoom(currentRoomId) {
     if (currentSubscription) currentSubscription.unsubscribe();
-    currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function(msg) {
+    currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
         addChatMessageToHistory(chat);
+
         // 새 메시지가 오면 안내 문구 숨김
         centerMessage.style.display = "none";
+
+        // 수신자가 현재 채팅방을 보고 있는 경우
+        if (String(currentRoomId) === String(chat.chatRoomId)) {
+            addChatMessageToHistory(chat);
+        } else {
+            // 수신자가 현재 채팅방을 보고 있지 않은 경우 알림을 표시
+            displayNotification(
+                chat.chatSenderAccountId,
+                chat.chatMessage,
+                chat.senderRole,
+                chat.chatCreatedAt,
+                chat.productName
+            );
+        }
     });
 }
-
 function subscribeNotifications() {
     stompClient.subscribe('/topic/notification', function(notification) {
         const data = JSON.parse(notification.body);
