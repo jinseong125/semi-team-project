@@ -60,18 +60,30 @@ if (sessionMap != null) {
         .chatList.highlight { background: #fff8e1; border: 2px solid #ffb300; }	
         .center-message { text-align:center; margin:20px 0; color:#888; }
         .notification {
-	        position: fixed;
-	        right: -100px;
-	        top: 20px;
-	        width: 300px; /* 알림의 너비를 300px로 설정 */
-	        background-color: #f9f9f9;
-	        border: 1px solid #ccc;
-	        padding: 10px;
-	        border-radius: 5px;
-	        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	        transition: right 1s;
-	    }
-        
+            position: fixed;
+            right: -100px;
+            top: 20px;
+            width: 200px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: right 1s;
+        }
+        .chat-input-group textarea {
+		    flex: 1; /* 입력창이 버튼보다 넓게 설정 */
+		    height: 180px; /* 20줄을 입력할 수 있는 높이 */
+		    padding: 10px; /* 입력창 내부 여백 */
+		    font-size: 16px; /* 읽기 좋은 텍스트 크기 */
+		    border: 1px solid #ccc; /* 입력창 테두리 */
+		    border-radius: 10px; /* 둥근 테두리 */
+		    background-color: #f9f9f9; /* 부드러운 배경색 */
+		    box-sizing: border-box; /* 전체 크기 포함 */
+		    resize: none; /* 크기 조정 비활성화 */
+		    overflow-y: auto; /* 스크롤 활성화 */
+		    font-family: 'Noto Sans KR', sans-serif; /* 한국어 폰트 */
+		}
         
         
     </style>
@@ -123,7 +135,7 @@ if (sessionMap != null) {
         <div class="center-message" id="center-message">상품 판매자와 채팅을 시작해보세요</div>
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-input-group">
-            <input placeholder="채팅메시지를 입력하세요"/>
+            <textarea placeholder="채팅메시지를 입력하세요"></textarea>
             <button type="submit">전송</button>
         </div>
     </div>
@@ -132,12 +144,15 @@ if (sessionMap != null) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
 const contextPath = "${contextPath}";
-const loginUserId = "${loginUserId}";
-const userId = "${userId}";
+const loginUserId = '<c:out value="${loginUserId}" />'; // 작은따옴표로 감싸 JS 문자열로 안전하게
+const userId = <c:out value="${userId}" />;             // 숫자는 그대로
 
 const centerMessage = document.getElementById('center-message');
 const chatHistory = document.getElementById('chat-history');
 const productInfoArea = document.getElementById('product-info-area');
+
+//렌더링된 메시지를 추적하기 위한 Set
+const renderedMessageIds = new Set();
 
 let stompClient = null;
 let currentRoomId = null;
@@ -277,132 +292,151 @@ function renderProductInfo(product, chatMessages) {
     }
 }
 
+//채팅 메시지 화면에 추가
 function addChatMessageToHistory(chat) {
-    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
-    const currentUserRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // 현재 사용자 역할 결정
+    console.log('Rendering message:', chat);
 
-    // 메시지를 보낸 사람과 현재 사용자를 비교하여 영역 결정
-    if (String(chat.chatSenderAccountId) === String(loginUserId)) {
-        // 현재 사용자가 메시지를 보낸 경우
-        let alignClass = "right"; // 오른쪽 정렬
-        let msg = chat.message || chat.chatMessage || "";
-
-        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
-        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
-
-        let html =
-            '<div class="chat-message ' + alignClass + '">' +
-                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-                '<div class="chat-text">' + msg + '</div>' +
-                '<div class="chat-time">' + formattedTime + '</div>' +
-            '</div>';
-        chatHistory.innerHTML += html;
-    } else {
-        // 상대방이 메시지를 보낸 경우
-        let alignClass = "left"; // 왼쪽 정렬
-        let msg = chat.message || chat.chatMessage || "";
-
-        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
-        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
-
-        let html =
-            '<div class="chat-message ' + alignClass + '">' +
-                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-                '<div class="chat-text">' + msg + '</div>' +
-                '<div class="chat-time">' + formattedTime + '</div>' +
-            '</div>';
-        chatHistory.innerHTML += html;
+    // chatHistory 요소 확인
+    if (!chatHistory) {
+        console.error('Chat history element not found.');
+        return;
     }
 
-    // 스크롤을 최신 메시지로 이동
+    const alignClass = (String(chat.chatSenderAccountId) === String(loginUserId)) ? "right" : "left";
+    const msg = chat.chatMessage || ""; // 메시지 내용
+
+    const formattedTime = formatChatTime(chat.chatCreatedAt || "");
+
+    const html =
+        '<div class="chat-message ' + alignClass + '">' +
+        '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
+        '<div class="chat-text">' + msg + '</div>' +
+        '<div class="chat-time">' + formattedTime + '</div>' +
+        '</div>';
+    chatHistory.innerHTML += html;
+
+    // 최신 메시지로 스크롤 이동
     chatHistory.scrollTop = chatHistory.scrollHeight;
+
+    // 마지막 렌더링된 메시지 시간 저장
+    chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
 }
 
 
 //시간 형식 변환 함수 추가
 function formatChatTime(timeString) {
- if (!timeString) return "시간 정보 없음"; // 시간이 없는 경우 기본 메시지 반환
-
- const date = new Date(timeString);
- const options = {
-     year: "numeric",
-     month: "2-digit",
-     day: "2-digit",
-     hour: "2-digit",
-     minute: "2-digit",
-     second: "2-digit",
-     hour12: true, // 오전/오후 표시
- };
-
- return new Intl.DateTimeFormat("ko-KR", options).format(date);
+    const timestamp = Number(timeString);
+    if (isNaN(timestamp)) {
+        return "시간 정보 없음";
+    }
+    const date = new Date(Number(timeString));
+    const options = {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+    };
+    return new Intl.DateTimeFormat("ko-KR", options).format(date);
 }
 
+//WebSocket 연결 및 구독
 function connectAndSubscribe(currentRoomId) {
     if (!stompClient) {
-        const socket = new SockJS(contextPath + '/ws-chat');
+        const socket = new SockJS(contextPath + '/ws-chat'); // 서버의 WebSocket 엔드포인트
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function() {
             isConnected = true;
-            subscribeRoom(currentRoomId);
-            enableChatInput(true);
-            subscribeNotifications(); // 알림 구독
+            subscribeRoom(currentRoomId); // 현재 채팅방에 구독
+            enableChatInput(true); // 채팅 입력 활성화
+        }, function() {
+            console.error('WebSocket connection error. Retrying...');
+            setTimeout(() => connectAndSubscribe(currentRoomId), 5000); // 5초 후 재시도
         });
     } else {
-        subscribeRoom(currentRoomId);
-        enableChatInput(isConnected);
+        subscribeRoom(currentRoomId); // 현재 채팅방에 구독
+        enableChatInput(isConnected); // 채팅 입력 활성화
         subscribeNotifications(); // 알림 구독
     }
 }
-
 function subscribeRoom(currentRoomId) {
-    if (currentSubscription) currentSubscription.unsubscribe();
+    if (currentSubscription) {
+        currentSubscription.unsubscribe(); // 기존 구독 해제
+    }
+
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
+        console.log('Received message:', chat);
+
+        // 중복 렌더링 방지: 이미 렌더링된 messageId인지 확인
+        if (renderedMessageIds.has(chat.messageId)) {
+            console.log('Duplicate message detected, skipping rendering.');
+            return;
+        }
+
+        // 메시지를 화면에 추가
         addChatMessageToHistory(chat);
 
-        // 새 메시지가 오면 안내 문구 숨김
-        centerMessage.style.display = "none";
+        // 렌더링된 messageId를 저장
+        renderedMessageIds.add(chat.messageId);
 
-        // 수신자가 현재 채팅방을 보고 있는 경우
-        if (String(currentRoomId) === String(chat.chatRoomId)) {
-            addChatMessageToHistory(chat);
-        } else {
-            // 수신자가 현재 채팅방을 보고 있지 않은 경우 알림을 표시
+        // 마지막 렌더링된 메시지 시간 저장
+        chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
+
+        // 안내 문구 숨기기
+        centerMessage.style.display = "none";
+    });
+}
+
+function subscribeNotifications() {
+    stompClient.subscribe('/topic/notification', function(notification) {
+        const data = JSON.parse(notification.body);
+        console.log('Notification received:', data);
+
+        // 알림 처리: 메시지의 전송자에게 알림 표시
+        if (data.senderAccountId === loginUserId) {
             displayNotification(
-                chat.chatSenderAccountId,
-                chat.chatMessage,
-                chat.senderRole,
-                chat.chatCreatedAt,
-                chat.productName
+                data.senderAccountId,
+                data.chatMessage,
+                data.senderRole,
+                data.chatCreatedAt,
+                data.productName
             );
         }
     });
 }
-function subscribeNotifications() {
-    stompClient.subscribe('/topic/notification', function(notification) {
-        const data = JSON.parse(notification.body);
-        displayNotification(
-            data.senderAccountId,
-            data.chatMessage,
-            data.senderRole,
-            data.chatCreatedAt,
-            data.productName
-        );
-    });
-}
-
 function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
     console.log('senderAccountId: ', senderAccountId);
     console.log('chatMessage: ', chatMessage);
     console.log('senderRole: ', senderRole);
     console.log('chatCreatedAt: ', chatCreatedAt);
     console.log('productName: ', productName);
-	const notification = document.createElement('div');
+
+    // chatCreatedAt을 밀리초 기반 타임스탬프로 처리하고 형식 변환
+    let formattedTime = "시간 정보 없음";
+    if (!isNaN(Number(chatCreatedAt))) {
+        const date = new Date(Number(chatCreatedAt));
+        const options = {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true // 오전/오후 표시
+        };
+        formattedTime = new Intl.DateTimeFormat("ko-KR", options).format(date);
+    }
+
+    const notification = document.createElement('div');
     notification.className = 'notification';
-    notification.innerHTML = `
-        <strong>${senderRole}:</strong> ${chatMessage}<br>
-        <small>${chatCreatedAt} - ${productName}</small>
-    `;
+
+    // 문자열 방식으로 데이터 바인딩
+    let notificationHTML = "<strong>" + senderRole + ":</strong> " + chatMessage + "<br>";
+    notificationHTML += "<small>" + formattedTime + " - " + productName + "</small>";
+    notification.innerHTML = notificationHTML;
     document.body.appendChild(notification);
 
     setTimeout(() => {
@@ -423,18 +457,19 @@ function enableChatInput(enable) {
     }
 }
 
+//메시지 전송
 function sendMessage(currentRoomId) {
     if (!stompClient || !isConnected) return;
-    const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
-    const message = input.value;
-    if (!message.trim() || !currentRoomId) return;
 
-    const productId = document.querySelector('#pay-btn')?.dataset.productId; // 버튼에서 productId 가져오기
-    const buyerId = userId; // 로그인된 사용자의 userId를 buyerId로 설정
+    const input = document.querySelector('textarea[placeholder="채팅메시지를 입력하세요"]');
+    const message = input.value.trim();
+    if (!message || !currentRoomId) return;
 
-    // senderRole을 동적으로 설정 (로그인한 사용자와 상품 판매자 비교)
-    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
-    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // SELLER 또는 BUYER 여부 확인
+    const productId = document.querySelector('#pay-btn')?.dataset.productId;
+    const buyerId = userId;
+
+    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
+    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
 
     const chatMessage = {
         chatRoomId: currentRoomId,
@@ -442,21 +477,29 @@ function sendMessage(currentRoomId) {
         chatSenderAccountId: loginUserId,
         productId: productId,
         buyerId: buyerId,
-        senderRole: senderRole // 동적으로 계산된 senderRole 설정
+        senderRole: senderRole,
+        chatCreatedAt: Date.now().toString(),
+        messageId: Date.now().toString() + "-" + loginUserId // 고유 messageId 생성
     };
 
+
+    // 메시지를 즉시 렌더링
+    // 이 코드는 쓰면안됨
+    //addChatMessageToHistory(chatMessage);
+
+    // 렌더링된 messageId를 저장
+    // 이코드는 쓰면안됨
+    //renderedMessageIds.add(chatMessage.messageId);
+    
+    
+    // WebSocket을 통해 메시지 전송
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
 
-    // 메시지를 채팅 창에 즉시 추가
-    addChatMessageToHistory({
-        chatSenderAccountId: loginUserId,
-        message: message,
-        senderRole: senderRole, // 동적으로 설정된 senderRole 사용
-        chatCreatedAt: new Date().toLocaleString() // 현재 시간
-    });
-
+    // 입력창 초기화
     input.value = "";
 }
+
+
 </script>
 </body>
 </html>

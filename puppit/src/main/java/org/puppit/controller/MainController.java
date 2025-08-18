@@ -23,31 +23,35 @@ public class MainController {
   private final ProductService productService;
   
 
-  // ���� ���� �� JSP���� ù 8�� ��ǰ ������
+//최초 진입 시 JSP에서 첫 8개 상품 렌더링
   @RequestMapping(value = "/")
   public String main(PageDTO dto
           , HttpServletRequest request
           , Model model) {
-    dto.setSize(16);
-    dto.setPage(1);
-    dto.setOffset(0); // <---- �ݵ�� ���� �־��ְų�, ���񽺿��� ���
-    Map<String, Object> map  = productService.getProducts(dto, request);
+
+	  dto.setSize(16);
+	  dto.setPage(1);
+	  dto.setOffset(0); // <---- 반드시 직접 넣어주거나, 서비스에서 계산
+	  Map<String, Object> map  = productService.getProducts(dto, request);
+
       System.out.println("map: " + map.get("products"));
     
     model.addAttribute("products", map.get("products"));
       return "main";
   }
 
-  // ���ѽ�ũ�� API: offset�� size�� �޾Ƽ� ��ǰ ����Ʈ�� ��ȯ
+
+  //무한스크롤 API: offset과 size를 받아서 상품 리스트를 반환
   @GetMapping(value = "/product/list", produces = "application/json" )
   public ResponseEntity<Map<String, Object>> getProducts(
-      @RequestParam(value="offset", defaultValue="0") int offset,
-        @RequestParam(value="size", defaultValue="16") int size, HttpServletRequest request) {
-    PageDTO dto = new PageDTO();
-      dto.setOffset(offset);
-      dto.setSize(size);
+		  @RequestParam(value="offset", defaultValue="0") int offset,
+		    @RequestParam(value="size", defaultValue="16") int size, HttpServletRequest request) {
+	  PageDTO dto = new PageDTO();
+	    dto.setOffset(offset);
+	    dto.setSize(size);
 
-      Map<String, Object> map = productService.getProducts(dto, request);
-      return ResponseEntity.ok(map); // �׻� 200 ��ȯ
+	    Map<String, Object> map = productService.getProducts(dto, request);
+	    return ResponseEntity.ok(map); // 항상 200 반환
+
   }
 }

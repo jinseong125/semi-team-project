@@ -15,6 +15,24 @@
              #{productName}, #{productPrice}, #{productDescription})
     </insert>
 
+    <!-- 상품 수정-->
+    <update id="updateProduct" parameterType="org.puppit.model.dto.ProductDTO">
+        UPDATE product
+        SET  category_id = #{categoryId},
+             location_id = #{locationId},
+             condition_id = #{conditionId},
+             product_name = #{productName},
+             product_price = #{productPrice},
+             product_description = #{productDescription},
+             product_updated_at = NOW()
+        WHERE product_id = #{productId}
+    </update>
+
+    <!-- 상품 삭제-->
+    <delete id="deleteProduct" parameterType="int">
+        DELETE FROM product WHERE product_id = #{productId}
+    </delete>
+
     <!-- 카테고리 -->
     <select id="getCategories" resultType="org.puppit.model.dto.CategoryDTO">
         SELECT category_id   AS categoryId,
@@ -61,16 +79,22 @@
         ORDER BY is_thumbnail DESC, image_id ASC
     </select>
 
-    <!-- getProductById-->
     <select id="getProductById"
             parameterType="int"
             resultType="org.puppit.model.dto.ProductDTO">
 
-      SELECT product_id ,
-             product_price ,
-             product_name
-        FROM product
-        WHERE product_id = #{productId}
+        SELECT p.product_id       AS productId,
+               p.product_name     AS productName,
+               p.product_price    AS productPrice,
+               p.product_description AS productDescription,
+               p.category_id      AS categoryId,
+               p.location_id      AS locationId,
+               p.condition_id     AS conditionId,
+               p.status_id        AS statusId,
+               s.status_name      AS statusName
+        FROM product p
+                 JOIN product_status s ON p.status_id = s.status_id
+        WHERE p.product_id = #{productId}
     </select>
 
 	<!-- 상품 전체목록 조회 -->

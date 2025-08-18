@@ -133,4 +133,13 @@ public class UserController {
     session.invalidate();
     return "redirect:/";
   }
+  
+  @GetMapping("/profile")
+  public String profileForm() {
+    return "user/profile";
+  }
+  @PostMapping("/profile")
+  public String profileEdit() {
+    return "redirect:/user/mypage";
+  }
 }
