@@ -93,6 +93,17 @@ public class ProductDAO {
     	  
 	  public Integer getProductCount() {
 	    return sqlSession.selectOne("product.getProductCount");
-	  }  
+	  }
+
+
+    public int updateProduct(ProductDTO productDTO) {
+        return sqlSession.update("product.updateProduct", productDTO);
+    }
+
+    public int deleteProduct(Integer productId) {
+        return sqlSession.delete("product.deleteProduct", Map.of("productId", productId));
+    }
+
+
 
 }

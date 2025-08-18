@@ -33,7 +33,9 @@ public interface ProductService {
     public List<ProductSearchDTO> searchByNew(String searchName);
     
     Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
-    
+
+    int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles);
+    int deleteProduct(Integer productId);
 
 
 }
