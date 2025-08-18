@@ -31,7 +31,6 @@ public class ChatServiceImpl implements ChatService{
 
 	private final ChatDAO chatDAO;
 	
-
 	@Override
 	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO  chatMessageSelectDTO) {
 		List<Map<String, Object>> messageList = chatDAO.getChatMessageList(chatMessageSelectDTO);

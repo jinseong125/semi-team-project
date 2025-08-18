@@ -128,6 +128,7 @@ public class ProductController {
 
         return "product/myproduct";
     }
+
     
     @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
     @ResponseBody
@@ -135,6 +136,4 @@ public class ProductController {
         return productService.searchByNew(searchName);
     }
 
-
-    
 }

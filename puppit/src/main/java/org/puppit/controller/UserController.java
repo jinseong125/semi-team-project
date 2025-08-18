@@ -30,6 +30,7 @@ public class UserController {
   
   private final UserService userService;
   
+  @SuppressWarnings("unchecked")
   @GetMapping("/mypage")
   public String myPage(HttpSession session, Model model) {
     Object attr = session.getAttribute("sessionMap");
@@ -52,7 +53,6 @@ public class UserController {
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
     // 회원가입
     boolean signupResult = userService.signup(user);
-    System.out.println("singnupResult" + signupResult);
     // 회원가입 실패
     if(!signupResult) {
       redirectAttr.addFlashAttribute("error", "아이디를 입력 해주세요");
@@ -64,15 +64,14 @@ public class UserController {
   }
   
   // 중복 검사
-  @SuppressWarnings("unchecked")
   @GetMapping("/check")
   public ResponseEntity<Void> check(UserDTO userDTO) {
     if(userDTO.getNickName() != null && userService.isNickNameAvailable(userDTO.getNickName())) {
-      return (ResponseEntity<Void>) ResponseEntity.ok();
+      return ResponseEntity.ok().build();
     } else if(userDTO.getAccountId() != null && userService.isAccountIdAvailable(userDTO.getAccountId())) {
-      return (ResponseEntity<Void>) ResponseEntity.ok();
+      return ResponseEntity.ok().build();
     } else if(userDTO.getUserEmail() != null && userService.isUserEmailAvailable(userDTO.getUserEmail())) {
-      return (ResponseEntity<Void>) ResponseEntity.ok();
+      return ResponseEntity.ok().build();
     } else {
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
@@ -101,17 +100,16 @@ public class UserController {
        oldSession.invalidate(); 
       }
       // 성공: 세션 저장 (db에서 가져온 loginResult 사용)
-      Map<String, Object> sessionmap = new HashMap<String, Object>();
-      sessionmap.put("userId", loginResult.getUserId());
-      sessionmap.put("accountId", loginResult.getAccountId());
-      sessionmap.put("userName", loginResult.getUserName());
-      sessionmap.put("nickName", loginResult.getNickName());
-      sessionmap.put("userEmail", loginResult.getUserEmail());
+      Map<String, Object> sessionMap = new HashMap<String, Object>();
+      sessionMap.put("userId", loginResult.getUserId());
+      sessionMap.put("accountId", loginResult.getAccountId());
+      sessionMap.put("userName", loginResult.getUserName());
+      sessionMap.put("nickName", loginResult.getNickName());
+      sessionMap.put("userEmail", loginResult.getUserEmail());
       
       session = request.getSession(true);
-      session.setAttribute("sessionMap", sessionmap);
-
-
+      session.setAttribute("sessionMap", sessionMap);
+      
       // timeStamp 생성
       Date now = new Date();
       SimpleDateFormat stf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
