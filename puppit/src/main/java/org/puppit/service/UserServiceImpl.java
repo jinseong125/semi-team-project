@@ -80,15 +80,15 @@ public class UserServiceImpl implements UserService {
       return null;
     }
   }
+  // 아이디 찾기
   @Override
   public String findAccountIdByUserNameUserEmail(UserDTO user) {
-    UserDTO userId = userDAO.findByAccountId(user.getAccountId());
-    return null;
+    return userDAO.findAccountIdByNameAndEmail(user);
   }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
     return userDAO.countByAccountId(accountId.trim().toLowerCase()) == 0; 
-  }
+  } 
   @Override
   public Boolean isNickNameAvailable(String nickName) {
     return userDAO.countByNickName(nickName.trim()) == 0;

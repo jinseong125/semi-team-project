@@ -21,9 +21,7 @@
     <label>아이디: <input type="text" id="accountId"
       name="accountId"></label>
     <button type="button" class="checkId" id="checkIdBtn">중복검사</button>
-<%--     <c:if test="${not empty error}">
-      <div style="font-size: 12px; color: red;">${error}</div>
-    </c:if> --%>
+    <div>${error}</div>
     <br> <label>비밀번호: <input type="password"
       id="userPassword" name="userPassword"></label> <br> <label>비밀번호
       확인: <input type="password" id="checkPwd" name="checkPwd">

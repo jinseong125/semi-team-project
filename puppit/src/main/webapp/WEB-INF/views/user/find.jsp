@@ -1,5 +1,8 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath}"/>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,28 +11,21 @@
 </head>
 <body>
 
-<h2>아이디/비밀번호 찾기</h2>
+<h2 style="text-align: center">아이디/비밀번호 찾기</h2>
 
-    <form id="findForm" action="${contextPath}/user/findIdCheck" method="post">
+  <div id="content" style="text-align: center;">
+    <form id="find" action="${contextPath}/user/find" method="post">
       <div class="form-group">
        <input type="text" name="userName" id="userName" placeholder="이름">
       </div>
       <div class="form-group">
         <input type="email" name="userEmail" id="userEmail" placeholder="이메일">
       </div>
-      <button type="submit" id="id-find" onclick="findSubmit(); return false;">아이디 찾기</button>
+      <button type="submit" id="id-find">아이디 찾기</button>
    </form>
-   
-   <div class="result-box">
-      <c:choose>
-        <c:when test="${empty findId}">
-      <p class="inquiry">조회결과가 없습니다.</p>
-      </c:when>
-        <c:otherwise>
-            <p>${findId.id}</p>
-        </c:otherwise>
-  </c:choose>
-</div>
+     <div style="font-size: 12px; color: red;">${msg}</div>
+  </div>
+
 
 </body>
 </html>

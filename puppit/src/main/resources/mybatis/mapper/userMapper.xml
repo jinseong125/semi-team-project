@@ -46,7 +46,7 @@
   </select>
 
   <!-- 아이디 찾기 -->  
-  <select id="findByAccountId" parameterType="UserDTO" resultType="String">
+  <select id="findAccountIdByNameAndEmail" parameterType="UserDTO" resultType="String">
     SELECT account_id
       FROM user
      WHERE user_name = #{userName} AND user_email = #{userEmail}
