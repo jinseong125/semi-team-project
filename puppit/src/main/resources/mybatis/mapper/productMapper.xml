@@ -163,7 +163,7 @@
 
             WHERE p.seller_id = #{value}   <!-- DAO가 Integer 하나를 그대로 넘기면 #{value} -->
             ORDER BY p.product_updated_at DESC, p.product_created_at DESC
-        </select>
+        </select><!-- 주석 -->
         <select id="findProductsAfter" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
               SELECT    p.product_id      	 AS productId  , 
             			p.product_name 		 AS productName,
