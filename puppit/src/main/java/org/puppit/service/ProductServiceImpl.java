@@ -31,29 +31,29 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Override
     public int registerProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
-        // 1. �긽�뭹 ���옣
+        // 1. 상품 저장
         productDAO.insertProduct(productDTO);
 
-        // �긽�깭媛� 湲곕낯 吏��젙 (null�씠硫� 1=�뙋留ㅼ쨷)
+        // 상태값 기본 지정 (null이면 1=판매중)
         if (productDTO.getStatusId() == null) {
             productDTO.setStatusId(1);
         }
 
-        // 2. �씠誘몄� ���옣 (泥� 踰덉㎏ �씠誘몄�留� �뜽�꽕�씪)
+        // 2. 이미지 저장 (첫 번째 이미지만 썸네일)
         for (int i = 0; i < imageFiles.size(); i++) {
             MultipartFile file = imageFiles.get(i);
             if (!file.isEmpty()) {
                 try {
-                    // S3 �뾽濡쒕뱶
+                	// S3 업로드
                     Map<String, String> uploadResult = s3Service.uploadFile(file, "product");
 
                     ProductImageDTO imageDTO = new ProductImageDTO();
                     imageDTO.setProductId(productDTO.getProductId());
-                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));   // �쐟 S3Service 諛섑솚 key�� �씪移�
-                    imageDTO.setImageKey(uploadResult.get("fileName"));  // �쐟 S3Service 諛섑솚 key�� �씪移�
-                    imageDTO.setThumbnail(i == 0); // 泥� 踰덉㎏ �씠誘몄�留� �뜽�꽕�씪
+                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));    // ✅ S3Service 반환 key와 일치
+                    imageDTO.setImageKey(uploadResult.get("fileName"));  // ✅ S3Service 반환 key와 일치
+                    imageDTO.setThumbnail(i == 0); // 첫 번째 이미지만 썸네일
 
-                    // DB ���옣
+                    // DB 저장
                     productDAO.insertProductImage(imageDTO);
 
                 } catch (IOException e) {

@@ -59,6 +59,21 @@ if (sessionMap != null) {
         .chat-history .chat-message .chat-time { font-size: 12px; color: #aaa; margin-top: 2px; align-self: flex-end; }
         .chatList.highlight { background: #fff8e1; border: 2px solid #ffb300; }	
         .center-message { text-align:center; margin:20px 0; color:#888; }
+        .notification {
+	        position: fixed;
+	        right: -100px;
+	        top: 20px;
+	        width: 300px; /* 알림의 너비를 300px로 설정 */
+	        background-color: #f9f9f9;
+	        border: 1px solid #ccc;
+	        padding: 10px;
+	        border-radius: 5px;
+	        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	        transition: right 1s;
+	    }
+        
+        
+        
     </style>
 </head>
 <body>
@@ -330,10 +345,12 @@ function connectAndSubscribe(currentRoomId) {
             isConnected = true;
             subscribeRoom(currentRoomId);
             enableChatInput(true);
+            subscribeNotifications(); // 알림 구독
         });
     } else {
         subscribeRoom(currentRoomId);
         enableChatInput(isConnected);
+        subscribeNotifications(); // 알림 구독
     }
 }
 
@@ -345,6 +362,42 @@ function subscribeRoom(currentRoomId) {
         // 새 메시지가 오면 안내 문구 숨김
         centerMessage.style.display = "none";
     });
+}
+
+function subscribeNotifications() {
+    stompClient.subscribe('/topic/notification', function(notification) {
+        const data = JSON.parse(notification.body);
+        displayNotification(
+            data.senderAccountId,
+            data.chatMessage,
+            data.senderRole,
+            data.chatCreatedAt,
+            data.productName
+        );
+    });
+}
+
+function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
+    console.log('senderAccountId: ', senderAccountId);
+    console.log('chatMessage: ', chatMessage);
+    console.log('senderRole: ', senderRole);
+    console.log('chatCreatedAt: ', chatCreatedAt);
+    console.log('productName: ', productName);
+	const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.innerHTML = `
+        <strong>${senderRole}:</strong> ${chatMessage}<br>
+        <small>${chatCreatedAt} - ${productName}</small>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.right = '20px';
+    }, 100);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 120000);
 }
 
 function enableChatInput(enable) {

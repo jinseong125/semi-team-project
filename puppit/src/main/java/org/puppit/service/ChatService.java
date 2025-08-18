@@ -1,7 +1,7 @@
 package org.puppit.service;
 
 import java.util.List;
-
+import java.util.Map;
 
 import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
@@ -30,5 +30,6 @@ public interface ChatService {
 	public ChatUserDTO getSellerByProductId(Integer productId);
 	public boolean isFirstChat(Integer chatRoomId);
 	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO);
+	public Integer saveAlarmData(Map<String, Object> messageAlarm);
 }
 

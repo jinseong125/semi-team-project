@@ -1,9 +1,12 @@
 package org.puppit.controller;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.puppit.model.dto.ChatMessageDTO;
+import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
@@ -44,6 +47,7 @@ public class ChatWebSocketController {
 		System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
 
         ChatUserDTO receiver = null;
+        Integer productId = 0;
 
         // Sender 정보 조회
         ChatUserDTO sender = userService.getUserByUserId(chatMessageDTO.getChatSenderAccountId());
@@ -75,7 +79,7 @@ public class ChatWebSocketController {
 
         // 첫 채팅일 경우 처리
         if (chatService.isFirstChat(chatRoomId)) {
-            Integer productId = chatService.getProductIdByRoomId(chatRoomId);
+           productId = chatService.getProductIdByRoomId(chatRoomId);
             System.out.println("productId: " + productId);
             receiver = chatService.getSellerByProductId(productId);
             System.out.println("receiver: " + receiver.toString());
@@ -138,9 +142,39 @@ public class ChatWebSocketController {
             e.printStackTrace();
         }
 
+        productId = chatService.getProductIdByRoomId(chatRoomId);
         // 메시지 전송
         String destination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
         messagingTemplate.convertAndSend(destination, chatMessageDTO);
+        
+        ChatMessageProductDTO product  = chatService.getProduct(productId);
+        
+        
+        // 알림 메시지 전송
+        Map<String, Object> messageNotification = new HashMap<String, Object>();
+        messageNotification.put("senderAccountId", chatMessageDTO.getChatSenderAccountId());
+        messageNotification.put("chatMessage", chatMessageDTO.getChatMessage());
+        messageNotification.put("senderRole", chatMessageDTO.getSenderRole());
+        messageNotification.put("chatCreatedAt", chatMessageDTO.getChatCreatedAt()); 
+        messageNotification.put("productName", product.getProductName());
+        
+        messagingTemplate.convertAndSend("/topic/notification", messageNotification);
+        
+        // alarm 테이블에 데이터 저장
+        try {
+			Map<String,Object> messageAlarm = new HashMap<>();
+			messageAlarm.put("roomId", chatRoomId);
+			messageAlarm.put("userId", sender.getUserId());
+			messageAlarm.put("alarmReadMessageId", chatMessageDTO.getMessageId());
+			
+			Integer alarmInsertedRow = chatService.saveAlarmData(messageAlarm); // 새로운 메서드 호출
+			System.out.println("Alarm 데이터 저장 완료: " + alarmInsertedRow);
+		} catch (Exception e) {
+			System.out.println("Alarm 데이터 저장 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+		}
+        
+        
 	}
 }
 	
