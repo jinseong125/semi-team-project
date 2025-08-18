@@ -30,11 +30,7 @@
 </style>
 
 <div class="container">
-  <!-- 검색 박스 -->
-  <div class="search-box">
-    <input type="text" id="search-input" class="search-input" placeholder="상품명 검색">
-    <button id="do-search" class="search-btn">검색</button>
-  </div>
+
   <!-- 상품 리스트 -->
   <c:if test="${not empty products}">
     <div class="product-grid" id="productGrid">

@@ -213,5 +213,13 @@
     SELECT COUNT(*)
       FROM product
   </select>
+  
+  <select id="getAutoComplete" resultType="string" parameterType="string">
+  	SELECT product_name
+  	  FROM product
+  	 WHERE product_name LIKE CONCAT('%', #{keyword}, '%')
+  	 ORDER BY product_name
+  	 LIMIT 50
+  </select>
         
 </mapper>

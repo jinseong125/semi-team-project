@@ -104,7 +104,7 @@ public class ProductController {
         return "product/detail";
     }
 
-    @GetMapping("/product/scroll")
+    @GetMapping("/scroll")
     public String scrollList() {
         return "product/scroll";
     }
@@ -133,6 +133,12 @@ public class ProductController {
     @ResponseBody
     public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
         return productService.searchByNew(searchName);
+    }
+    
+    @GetMapping(value = "/autocomplete", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<String> getAutoComplete(@RequestParam("keyword") String keyword) {
+      return productService.getAutoComplete(keyword);
     }
 
 }

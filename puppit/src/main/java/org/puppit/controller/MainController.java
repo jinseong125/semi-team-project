@@ -23,31 +23,31 @@ public class MainController {
   private final ProductService productService;
   
 
-  // ÃÖÃÊ ÁøÀÔ ½Ã JSP¿¡¼­ Ã¹ 8°³ »óÇ° ·»´õ¸µ
+  // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ JSPï¿½ï¿½ï¿½ï¿½ Ã¹ 8ï¿½ï¿½ ï¿½ï¿½Ç° ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
   @RequestMapping(value = "/")
   public String main(PageDTO dto
           , HttpServletRequest request
           , Model model) {
-	  dto.setSize(16);
-	  dto.setPage(1);
-	  dto.setOffset(0); // <---- ¹Ýµå½Ã Á÷Á¢ ³Ö¾îÁÖ°Å³ª, ¼­ºñ½º¿¡¼­ °è»ê
-	  Map<String, Object> map  = productService.getProducts(dto, request);
+    dto.setSize(16);
+    dto.setPage(1);
+    dto.setOffset(0); // <---- ï¿½Ýµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½Ö°Å³ï¿½, ï¿½ï¿½ï¿½ñ½º¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    Map<String, Object> map  = productService.getProducts(dto, request);
       System.out.println("map: " + map.get("products"));
-	  
-	  model.addAttribute("products", map.get("products"));
+    
+    model.addAttribute("products", map.get("products"));
       return "main";
   }
 
-  // ¹«ÇÑ½ºÅ©·Ñ API: offset°ú size¸¦ ¹Þ¾Æ¼­ »óÇ° ¸®½ºÆ®¸¦ ¹ÝÈ¯
+  // ï¿½ï¿½ï¿½Ñ½ï¿½Å©ï¿½ï¿½ API: offsetï¿½ï¿½ sizeï¿½ï¿½ ï¿½Þ¾Æ¼ï¿½ ï¿½ï¿½Ç° ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½È¯
   @GetMapping(value = "/product/list", produces = "application/json" )
   public ResponseEntity<Map<String, Object>> getProducts(
-		  @RequestParam(value="offset", defaultValue="0") int offset,
-		    @RequestParam(value="size", defaultValue="16") int size, HttpServletRequest request) {
-	  PageDTO dto = new PageDTO();
-	    dto.setOffset(offset);
-	    dto.setSize(size);
+      @RequestParam(value="offset", defaultValue="0") int offset,
+        @RequestParam(value="size", defaultValue="16") int size, HttpServletRequest request) {
+    PageDTO dto = new PageDTO();
+      dto.setOffset(offset);
+      dto.setSize(size);
 
-	    Map<String, Object> map = productService.getProducts(dto, request);
-	    return ResponseEntity.ok(map); // Ç×»ó 200 ¹ÝÈ¯
+      Map<String, Object> map = productService.getProducts(dto, request);
+      return ResponseEntity.ok(map); // ï¿½×»ï¿½ 200 ï¿½ï¿½È¯
   }
 }

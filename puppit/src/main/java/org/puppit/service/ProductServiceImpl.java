@@ -148,5 +148,10 @@ public class ProductServiceImpl implements ProductService {
         return Map.of("products", products, "pageCount", dto.getPageCount());
     }
 
+    @Override
+    public List<String> getAutoComplete(String keyword) {
+      return productDAO.getAutoComplete(keyword);
+    }
+
 
 }

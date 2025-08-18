@@ -1,5 +1,6 @@
 package org.puppit.service;
 
+import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductSearchDTO;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,7 @@ public interface ProductService {
     
     Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
     
+    public List<String> getAutoComplete(String keyword);
 
 
 }
