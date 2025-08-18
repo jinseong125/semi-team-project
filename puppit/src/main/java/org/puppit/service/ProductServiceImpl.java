@@ -57,7 +57,7 @@ public class ProductServiceImpl implements ProductService {
                     productDAO.insertProductImage(imageDTO);
 
                 } catch (IOException e) {
-                    throw new RuntimeException("�씠誘몄� �뾽濡쒕뱶 �떎�뙣", e);
+                    throw new RuntimeException("이미지 업로드 실패", e);
                 }
             }
         }
