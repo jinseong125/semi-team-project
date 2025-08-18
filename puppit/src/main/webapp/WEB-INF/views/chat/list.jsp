@@ -144,8 +144,8 @@ if (sessionMap != null) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
 const contextPath = "${contextPath}";
-const loginUserId = "${loginUserId}";
-const userId = "${userId}";
+const loginUserId = '<c:out value="${loginUserId}" />'; // 작은따옴표로 감싸 JS 문자열로 안전하게
+const userId = <c:out value="${userId}" />;             // 숫자는 그대로
 
 const centerMessage = document.getElementById('center-message');
 const chatHistory = document.getElementById('chat-history');
@@ -290,58 +290,39 @@ function renderProductInfo(product, chatMessages) {
 }
 
 function addChatMessageToHistory(chat) {
-	  console.log('Received message:', chat); // 서버로부터 받은 메시지 확인
+    console.log('Rendering message:', chat); // 렌더링되는 메시지 확인
+
     const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
     const currentUserRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // 현재 사용자 역할 결정
 
     // 메시지를 보낸 사람과 현재 사용자를 비교하여 영역 결정
-    if (String(chat.chatSenderAccountId) === String(loginUserId)) {
-        // 현재 사용자가 메시지를 보낸 경우
-        let alignClass = "right"; // 오른쪽 정렬
-        let msg = chat.message || chat.chatMessage || "";
+    const alignClass = (String(chat.chatSenderAccountId) === String(loginUserId)) ? "right" : "left";
+    const msg = chat.message || chat.chatMessage || "";
 
-        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
-        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
+    // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
+    const formattedTime = formatChatTime(chat.chatCreatedAt || "");
 
-        let html =
-            '<div class="chat-message ' + alignClass + '">' +
-                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-                '<div class="chat-text">' + msg + '</div>' +
-                '<div class="chat-time">' + formattedTime + '</div>' +
-            '</div>';
-        chatHistory.innerHTML += html;
-    } else {
-        // 상대방이 메시지를 보낸 경우
-        let alignClass = "left"; // 왼쪽 정렬
-        let msg = chat.message || chat.chatMessage || "";
-
-        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
-        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
-
-        let html =
-            '<div class="chat-message ' + alignClass + '">' +
-                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-                '<div class="chat-text">' + msg + '</div>' +
-                '<div class="chat-time">' + formattedTime + '</div>' +
-            '</div>';
-        chatHistory.innerHTML += html;
-    }
+    const html =
+        '<div class="chat-message ' + alignClass + '">' +
+            '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
+            '<div class="chat-text">' + msg + '</div>' +
+            '<div class="chat-time">' + formattedTime + '</div>' +
+        '</div>';
+    chatHistory.innerHTML += html;
 
     // 스크롤을 최신 메시지로 이동
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
 
+
 //시간 형식 변환 함수 추가
 function formatChatTime(timeString) {
-	let timestamp = Number(timeString);
+    const timestamp = Number(timeString);
     if (isNaN(timestamp)) {
         return "시간 정보 없음";
     }
-    // 밀리초 기반 타임스탬프를 Date 객체로 변환
     const date = new Date(Number(timeString));
-    console.log('date: ', date);
-
     const options = {
         year: "numeric",
         month: "2-digit",
@@ -349,9 +330,8 @@ function formatChatTime(timeString) {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
-        hour12: true, // 오전/오후 표시
+        hour12: true,
     };
-
     return new Intl.DateTimeFormat("ko-KR", options).format(date);
 }
 
@@ -371,31 +351,58 @@ function connectAndSubscribe(currentRoomId) {
         subscribeNotifications(); // 알림 구독
     }
 }
-
 function subscribeRoom(currentRoomId) {
     if (currentSubscription) currentSubscription.unsubscribe();
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function(msg) {
         const chat = JSON.parse(msg.body);
+        console.log('Received from server:', chat);
+
+        // 중복 렌더링 방지: 내가 보낸 메시지는 이미 렌더링됨
+        if (
+            chat.chatSenderAccountId === loginUserId &&
+            chat.chatCreatedAt === chatHistory.lastRenderedMessageTime
+        ) {
+            console.log('Duplicate message detected, skipping rendering.');
+            return;
+        }
+
+        // 화면에 렌더링
         addChatMessageToHistory(chat);
-        // 새 메시지가 오면 안내 문구 숨김
+
+        // 마지막 렌더링된 메시지 시간 저장
+        chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
+
+        // 알림 처리: 메시지의 수신자에게 알림 표시
+        if (chat.chatSenderAccountId !== loginUserId) {
+            displayNotification(
+                chat.chatSenderAccountId,
+                chat.chatMessage,
+                chat.senderRole,
+                chat.chatCreatedAt,
+                chat.productName
+            );
+        }
+
         centerMessage.style.display = "none";
     });
 }
-
 function subscribeNotifications() {
     stompClient.subscribe('/topic/notification', function(notification) {
         const data = JSON.parse(notification.body);
-        console.log('data: ', data);
-        displayNotification(
-            data.senderAccountId,
-            data.chatMessage,
-            data.senderRole,
-            data.chatCreatedAt,
-            data.productName
-        );
+        console.log('Notification received:', data);
+
+        // 알림 처리: 메시지의 전송자에게 알림 표시
+        if (data.senderAccountId === loginUserId) {
+            displayNotification(
+                data.senderAccountId,
+                data.chatMessage,
+                data.senderRole,
+                data.chatCreatedAt,
+                data.productName
+            );
+        }
     });
 }
-
 function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
     console.log('senderAccountId: ', senderAccountId);
     console.log('chatMessage: ', chatMessage);
@@ -469,13 +476,12 @@ function sendMessage(currentRoomId) {
         chatCreatedAt: Date.now().toString() // 문자열로 변환
     };
 
+    // 서버로 메시지 전송
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
 
-    // 메시지를 채팅 창에 즉시 추가
-    addChatMessageToHistory(chatMessage);
-
-    input.value = "";
+    input.value = ""; // textarea 내용 초기화
 }
+
 </script>
 </body>
 </html>
