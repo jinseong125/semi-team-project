@@ -57,7 +57,7 @@ public class ProductController {
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
                          @RequestParam("imageFiles") List<MultipartFile> imageFiles,
-                         @RequestParam(value="attachment", required=false) MultipartFile attachment,    
+                         @RequestParam(value="attachment", required=false) MultipartFile attachment,
                          HttpSession session,
                          RedirectAttributes ra) {
 
@@ -131,7 +131,7 @@ public class ProductController {
         return "product/myproduct";
     }
 
-    
+
     @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
     @ResponseBody
     public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
@@ -208,10 +208,10 @@ public class ProductController {
         Integer sellerId = (Integer) map.get("userId");
 
         ProductDTO productDTO = productService.getProductById(productId);
-        if (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
+       /* if (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
             ra.addFlashAttribute("error", "권한이 없습니다.");
             return "redirect:/product/myproduct";
-        }
+        }*/
 
 
 
