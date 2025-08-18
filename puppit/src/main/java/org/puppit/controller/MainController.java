@@ -23,14 +23,14 @@ public class MainController {
   private final ProductService productService;
   
 
-  // ÃÖÃÊ ÁøÀÔ ½Ã JSP¿¡¼­ Ã¹ 8°³ »óÇ° ·»´õ¸µ
+//ìµœì´ˆ ì§„ì… ì‹œ JSPì—ì„œ ì²« 8ê°œ ìƒí’ˆ ë Œë”ë§
   @RequestMapping(value = "/")
   public String main(PageDTO dto
           , HttpServletRequest request
           , Model model) {
 	  dto.setSize(16);
 	  dto.setPage(1);
-	  dto.setOffset(0); // <---- ¹İµå½Ã Á÷Á¢ ³Ö¾îÁÖ°Å³ª, ¼­ºñ½º¿¡¼­ °è»ê
+	  dto.setOffset(0); // <---- ë°˜ë“œì‹œ ì§ì ‘ ë„£ì–´ì£¼ê±°ë‚˜, ì„œë¹„ìŠ¤ì—ì„œ ê³„ì‚°
 	  Map<String, Object> map  = productService.getProducts(dto, request);
       System.out.println("map: " + map.get("products"));
 	  
@@ -38,7 +38,7 @@ public class MainController {
       return "main";
   }
 
-  // ¹«ÇÑ½ºÅ©·Ñ API: offset°ú size¸¦ ¹Ş¾Æ¼­ »óÇ° ¸®½ºÆ®¸¦ ¹İÈ¯
+  //ë¬´í•œìŠ¤í¬ë¡¤ API: offsetê³¼ sizeë¥¼ ë°›ì•„ì„œ ìƒí’ˆ ë¦¬ìŠ¤íŠ¸ë¥¼ ë°˜í™˜
   @GetMapping(value = "/product/list", produces = "application/json" )
   public ResponseEntity<Map<String, Object>> getProducts(
 		  @RequestParam(value="offset", defaultValue="0") int offset,
@@ -48,6 +48,6 @@ public class MainController {
 	    dto.setSize(size);
 
 	    Map<String, Object> map = productService.getProducts(dto, request);
-	    return ResponseEntity.ok(map); // Ç×»ó 200 ¹İÈ¯
+	    return ResponseEntity.ok(map); // í•­ìƒ 200 ë°˜í™˜
   }
 }
