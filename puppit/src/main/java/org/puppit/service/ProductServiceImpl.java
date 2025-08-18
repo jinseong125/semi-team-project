@@ -148,6 +148,13 @@ public class ProductServiceImpl implements ProductService {
         return Map.of("products", products, "pageCount", dto.getPageCount());
     }
 
+
+    @Override
+    public List<String> getAutoComplete(String keyword) {
+      return productDAO.getAutoComplete(keyword);
+    }
+
+
     @Transactional
     @Override
     public int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
@@ -161,4 +168,5 @@ public class ProductServiceImpl implements ProductService {
     }
 
     }
+
 
