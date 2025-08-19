@@ -56,13 +56,11 @@
   font-weight:700;
   border:none;
   border-radius:10px;
-  background:#4f86ff;
+  background:#333333;
   color:#fff;
   cursor:pointer;
   }
-  .charge-btn:active{
-    background:#3d6cd1;
-  }
+
 </style>
 
 <div class="wrap">
@@ -100,9 +98,9 @@
   </div>
 
   <div class="space">
-    <input type="hidden" id="uid" value="${sessionScope.userId}">
-    <input type="hidden" id="name" value="${sessionScope.userName}">
-    <input type="hidden" id="email" value="${sessionScope.userEmail}">
+    <input type="hidden" id="uid" value="${sessionScope.sessionMap.userId}">
+    <input type="hidden" id="name" value="${sessionScope.sessionMap.userName}">
+    <input type="hidden" id="email" value="${sessionScope.sessionMap.userEmail}">
   </div>
   
   <div class="charge-btn-wrap">

@@ -316,7 +316,6 @@ function addChatMessageToHistory(chat) {
     const senderName = chat.chatSenderUserName || "알 수 없음"; // 발신자 이름
     const formattedTime = formatChatTime(chat.chatCreatedAt || "");
 
-
     const html =
         '<div class="chat-message ' + alignClass + '">' +
         '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
@@ -377,6 +376,7 @@ function connectAndSubscribe(currentRoomId) {
             setTimeout(() => connectAndSubscribe(currentRoomId), 5000); // 5초 후 재시도
         });
     } else {
+
     	 console.log("Reusing existing WebSocket connection.");
          // 알림 구독 호출
          subscribeNotifications();
@@ -391,12 +391,14 @@ function subscribeRoom(currentRoomId) {
         currentSubscription.unsubscribe(); // 기존 구독 해제
     }
 
+
     console.log(`Subscribing to room: /topic/chat/${currentRoomId}`); // 구독 로그
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
         console.log('Received message:', chat);
 
         // 중복 렌더링 방지: 이미 렌더링된 messageId인지 확인
+
         //if (renderedMessageIds.has(chat.messageId)) {
         //    console.log('Duplicate message detected, skipping rendering.');
         //    return;
@@ -415,6 +417,13 @@ function subscribeRoom(currentRoomId) {
         }
         
         
+
+        if (renderedMessageIds.has(chat.messageId)) {
+            console.log('Duplicate message detected, skipping rendering.');
+            return;
+        }
+
+
         // 메시지를 화면에 추가
         addChatMessageToHistory(chat);
 
@@ -423,6 +432,7 @@ function subscribeRoom(currentRoomId) {
 
         // 마지막 렌더링된 메시지 시간 저장
         //chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
+
 
         // 안내 문구 숨기기
         centerMessage.style.display = "none";
@@ -435,8 +445,10 @@ function subscribeNotifications() {
         console.log('Notification received:', data);
 
         // 알림 처리: 메시지의 전송자에게 알림 표시
+
         if (data.receiverAccountId === loginUserId) {
         	 console.log("Displaying notification for receiver:", loginUserId);
+
             displayNotification(
                 data.senderAccountId,
                 data.chatMessage,
@@ -444,15 +456,20 @@ function subscribeNotifications() {
                 data.chatCreatedAt,
                 data.productName
             );
+
         } else {
             console.log("Notification ignored. Receiver:", data.receiverAccountId, "Current user:", loginUserId);
+
         }
     });
 }
 function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
+
    console.log('Displaying notification:', {
         senderAccountId, chatMessage, senderRole, chatCreatedAt, productName
     });
+
+    
 
     // chatCreatedAt을 밀리초 기반 타임스탬프로 처리하고 형식 변환
     let formattedTime = "시간 정보 없음";
@@ -603,12 +620,14 @@ async function sendMessage(currentRoomId) {
         chatCreatedAt: Date.now().toString(),
         messageId: Date.now().toString() + "-" + loginUserId // 고유 messageId 생성
     };
+
     
     console.log('chatMessage: ', chatMessage);
     
     
     // WebSocket을 통해 메시지 전송
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+
 
     // 입력창 초기화
     input.value = "";
