@@ -20,21 +20,28 @@ if (sessionMap != null) {
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="userId" value="<%= userId %>" />
 
-
-<jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+<jsp:include page="/WEB-INF/views/layout/header.jsp?dt=<%=System.currentTimeMillis()%>"/>
 
 <div class="detail-wrap">
-  <!-- 상단 카테고리 표시 (안전 처리) -->
-  <div class="breadcrumb">
+  <!-- 좌측: 이미지 -->
+  <div class="detail-left">
     <c:choose>
-      <c:when test="${product.category ne null and not empty product.category.categoryName}">
-        <span>${product.category.categoryName}</span>
+      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.url}">
+        <img src="${product.thumbnail.url}" alt="${product.productName}" class="main-img"/>
+      </c:when>
+      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
+        <img src="${product.thumbnail.imageUrl}" alt="${product.productName}" class="main-img"/>
+      </c:when>
+      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.path}">
+        <img src="${product.thumbnail.path}" alt="${product.productName}" class="main-img"/>
       </c:when>
       <c:otherwise>
-        <span>${product.categoryId}</span>
+        <div class="thumb-placeholder">이미지 없음</div>
       </c:otherwise>
     </c:choose>
   </div>
+
+
   <!-- 내 상품일 때만 수정 버튼 보이도록 -->
   <div class="actions">
     <c:set var="sessionMap" value="${sessionScope.sessionMap}" />
@@ -47,133 +54,171 @@ if (sessionMap != null) {
 
   </div>
 
-  <div class="top">
-    <!-- 좌: 대표 이미지 -->
-    <div class="thumb">
+
+  <!-- 우측: 상품 정보 -->
+  <div class="detail-right">
+    <!-- 카테고리 -->
+    <div class="breadcrumb">
       <c:choose>
-
-        <c:when test="${product.thumbnail ne null and not empty product.thumbnail.url}">
-          <img src="${product.thumbnail.url}" alt="${product.productName}"/>
+        <c:when test="${product.category ne null and not empty product.category.categoryName}">
+          ${product.category.categoryName}
         </c:when>
-        <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
-          <img src="${product.thumbnail.imageUrl}" alt="${product.productName}"/>
-        </c:when>
-        <c:when test="${product.thumbnail ne null and not empty product.thumbnail.path}">
-          <img src="${product.thumbnail.path}" alt="${product.productName}"/>
-        </c:when>
-
-        <c:otherwise>
-          <div class="thumb-placeholder">
-            <div class="ph-dot"></div>
-            <div class="ph-mountain"></div>
-          </div>
-        </c:otherwise>
+        <c:otherwise>${product.categoryId}</c:otherwise>
       </c:choose>
     </div>
 
-    <!-- 우: 상품 메타 -->
-    <div class="meta">
-      <h1 class="title">${product.productName}</h1>
+    <!-- 상품명 -->
+    <h1 class="title">${product.productName}</h1>
 
-      <div class="price">
-        <strong><fmt:formatNumber value="${product.productPrice}" pattern="#,###원"/></strong>
-      </div>
+    <!-- 가격 -->
+    <div class="price">
+      <fmt:formatNumber value="${product.productPrice}" pattern="#,###"/>원
+    </div>
 
-      <div class="meta-line"></div>
+    <!-- 상태 / 등록일 -->
+    <ul class="meta-list">
+      <li>
+        <span class="label">상품상태</span>
+        <span class="value">
+          <c:choose>
+            <c:when test="${product.status ne null and not empty product.status.statusName}">
+              ${product.status.statusName}
+            </c:when>
+            <c:otherwise>상태 코드: ${product.statusId}</c:otherwise>
+          </c:choose>
+        </span>
+      </li>
+      <li>
+        <span class="label">등록일</span>
+        <span class="value">
+          <fmt:formatDate value="${product.productCreatedAt}" pattern="yyyy.MM.dd HH:mm"/>
+        </span>
+      </li>
+   <%--    <li>
+	       <span class="value">
+			 <c:choose>
+			   <c:when test="${not empty product.location}">
+			     ${product.location}
+			   </c:when>
+			   <c:otherwise>지역 정보 없음</c:otherwise>
+			 </c:choose>
+		  </span>
+	    </li> --%>
+    </ul>
 
-      <ul class="mini-list">
-        <li>
-          <span class="label">상품상태</span>
-          <span class="value">
-            <c:choose>
-              <c:when test="${product.status ne null and not empty product.status.statusName}">
-                ${product.status.statusName}
-              </c:when>
-              <c:otherwise>상태 코드: ${product.statusId}</c:otherwise>
-            </c:choose>
-          </span>
-        </li>
-        <li>
-          <span class="label">등록일</span>
-          <span class="value">
-            <fmt:formatDate value="${product.productCreatedAt}" pattern="yyyy.MM.dd"/>
-          </span>
-        </li>
-      </ul>
+    <!-- 버튼 영역 -->
+    <div class="buttons">
+      <!-- 내 상품일 때만 수정/삭제 -->
+      <c:set var="sessionMap" value="${sessionScope.sessionMap}" />
+      <c:if test="${sessionMap.userId eq product.sellerId}">
+        <a href="${contextPath}/product/edit/${product.productId}" class="btn outline">상품 수정</a>
+        <form action="${contextPath}/product/delete" method="post" style="display:inline;">
+          <input type="hidden" name="productId" value="${product.productId}"/>
+          <button type="submit" class="btn outline"
+                  onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
+        </form>
+      </c:if>
 
-      <div class="actions">
-        <button type="button" class="btn btn-outline" onclick="history.back()">목록</button>
-        <button type="button" class="btn btn-outline" id="btnWish">찜</button>
-        <button type="button" class="btn btn-solid" id="btnPay">채팅하기</button>
-      </div>
+      <!-- 공통 버튼 -->
+      <button type="button" class="btn outline" onclick="history.back()">목록</button>
+      <button type="button" class="btn outline" id="btnWish">찜</button>
+      <button type="button" class="btn solid" id="btnPay">채팅하기</button>
     </div>
   </div>
+</div>
 
-  <!-- 구분선 -->
-  <div class="divider"></div>
-
-  <!-- 상세정보 -->
-  <section class="section">
-    <div class="section-head">
-      <h2>상품정보</h2>
-    </div>
-    <div class="section-body">
-      <c:choose>
-        <c:when test="${not empty product.productDescription}">
-          <pre class="desc"><c:out value="${product.productDescription}"/></pre>
-        </c:when>
-        <c:otherwise>
-          <div class="empty">등록된 설명이 없습니다.</div>
-        </c:otherwise>
-      </c:choose>
-    </div>
-  </section>
+<!-- 상세 설명 -->
+<div class="detail-desc">
+  <h2>상품정보</h2>
+  <c:choose>
+    <c:when test="${not empty product.productDescription}">
+      <pre class="desc"><c:out value="${product.productDescription}"/></pre>
+    </c:when>
+    <c:otherwise>
+      <div class="empty">등록된 설명이 없습니다.</div>
+    </c:otherwise>
+  </c:choose>
 </div>
 
 <style>
-:root{
-  --text:#111; --muted:#6b7280; --border:#e5e7eb; --line:#ebebef;
-  --black:#0a0a0a; --pink-verylight:#fff1f7;
+.detail-wrap {
+  max-width:1100px; margin:40px auto; padding:0 20px;
+  display:flex; gap:32px;
 }
-.detail-wrap .detail-wrap{max-width:980px;margin:24px auto 80px;padding:0 16px;color:var(--text);}
-.detail-wrap .breadcrumb{font-size:14px;color:var(--muted);margin-bottom:16px;}
-.detail-wrap .detail-wrap .top{display:grid;grid-template-columns:360px 1fr;gap:28px;}
-.detail-wrap .thumb{width:20%;aspect-ratio:1/1;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;}
-.detail-wrap .thumb img{width:20%;height:20%;object-fit:cover;display:block;}
-.detail-wrap .thumb-placeholder{width:70%;height:70%;border:2px solid #cfcfd4;border-radius:12px;position:relative;}
-.detail-wrap .ph-dot{width:14px;height:14px;border-radius:50%;background:#cfcfd4;position:absolute;left:10px;top:10px;}
-.detail-wrap .ph-mountain{position:absolute;bottom:10px;left:10px;right:10px;top:40%;border-left:2px solid #cfcfd4;border-bottom:2px solid #cfcfd4;transform:skewX(-20deg);}
-.detail-wrap .meta .title{font-size:28px;margin:4px 0 8px;font-weight:700;}
-.detail-wrap .price strong{font-size:22px;}
-.detail-wrap .meta-line{height:1px;background:var(--line);margin:16px 0;}
-.detail-wrap .mini-list{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px;}
-.detail-wrap .mini-list .label{color:var(--muted);font-size:13px;margin-right:6px;}
-.detail-wrap .mini-list .value{font-size:14px;}
-.detail-wrap .actions{display:flex;gap:12px;margin-top:18px;}
-.detail-wrap .btn{height:42px;padding:0 18px;border-radius:10px;font-size:14px;cursor:pointer;border:1px solid var(--black);background:#fff;}
-.detail-wrap .btn-solid{background:var(--black);color:#fff;}
-.detail-wrap .btn-outline{background:#fff;color:#111;}
-.detail-wrap .divider{height:1px;background:var(--line);margin:26px 0;}
-.detail-wrap .section-head h2{font-size:18px;font-weight:700;}
-.detail-wrap .section-body{margin-top:12px;background:var(--pink-verylight);border:1px dashed #f2cfe0;border-radius:12px;min-height:160px;padding:18px;}
-.detail-wrap .desc{white-space:pre-wrap;line-height:1.6;font-size:15px;}
-.detail-wrap .empty{color:var(--muted);font-size:14px;}
-@media(max-width:860px){.top{grid-template-columns:1fr;}}
+.detail-left { flex:1; }
+.main-img {
+  width:100%; max-height: 500px;
+  border-radius:12px; border:1px solid #eee;
+  object-fit:contain;
+}
+.detail-right { flex:1; display:flex; flex-direction:column; gap:14px; }
+.breadcrumb { font-size:14px; color:#6b7280; }
+.title { font-size:24px; font-weight:700; margin:4px 0; }
+.price { font-size:22px; font-weight:600; color:#111; }
+.meta-list { list-style:none; padding:0; margin:8px 0; }
+.meta-list li { font-size:14px; margin:6px 0; }
+.label { color:#6b7280; margin-right:6px; }
+.value { color:#111; }
+.buttons { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.btn {
+  padding:10px 18px; border-radius:8px; font-size:15px; cursor:pointer;
+}
+.btn.solid { background:#0073e6; color:#fff; border:none; flex:1; text-align:center; }
+.btn.outline { background:#fff; border:1px solid #d1d5db; color:#111; }
+.detail-desc {
+  max-width:1100px; margin:30px auto; padding:20px;
+  border:1px solid #eee; border-radius:12px; background:#fafafa;
+}
+.detail-desc h2 { font-size:18px; font-weight:700; margin-bottom:12px; }
+.desc { white-space:pre-wrap; line-height:1.6; font-size:15px; }
+.empty { color:#6b7280; font-size:14px; }
 </style>
 
 <script>
-var contextPath = "${contextPath}"; // <-- 반드시 선언!
+document.addEventListener("DOMContentLoaded", () => {
+	const productId = "${product.productId}";
+    getProductFetch(productId);
+  });
+
+var contextPath = "${contextPath}";
 
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
 document.getElementById('btnPay')?.addEventListener('click',function() {
-	const productId = "${product.productId}";
+    const productId = "${product.productId}";
     const buyerId = "${userId}";
     const sellerId = "${product.sellerId}";
-    // chat/createRoom?productId=xxx&buyerId=xxx&sellerId=xxx 로 요청
     window.location.href = contextPath + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;
-
-
-
-
 });
+
+async function getProductFetch(productId) {
+	  try {
+	    const res = await fetch(contextPath + "/api/product/detail/" + productId, {
+	      method: "GET",
+	      headers: {
+	        "Accept": "application/json"
+	      }
+	    });
+	    if (!res.ok) {
+	      throw new Error("HTTP 오류 " + res.status);
+	    }
+
+	    const data = await res.json();
+	    console.log("[getProductFetch] 응답:", data);
+
+	    // 예시: 가격 업데이트
+	    /* const priceEl = document.querySelector(".price");
+	    if (priceEl && data.productPrice) {
+	      priceEl.textContent = new Intl.NumberFormat().format(data.productPrice) + "원";
+	    }
+
+	    // 예시: 상품 설명 업데이트
+	    const descEl = document.querySelector(".desc");
+	    if (descEl && data.productDescription) {
+	      descEl.textContent = data.productDescription;
+	    }
+ */
+	  } catch (err) {
+	    console.error("상품 조회 실패:", err);
+	  }
+}
 </script>

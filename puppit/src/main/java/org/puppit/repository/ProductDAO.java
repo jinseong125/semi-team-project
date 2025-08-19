@@ -47,8 +47,27 @@ public class ProductDAO {
     }
 
     public ProductDTO getProductById(Integer productId){
+     
         return sqlSession.selectOne("product.getProductById", productId);
+
     }
+    
+    
+    // 상품에 대한 썸네일이미지 가져오는 메소드
+    public ProductImageLIstDTO getThumnailImage(Integer productId) {
+      ProductImageLIstDTO productImageLIstDTO = new ProductImageLIstDTO();
+      ProductImageDTO imageDTO = sqlSession.selectOne("product.getProductImages", productId);
+      productImageLIstDTO.setImageUrl(imageDTO.getImageUrl());
+      productImageLIstDTO.setImageId(imageDTO.getImageId());
+      productImageLIstDTO.setThumbnail(imageDTO.isThumbnail());
+      productImageLIstDTO.setProductId(imageDTO.getProductId());
+      
+      
+      return productImageLIstDTO;
+    }
+    
+    
+    
 
     public List<ProductDTO> getProductList() {
       return sqlSession.selectList("product.getProductList");
@@ -98,8 +117,6 @@ public class ProductDAO {
 	  public List<String> getAutoComplete(String keyword) {
 	    return sqlSession.selectList("product.getAutoComplete", keyword);
 	  }
-
-	  
 
 
     public int updateProduct(ProductDTO productDTO) {

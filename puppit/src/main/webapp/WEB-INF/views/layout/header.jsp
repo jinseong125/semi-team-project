@@ -45,7 +45,9 @@ a{text-decoration:none;color:inherit;}
   padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f3f3;
 }
 #autocompleteList li:hover {background:#f9f9f9;}
-/* 🔽 인기검색어 */
+
+/* 인기검색어 */
+
 #top-keywords {margin-top:4px;font-size:14px;color:#444;}
 #top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
 #top-keywords .keyword:hover {text-decoration:underline;}
@@ -110,18 +112,56 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<hr>
 <div id="search-results"></div>
-
+<hr>
 <script>
-(function () {
-  console.log('[search] boot');
+  //const contextPath = '${contextPath}';
+  const input = document.getElementById("search-input");
 
-  var contextPath = '${contextPath}';
-  var input = document.getElementById('search-input');
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
+  
+  document.addEventListener("DOMContentLoaded", () => {
+    loadTopKeywords();
+  });
+
+
+  async function loadTopKeywords() {
+	  try {
+	    const res = await fetch("${contextPath}/search/top");
+	    if (!res.ok) throw new Error("HTTP " + res.status);
+	    const data = await res.json();
+
+	    console.log("[loadTopKeywords] API Response:", data);
+
+	    let html = "";
+	    data.slice(0, 10).forEach(item => {
+	      const keyword = item.searchKeyword; 
+	      console.log('keyword: ', keyword);
+	      if (keyword) {
+	    	 html += '<span class="keyword">#' + keyword + '</span>';
+	      }
+	    });
+
+	    const topKeywordsElement = document.getElementById("top-keywords");
+	    if (!topKeywordsElement) throw new Error("top-keywords element not found");
+	    topKeywordsElement.innerHTML = html;
+
+	    // 클릭 이벤트 바인딩
+	    document.querySelectorAll("#top-keywords .keyword").forEach(el => {
+	      el.addEventListener("click", () => {
+	        const kw = el.textContent.replace("#", "");
+	        input.value = kw;
+	        search(kw);
+	      });
+	    });
+	  } catch (err) {
+	    console.error("인기검색어 불러오기 에러:", err);
+	    document.getElementById("top-keywords").innerHTML = "인기검색어를 불러올 수 없습니다.";
+	  }
+	}
+  // ===================== 자동완성 =====================
 
   function formatPrice(v) {
     if (v === null || v === undefined) return '';
@@ -181,7 +221,8 @@ a{text-decoration:none;color:inherit;}
     }
   }
 
-  // ===================== 🔽 자동완성 =====================
+  
+
   input.addEventListener("keyup", async () => {
     const keyword = input.value.trim();
     if (keyword.length === 0) {
@@ -189,7 +230,7 @@ a{text-decoration:none;color:inherit;}
       return;
     }
     try {
-      const res = await fetch(contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword));
+      const res = await fetch("${contextPath}/product/autocomplete?keyword=" + encodeURIComponent(keyword));
       const data = await res.json();
 
       autoList.innerHTML = "";
@@ -223,9 +264,47 @@ a{text-decoration:none;color:inherit;}
   });
 
   // 돋보기 클릭
-  btn.addEventListener('click', function () {
+  document.getElementById('do-search').addEventListener('click', function () {
     search(input.value);
   });
+
+
+  
+  async function search(keyword) {
+	    var q = (keyword || '').trim();
+	    if (!q) {
+	      results.innerHTML = '<div class="empty">검색어를 입력하세요.</div>';
+	      return;
+	    }
+	    results.innerHTML = '<div class="empty">검색 중...</div>';
+
+	    var url = '${contextPath}/product/search?searchName=' + encodeURIComponent(q);
+	    console.log('[search] fetch:', url);
+
+	    try {
+	      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+	      const data = await res.json();
+	      console.log('[search] parsed data:', data);
+	      render(Array.isArray(data) ? data : [], q);
+	    } catch (err) {
+	      console.error('[search] fetch error:', err);
+	      results.innerHTML = '<div class="empty">검색 중 오류가 발생했습니다.</div>';
+	    }
+	  }
+  
+  
+  function render(list, keyword) {
+	    if (!Array.isArray(list)) list = [];
+	    if (!list.length) {
+	      results.innerHTML =
+	        '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 0건</div>' +
+	        '<div class="empty">조건에 맞는 상품이 없습니다.</div>';
+	      return;
+	    }
+  }
+</script>
 
   // ===================== 🔽 인기검색어 =====================
   async function loadTopKeywords() {
@@ -260,4 +339,5 @@ a{text-decoration:none;color:inherit;}
 })();
 
 </script>
+
 
