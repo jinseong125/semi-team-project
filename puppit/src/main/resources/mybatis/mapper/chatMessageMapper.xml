@@ -321,6 +321,13 @@ WHERE p.product_id = #{productId};
   	
   	</insert>
   	
+  	<select id="getReceiverInfoByUserId" parameterType="Integer" resultType="ChatUserDTO">
+  	    SELECT user_id, account_id, user_name, nick_name
+  		FROM user
+  		WHERE user_id = #{userId}
+  	
+  	
+  	</select>
   	
   	
   	
