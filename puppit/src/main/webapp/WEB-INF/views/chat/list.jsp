@@ -329,7 +329,7 @@ function addChatMessageToHistory(chat) {
     chatHistory.scrollTop = chatHistory.scrollHeight;
 
     // 마지막 렌더링된 메시지 시간 저장
-    chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
+    //chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
 }
 
 
@@ -498,29 +498,114 @@ function enableChatInput(enable) {
 }
 
 //메시지 전송
-function sendMessage(currentRoomId) {
+async function sendMessage(currentRoomId) {
+	console.log("currentRoomId:", currentRoomId);
+    if (!currentRoomId) {
+        console.error("currentRoomId가 유효하지 않습니다. 메시지를 전송할 수 없습니다.");
+        return;
+    }
+
     if (!stompClient || !isConnected) return;
 
     const input = document.querySelector('textarea[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value.trim();
     if (!message || !currentRoomId) return;
-
+    
     const productId = document.querySelector('#pay-btn')?.dataset.productId;
-    const buyerId = userId;
+ 	// 현재 로그인한 사용자의 ID
+    const chatSender = userId;
+    const chatSenderAccountId = loginUserId; // 로그인 사용자 계정 ID
+    
+    let productSellerId = null;
+    let buyerId = null;
+    
+    
+    // 1. payBtn 요소에서 데이터를 가져오는 시도
+    const payBtn = document.querySelector('#pay-btn');
+    if (payBtn) {
+        productSellerId = payBtn.dataset.sellerId || null;
+        buyerId = payBtn.dataset.buyerId || null;
+    }
 
-    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
+    // 2. payBtn 데이터가 없을 경우, currentRoomId를 기반으로 데이터를 가져오기
+    if (!productSellerId || !buyerId) {
+        const roomData = await getChatRoomData(currentRoomId); // 서버 또는 클라이언트에서 데이터를 가져오는 함수
+        if (roomData) {
+        	  productSellerId = roomData.product?.sellerId || null;
+        	  // buyerId는 chatMessages 배열에서 추출
+              buyerId =
+                  roomData.chatMessages?.find((msg) => msg.buyerId)?.buyerId ||
+                  roomData.product?.buyerId ||
+                  null;
+        }
+    }
+    
+    console.log('userId: ', userId , ' productSellerId: ', productSellerId, ' buyerId: ', buyerId);
+    console.log('payBtn:', payBtn);
+    
+    // 로그인한 사용자가 구매자인 경우 판매자를 수신자로 설정, 판매자인 경우 구매자를 수신자로 설정
+       // 채팅 상대방을 구분하여 수신자(chatReceiver) 설정
+    const chatReceiver = (() => {
+      if (String(userId) === String(productSellerId)) {
+          // 현재 사용자가 판매자인 경우, 수신자는 구매자
+          return buyerId && !isNaN(parseInt(buyerId)) ? parseInt(buyerId) : null;
+      } else {
+          // 현재 사용자가 구매자가 아닌 경우, 수신자는 판매자
+          return productSellerId && !isNaN(parseInt(productSellerId)) ? parseInt(productSellerId) : null;
+      }
+    })();
+    
+    // 수신자 값 검증
+    if (!chatReceiver) {
+        console.error('chatReceiver 값이 유효하지 않습니다. 메시지를 전송할 수 없습니다.');
+        return;
+    }
+
+    
+    
+    
+    
+    const chatReceiverAccountId = (String(userId) === String(productSellerId)) ? buyerId : productSellerId;
+    
+    console.log('chatSender: ', chatSender);
+    console.log('chatReceiver: ', chatReceiver);
+    
+    
+	 // 발신자와 수신자가 동일한지 확인
+    if (chatSender === chatReceiver) {
+        console.error('발신자와 수신자가 동일합니다. 메시지를 전송할 수 없습니다.');
+        return;
+    }
+
+    // 발신자 역할 설정
     const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
+
+    // 수신자 역할 설정
+    const receiverRole = (senderRole === "SELLER") ? "BUYER" : "SELLER";
+    
+    //const buyerId = userId;
+    
+    //const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
+    //const receiverAccountId = (String(userId) === String(productSellerId)) ? buyerId : productSellerId; // 수신자 ID 설정
+    //const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
 
     const chatMessage = {
         chatRoomId: currentRoomId,
         chatMessage: message,
-        chatSenderAccountId: loginUserId,
+        chatSender: chatSender, // 발신자 ID
+        chatSenderAccountId:  chatSenderAccountId, // 발신자 계정 ID,
+        chatReceiver: chatReceiver, // 수신자 ID
+        chatReceiverAccountId: chatReceiverAccountId, // 수신자 계정 ID
         productId: productId,
         buyerId: buyerId,
-        senderRole: senderRole,
+        senderRole: senderRole, // 발신자 역할
+        receiverRole: receiverRole, // 수신자 역할
         chatCreatedAt: Date.now().toString(),
         messageId: Date.now().toString() + "-" + loginUserId // 고유 messageId 생성
     };
+    
+    console.log('chatMessage: ', chatMessage);
+    
     
     // WebSocket을 통해 메시지 전송
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
@@ -528,6 +613,44 @@ function sendMessage(currentRoomId) {
     // 입력창 초기화
     input.value = "";
 }
+
+
+async function getChatRoomData(roomId) {
+    console.log("getChatRoomData() roomId: ", roomId);
+    // roomId 유효성 확인
+    if (!roomId) {
+        console.error('roomId가 유효하지 않습니다. 데이터를 가져올 수 없습니다.');
+        return null;
+    }
+
+    try {
+        // 문자열 연결 방식으로 URL 생성
+        const url = contextPath + "/chat/message?roomId=" + roomId + "&loginUserId=" + userId;
+
+        // 서버로부터 데이터를 비동기로 가져오기
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        // 응답 상태 확인
+        if (!response.ok) {
+            console.error('채팅방 데이터를 가져오는 데 실패했습니다:', response.status, response.statusText);
+            return null;
+        }
+
+        // JSON 데이터 파싱
+        const data = await response.json();
+        console.log('roomData:', data); // 디버깅 용도로 출력
+        return data;
+    } catch (error) {
+        console.error('채팅방 데이터를 가져오는 중 오류가 발생했습니다:', error);
+        return null;
+    }
+}
+
 
 
 </script>
