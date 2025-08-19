@@ -48,15 +48,11 @@
 
   /* 구분선(아래 공간 남김) */
   .space{height:240px;}
-  
   .charge-btn-wrap {
     display: flex;
     justify-content: center; 
     align-items: center;    
-
   }
-  
-  
   .charge-btn{
   width:600px;
   height:50px;
@@ -68,7 +64,6 @@
   color:#fff;
   cursor:pointer;
   }
-
 </style>
 
 <div class="wrap">
@@ -120,9 +115,8 @@
   const limit = Number("${chargeLimit}");
   const $amount = document.getElementById('amount');
 
-  // str이 null, undefined 이면 .replace() 호출시 에러가 나기 때문에 str || ''를 사용합니다.
-  function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); } // 문자열 전체에서 숫자가 아닌 문자를 찾는 정규식
-  function format(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); } // 천 단위 콤마(,)를 넣어주는 정규식 포맷 함수 
+  function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); } 
+  function format(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); } 
   function snap1000(n){
     if (isNaN(n)) return 0;
     n = Math.min(n, limit);
