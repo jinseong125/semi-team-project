@@ -627,7 +627,8 @@ async function sendMessage(currentRoomId) {
     
     // WebSocket을 통해 메시지 전송
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
-
+    // 메시지를 화면에 추가 (서버 응답 없이 클라이언트에서 바로 렌더링)
+    addChatMessageToHistory(chatMessage);
 
     // 입력창 초기화
     input.value = "";
