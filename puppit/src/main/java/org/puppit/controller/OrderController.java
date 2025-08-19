@@ -40,7 +40,7 @@ public class OrderController {
     Integer amount = price * quantity;
     
     UserDTO userDTO = userService.getUserId(String.valueOf(chatSellerAccountId));
-    String userNickname = userDTO.getUserName();
+    String userNickname = userDTO.getNickName();
 
     model.addAttribute("buyerId", buyerId);
     model.addAttribute("sellerId", sellerId);
