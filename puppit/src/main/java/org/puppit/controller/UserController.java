@@ -76,7 +76,6 @@ public class UserController {
     } else {
       return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
-
   }
   
   // 로그인 폼 보여주기
@@ -129,12 +128,29 @@ public class UserController {
      return "redirect:/user/login";
   }
 }
+   // 로그 아웃
   @GetMapping("/logout")
   public String logout(HttpSession session) {
     session.invalidate();
     return "redirect:/";
   }
-  
+  // 아이디 찾기 JSP
+  @GetMapping("/find")
+  public String findCheckForm() {
+    return "user/find";
+  }
+  // 아이디 찾기
+  @PostMapping("/find")
+  public String findCheck(RedirectAttributes redirectAttr, UserDTO user) {
+    String findId = userService.findAccountIdByUserNameUserEmail(user);
+    if(findId == null) {
+      redirectAttr.addFlashAttribute("msg", "입력하신 정보로 가입 된 회원 아이디는 존재하지 않습니다.");
+      return "redirect:/user/find";
+    } else {
+      redirectAttr.addFlashAttribute("msg", findId + "입니다.");
+      return "redirect:/user/login";
+    }
+  }
   @GetMapping("/profile")
   public String profileForm() {
     return "user/profile";
