@@ -42,8 +42,6 @@ if (sessionMap != null) {
       <a href="${contextPath}/product/edit/${product.productId}" class="btn btn-outline">상품 수정</a>
       <form action="${contextPath}/product/delete" method="post" style="display:inline;">
         <input type="hidden" name="productId" value="${product.productId}"/>
-        <button type="submit" class="btn btn-outline"
-                onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
       </form>
     </c:if>
 
