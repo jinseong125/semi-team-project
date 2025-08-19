@@ -147,6 +147,11 @@ public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId) {
 	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getReceiverInfoByUserId", chatReceiverAccountId);
 }
 
+public String getProductNameById(int parseInt) {
+	
+	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getProductNameById", parseInt);
+}
+
 
    
    

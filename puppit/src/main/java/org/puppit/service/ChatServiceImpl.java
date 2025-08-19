@@ -141,6 +141,12 @@ public class ChatServiceImpl implements ChatService{
 		
 		return chatDAO.getReceiverInfoByUserId(chatReceiverAccountId);
 	}
+
+	@Override
+	public String getProductNameById(int parseInt) {
+		
+		return chatDAO.getProductNameById(parseInt);
+	}
 	
 	  // 페이징된 채팅방 목록 조회
 

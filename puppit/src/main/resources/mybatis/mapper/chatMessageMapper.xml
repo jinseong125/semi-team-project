@@ -329,7 +329,13 @@ WHERE p.product_id = #{productId};
   	
   	</select>
   	
+  	<select id="getProductNameById" parameterType="Integer" resultType="String">
+  		SELECT product_name
+  		FROM product
+  		WHERE product_id = #{parseInt}
   	
+  	
+  	</select>
   	
   
 </mapper>
