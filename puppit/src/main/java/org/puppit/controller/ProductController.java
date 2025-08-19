@@ -28,7 +28,7 @@ public class ProductController {
     private final S3Service s3Service;
     private final ProductDAO productDAO;
 
-    /** 상품 등록 폼 */
+    /** 상품 등록 */
     @GetMapping("/new")
     public String newForm(ProductDTO productDTO, Model model, HttpSession session,
                           RedirectAttributes ra) {
@@ -36,13 +36,11 @@ public class ProductController {
         Map<String, Object> map = (Map<String, Object>)attr;
         Integer sellerId = (Integer) map.get("userId");
 
-
         if (sellerId == null) {
             ra.addFlashAttribute("error", "상품 등록은 로그인 후 이용 가능합니다.");
             return "redirect:/user/login";
         }
-
-
+        
 
         // 셀렉트 박스 데이터
         var formData = productService.getProductFormData();
@@ -112,6 +110,7 @@ public class ProductController {
         return "product/scroll";
     }
 
+    /* 상품 관리 */
     @GetMapping("/myproduct")
     public String myProduct(HttpSession session, RedirectAttributes ra, Model model) {
 
@@ -145,6 +144,7 @@ public class ProductController {
     }
 
 
+    /* 상품 수정 */
     @GetMapping("/edit/{productId}")
     public String editForm(@PathVariable("productId") Integer productId,
                            HttpSession session,
@@ -223,6 +223,7 @@ public class ProductController {
         return "redirect:/product/detail/" + product.getProductId();
     }
 
+    /* 상품 삭제 */
     @PostMapping("/delete")
     public String delete(@RequestParam("productId") Integer productId,
                          HttpSession session,
@@ -247,7 +248,6 @@ public class ProductController {
         } else {
             ra.addFlashAttribute("error", "상품 삭제 실패 ");
         }
-
 
         return "redirect:/product/myproduct";
     }
