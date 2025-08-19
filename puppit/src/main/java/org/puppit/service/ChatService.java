@@ -32,5 +32,6 @@ public interface ChatService {
 	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO);
 	public Integer saveAlarmData(Map<String, Object> messageAlarm);
 	public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId);
+	public String getProductNameById(int parseInt);
 }
 

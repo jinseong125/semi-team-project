@@ -10,12 +10,14 @@ import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
+import org.puppit.model.dto.NotificationDTO;
 import org.puppit.service.ChatService;
 import org.puppit.service.UserService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -145,5 +147,37 @@ public class ChatWebSocketController {
 
 	    String destination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
 	    messagingTemplate.convertAndSend(destination, chatMessageDTO);
+	    
+	    
+	    productId = chatService.getProductIdByRoomId(chatRoomId);
+	    
+	    System.out.println("productId: " + productId);
+	    System.out.println("productName: " + chatService.getProductNameById(productId));
+	    
+	    
+	    
+	    // 알림 메시지 생성
+	    NotificationDTO notification = new NotificationDTO();
+        notification.setSenderAccountId(chatMessageDTO.getChatSenderAccountId());
+        notification.setReceiverAccountId(chatMessageDTO.getChatReceiverAccountId());
+        notification.setChatMessage(chatMessageDTO.getChatMessage());
+        notification.setSenderRole(chatMessageDTO.getSenderRole());
+        notification.setChatCreatedAt(chatMessageDTO.getChatCreatedAt());
+        notification.setProductName(chatService.getProductNameById(productId));
+
+        // 알림을 브로드캐스트
+        messagingTemplate.convertAndSend("/topic/notification", notification);
+        System.out.println("Notification sent: " + notification);
+	    
+	    
+	    
 	}
+	
+	@MessageMapping("/chat.notify")
+	@SendTo("/topic/notification")
+	public NotificationDTO sendNotification(@Payload NotificationDTO notification) {
+	    System.out.println("Broadcasting notification: " + notification);
+	    return notification;
+	}
+	
 }
