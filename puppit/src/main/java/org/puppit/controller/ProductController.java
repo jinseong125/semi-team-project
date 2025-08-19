@@ -151,11 +151,25 @@ public class ProductController {
                            RedirectAttributes ra,
                            Model model) {
 
-        // 로그인 확인
+        Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
+        Integer sellerId = (Integer) map.get("userId");
+
         Object attr = session.getAttribute("sessionMap");
 
-        Map<String, Object> map = (Map<String, Object>) attr;
-        Integer sellerId = (Integer) map.get("userId");
+        ProductDTO productDTO = productService.getProductById(productId);
+
+        if (productDTO == null) {
+            ra.addFlashAttribute("error", "상품을 찾을 수 없습니다.");
+            return "redirect:/product/myproduct";
+        }
+
+
+        if (productDTO.getSellerId() == null || !productDTO.getSellerId().equals(sellerId)) {
+            ra.addFlashAttribute("error", "상품 주인만 상품 수정이 가능합니다.");
+            return "redirect:/product/myproduct";
+        }
+
+
 
         // 상품 가져오기
         ProductDTO product = productService.getProductById(productId);
@@ -175,20 +189,25 @@ public class ProductController {
     @PostMapping("/update")
     public String update(@ModelAttribute ProductDTO product,
                          @RequestParam(value="imageFiles", required=false) List<MultipartFile> imageFiles,
+                         @RequestParam("productId") Integer productId,
                          HttpSession session,
                          RedirectAttributes ra) {
 
-        // 로그인 확인
+
+
         Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
         Integer sellerId = (Integer) map.get("userId");
 
-        // 상품 주인 확인
-        ProductDTO productDTO = productService.getProductById(product.getProductId());
-        if (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
-            ra.addFlashAttribute("error", "권한이 없습니다.");
+        Object attr = session.getAttribute("sessionMap");
+        ProductDTO productDTO = productService.getProductById(productId);
+        if (attr == null || !productDTO.getSellerId().equals(sellerId)) {
+            ra.addFlashAttribute("error", "상품 주인만 상품 삭제가 가능합니다.");
             return "redirect:/product/myproduct";
         }
 
+        if (productDTO != null) {
+            System.out.println("productDTO.sellerId = " + productDTO.getSellerId());
+        }
 
         try {
 
@@ -213,12 +232,12 @@ public class ProductController {
         Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
         Integer sellerId = (Integer) map.get("userId");
 
-        /*
-         * ProductDTO productDTO = productService.getProductById(productId); if
-         * (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
-         * ra.addFlashAttribute("error", "권한이 없습니다."); return
-         * "redirect:/product/myproduct"; }
-         */
+        Object attr = session.getAttribute("sessionMap");
+        ProductDTO productDTO = productService.getProductById(productId);
+        if (attr == null || !productDTO.getSellerId().equals(sellerId)) {
+            ra.addFlashAttribute("error", "상품 주인만 상품 삭제가 가능합니다.");
+            return "redirect:/product/myproduct";
+        }
 
 
 
