@@ -10,7 +10,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* ===== 스타일 동일 (생략 없이 기존 코드 유지) ===== */
+/* ===== 기존 스타일 ===== */
 .header {display:flex;justify-content:space-between;align-items:flex-start;max-width:1200px;margin:0 auto;padding:16px 20px;}
 .left {display:flex;align-items:flex-start;gap:18px;}
 .left-col {display:flex;flex-direction:column;gap:14px;min-width:420px;}
@@ -45,6 +45,10 @@ a{text-decoration:none;color:inherit;}
   padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f3f3;
 }
 #autocompleteList li:hover {background:#f9f9f9;}
+/* 🔽 인기검색어 */
+#top-keywords {margin-top:4px;font-size:14px;color:#444;}
+#top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
+#top-keywords .keyword:hover {text-decoration:underline;}
 </style>
 </head>
 
@@ -57,13 +61,17 @@ a{text-decoration:none;color:inherit;}
     </a>
 
     <div class="left-col">
+      <!-- 검색창 -->
       <div class="searchBar">
         <i class="fa-solid fa-magnifying-glass" id="do-search"></i>
         <input type="text" class="input" id="search-input" placeholder="검색어를 입력하세요" autocomplete="off">
-        <!-- 🔽 자동완성 리스트 -->
         <ul id="autocompleteList"></ul>
       </div>
 
+      <!-- 인기검색어 -->
+      <div id="top-keywords">로딩 중...</div>
+
+      <!-- 카테고리 -->
       <div class="meta-row">
         <label class="category">
           <select>
@@ -135,9 +143,6 @@ a{text-decoration:none;color:inherit;}
       var id = p.productId;
       var name = p.productName || '';
       var price = formatPrice(p.productPrice);
-      var imgSrc = p.productImage
-        ? (contextPath + '/uploads/' + p.productImage)
-        : (contextPath + '/resources/image/no-image.png');
 
       return ''
         + '<div class="card">'
@@ -176,7 +181,7 @@ a{text-decoration:none;color:inherit;}
     }
   }
 
-  // ===================== 🔽 자동완성 기능 =====================
+  // ===================== 🔽 자동완성 =====================
   input.addEventListener("keyup", async () => {
     const keyword = input.value.trim();
     if (keyword.length === 0) {
@@ -193,8 +198,8 @@ a{text-decoration:none;color:inherit;}
           const li = document.createElement("li");
           li.textContent = item;
           li.addEventListener("click", () => {
-            input.value = item;   // 클릭하면 검색창에 값 넣기
-            search(item);         // 바로 검색 실행
+            input.value = item;
+            search(item);
             autoList.style.display = "none";
           });
           autoList.appendChild(li);
@@ -222,12 +227,37 @@ a{text-decoration:none;color:inherit;}
     search(input.value);
   });
 
+  // ===================== 🔽 인기검색어 =====================
+  async function loadTopKeywords() {
+    try {
+      const res = await fetch(contextPath + "/search/top");
+      const data = await res.json();
+
+      let html = "";
+      data.slice(0, 10).forEach(item => {
+        html += `<span class="keyword">#${item.searchKeyword}</span>`;
+      });
+      document.getElementById("top-keywords").innerHTML = html;
+
+      // 클릭 → 검색 실행
+      document.querySelectorAll("#top-keywords .keyword").forEach(el => {
+        el.addEventListener("click", () => {
+          const kw = el.textContent.replace("#", "");
+          input.value = kw;
+          search(kw);
+        });
+      });
+    } catch (err) {
+      console.error("인기검색어 불러오기 에러:", err);
+      document.getElementById("top-keywords").innerHTML = "인기검색어를 불러올 수 없습니다.";
+    }
+  }
+
+  // 로딩 시 인기검색어 실행
+  loadTopKeywords();
+
   window.__search = search;
 })();
-
-  // 키보드 클릭
-  btn.add
 </script>
 
-</body>
-</html>
+
