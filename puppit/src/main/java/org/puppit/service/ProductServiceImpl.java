@@ -6,7 +6,6 @@ import org.puppit.model.dto.PageDTO;
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ProductSearchDTO;
-import org.puppit.model.dto.ScrollResponseDTO;
 import org.puppit.repository.ProductDAO;
 import org.puppit.util.PageUtil;
 import org.springframework.stereotype.Service;
@@ -150,4 +149,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-}
+    @Override
+    public List<String> getAutoComplete(String keyword) {
+      return productDAO.getAutoComplete(keyword);
+    }
+
+
+    @Transactional
+    @Override
+    public int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
+        productDAO.updateProduct(productDTO);
+        return productDTO.getProductId();
+    }
+
+    @Override
+    public int deleteProduct(Integer productId) {
+        return productDAO.deleteProduct(productId);
+    }
+
+    }
+
+

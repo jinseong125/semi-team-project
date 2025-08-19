@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <jsp:include page="../layout/header.jsp" />
@@ -93,8 +94,15 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
     <input type="hidden" name="productId" value="${productId}">
     <input type="hidden" name="quantity"  value="${quantity}">
     <input type="hidden" name="amount"    value="${amount}">
+    <input type="hidden" name="chatSellerAccountId"    value="${chatSellerAccountId}">
   </form>
 </div>
+
+<script>
+  <c:if test="${not empty msg}">
+    alert("${fn:escapeXml(msg)}")
+  </c:if>
+</script>
 
 <script>
   // 확인 체크해야 결제 가능
