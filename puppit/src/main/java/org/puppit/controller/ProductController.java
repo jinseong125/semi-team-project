@@ -2,6 +2,7 @@ package org.puppit.controller;
 
 
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductImageLIstDTO;
 import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.repository.ProductDAO;
 import org.puppit.service.ProductService;
@@ -102,6 +103,7 @@ public class ProductController {
             return "error/404";
         }
         System.out.println("product: " + productDetail.toString());
+       
         model.addAttribute("product", productDetail);
         return "product/detail";
     }

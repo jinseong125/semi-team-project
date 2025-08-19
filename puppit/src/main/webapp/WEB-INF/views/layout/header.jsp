@@ -10,7 +10,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* ===== 스타일 동일 (생략 없이 기존 코드 유지) ===== */
+/* ===== 기존 스타일 ===== */
 .header {display:flex;justify-content:space-between;align-items:flex-start;max-width:1200px;margin:0 auto;padding:16px 20px;}
 .left {display:flex;align-items:flex-start;gap:18px;}
 .left-col {display:flex;flex-direction:column;gap:14px;min-width:420px;}
@@ -45,6 +45,10 @@ a{text-decoration:none;color:inherit;}
   padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f3f3;
 }
 #autocompleteList li:hover {background:#f9f9f9;}
+/* 인기검색어 */
+#top-keywords {margin-top:4px;font-size:14px;color:#444;}
+#top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
+#top-keywords .keyword:hover {text-decoration:underline;}
 </style>
 </head>
 
@@ -57,13 +61,17 @@ a{text-decoration:none;color:inherit;}
     </a>
 
     <div class="left-col">
+      <!-- 검색창 -->
       <div class="searchBar">
         <i class="fa-solid fa-magnifying-glass" id="do-search"></i>
         <input type="text" class="input" id="search-input" placeholder="검색어를 입력하세요" autocomplete="off">
-        <!-- 🔽 자동완성 리스트 -->
         <ul id="autocompleteList"></ul>
       </div>
 
+      <!-- 인기검색어 -->
+      <div id="top-keywords">로딩 중...</div>
+
+      <!-- 카테고리 -->
       <div class="meta-row">
         <label class="category">
           <select>
@@ -102,81 +110,55 @@ a{text-decoration:none;color:inherit;}
   </div>
 </div>
 
-<hr>
 <div id="search-results"></div>
-
+<hr>
 <script>
-(function () {
-  console.log('[search] boot');
+  //const contextPath = '${contextPath}';
+  const input = document.getElementById("search-input");
 
-  var contextPath = '${contextPath}';
-  var input = document.getElementById('search-input');
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
+  
+  document.addEventListener("DOMContentLoaded", () => {
+    loadTopKeywords();
+  });
 
-  function formatPrice(v) {
-    if (v === null || v === undefined) return '';
-    try { return new Intl.NumberFormat('ko-KR').format(v) + '원'; }
-    catch (e) { return v + '원'; }
-  }
+  async function loadTopKeywords() {
+	  try {
+	    const res = await fetch("${contextPath}/search/top");
+	    if (!res.ok) throw new Error("HTTP " + res.status);
+	    const data = await res.json();
 
-  function render(list, keyword) {
-    if (!Array.isArray(list)) list = [];
-    if (!list.length) {
-      results.innerHTML =
-        '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 0건</div>' +
-        '<div class="empty">조건에 맞는 상품이 없습니다.</div>';
-      return;
-    }
+	    console.log("[loadTopKeywords] API Response:", data);
 
-    var head = '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 ' + list.length + '건</div>';
-    var cards = list.map(function (p) {
-      var id = p.productId;
-      var name = p.productName || '';
-      var price = formatPrice(p.productPrice);
-      var imgSrc = p.productImage
-        ? (contextPath + '/uploads/' + p.productImage)
-        : (contextPath + '/resources/image/no-image.png');
+	    let html = "";
+	    data.slice(0, 10).forEach(item => {
+	      const keyword = item.searchKeyword; 
+	      console.log('keyword: ', keyword);
+	      if (keyword) {
+	    	 html += '<span class="keyword">#' + keyword + '</span>';
+	      }
+	    });
 
-      return ''
-        + '<div class="card">'
-        + '  <a href="' + contextPath + '/product/detail/' + id + '">'
-        + '    <div class="name">' + name + '</div>'
-        + '    <div class="price">' + price + '</div>'
-        + '  </a>'
-        + '</div>';
-    }).join('');
+	    const topKeywordsElement = document.getElementById("top-keywords");
+	    if (!topKeywordsElement) throw new Error("top-keywords element not found");
+	    topKeywordsElement.innerHTML = html;
 
-    results.innerHTML = head + '<div class="grid">' + cards + '</div>';
-    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  async function search(keyword) {
-    var q = (keyword || '').trim();
-    if (!q) {
-      results.innerHTML = '<div class="empty">검색어를 입력하세요.</div>';
-      return;
-    }
-    results.innerHTML = '<div class="empty">검색 중...</div>';
-
-    var url = contextPath + '/product/search?searchName=' + encodeURIComponent(q);
-    console.log('[search] fetch:', url);
-
-    try {
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-
-      const data = await res.json();
-      console.log('[search] parsed data:', data);
-      render(Array.isArray(data) ? data : [], q);
-    } catch (err) {
-      console.error('[search] fetch error:', err);
-      results.innerHTML = '<div class="empty">검색 중 오류가 발생했습니다.</div>';
-    }
-  }
-
-  // ===================== 🔽 자동완성 기능 =====================
+	    // 클릭 이벤트 바인딩
+	    document.querySelectorAll("#top-keywords .keyword").forEach(el => {
+	      el.addEventListener("click", () => {
+	        const kw = el.textContent.replace("#", "");
+	        input.value = kw;
+	        search(kw);
+	      });
+	    });
+	  } catch (err) {
+	    console.error("인기검색어 불러오기 에러:", err);
+	    document.getElementById("top-keywords").innerHTML = "인기검색어를 불러올 수 없습니다.";
+	  }
+	}
+  // ===================== 자동완성 =====================
   input.addEventListener("keyup", async () => {
     const keyword = input.value.trim();
     if (keyword.length === 0) {
@@ -184,7 +166,7 @@ a{text-decoration:none;color:inherit;}
       return;
     }
     try {
-      const res = await fetch(contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword));
+      const res = await fetch("${contextPath}/product/autocomplete?keyword=" + encodeURIComponent(keyword));
       const data = await res.json();
 
       autoList.innerHTML = "";
@@ -193,8 +175,8 @@ a{text-decoration:none;color:inherit;}
           const li = document.createElement("li");
           li.textContent = item;
           li.addEventListener("click", () => {
-            input.value = item;   // 클릭하면 검색창에 값 넣기
-            search(item);         // 바로 검색 실행
+            input.value = item;
+            search(item);
             autoList.style.display = "none";
           });
           autoList.appendChild(li);
@@ -218,16 +200,43 @@ a{text-decoration:none;color:inherit;}
   });
 
   // 돋보기 클릭
-  btn.addEventListener('click', function () {
+  document.getElementById('do-search').addEventListener('click', function () {
     search(input.value);
   });
 
-  window.__search = search;
-})();
+  
+  async function search(keyword) {
+	    var q = (keyword || '').trim();
+	    if (!q) {
+	      results.innerHTML = '<div class="empty">검색어를 입력하세요.</div>';
+	      return;
+	    }
+	    results.innerHTML = '<div class="empty">검색 중...</div>';
 
-  // 키보드 클릭
-  btn.add
+	    var url = '${contextPath}/product/search?searchName=' + encodeURIComponent(q);
+	    console.log('[search] fetch:', url);
+
+	    try {
+	      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+	      const data = await res.json();
+	      console.log('[search] parsed data:', data);
+	      render(Array.isArray(data) ? data : [], q);
+	    } catch (err) {
+	      console.error('[search] fetch error:', err);
+	      results.innerHTML = '<div class="empty">검색 중 오류가 발생했습니다.</div>';
+	    }
+	  }
+  
+  
+  function render(list, keyword) {
+	    if (!Array.isArray(list)) list = [];
+	    if (!list.length) {
+	      results.innerHTML =
+	        '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 0건</div>' +
+	        '<div class="empty">조건에 맞는 상품이 없습니다.</div>';
+	      return;
+	    }
+  }
 </script>
-
-</body>
-</html>

@@ -4,17 +4,25 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="search">
 
- <select id="searchByNew" parameterType="map" resultType="org.puppit.model.dto.ProductSearchDTO">
- SELECT  product_name
-   FROM product
-  WHERE product_name LIKE CONCAT('%', #{searchName}, '%')
-      
-      
-      
-      
-</select>
+    <!-- 상품 검색 -->
+    <select id="searchByNew" parameterType="map" resultType="org.puppit.model.dto.ProductSearchDTO">
+        SELECT product_name
+          FROM product
+         WHERE product_name LIKE CONCAT('%', #{searchName}, '%')
+    </select>
 
+    <!-- 인기 검색어 TOP 10 -->
+    <select id="selectTopKeywords" resultType="org.puppit.model.dto.SearchLogDTO">
+        SELECT search_keyword AS searchKeyword,
+               COUNT(*) AS cnt
+         FROM search_log
+        GROUP BY search_keyword
+        ORDER BY cnt DESC
+        LIMIT 8
+    </select>
 
-
-
+	<insert id="insertTopKeywords">
+		INSERT INTO 
+	
+	</insert>
 </mapper>
