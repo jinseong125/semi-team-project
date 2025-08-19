@@ -22,11 +22,7 @@ public class TradeController {
   public String getTradeHistory(Integer userId, Model model) {
     List<TradeDTO> tradeDTOs = trade.selectTradeById(userId);
     model.addAttribute("tradeDTOs", tradeDTOs);
-    for(TradeDTO tradeDTO : tradeDTOs) {
-      System.out.println("sellerNickname: " + tradeDTO.getSellerId());
-      System.out.println("buyerId: " + tradeDTO.getBuyerId());
-      System.out.println("productId: " + tradeDTO.getProductId());
-    }
+  
     return "trade/tradeRecord";
   }
   
