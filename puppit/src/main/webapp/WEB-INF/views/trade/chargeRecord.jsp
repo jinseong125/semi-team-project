@@ -8,7 +8,7 @@
 
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #fff;
   --card: #fff;
   --text: #111;
   --muted: #8a8f98;

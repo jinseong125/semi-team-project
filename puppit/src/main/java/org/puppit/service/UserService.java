@@ -1,5 +1,7 @@
 package org.puppit.service;
 
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Mapper;
 import org.puppit.model.dto.ChatUserDTO;
 
@@ -26,5 +28,7 @@ public interface UserService {
 
   // 채팅 보낸 사람의 사용자 정보 조회
   ChatUserDTO getUserByUserId(String senderUserId);
+  
+  boolean updateUser(Map<String, Object> map);
   
 }

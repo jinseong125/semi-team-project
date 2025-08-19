@@ -35,12 +35,25 @@ if (sessionMap != null) {
       </c:otherwise>
     </c:choose>
   </div>
+  <!-- 내 상품일 때만 수정 버튼 보이도록 -->
+  <div class="actions">
+    <c:set var="sessionMap" value="${sessionScope.sessionMap}" />
+    <c:if test="${sessionMap.userId eq product.sellerId}">
+      <a href="${contextPath}/product/edit/${product.productId}" class="btn btn-outline">상품 수정</a>
+      <form action="${contextPath}/product/delete" method="post" style="display:inline;">
+        <input type="hidden" name="productId" value="${product.productId}"/>
+        <button type="submit" class="btn btn-outline"
+                onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
+      </form>
+    </c:if>
+
+  </div>
 
   <div class="top">
     <!-- 좌: 대표 이미지 -->
     <div class="thumb">
       <c:choose>
-        
+
         <c:when test="${product.thumbnail ne null and not empty product.thumbnail.url}">
           <img src="${product.thumbnail.url}" alt="${product.productName}"/>
         </c:when>
@@ -50,7 +63,7 @@ if (sessionMap != null) {
         <c:when test="${product.thumbnail ne null and not empty product.thumbnail.path}">
           <img src="${product.thumbnail.path}" alt="${product.productName}"/>
         </c:when>
-       
+
         <c:otherwise>
           <div class="thumb-placeholder">
             <div class="ph-dot"></div>
@@ -160,9 +173,9 @@ document.getElementById('btnPay')?.addEventListener('click',function() {
     const sellerId = "${product.sellerId}";
     // chat/createRoom?productId=xxx&buyerId=xxx&sellerId=xxx 로 요청
     window.location.href = contextPath + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;
-	
-	
-	
-	
+
+
+
+
 });
 </script>

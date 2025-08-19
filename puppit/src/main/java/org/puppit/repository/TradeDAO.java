@@ -28,6 +28,8 @@ public class TradeDAO {
     paraMap.put("productId", productId);
     paraMap.put("status", status);
     
+    System.out.println("DAO다오" + "buyerId: " + buyerId + ", sellerId: " + sellerId);
+    
     return sst.insert("mybatis.mapper.tradeMapper.insertTrade", paraMap);
     
   }

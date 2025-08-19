@@ -135,6 +135,12 @@ public class ChatServiceImpl implements ChatService{
 	public Integer saveAlarmData(Map<String, Object> messageAlarm) {
 		return chatDAO.saveAlarmData(messageAlarm);
 	}
+
+	@Override
+	public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId) {
+		
+		return chatDAO.getReceiverInfoByUserId(chatReceiverAccountId);
+	}
 	
 	  // 페이징된 채팅방 목록 조회
 

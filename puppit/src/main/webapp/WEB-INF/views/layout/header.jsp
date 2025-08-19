@@ -17,7 +17,6 @@
 .searchBar {position:relative;width:100%;max-width:600px;}
 .searchBar .input {width:85%;height:44px;padding:0 44px 0 40px;border:1px solid #e5e7eb;border-radius:12px;background:#f5f7fa;outline:none;}
 .searchBar .fa-magnifying-glass {position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#666;cursor:pointer;}
-.searchBar .fa-keyboard {position:absolute;right:1px;top:50%;transform:translateY(-50%);color:#666;}
 .meta-row{display:flex;align-items:center;gap:16px;}
 .category{position:relative;display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;}
 .category select{appearance:none;border:none;background:transparent;font:inherit;outline:none;padding-right:22px;}
@@ -35,6 +34,17 @@ a{text-decoration:none;color:inherit;}
 .card {border:1px solid #ececef;border-radius:12px;padding:10px;background:#fff;}
 .card .name {margin-top:8px;font-weight:600;}
 .card .price {margin-top:4px;color:#555;}
+/* 🔽 자동완성 리스트 */
+#autocompleteList {
+  position:absolute;top:48px;left:0;width:85%;
+  background:#fff;border:1px solid #ddd;border-radius:8px;
+  display:none;z-index:1000;max-height:200px;overflow-y:auto;
+  list-style:none;padding:0;margin:0;
+}
+#autocompleteList li {
+  padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f3f3;
+}
+#autocompleteList li:hover {background:#f9f9f9;}
 </style>
 </head>
 
@@ -49,18 +59,21 @@ a{text-decoration:none;color:inherit;}
     <div class="left-col">
       <div class="searchBar">
         <i class="fa-solid fa-magnifying-glass" id="do-search"></i>
-        <input type="text" class="input" id="search-input" placeholder="검색어를 입력하세요">
-        <i class="fa-solid fa-keyboard"></i>
+        <input type="text" class="input" id="search-input" placeholder="검색어를 입력하세요" autocomplete="off">
+        <!-- 🔽 자동완성 리스트 -->
+        <ul id="autocompleteList"></ul>
       </div>
 
       <div class="meta-row">
         <label class="category">
           <select>
-            <option>강아지용품</option>
-            <option>산책용품</option>
+            <option>강아지 용품</option>
             <option>강아지 의류</option>
             <option>강아지 사료</option>
-            <option>기타용품</option>
+            <option>고양이 용품</option>
+            <option>고양이 의류</option>
+            <option>고양이 사료</option>
+            <option>기타 용품</option>
           </select>
           <i class="fa-solid fa-chevron-down chev"></i>
         </label>
@@ -100,6 +113,7 @@ a{text-decoration:none;color:inherit;}
   var input = document.getElementById('search-input');
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
+  var autoList = document.getElementById('autocompleteList');
 
   function formatPrice(v) {
     if (v === null || v === undefined) return '';
@@ -128,7 +142,6 @@ a{text-decoration:none;color:inherit;}
       return ''
         + '<div class="card">'
         + '  <a href="' + contextPath + '/product/detail/' + id + '">'
-        + '    <img src="' + imgSrc + '" alt="" style="width:100%;height:180px;object-fit:cover;border-radius:8px;">'
         + '    <div class="name">' + name + '</div>'
         + '    <div class="price">' + price + '</div>'
         + '  </a>'
@@ -163,6 +176,42 @@ a{text-decoration:none;color:inherit;}
     }
   }
 
+  // ===================== 🔽 자동완성 기능 =====================
+  input.addEventListener("keyup", async () => {
+    const keyword = input.value.trim();
+    if (keyword.length === 0) {
+      autoList.style.display = "none";
+      return;
+    }
+    try {
+      const res = await fetch(contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword));
+      const data = await res.json();
+
+      autoList.innerHTML = "";
+      if (data.length > 0) {
+        data.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          li.addEventListener("click", () => {
+            input.value = item;   // 클릭하면 검색창에 값 넣기
+            search(item);         // 바로 검색 실행
+            autoList.style.display = "none";
+          });
+          autoList.appendChild(li);
+        });
+        autoList.style.display = "block";
+      } else {
+        autoList.style.display = "none";
+      }
+    } catch (err) {
+      console.error("자동완성 에러:", err);
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(() => { autoList.style.display = "none"; }, 200);
+  });
+
   // Enter 키
   input.addEventListener('keydown', function (e) {
     if (e.key === 'Enter') search(input.value);
@@ -175,6 +224,10 @@ a{text-decoration:none;color:inherit;}
 
   window.__search = search;
 })();
+
+  // 키보드 클릭
+  btn.add
 </script>
+
 </body>
 </html>

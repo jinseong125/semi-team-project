@@ -1,5 +1,7 @@
 package org.puppit.service;
 
+import java.util.Map;
+
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
@@ -110,6 +112,12 @@ public class UserServiceImpl implements UserService {
   @Override
   public ChatUserDTO getUserByUserId(String senderUserId) {
 	return userDAO.getUserByUserId(senderUserId);
+  }
+
+  @Override
+  public boolean updateUser(Map<String, Object> map) {
+    return userDAO.updateUser(map) == 1;
+   
   }
 
 }

@@ -3,6 +3,7 @@ package org.puppit.controller;
 
 import org.puppit.model.dto.ProductDTO;
 import org.puppit.model.dto.ProductSearchDTO;
+import org.puppit.repository.ProductDAO;
 import org.puppit.service.ProductService;
 import org.puppit.service.S3Service;
 import org.springframework.stereotype.Controller;
@@ -24,6 +25,7 @@ public class ProductController {
 
     private final ProductService productService;
     private final S3Service s3Service;
+    private final ProductDAO productDAO;
 
     /** 상품 등록 폼 */
     @GetMapping("/new")
@@ -54,7 +56,7 @@ public class ProductController {
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
                          @RequestParam("imageFiles") List<MultipartFile> imageFiles,
-                         @RequestParam(value="attachment", required=false) MultipartFile attachment,
+                         @RequestParam(value="attachment", required=false) MultipartFile attachment,    
                          HttpSession session,
                          RedirectAttributes ra) {
 
@@ -104,7 +106,7 @@ public class ProductController {
         return "product/detail";
     }
 
-    @GetMapping("/product/scroll")
+    @GetMapping("/scroll")
     public String scrollList() {
         return "product/scroll";
     }
@@ -134,5 +136,105 @@ public class ProductController {
     public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
         return productService.searchByNew(searchName);
     }
+    
+    @GetMapping(value = "/autocomplete", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<String> getAutoComplete(@RequestParam("keyword") String keyword) {
+      return productService.getAutoComplete(keyword);
+    }
+
+
+    @GetMapping("/edit/{productId}")
+    public String editForm(@PathVariable("productId") Integer productId,
+                           HttpSession session,
+                           RedirectAttributes ra,
+                           Model model) {
+
+        // 로그인 확인
+        Object attr = session.getAttribute("sessionMap");
+
+        Map<String, Object> map = (Map<String, Object>) attr;
+        Integer sellerId = (Integer) map.get("userId");
+
+        // 상품 가져오기
+        ProductDTO product = productService.getProductById(productId);
+
+        // 기본 데이터 세팅
+        model.addAttribute("product", product);
+        model.addAttribute("categories", productDAO.getCategories());
+        model.addAttribute("locations", productDAO.getLocations());
+        model.addAttribute("conditions", productDAO.getConditions());
+        model.addAttribute("images", productDAO.getProductImages(productId));
+
+
+        return "product/edit";
+    }
+
+    // 상품 수정 처리
+    @PostMapping("/update")
+    public String update(@ModelAttribute ProductDTO product,
+                         @RequestParam(value="imageFiles", required=false) List<MultipartFile> imageFiles,
+                         HttpSession session,
+                         RedirectAttributes ra) {
+
+        // 로그인 확인
+        Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
+        Integer sellerId = (Integer) map.get("userId");
+
+        // 상품 주인 확인
+        ProductDTO productDTO = productService.getProductById(product.getProductId());
+        if (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
+            ra.addFlashAttribute("error", "권한이 없습니다.");
+            return "redirect:/product/myproduct";
+        }
+
+
+        try {
+
+            product.setSellerId(sellerId);
+
+            productService.updateProduct(product, imageFiles);
+            ra.addFlashAttribute("success", "상품이 수정되었습니다.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("error", "상품 수정 실패: " + e.getMessage());
+        }
+
+        // 수정 후 → 상세 페이지로 이동
+        return "redirect:/product/detail/" + product.getProductId();
+    }
+
+    @PostMapping("/delete")
+    public String delete(@RequestParam("productId") Integer productId,
+                         HttpSession session,
+                         RedirectAttributes ra) {
+
+
+        Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
+        Integer sellerId = (Integer) map.get("userId");
+
+        /*
+         * ProductDTO productDTO = productService.getProductById(productId); if
+         * (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
+         * ra.addFlashAttribute("error", "권한이 없습니다."); return
+         * "redirect:/product/myproduct"; }
+         */
+
+
+
+        int result = productService.deleteProduct(productId);
+        if (result > 0) {
+            ra.addFlashAttribute("success", "상품이 삭제되었습니다.");
+        } else {
+            ra.addFlashAttribute("error", "상품 삭제 실패 ");
+        }
+
+
+        return "redirect:/product/myproduct";
+    }
+
+
+
+
+
 
 }

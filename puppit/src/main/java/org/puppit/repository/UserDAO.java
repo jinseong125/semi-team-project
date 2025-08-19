@@ -1,5 +1,7 @@
 package org.puppit.repository;
 
+import java.util.Map;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.UserDTO;
@@ -50,5 +52,10 @@ public class UserDAO {
 
  
   }
+  
+  public Integer updateUser(Map<String, Object> map) {
+    return sqlSession.update("mybatis.mapper.userMapper.updateUser", map);
+  }
+  
 
 }

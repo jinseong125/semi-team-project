@@ -5,6 +5,20 @@
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 
+
+<%-- 상품 삭제 확인--%>
+<c:if test="${not empty success}">
+  <script>
+    alert("${success}");
+  </script>
+</c:if>
+
+<c:if test="${not empty error}">
+  <script>
+    alert("${error}");
+  </script>
+</c:if>
+
 <style>
   table {
     width: 100%;
@@ -78,8 +92,10 @@
           </c:when>
         </c:choose>
       </td>
-      <td>${item.status.statusName}</td>
-      <td>${item.productName}</td>
+      <td >  <a href="${contextPath}/product/detail/${item.productId}">
+          ${item.status.statusName}
+      </a></td>
+      <td><a href="${contextPath}/product/detail/${item.productId}">${item.productName}</a></td>
       <td>${item.category.categoryName}</td>
       <td><fmt:formatNumber value="${item.productPrice}" pattern="#,###"/></td>
       <td><fmt:formatDate value="${item.productCreatedAt}" pattern="yyyy-MM-dd HH:mm"/></td>

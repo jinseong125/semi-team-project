@@ -149,4 +149,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-}
+    @Override
+    public List<String> getAutoComplete(String keyword) {
+      return productDAO.getAutoComplete(keyword);
+    }
+
+
+    @Transactional
+    @Override
+    public int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
+        productDAO.updateProduct(productDTO);
+        return productDTO.getProductId();
+    }
+
+    @Override
+    public int deleteProduct(Integer productId) {
+        return productDAO.deleteProduct(productId);
+    }
+
+    }
+
+
