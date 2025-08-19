@@ -225,9 +225,5 @@ a{text-decoration:none;color:inherit;}
   window.__search = search;
 })();
 
-  // 키보드 클릭
-  btn.add
 </script>
 
-</body>
-</html>
