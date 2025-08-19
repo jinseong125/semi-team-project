@@ -10,6 +10,13 @@
   WHERE user_id = #{uid}
 </update>
 
+<update id="decreaseIfEnough" parameterType="Map">
+  UPDATE user
+  SET point = point - #{amount}
+  WHERE user_id = #{uid}
+  AND point >= #{amount}
+</update>
+
 <insert id="insertPointRecord" parameterType="Map">
   INSERT INTO point_charge(user_id, point_charge_amount, point_charge_order_number)
   VALUES (#{uid}, #{amount}, #{uuid})

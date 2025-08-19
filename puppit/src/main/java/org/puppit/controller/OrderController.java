@@ -6,11 +6,14 @@ import org.puppit.service.ProductService;
 import org.puppit.service.TradePaymentService;
 import org.puppit.service.UserService;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,10 +26,9 @@ public class OrderController {
   private final ProductService productService;
   private final UserService userService;
   
-
   @GetMapping("/pay")
   public String orderForm(@RequestParam("buyerId") Integer buyerId, 
-                          @RequestParam("buyerId") Integer sellerId, 
+                          @RequestParam("sellerId") Integer sellerId, 
                           @RequestParam("chatSellerAccountId") String chatSellerAccountId, 
                           @RequestParam("productId") Integer productId, 
                           @RequestParam("quantity") Integer quantity, 
@@ -48,6 +50,7 @@ public class OrderController {
     model.addAttribute("amount", amount);
     model.addAttribute("productName", productName);
     model.addAttribute("sellerNickname", userNickname);
+    model.addAttribute("chatSellerAccountId", chatSellerAccountId);
     
     return "/payment/orderForm";
   }
@@ -57,13 +60,29 @@ public class OrderController {
                       @RequestParam("sellerId") Integer sellerId, 
                       @RequestParam("productId") Integer productId, 
                       @RequestParam("quantity") Integer quantity,
-                      @RequestParam("amount") Integer amount) {
+                      @RequestParam("chatSellerAccountId") String chatSellerAccountId,
+                      RedirectAttributes rttr) {
     
-    String status = "거래완료";
-    tps.updateBuyerPoint(buyerId, -amount);
-    tps.updateSellerPoint(sellerId, amount);
-    tps.insertTrade(buyerId, sellerId, productId, status);
+    ProductDTO p = productService.getProductById(productId);
+    int price = p.getProductPrice();
+    int amount = price * quantity; 
     
-    return "redirect:/";
+    try {
+      tps.payAndRecord(buyerId, sellerId, productId, quantity, amount);
+      rttr.addFlashAttribute("msg", "결제가 완료되었습니다.");
+      
+      return "redirect:/";
+      
+    } catch (RuntimeException e) {
+      rttr.addFlashAttribute("msg", e.getMessage());
+      
+      rttr.addAttribute("buyerId", buyerId);
+      rttr.addAttribute("sellerId", sellerId);
+      rttr.addAttribute("productId", productId);
+      rttr.addAttribute("quantity", quantity);
+      rttr.addAttribute("chatSellerAccountId", chatSellerAccountId);
+      
+      return "redirect:/order/pay";
+    }
   }
 }
