@@ -4,6 +4,7 @@ package org.puppit.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
@@ -89,8 +90,8 @@ public class ChatWebSocketController {
             }
 
             String senderRole = sender.getUserId().equals(receiver.getUserId()) ? "SELLER" : "BUYER";
-            System.out.println("senderRole: " + senderRole);
-            String receiverRole = receiver.getUserId().equals(sender.getUserId()) ? "SELLER" : "BUYER";
+            String receiverRole = senderRole.equals("SELLER") ? "BUYER" : "SELLER";
+            System.out.println("senderRole: " + senderRole + " receiverRole: " + receiverRole);
 
             chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
             chatMessageDTO.setChatSenderUserName(sender.getUserName());
@@ -132,6 +133,10 @@ public class ChatWebSocketController {
 
             System.out.println("chatMessageDTO: " + chatMessageDTO.toString());
         }
+        
+        // 메시지 ID를 서버에서 UUID로 생성
+        chatMessageDTO.setMessageId(UUID.randomUUID().toString());
+        
 
         // 메시지 저장 (트랜잭션 처리)
         try {
@@ -149,10 +154,11 @@ public class ChatWebSocketController {
         
         ChatMessageProductDTO product  = chatService.getProduct(productId);
         
-        
+        System.out.println("senderAccountId: " + chatMessageDTO.getChatSenderAccountId() + " receiverAccountId: " + chatMessageDTO.getChatReceiverAccountId());
         // 알림 메시지 전송
         Map<String, Object> messageNotification = new HashMap<String, Object>();
         messageNotification.put("senderAccountId", chatMessageDTO.getChatSenderAccountId());
+        messageNotification.put("receiverAccountId", chatMessageDTO.getChatReceiverAccountId());
         messageNotification.put("chatMessage", chatMessageDTO.getChatMessage());
         messageNotification.put("senderRole", chatMessageDTO.getSenderRole());
         messageNotification.put("chatCreatedAt", chatMessageDTO.getChatCreatedAt()); 

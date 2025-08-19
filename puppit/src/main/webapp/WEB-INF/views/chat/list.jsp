@@ -184,6 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     enableChatInput(false);
+    
+    // websocket 연결 시작
+    connectAndSubscribe();
 });
 
 function loadChatHeader(product, buyerId, sellerId, sellerAccountId, buyerAccountId) {
@@ -209,6 +212,7 @@ function loadChatHeader(product, buyerId, sellerId, sellerAccountId, buyerAccoun
 }
 
 function loadChatHistory(roomId) {
+	renderedMessageIds.clear(); // 올바른 변수명 방 진입시 이전 메시지 ID 초기화
     return fetch(contextPath + '/chat/message?roomId=' + roomId)
         .then(response => response.json())
         .then(data => {
@@ -235,7 +239,11 @@ function loadChatHistory(roomId) {
 
             chatHistory.innerHTML = "";
             const messages = Array.isArray(data.chatMessages) ? data.chatMessages : [];
-            messages.forEach(chat => addChatMessageToHistory(chat));
+            messages.forEach(chat => {
+            	addChatMessageToHistory(chat);
+            	renderedMessageIds.add(chat.messageId);
+            	
+            });
 
             // 🔥 메시지가 있으면 안내 문구 숨기기
             if (messages.length > 0) {
@@ -302,10 +310,12 @@ function addChatMessageToHistory(chat) {
         return;
     }
 
+    // 발신자와 수신자에 따라 메시지 정렬
     const alignClass = (String(chat.chatSenderAccountId) === String(loginUserId)) ? "right" : "left";
     const msg = chat.chatMessage || ""; // 메시지 내용
-
+    const senderName = chat.chatSenderUserName || "알 수 없음"; // 발신자 이름
     const formattedTime = formatChatTime(chat.chatCreatedAt || "");
+
 
     const html =
         '<div class="chat-message ' + alignClass + '">' +
@@ -347,18 +357,33 @@ function connectAndSubscribe(currentRoomId) {
     if (!stompClient) {
         const socket = new SockJS(contextPath + '/ws-chat'); // 서버의 WebSocket 엔드포인트
         stompClient = Stomp.over(socket);
+        
+        console.log("Attempting WebSocket connection..."); // 연결 시도 로그
         stompClient.connect({}, function() {
             isConnected = true;
-            subscribeRoom(currentRoomId); // 현재 채팅방에 구독
+            console.log("WebSocket connected!"); // WebSocket 연결 성공
+            
+            // 알림 구독 호출
+            subscribeNotifications();
+            
+            // 채팅방에 연결된 경우 구독
+            if (currentRoomId) {
+            	subscribeRoom(currentRoomId); // 현재 채팅방에 구독	
+            }
+            
             enableChatInput(true); // 채팅 입력 활성화
         }, function() {
             console.error('WebSocket connection error. Retrying...');
             setTimeout(() => connectAndSubscribe(currentRoomId), 5000); // 5초 후 재시도
         });
     } else {
-        subscribeRoom(currentRoomId); // 현재 채팅방에 구독
-        enableChatInput(isConnected); // 채팅 입력 활성화
-        subscribeNotifications(); // 알림 구독
+    	 console.log("Reusing existing WebSocket connection.");
+         // 알림 구독 호출
+         subscribeNotifications();
+         if (currentRoomId) {
+             subscribeRoom(currentRoomId);
+         }
+         enableChatInput(isConnected);
     }
 }
 function subscribeRoom(currentRoomId) {
@@ -366,16 +391,30 @@ function subscribeRoom(currentRoomId) {
         currentSubscription.unsubscribe(); // 기존 구독 해제
     }
 
+    console.log(`Subscribing to room: /topic/chat/${currentRoomId}`); // 구독 로그
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
         console.log('Received message:', chat);
 
         // 중복 렌더링 방지: 이미 렌더링된 messageId인지 확인
-        if (renderedMessageIds.has(chat.messageId)) {
-            console.log('Duplicate message detected, skipping rendering.');
+        //if (renderedMessageIds.has(chat.messageId)) {
+        //    console.log('Duplicate message detected, skipping rendering.');
+        //    return;
+        //}
+
+        // 메시지 데이터 유효성 검증
+        if (!chat || !chat.chatRoomId || !chat.chatMessage) {
+            console.error('Invalid message data received:', chat);
             return;
         }
 
+        // 현재 채팅방인지 확인
+        if (String(chat.chatRoomId) !== String(currentRoomId)) {
+            console.log('Message does not belong to this room. Ignoring...');
+            return;
+        }
+        
+        
         // 메시지를 화면에 추가
         addChatMessageToHistory(chat);
 
@@ -383,7 +422,7 @@ function subscribeRoom(currentRoomId) {
         renderedMessageIds.add(chat.messageId);
 
         // 마지막 렌더링된 메시지 시간 저장
-        chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
+        //chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
 
         // 안내 문구 숨기기
         centerMessage.style.display = "none";
@@ -396,7 +435,8 @@ function subscribeNotifications() {
         console.log('Notification received:', data);
 
         // 알림 처리: 메시지의 전송자에게 알림 표시
-        if (data.senderAccountId === loginUserId) {
+        if (data.receiverAccountId === loginUserId) {
+        	 console.log("Displaying notification for receiver:", loginUserId);
             displayNotification(
                 data.senderAccountId,
                 data.chatMessage,
@@ -404,15 +444,15 @@ function subscribeNotifications() {
                 data.chatCreatedAt,
                 data.productName
             );
+        } else {
+            console.log("Notification ignored. Receiver:", data.receiverAccountId, "Current user:", loginUserId);
         }
     });
 }
 function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
-    console.log('senderAccountId: ', senderAccountId);
-    console.log('chatMessage: ', chatMessage);
-    console.log('senderRole: ', senderRole);
-    console.log('chatCreatedAt: ', chatCreatedAt);
-    console.log('productName: ', productName);
+   console.log('Displaying notification:', {
+        senderAccountId, chatMessage, senderRole, chatCreatedAt, productName
+    });
 
     // chatCreatedAt을 밀리초 기반 타임스탬프로 처리하고 형식 변환
     let formattedTime = "시간 정보 없음";
@@ -481,16 +521,6 @@ function sendMessage(currentRoomId) {
         chatCreatedAt: Date.now().toString(),
         messageId: Date.now().toString() + "-" + loginUserId // 고유 messageId 생성
     };
-
-
-    // 메시지를 즉시 렌더링
-    // 이 코드는 쓰면안됨
-    //addChatMessageToHistory(chatMessage);
-
-    // 렌더링된 messageId를 저장
-    // 이코드는 쓰면안됨
-    //renderedMessageIds.add(chatMessage.messageId);
-    
     
     // WebSocket을 통해 메시지 전송
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
