@@ -8,17 +8,17 @@
 
 <style>
   :root{
-    --bg:#f7f8fa; --card:#fff; --text:#111; --muted:#8a8f98; --line:#e6e9ef; --primary:#4f86ff;
+    --bg:#fff; --card:#fff; --text:#111; --muted:#8a8f98; --line:#e6e9ef; --primary:#4f86ff;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--text);}
-  .wrap{max-width:720px;margin:0 auto;padding:20px;}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px;}
 
   /* 헤더 */
   .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
   .left{display:flex;align-items:center;gap:10px;}
   .back-btn{
-    border:none;background-color:#f7f8fa;color:#333;cursor:pointer;font-size:20px;line-height:1;
+    border:none;background-color:#fff;color:#333;cursor:pointer;font-size:20px;line-height:1;
     width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
   }
   .title{font-weight:800;font-size:22px;}
@@ -48,9 +48,13 @@
 
   /* 구분선(아래 공간 남김) */
   .space{height:240px;}
-  
+  .charge-btn-wrap {
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+  }
   .charge-btn{
-  width:100%;
+  width:600px;
   height:50px;
   font-size:18px;
   font-weight:700;
@@ -60,7 +64,6 @@
   color:#fff;
   cursor:pointer;
   }
-
 </style>
 
 <div class="wrap">
@@ -112,9 +115,8 @@
   const limit = Number("${chargeLimit}");
   const $amount = document.getElementById('amount');
 
-  // str이 null, undefined 이면 .replace() 호출시 에러가 나기 때문에 str || ''를 사용합니다.
-  function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); } // 문자열 전체에서 숫자가 아닌 문자를 찾는 정규식
-  function format(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); } // 천 단위 콤마(,)를 넣어주는 정규식 포맷 함수 
+  function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); } 
+  function format(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); } 
   function snap1000(n){
     if (isNaN(n)) return 0;
     n = Math.min(n, limit);

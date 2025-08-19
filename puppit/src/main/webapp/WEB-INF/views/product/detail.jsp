@@ -41,6 +41,20 @@ if (sessionMap != null) {
     </c:choose>
   </div>
 
+
+  <!-- 내 상품일 때만 수정 버튼 보이도록 -->
+  <div class="actions">
+    <c:set var="sessionMap" value="${sessionScope.sessionMap}" />
+    <c:if test="${sessionMap.userId eq product.sellerId}">
+      <a href="${contextPath}/product/edit/${product.productId}" class="btn btn-outline">상품 수정</a>
+      <form action="${contextPath}/product/delete" method="post" style="display:inline;">
+        <input type="hidden" name="productId" value="${product.productId}"/>
+      </form>
+    </c:if>
+
+  </div>
+
+
   <!-- 우측: 상품 정보 -->
   <div class="detail-right">
     <!-- 카테고리 -->

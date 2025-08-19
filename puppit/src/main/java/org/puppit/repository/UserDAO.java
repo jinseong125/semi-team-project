@@ -1,5 +1,7 @@
 package org.puppit.repository;
 
+import java.util.Map;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.UserDTO;
@@ -38,6 +40,9 @@ public class UserDAO {
   public UserDTO getUserId(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserId", accountId);
   }
+  public String findAccountIdByNameAndEmail(UserDTO user) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.findAccountIdByNameAndEmail", user);
+  }
   
   //채팅 보낸 사람의 사용자 정보 조회
   public ChatUserDTO getUserByUserId(String senderUserId) {
@@ -47,5 +52,10 @@ public class UserDAO {
 
  
   }
+  
+  public Integer updateUser(Map<String, Object> map) {
+    return sqlSession.update("mybatis.mapper.userMapper.updateUser", map);
+  }
+  
 
 }

@@ -93,23 +93,6 @@ body {
   font-size: 18px;
 }
 
-.edit {
-  margin-left: auto;
-  background: #333333;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  opacity: .95;
-  transition: .15s;
-  white-space: nowrap;
-}
-
-.edit:hover {
-  opacity: 1;
-}
-
 /* 포인트 카드 — 살짝 컴팩트 */
 .point-card {
   margin-top: 18px;
@@ -135,13 +118,14 @@ body {
 .point-row {
   display: flex;
   align-items: center;
+  justify-content: space-between; 
   gap: 12px;
   margin: 8px 0 16px;
 }
 
 .p-icon {
-  width: 28px;
-  height: 28px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   overflow: hidden;
   display: flex;
@@ -156,24 +140,25 @@ body {
   object-fit: cover;
 }
 
-.p-amount {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: .5px;
+.point-amount{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-.charge {
-  margin-top: 6px;
-  width: 100%;
-  height: 56px;
-  border: none;
-  border-radius: 14px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 800;
-  font-size: 18px;
-  cursor: pointer;
-  transition: transform .05s ease;
+.p-amount{
+  font-size:28px;      
+  font-weight:800;     
+  line-height:1;
+  white-space:nowrap;  
+}
+
+.charge { width: auto; height: 44px; padding: 0 16px; border-radius: 12px; }
+
+.charge-inline {
+  height: 44px;           
+  padding: 0 16px;       
+  border-radius: 12px;   
 }
 
 .charge:active {
@@ -198,6 +183,7 @@ body {
   }
   .p-amount {
     font-size: 32px;
+    font-weight:800;
   }
 }
 
@@ -260,12 +246,12 @@ body {
   <!-- 프로필 -->
   <div class="profile">
     <div class="avatar">
-      <img src="${contextPath}/resources/image/profile-default.png" alt="프로필 이미지" />
+      <img src="${contextPath}/resources/image/${sessionScope.sessionMap.userId}.png" alt="프로필 이미지" />
     </div>
     <div class="who">
       <div class="nick">${user.nickName != null ? user.nickName : 'happy'}</div>
     </div>
-    <button class="edit" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
+    <button class="action-btn" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
   </div>
   
     <!-- 찜 목록 카드 -->
@@ -284,19 +270,22 @@ body {
       <div class="point-title">포인트</div>
     </div>
     <div class="point-row">
-      <div class="p-icon">
-        <img src="${contextPath}/resources/image/point-icon.png" alt="포인트" />
+      <div class="point-amount">
+        <div class="p-icon"><img src="${contextPath}/resources/image/point-icon.png" alt="포인트" /></div>
+        <div class="p-amount">
+          <c:choose>
+            <c:when test="${not empty user.point}">
+              <fmt:formatNumber value="${user.point}" type="number" />
+            </c:when>
+            <c:otherwise>0</c:otherwise>
+          </c:choose>
+        </div>
       </div>
-      <div class="p-amount">
-        <c:choose>
-          <c:when test="${not empty user.point}">
-            <fmt:formatNumber value="${user.point}" type="number" />
-          </c:when>
-          <c:otherwise>0</c:otherwise>
-        </c:choose>
-      </div>
+    
+      <button class="action-btn charge-inline" type="button"
+              onclick="location.href='${contextPath}/payment/paymentForm'">충전하기</button>
     </div>
-    <button class="charge" type="button" onclick="location.href='${contextPath}/payment/paymentForm'">충전하기</button>
+        
   </div>
 
   <div class="future-area">

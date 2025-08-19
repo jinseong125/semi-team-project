@@ -45,7 +45,9 @@ a{text-decoration:none;color:inherit;}
   padding:10px 14px;cursor:pointer;border-bottom:1px solid #f3f3f3;
 }
 #autocompleteList li:hover {background:#f9f9f9;}
+
 /* 인기검색어 */
+
 #top-keywords {margin-top:4px;font-size:14px;color:#444;}
 #top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
 #top-keywords .keyword:hover {text-decoration:underline;}
@@ -124,6 +126,7 @@ a{text-decoration:none;color:inherit;}
     loadTopKeywords();
   });
 
+
   async function loadTopKeywords() {
 	  try {
 	    const res = await fetch("${contextPath}/search/top");
@@ -159,6 +162,67 @@ a{text-decoration:none;color:inherit;}
 	  }
 	}
   // ===================== 자동완성 =====================
+
+  function formatPrice(v) {
+    if (v === null || v === undefined) return '';
+    try { return new Intl.NumberFormat('ko-KR').format(v) + '원'; }
+    catch (e) { return v + '원'; }
+  }
+
+  function render(list, keyword) {
+    if (!Array.isArray(list)) list = [];
+    if (!list.length) {
+      results.innerHTML =
+        '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 0건</div>' +
+        '<div class="empty">조건에 맞는 상품이 없습니다.</div>';
+      return;
+    }
+
+    var head = '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 ' + list.length + '건</div>';
+    var cards = list.map(function (p) {
+      var id = p.productId;
+      var name = p.productName || '';
+      var price = formatPrice(p.productPrice);
+
+      return ''
+        + '<div class="card">'
+        + '  <a href="' + contextPath + '/product/detail/' + id + '">'
+        + '    <div class="name">' + name + '</div>'
+        + '    <div class="price">' + price + '</div>'
+        + '  </a>'
+        + '</div>';
+    }).join('');
+
+    results.innerHTML = head + '<div class="grid">' + cards + '</div>';
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  async function search(keyword) {
+    var q = (keyword || '').trim();
+    if (!q) {
+      results.innerHTML = '<div class="empty">검색어를 입력하세요.</div>';
+      return;
+    }
+    results.innerHTML = '<div class="empty">검색 중...</div>';
+
+    var url = contextPath + '/product/search?searchName=' + encodeURIComponent(q);
+    console.log('[search] fetch:', url);
+
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      const data = await res.json();
+      console.log('[search] parsed data:', data);
+      render(Array.isArray(data) ? data : [], q);
+    } catch (err) {
+      console.error('[search] fetch error:', err);
+      results.innerHTML = '<div class="empty">검색 중 오류가 발생했습니다.</div>';
+    }
+  }
+
+  
+
   input.addEventListener("keyup", async () => {
     const keyword = input.value.trim();
     if (keyword.length === 0) {
@@ -204,6 +268,7 @@ a{text-decoration:none;color:inherit;}
     search(input.value);
   });
 
+
   
   async function search(keyword) {
 	    var q = (keyword || '').trim();
@@ -240,3 +305,39 @@ a{text-decoration:none;color:inherit;}
 	    }
   }
 </script>
+
+  // ===================== 🔽 인기검색어 =====================
+  async function loadTopKeywords() {
+    try {
+      const res = await fetch(contextPath + "/search/top");
+      const data = await res.json();
+
+      let html = "";
+      data.slice(0, 10).forEach(item => {
+        html += `<span class="keyword">#${item.searchKeyword}</span>`;
+      });
+      document.getElementById("top-keywords").innerHTML = html;
+
+      // 클릭 → 검색 실행
+      document.querySelectorAll("#top-keywords .keyword").forEach(el => {
+        el.addEventListener("click", () => {
+          const kw = el.textContent.replace("#", "");
+          input.value = kw;
+          search(kw);
+        });
+      });
+    } catch (err) {
+      console.error("인기검색어 불러오기 에러:", err);
+      document.getElementById("top-keywords").innerHTML = "인기검색어를 불러올 수 없습니다.";
+    }
+  }
+
+  // 로딩 시 인기검색어 실행
+  loadTopKeywords();
+
+  window.__search = search;
+})();
+
+</script>
+
+

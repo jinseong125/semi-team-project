@@ -142,6 +142,16 @@ public Integer saveAlarmData(Map<String, Object> messageAlarm) {
 	return sqlSession.insert("mybatis.mapper.chatMessageMapper.saveAlarmData", messageAlarm);
 }
 
+public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId) {
+	
+	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getReceiverInfoByUserId", chatReceiverAccountId);
+}
+
+public String getProductNameById(int parseInt) {
+	
+	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getProductNameById", parseInt);
+}
+
 
    
    
