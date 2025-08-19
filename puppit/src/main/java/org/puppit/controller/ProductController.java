@@ -57,7 +57,7 @@ public class ProductController {
     @PostMapping("/new")
     public String create(@ModelAttribute ProductDTO product,
                          @RequestParam("imageFiles") List<MultipartFile> imageFiles,
-                         @RequestParam(value="attachment", required=false) MultipartFile attachment,
+                         @RequestParam(value="attachment", required=false) MultipartFile attachment,    
                          HttpSession session,
                          RedirectAttributes ra) {
 
@@ -131,11 +131,17 @@ public class ProductController {
         return "product/myproduct";
     }
 
-
+    
     @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
     @ResponseBody
     public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
         return productService.searchByNew(searchName);
+    }
+
+    @GetMapping(value = "/autocomplete", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<String> getAutoComplete(@RequestParam("keyword") String keyword) {
+      return productService.getAutoComplete(keyword);
     }
 
 
@@ -207,11 +213,12 @@ public class ProductController {
         Map<String,Object> map = (Map<String,Object>) session.getAttribute("sessionMap");
         Integer sellerId = (Integer) map.get("userId");
 
-        ProductDTO productDTO = productService.getProductById(productId);
-       /* if (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
-            ra.addFlashAttribute("error", "권한이 없습니다.");
-            return "redirect:/product/myproduct";
-        }*/
+        /*
+         * ProductDTO productDTO = productService.getProductById(productId); if
+         * (productDTO == null || !productDTO.getSellerId().equals(sellerId)) {
+         * ra.addFlashAttribute("error", "권한이 없습니다."); return
+         * "redirect:/product/myproduct"; }
+         */
 
 
 
