@@ -8,7 +8,7 @@
 
 <style>
 :root {
-  --bg:#f7f8fa; --card:#fff; --text:#111; --muted:#8a8f98; --primary:#4f86ff; --line:#e6e9ef;
+  --bg:#fff; --card:#fff; --text:#111; --muted:#8a8f98; --primary:#4f86ff; --line:#e6e9ef;
   --shadow:0 8px 24px rgba(0,0,0,.08);
 }
 *{box-sizing:border-box}
@@ -29,10 +29,10 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-appl
 .total .right{font-size:20px;font-weight:900}
 .notice{margin-top:8px;color:var(--muted);font-size:13px}
 .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
-.btn{
+.button{
   height:46px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:800
 }
-.btn:active{transform:translateY(1px)}
+.button:active{transform:translateY(1px)}
 .btn-primary{background:var(--primary);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(79,134,255,.25)}
 .btn-primary[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
 .check{display:flex;align-items:center;gap:8px;margin-top:10px}
@@ -83,8 +83,8 @@ hr.sep{border:none;border-top:1px solid var(--line);margin:14px 0}
       <hr class="sep"/>
 
       <div class="actions">
-        <button type="button" class="btn" onclick="history.back()">뒤로가기</button>
-        <button type="submit" id="payBtn" class="btn btn-primary" disabled>결제하기</button>
+        <button type="button" class="button" onclick="history.back()">뒤로가기</button>
+        <button type="submit" id="payBtn" class="button btn-primary" disabled>결제하기</button>
       </div>
     </div>
 
