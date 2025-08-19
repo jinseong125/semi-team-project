@@ -246,7 +246,7 @@ body {
   <!-- 프로필 -->
   <div class="profile">
     <div class="avatar">
-      <img src="${contextPath}/resources/image/profile-default.png" alt="프로필 이미지" />
+      <img src="${contextPath}/resources/image/${sessionScope.sessionMap.userId}.png" alt="프로필 이미지" />
     </div>
     <div class="who">
       <div class="nick">${user.nickName != null ? user.nickName : 'happy'}</div>
