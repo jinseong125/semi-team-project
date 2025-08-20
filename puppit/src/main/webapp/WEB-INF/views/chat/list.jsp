@@ -261,15 +261,18 @@ function renderProductInfo(product, chatMessages) {
         + '<strong>상품명:</strong> ' + product.productName + '<br>'
         + '<strong>가격:</strong> ' + (isNaN(price) ? product.productPrice : price.toLocaleString()) + '원 <br>';
 
-    // 🔥 로그인된 사용자와 판매자가 다른 경우 결제 버튼 추가
-    if (String(userId) !== String(product.sellerId)) {
+        
+    // 🔥 채팅 메시지가 2개 이상이고, 로그인된 사용자가 구매자일 때만 결제 버튼 추가    
+    const isBuyer = String(userId) !== String(product.sellerId);
+    const chatCount = Array.isArray(chatMessages) ? chatMessages.length : 0; 
+    if (isBuyer && chatCount >= 2) {
         html += `<button
             id="pay-btn"
-            	    data-buyer-id="\${userId}" // 로그인된 사용자를 buyerId로 설정
-                    data-seller-id="\${product.sellerId}"
-                    data-seller-account-id="\${product.chatSellerAccountId}" // Fix: Bind chatSellerAccountId directly from product object
-                    data-product-name="\${product.productName}"
-                    data-product-id="\${product.productId}"
+            data-buyer-id="${userId}"
+            data-seller-id="${product.sellerId}"
+            data-seller-account-id="${product.chatSellerAccountId}"
+            data-product-name="${product.productName}"
+            data-product-id="${product.productId}"
         >결제하기</button>`;
     }
 
