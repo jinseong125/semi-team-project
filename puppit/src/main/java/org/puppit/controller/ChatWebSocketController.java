@@ -158,6 +158,8 @@ public class ChatWebSocketController {
 	    
 	    // 알림 메시지 생성
 	    NotificationDTO notification = new NotificationDTO();
+	    notification.setRoomId(chatRoomId);
+	    notification.setUserId(sender.getUserId());
         notification.setSenderAccountId(chatMessageDTO.getChatSenderAccountId());
         notification.setReceiverAccountId(chatMessageDTO.getChatReceiverAccountId());
         notification.setChatMessage(chatMessageDTO.getChatMessage());
@@ -165,6 +167,9 @@ public class ChatWebSocketController {
         notification.setChatCreatedAt(chatMessageDTO.getChatCreatedAt());
         notification.setProductName(chatService.getProductNameById(productId));
 
+        Integer alarmInsertRowId = chatService.saveAlarmData(notification);
+        System.out.println("메시지 알림 저장 성공: " + alarmInsertRowId);
+                
         // 알림을 브로드캐스트
         messagingTemplate.convertAndSend("/topic/notification", notification);
         System.out.println("Notification sent: " + notification);

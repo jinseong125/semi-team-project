@@ -13,6 +13,7 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
+import org.puppit.model.dto.NotificationDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
@@ -132,7 +133,7 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public Integer saveAlarmData(Map<String, Object> messageAlarm) {
+	public Integer saveAlarmData(NotificationDTO messageAlarm) {
 		return chatDAO.saveAlarmData(messageAlarm);
 	}
 
@@ -146,6 +147,12 @@ public class ChatServiceImpl implements ChatService{
 	public String getProductNameById(int parseInt) {
 		
 		return chatDAO.getProductNameById(parseInt);
+	}
+
+	@Override
+	public List<NotificationDTO> getUnreadAlarms(Integer userId) {
+		
+		return chatDAO.getUnreadAlarms(userId);
 	}
 	
 	  // 페이징된 채팅방 목록 조회

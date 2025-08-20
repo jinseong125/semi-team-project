@@ -313,9 +313,9 @@ WHERE p.product_id = #{productId};
   	
   	</select>
   	
-  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarm_id">
+  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarmId">
   		  INSERT INTO alarm (room_id, user_id, alarm_read_message_id)
-    VALUES (#{roomId}, #{userId}, ${alarmReadMessageId})
+    VALUES (#{roomId}, #{userId}, #{alarmReadMessageId})
   	
   	
   	
@@ -337,5 +337,35 @@ WHERE p.product_id = #{productId};
   	
   	</select>
   	
+  	<select id="mybatis.mapper.chatMessageMapper.getUnreadAlarms" parameterType="Integer" resultType="NotificationDTO">
+  	  SELECT 
+		    a.*,
+		    c.message_id AS message_id,                      -- 메시지의 PK 추가!
+		    c.chat_message AS chat_message,                  -- 채팅 메시지 내용
+		    u.account_id AS sender_account_id,               -- 메시지 발신자 accountId
+		    u.user_name AS sender_user_name,                 -- 메시지 발신자 이름
+		    c.chat_created_at AS message_created_at,         -- 메시지 발신 시간
+		    p.product_name,                                  -- 채팅방의 상품 이름
+		    ur.account_id AS receiver_account_id,            -- 메시지 수신자 accountId
+		    ur.user_name AS receiver_user_name               -- 메시지 수신자 이름
+		FROM alarm a
+		LEFT JOIN chat c 
+		    ON a.room_id = c.chat_room_id
+		    AND a.alarm_read_message_id IS NULL
+		    AND c.message_id = (
+		        SELECT MAX(message_id)
+		        FROM chat
+		        WHERE chat_room_id = a.room_id
+		    )
+		LEFT JOIN user u ON c.chat_sender = u.user_id           -- 발신자 정보
+		LEFT JOIN user ur ON c.chat_receiver = ur.user_id       -- 수신자 정보 (추가)
+		LEFT JOIN room r ON a.room_id = r.room_id
+		LEFT JOIN product p ON r.product_id = p.product_id
+		WHERE a.user_id = #{userId}
+		  AND a.alarm_read_message_id IS NULL
+  	</select>
+  
+  
+  
   
 </mapper>

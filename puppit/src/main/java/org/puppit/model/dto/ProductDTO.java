@@ -32,6 +32,7 @@ public class ProductDTO {
 
     private CategoryDTO      category;
     private ProductStatusDTO  status;
+
     private ProductImageDTO   thumbnail;  // 썸네일 1장
     
     @Override
@@ -42,6 +43,7 @@ public class ProductDTO {
           + ", productCreatedAt=" + productCreatedAt + ", productUpdatedAt=" + productUpdatedAt + ", totalCount="
           + totalCount + ", category=" + category + ", status=" + status + ", thumbnail=" + thumbnail + "]";
     }
+
 
     
     

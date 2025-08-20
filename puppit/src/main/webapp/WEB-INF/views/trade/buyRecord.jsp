@@ -124,7 +124,7 @@ body {
 
 <div class="wrap">
   <div class="header-row">
-    <div class="title">거래 내역</div>
+    <div class="title">구매 내역</div>
     <div class="count">총 <strong>${fn:length(tradeDTOs)}</strong>건</div>
   </div>
 
@@ -144,18 +144,20 @@ body {
           </thead>
           <tbody>
             <c:forEach var="tradeDTO" items="${tradeDTOs}">
-              <tr>
-                <td><fmt:formatDate value="${tradeDTO.createdAt}" pattern="yyyy-MM-dd HH:mm" /></td>
-                <td class="mono">${tradeDTO.productName}</td>
-                <td>${tradeDTO.productPrice} P</td>
-                <td>${tradeDTO.buyerNickname}</td>
-                <td>${tradeDTO.sellerNickname}</td>
-                <td>
-                  <span class="badge-status" data-status="${tradeDTO.status}">
-                    ${tradeDTO.status}
-                  </span>
-                </td>
-              </tr>
+              <c:if test="${tradeDTO.buyerId eq sessionScope.sessionMap.userId}">
+                <tr>
+                  <td><fmt:formatDate value="${tradeDTO.createdAt}" pattern="yyyy-MM-dd HH:mm" /></td>
+                  <td class="mono">${tradeDTO.productName}</td>
+                  <td>${tradeDTO.productPrice} P</td>
+                  <td>${tradeDTO.buyerNickname}</td>
+                  <td>${tradeDTO.sellerNickname}</td>
+                  <td>
+                    <span class="badge-status" data-status="${tradeDTO.status}">
+                      ${tradeDTO.status}
+                    </span>
+                  </td>
+                </tr>
+              </c:if>
             </c:forEach>
           </tbody>
         </table>

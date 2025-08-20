@@ -30,5 +30,7 @@ public interface UserService {
   ChatUserDTO getUserByUserId(String senderUserId);
   
   boolean updateUser(Map<String, Object> map);
+  String getProfileImageKey(Integer userId);
+  boolean updateProfileImageKey(Integer userId, String profileImageKey);
   
 }

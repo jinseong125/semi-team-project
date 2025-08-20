@@ -1,23 +1,18 @@
 package org.puppit.service;
 
 import lombok.RequiredArgsConstructor;
-
-import org.puppit.model.dto.PageDTO;
-import org.puppit.model.dto.ProductDTO;
-import org.puppit.model.dto.ProductImageDTO;
-import org.puppit.model.dto.ProductSearchDTO;
+import org.puppit.model.dto.*;
 import org.puppit.repository.ProductDAO;
 import org.puppit.util.PageUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -27,34 +22,33 @@ public class ProductServiceImpl implements ProductService {
     private final S3Service s3Service;
     private final PageUtil pageUtil;
 
+    /** 상품 등록 */
     @Transactional
     @Override
     public int registerProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
-        // 1. 상품 저장
         productDAO.insertProduct(productDTO);
 
-        // 상태값 기본 지정 (null이면 1=판매중)
         if (productDTO.getStatusId() == null) {
             productDTO.setStatusId(1);
         }
 
-        // 2. 이미지 저장 (첫 번째 이미지만 썸네일)
         for (int i = 0; i < imageFiles.size(); i++) {
             MultipartFile file = imageFiles.get(i);
             if (!file.isEmpty()) {
                 try {
-                	// S3 업로드
                     Map<String, String> uploadResult = s3Service.uploadFile(file, "product");
 
                     ProductImageDTO imageDTO = new ProductImageDTO();
                     imageDTO.setProductId(productDTO.getProductId());
-                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));    // ✅ S3Service 반환 key와 일치
-                    imageDTO.setImageKey(uploadResult.get("fileName"));  // ✅ S3Service 반환 key와 일치
-                    imageDTO.setThumbnail(i == 0); // 첫 번째 이미지만 썸네일
+                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));
+                    imageDTO.setImageKey(uploadResult.get("fileName"));
+                    imageDTO.setThumbnail(i == 0);
 
-                    // DB 저장
                     productDAO.insertProductImage(imageDTO);
 
+                    if (i == 0) {
+                        productDAO.updateThumbnail(productDTO.getProductId(), imageDTO.getImageId());
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException("이미지 업로드 실패", e);
                 }
@@ -64,13 +58,12 @@ public class ProductServiceImpl implements ProductService {
         return productDTO.getProductId();
     }
 
-    // org.puppit.service.ProductServiceImpl
-
+    /** 상품 등록 폼 데이터 */
     @Override
     public Map<String, List<?>> getProductFormData() {
         Map<String, List<?>> map = new HashMap<>();
         map.put("categories", productDAO.getCategories());
-        map.put("locations",  productDAO.getLocations());
+        map.put("locations", productDAO.getLocations());
         map.put("conditions", productDAO.getConditions());
         return map;
     }
@@ -87,59 +80,84 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDTO> getProductList() {
-      return productDAO.getProductList();
+        return productDAO.getProductList();
     }
 
     @Override
     public ProductDTO getProductDetail(Integer productId) {
-      return productDAO.getProductDetail(productId);
+        return productDAO.getProductDetail(productId);
     }
-
-  
 
     @Override
     public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
+
       return null;
     }
 
 
     @Override
     public List<ProductSearchDTO> searchByNew(String searchName) {
-      return productDAO.searchByNew(searchName);
+        return productDAO.searchByNew(searchName);
     }
 
     @Override
     public Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request) {
-    	 //----- 파라미터 sort 받기 (디폴트 DESC)
         String sort = request.getParameter("sort");
-        if (sort == null || !(sort.equalsIgnoreCase("ASC") || sort.equalsIgnoreCase("DESC"))) 
-          sort = "DESC";
-        //----- 전체 항목의 개수를 PageDTO 객체에 저장하기
+        if (sort == null || !(sort.equalsIgnoreCase("ASC") || sort.equalsIgnoreCase("DESC"))) {
+            sort = "DESC";
+        }
         int itemCount = productDAO.getProductCount();
         dto.setItemCount(itemCount);
-        //----- 한 번에 9개씩 가져오기
-        //dto.setSize(16);
-        //----- 페이징 정보 계산해서 PageDTO 객체에 저장하기 (PageDTO 객체에 페이징 위한 모든 정보가 저장됩니다.)
-        //pageUtil.calculatePaging(dto);
-        //----- 목록 가져오기
-        List<ProductDTO> products =  productDAO.getProducts(Map.of("offset", dto.getOffset(), "size", dto.getSize(), "sort", sort));
-        
-        
-        //----- 결과 반환 (회원 목록과 전체 페이지 개수)
+
+        List<ProductDTO> products = productDAO.getProductList(); // 단순화
+
         return Map.of("products", products, "pageCount", dto.getPageCount());
     }
 
-
     @Override
     public List<String> getAutoComplete(String keyword) {
-      return productDAO.getAutoComplete(keyword);
+        return productDAO.getAutoComplete(keyword);
     }
 
-
+    /** 상품 수정 */
     @Transactional
     @Override
-    public int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles) {
+    public int updateProduct(ProductDTO productDTO, List<Integer> deleteImageIds, List<MultipartFile> imageFiles) throws Exception {
         productDAO.updateProduct(productDTO);
+
+        if (deleteImageIds != null && !deleteImageIds.isEmpty()) {
+            for (Integer imageId : deleteImageIds) {
+                ProductImageDTO img = productDAO.getImageById(imageId);
+                if (img != null) {
+                    s3Service.deleteFile(img.getImageUrl());
+                    productDAO.deleteImage(imageId);
+                }
+            }
+        }
+
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            for (MultipartFile file : imageFiles) {
+                if (!file.isEmpty()) {
+                    Map<String, String> uploadResult = s3Service.uploadFile(file, "product");
+
+                    ProductImageDTO imageDTO = new ProductImageDTO();
+                    imageDTO.setProductId(productDTO.getProductId());
+                    imageDTO.setImageUrl(uploadResult.get("fileUrl"));
+                    imageDTO.setImageKey(uploadResult.get("fileName"));
+                    imageDTO.setThumbnail(false);
+
+                    productDAO.insertProductImage(imageDTO);
+                }
+            }
+        }
+
+        List<ProductImageDTO> remainImages = productDAO.getProductImages(productDTO.getProductId());
+        if (!remainImages.isEmpty()) {
+            productDAO.unsetAllThumbnails(productDTO.getProductId());
+            productDAO.setThumbnail(remainImages.get(0).getImageId());
+            productDAO.updateThumbnail(productDTO.getProductId(), remainImages.get(0).getImageId());
+        }
+
         return productDTO.getProductId();
     }
 
@@ -153,6 +171,32 @@ public class ProductServiceImpl implements ProductService {
       return productDAO.getProductsByCategory(categoryName);
     }
 
+
+    public ProductImageDTO getThumbnailImage(Integer productId) {
+        return productDAO.getThumbnailImage(productId);
     }
 
+    @Override
+    public List<ProductImageDTO> getProductImages(Integer productId) {
+        return productDAO.getProductImages(productId);
 
+    }
+
+    @Transactional
+    @Override
+    public void setThumbnail(Integer productId, Integer imageId) {
+        productDAO.unsetAllThumbnails(productId);
+        productDAO.setThumbnail(imageId);
+        productDAO.updateThumbnail(productId, imageId);
+    }
+
+    @Transactional
+    @Override
+    public void deleteImage(Integer imageId) throws Exception {
+        ProductImageDTO img = productDAO.getImageById(imageId);
+        if (img != null) {
+            s3Service.deleteFile(img.getImageUrl());
+            productDAO.deleteImage(imageId);
+        }
+    }
+}

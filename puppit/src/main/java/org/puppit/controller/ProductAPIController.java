@@ -3,6 +3,7 @@ package org.puppit.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.ProductImageLIstDTO;
 import org.puppit.repository.ProductDAO;
 import org.springframework.http.MediaType;
@@ -26,9 +27,9 @@ public class ProductAPIController {
   @ResponseBody
   public Map<String, Object> getProductThumnailImage(@PathVariable Integer productId, Model model) {
     Map<String, Object> map = new HashMap<String, Object>();
-    ProductImageLIstDTO productImageLIstDTO =productDAO.getThumnailImage(productId);
-    map.put("thumbnail", productImageLIstDTO);
-    System.out.println("productImageLIstDTO: " + productImageLIstDTO.toString());
+    ProductImageDTO productImageDTO = productDAO.getThumbnailImage(productId);
+    map.put("thumbnail", productImageDTO);
+    System.out.println("productImageLIstDTO: " + productImageDTO.toString());
     model.addAttribute("thumbnail", map);
     return map;
   }
