@@ -17,9 +17,9 @@ public class S3Service {
 
     private final AmazonS3 amazonS3;
 
+    //  업로드
     public Map<String, String> uploadFile(MultipartFile file, String folderName) throws IOException {
-        String bucketName = "jscode-upload-images" ;// 환경변수에 버킷명
-
+        String bucketName = "jscode-upload-images"; // ← 통일
         String fileName = folderName + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         ObjectMetadata metadata = new ObjectMetadata();
@@ -33,9 +33,14 @@ public class S3Service {
         Map<String, String> result = new HashMap<>();
         result.put("fileName", fileName);
         result.put("fileUrl", fileUrl);
-
         return result;
     }
 
-}
+    //  삭제
+    public void deleteFile(String fileUrl) {
+        String bucketName = "jscode-upload-images"; // ← 업로드랑 동일하게
+        String fileKey = fileUrl.substring(fileUrl.indexOf(bucketName) + bucketName.length() + 1);
 
+        amazonS3.deleteObject(bucketName, fileKey);
+    }
+}
