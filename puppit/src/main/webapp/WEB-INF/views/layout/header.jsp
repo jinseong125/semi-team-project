@@ -304,7 +304,7 @@ a{text-decoration:none;color:inherit;}
 	      return;
 	    }
   }
-</script>
+
 
   // ===================== 🔽 인기검색어 =====================
   async function loadTopKeywords() {
@@ -336,7 +336,7 @@ a{text-decoration:none;color:inherit;}
   loadTopKeywords();
 
   window.__search = search;
-})();
+})();  
 
 </script>
 
