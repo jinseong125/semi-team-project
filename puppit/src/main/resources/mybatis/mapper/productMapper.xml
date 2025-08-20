@@ -210,21 +210,9 @@
                ORDER BY p.product_id DESC
                LIMIT #{size}
         </select>
+
         
-<!--         
-       <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
-  SELECT 
-    product_id AS productId,
-    product_name AS productName,
-    product_description AS productDescription,
-    product_price AS productPrice
-  FROM product
-  ORDER BY product_created_at DESC
-  LIMIT #{size} OFFSET #{offset}
-</select>
-      -->   
-        
-          <select id="getProducts" parameterType="Map" resultType="org.puppit.model.dto.ProductDTO">
+  <select id="getProducts" parameterType="Map" resultType="org.puppit.model.dto.ProductDTO">
     SELECT 
     product_id AS productId,
     product_name AS productName,
@@ -240,6 +228,7 @@
       FROM product
   </select>
   
+  <!-- 자동완성 -->
   <select id="getAutoComplete" resultType="string" parameterType="string">
   	SELECT product_name
   	  FROM product
@@ -247,5 +236,21 @@
   	 ORDER BY product_name
   	 LIMIT 50
   </select>
+  
+  <!-- 카테고리별 상품 조회 -->
+    <select id="getProductsByCategory" parameterType="string" resultType="org.puppit.model.dto.ProductDTO">
+        SELECT p.product_id       AS productId,
+               p.product_name     AS productName,
+               p.product_price    AS productPrice,
+               c.category_name    AS categoryName,
+               p.status_id        AS statusId,
+               p.condition_id     AS conditionId,
+               p.location_id      AS locationId,
+               p.product_created_at AS productCreatedAt
+        FROM product p
+        JOIN product_category c ON p.category_id = c.category_id
+        WHERE c.category_name = #{categoryName}
+        ORDER BY p.product_created_at DESC
+    </select>
         
 </mapper>

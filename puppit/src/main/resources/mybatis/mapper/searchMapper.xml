@@ -5,24 +5,37 @@
 <mapper namespace="search">
 
     <!-- 상품 검색 -->
-    <select id="searchByNew" parameterType="map" resultType="org.puppit.model.dto.ProductSearchDTO">
-        SELECT product_name
-          FROM product
-         WHERE product_name LIKE CONCAT('%', #{searchName}, '%')
-    </select>
+<select id="searchByNew" parameterType="map" resultType="org.puppit.model.dto.ProductSearchDTO">
+    SELECT 
+        p.product_id   AS productId,
+        p.product_name AS productName,
+        p.product_price AS productPrice,
+        (
+          SELECT image_url 
+          FROM product_image i 
+          WHERE i.product_id = p.product_id 
+          LIMIT 1
+        ) AS productImage
+    FROM product p
+    WHERE p.product_name LIKE CONCAT('%', #{searchName}, '%')
+</select>
 
-    <!-- 인기 검색어 TOP 10 -->
+
+    <!-- 인기 검색어 TOP 5 -->
     <select id="selectTopKeywords" resultType="org.puppit.model.dto.SearchLogDTO">
-        SELECT search_keyword AS searchKeyword,
-               COUNT(*) AS cnt
-         FROM search_log
-        GROUP BY search_keyword
-        ORDER BY cnt DESC
-        LIMIT 8
-    </select>
+    SELECT search_keyword AS searchKeyword,
+           COUNT(*) AS cnt
+     FROM search_log
+    WHERE user_id BETWEEN 1 AND 5
+    GROUP BY search_keyword
+    ORDER BY cnt DESC
+    LIMIT 5
+</select>
 
-	<insert id="insertTopKeywords">
-		INSERT INTO 
-	
-	</insert>
+
+<insert id="insertTopKeywords" parameterType="org.puppit.model.dto.SearchLogDTO">
+    INSERT INTO search_log (user_id, search_keyword, searched_at)
+    VALUES (#{userId}, #{searchKeyword}, NOW())
+</insert>
+
 </mapper>

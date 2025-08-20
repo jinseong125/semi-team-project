@@ -128,7 +128,9 @@ public class ProductDAO {
     }
 
 
-
+    public List<ProductDTO> getProductsByCategory (String categoryName) {
+        return sqlSession.selectList("product.getProductsByCategory", categoryName);
+    }
  
     
 }

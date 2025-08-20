@@ -50,7 +50,7 @@
 
 <script>
 (function () {
-  var contextPath = '${contextPath}';
+
   var input = document.getElementById('search-input');
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');

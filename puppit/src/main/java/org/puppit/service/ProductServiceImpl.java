@@ -101,26 +101,6 @@ public class ProductServiceImpl implements ProductService {
       return null;
     }
 
-//    @Transactional(readOnly = true)
-//    public ScrollResponseDTO<ProductDTO> getProductsForScroll(Long cursor, int size) {
-//      List<ProductDTO> list = productDAO.findProductsAfter(cursor, size);
-//
-//      ScrollResponseDTO<ProductDTO> responseDTO = new ScrollResponseDTO<ProductDTO>();
-//      responseDTO.setItem(list);
-//
-//      if(list.isEmpty()) {
-//        responseDTO.setHasMore(false);
-//        responseDTO.setNextCursor(null);
-//        return responseDTO;
-//      }
-//
-//      Long next = list.get(list.size() - 1).getProductId().longValue();
-//      responseDTO.setNextCursor(next);
-//
-//      responseDTO.setHasMore(list.size() == size);
-//        return responseDTO;
-//
-//    }
 
     @Override
     public List<ProductSearchDTO> searchByNew(String searchName) {
@@ -165,6 +145,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public int deleteProduct(Integer productId) {
         return productDAO.deleteProduct(productId);
+    }
+
+    @Override
+    public List<ProductDTO> getProductsByCategory(String categoryName) {
+      return productDAO.getProductsByCategory(categoryName);
     }
 
     }

@@ -41,6 +41,6 @@ public interface ProductService {
     int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles);
     int deleteProduct(Integer productId);
 
-
+    List<ProductDTO> getProductsByCategory(String categoryName);
 
 }

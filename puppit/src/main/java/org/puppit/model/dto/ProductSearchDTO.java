@@ -11,11 +11,19 @@ import lombok.Setter;
 @Setter
 public class ProductSearchDTO {
   private String productName;
-
+  private Integer productId;
+  private Integer productPrice;
+  private String productImage;
+  
+  
   @Override
   public String toString() {
-    return "ProductSearchDTO [productName=" + productName + "]";
+    return "ProductSearchDTO [productName=" + productName + ", productId=" + productId + ", productPrice="
+        + productPrice + ", productImage=" + productImage + "]";
+  }
+  
+  
+
   }
   
 
-}
