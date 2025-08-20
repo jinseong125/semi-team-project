@@ -19,7 +19,7 @@ public class CategoryController {
   
  private final ProductService productService;
  
- // @RequestParam String categoryName : /category?categoryName=간식
+ // @RequestParam String categoryName :   ?categoryName=간식
  // @PathVariable String categoryName : /category/간식
  
  @GetMapping(value = "/product", produces = "application/json"  )
