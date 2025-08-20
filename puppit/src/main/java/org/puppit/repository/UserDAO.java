@@ -57,5 +57,13 @@ public class UserDAO {
     return sqlSession.update("mybatis.mapper.userMapper.updateUser", map);
   }
   
+  public String selectProfileImageKey(Integer userId) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.selectProfileImageKey", userId);
+  }
+  
+  public Integer updateProfileImageKey(Map<String, Object> map) {
+    return sqlSession.update("mybatis.mapper.userMapper.updateProfileImageKey", map);
+  }
+  
 
 }
