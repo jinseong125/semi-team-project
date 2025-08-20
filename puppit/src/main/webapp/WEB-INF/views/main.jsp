@@ -55,7 +55,7 @@
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var mainGrid = document.getElementById('productGrid');
-  var size = 16;
+  var size = 20;
   var loading = false;
   var endOfData = false;
 

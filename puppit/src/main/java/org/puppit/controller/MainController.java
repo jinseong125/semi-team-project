@@ -29,7 +29,7 @@ public class MainController {
           , HttpServletRequest request
           , Model model) {
 
-	  dto.setSize(16);
+	  dto.setSize(20);
 	  dto.setPage(1);
 	  dto.setOffset(0); // <---- 반드시 직접 넣어주거나, 서비스에서 계산
 	  Map<String, Object> map  = productService.getProducts(dto, request);
@@ -45,7 +45,7 @@ public class MainController {
   @GetMapping(value = "/product/list", produces = "application/json" )
   public ResponseEntity<Map<String, Object>> getProducts(
 		  @RequestParam(value="offset", defaultValue="0") int offset,
-		    @RequestParam(value="size", defaultValue="16") int size, HttpServletRequest request) {
+		    @RequestParam(value="size", defaultValue="20") int size, HttpServletRequest request) {
 	  PageDTO dto = new PageDTO();
 	    dto.setOffset(offset);
 	    dto.setSize(size);
