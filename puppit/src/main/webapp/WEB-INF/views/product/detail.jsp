@@ -187,7 +187,15 @@ document.getElementById('btnPay')?.addEventListener('click',function() {
     const productId = "${product.productId}";
     const buyerId = "${userId}";
     const sellerId = "${product.sellerId}";
-    window.location.href = contextPath + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;
+    // 판매자와 구매자가 같을 때 경고창 띄우고 이동 막기
+    if (buyerId === sellerId) {
+        alert("상품에 등록된 판매자와 구매자가 같아서 채팅할 수 없습니다");
+        return;
+    }
+    else {
+    	window.location.href = contextPath + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;	
+    }
+    
 });
 
 async function getProductFetch(productId) {
