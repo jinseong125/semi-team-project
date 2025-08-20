@@ -85,6 +85,7 @@ public class ProductServiceImpl implements ProductService {
         return productDAO.selectMyProducts(sellerId);
     }
 
+    @Override
     public List<ProductDTO> getProductList() {
       return productDAO.getProductList();
     }
