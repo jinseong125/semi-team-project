@@ -338,15 +338,16 @@ WHERE p.product_id = #{productId};
   	</select>
   	
   	<select id="mybatis.mapper.chatMessageMapper.getUnreadAlarms" parameterType="Integer" resultType="NotificationDTO">
-  		SELECT 
+  	  SELECT 
 		    a.*,
-		    c.chat_message AS chat_message,                    -- 채팅 메시지 내용
-		    u.account_id AS sender_account_id,                 -- 메시지 발신자 accountId
-		    u.user_name AS sender_user_name,                   -- 메시지 발신자 이름
-		    c.chat_created_at AS message_created_at,           -- 메시지 발신 시간
-		    p.product_name,                                    -- 채팅방의 상품 이름
-		    ur.account_id AS receiver_account_id,              -- 메시지 수신자 accountId
-		    ur.user_name AS receiver_user_name                 -- 메시지 수신자 이름
+		    c.message_id AS message_id,                      -- 메시지의 PK 추가!
+		    c.chat_message AS chat_message,                  -- 채팅 메시지 내용
+		    u.account_id AS sender_account_id,               -- 메시지 발신자 accountId
+		    u.user_name AS sender_user_name,                 -- 메시지 발신자 이름
+		    c.chat_created_at AS message_created_at,         -- 메시지 발신 시간
+		    p.product_name,                                  -- 채팅방의 상품 이름
+		    ur.account_id AS receiver_account_id,            -- 메시지 수신자 accountId
+		    ur.user_name AS receiver_user_name               -- 메시지 수신자 이름
 		FROM alarm a
 		LEFT JOIN chat c 
 		    ON a.room_id = c.chat_room_id
@@ -361,7 +362,7 @@ WHERE p.product_id = #{productId};
 		LEFT JOIN room r ON a.room_id = r.room_id
 		LEFT JOIN product p ON r.product_id = p.product_id
 		WHERE a.user_id = #{userId}
-		  AND a.alarm_read_message_id IS NULL	
+		  AND a.alarm_read_message_id IS NULL
   	</select>
   
   
