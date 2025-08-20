@@ -17,7 +17,7 @@ if (sessionMap != null) {
     }
 }
 %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
 <c:set var="userId" value="<%= userId %>" />
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp?dt=<%=System.currentTimeMillis()%>"/>
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
     getProductFetch(productId);
   });
 
-var contextPath = "${contextPath}";
+const contextPath = "${pageContext.request.contextPath}";
 
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
 document.getElementById('btnPay')?.addEventListener('click',function() {

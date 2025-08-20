@@ -143,7 +143,6 @@ a{text-decoration:none;color:inherit;}
 <div id="search-results"></div>
 <hr>
 <script>
-const contextPath = '${contextPath}';
 const input = document.getElementById("search-input");
 var btn = document.getElementById('do-search');
 var results = document.getElementById('search-results');
@@ -201,7 +200,7 @@ function loadAlarms() {
   }
   
   console.log("userId: ", userId);
-  fetch(contextPath + "/api/alarm?userId=" + userId)
+  fetch("${contextPath}/api/alarm?userId=" + userId)
     .then(res => {
       if (!res.ok) throw new Error("서버 오류");
       return res.json();

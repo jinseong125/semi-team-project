@@ -47,7 +47,7 @@ request.setAttribute("sortedChatList", sortedChatList);
 
 
 %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
 <c:set var="loginUserId" value="<%= accountId %>" />
 <c:set var="userId" value="<%=userId %>"/>
 <c:set var="highlightRoomIdStr" value="${highlightRoomIdStr}"/>
@@ -173,7 +173,7 @@ request.setAttribute("sortedChatList", sortedChatList);
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
-const contextPath = "${contextPath}";
+const contextPath = "${pageContext.request.contextPath}";
 const loginUserId = '<c:out value="${loginUserId}" />'; // 작은따옴표로 감싸 JS 문자열로 안전하게
 const userId = <c:out value="${userId}" />;             // 숫자는 그대로
 
@@ -342,14 +342,14 @@ function renderProductInfo(product, chatMessages) {
     const isBuyer = String(userId) !== String(product.sellerId);
     const chatCount = Array.isArray(chatMessages) ? chatMessages.length : 0; 
     if (isBuyer && chatCount >= 2) {
-        html += `<button
-            id="pay-btn"
-            data-buyer-id="${userId}"
-            data-seller-id="${product.sellerId}"
-            data-seller-account-id="${product.chatSellerAccountId}"
-            data-product-name="${product.productName}"
-            data-product-id="${product.productId}"
-        >결제하기</button>`;
+    	html += `<button
+    	    id="pay-btn"
+    	    data-buyer-id="\${userId}"
+    	    data-seller-id="\${product.sellerId}"
+    	    data-seller-account-id="\${product.chatSellerAccountId}"
+    	    data-product-name="\${product.productName}"
+    	    data-product-id="\${product.productId}"
+    	>결제하기</button>`;
     }
 
     html += '</div>';
@@ -721,7 +721,7 @@ async function sendMessage(currentRoomId) {
         chatSender: chatSender, // 발신자 ID
         chatSenderAccountId:  chatSenderAccountId, // 발신자 계정 ID,
         chatReceiver: chatReceiver, // 수신자 ID
-        chatReceiverAccountId: chatReceiverAccountId, // 수신자 계정 ID
+        chatReceiverAccountId: chatReceiverAccountId, // 수신자 계정 ID 
         productId: productId,
         buyerId: buyerId,
         senderRole: senderRole, // 발신자 역할
