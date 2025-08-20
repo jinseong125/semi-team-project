@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.puppit.model.dto.AlarmDuplicationDTO;
 import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
@@ -17,8 +18,7 @@ import org.puppit.model.dto.NotificationDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
-
-
+import org.puppit.repository.AlarmDAO;
 import org.puppit.repository.ChatDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatServiceImpl implements ChatService{
 
 	private final ChatDAO chatDAO;
+	private final AlarmDAO alarmDAO;
 	
 	@Override
 	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO  chatMessageSelectDTO) {
@@ -155,14 +156,20 @@ public class ChatServiceImpl implements ChatService{
 		return chatDAO.getUnreadAlarms(userId);
 	}
 	
-	  // 페이징된 채팅방 목록 조회
+    @Override
+    public int isAlarmDuplicate(NotificationDTO notification) {
+        // 예시: DB에 동일한 messageId, roomId, senderAccountId, receiverAccountId, chatMessage가 있으면 중복
+        // 실제 DB 쿼리로 변경 필요 (아래는 Pseudo 코드)
+    	AlarmDuplicationDTO alarmDuplicationDTO = new AlarmDuplicationDTO();
+    	alarmDuplicationDTO.setChatMessage(notification.getChatMessage());
+    	alarmDuplicationDTO.setRoomId(notification.getRoomId());
+    	alarmDuplicationDTO.setUserId(notification.getUserId());
+    	
+    	
+        return alarmDAO.countDuplicateAlarm(alarmDuplicationDTO);
+        // 또는 아래처럼 여러 필드를 조합하여 체크 가능
+        // return alarmMapper.existsAlarm(notification.getMessageId(), notification.getRoomId(), notification.getSenderAccountId(), notification.getReceiverAccountId(), notification.getChatMessage());
+    }
 
-	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size) {
-	//    Map<String, Object> param = new HashMap<>();
-	//    param.put("userId", userId);
-	//    param.put("offset", offset); // int 값
-	//    param.put("size", size);     // int 값
-	//    return chatDAO.getChatRoomsByCreatedDescPaged(param);
-	//}
 
 }

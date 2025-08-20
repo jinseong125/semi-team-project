@@ -159,9 +159,5 @@ public List<NotificationDTO> getUnreadAlarms(Integer userId) {
    
    
    
-   // 페이징 처리된 채팅방 목록 조회
-   // 페이징 처리된 채팅방 목록 조회
-  // public List<ChatListDTO> getChatRoomsByCreatedDescPaged(Map<String, Object> param) {
-  //    return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getChatRoomsByCreatedDescPaged", param);
-  // }
+  
 }

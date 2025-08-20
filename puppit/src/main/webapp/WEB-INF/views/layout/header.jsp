@@ -148,6 +148,8 @@ a{text-decoration:none;color:inherit;}
   <div id="alarmArea"></div>
 <div id="search-results"></div>
 <hr>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
 	// JSP에서 세션 정보를 JS 변수로 전달
 	var contextPath = "${pageContext.request.contextPath}";
@@ -155,22 +157,50 @@ a{text-decoration:none;color:inherit;}
 	const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
 	const input = document.getElementById("search-input");
 
+	let stompClient = null;
+	//채팅방 접속 상태
+	let currentChatRoomId = null;
+	
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
   
   document.addEventListener("DOMContentLoaded", () => {
 	  loadTopKeywords();
-	  //로그인 상태일 때만 알림 영역 보이고 함수 실행
-	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-	      document.getElementById("alarmArea").style.display = "block";
-	      loadAlarms();
-	      //setInterval(loadAlarms, 30000);
-	    }
+	  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
+		    document.getElementById("alarmArea").style.display = "block";
+		    loadAlarms();
+		    setInterval(loadAlarms, 30000);
+		    connectNotificationSocket(); // 실시간 알림 연결 추가
+		  }
   });
   
-  //채팅방 접속 상태
-  let currentChatRoomId = null;
+//웹소켓(Stomp) 연결 및 구독
+  function connectNotificationSocket() {
+    var socket = new SockJS(contextPath + '/ws-stomp'); // 서버의 SockJS endpoint 맞게 수정
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+      stompClient.subscribe('/topic/notification', function (notificationMsg) {
+        let notification = JSON.parse(notificationMsg.body);
+
+        // 본인에게 온 알림만 표시
+        if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
+
+        // 중복 방지: messageId 기준
+        // 기존 알림 리스트에 중복 messageId가 있으면 건너뜀
+        let alarmArea = document.getElementById("alarmArea");
+        let existing = alarmArea.innerHTML || "";
+        if (existing.includes(notification.messageId)) return;
+
+        // 알림 새로 추가
+        showAlarmPopup([notification]);
+      });
+    });
+  }
+
+  
+  
+
 
   // 채팅방 입장 시
   function enterChatRoom(roomId) {
@@ -278,16 +308,19 @@ a{text-decoration:none;color:inherit;}
   function showAlarmPopup(alarms) {
 	  var alarmArea = document.getElementById("alarmArea");
 	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
+	  
+	  // 알림 데이터가 배열이 아닐 경우 배열로 변환
 	  if (!Array.isArray(alarms)) alarms = [alarms];
-	  // 중복 제거: 메시지ID 기준
-	  const deduped = [];
+
+	  // 중복 제거: messageId 기준
 	  const msgIdSet = new Set();
-	  alarms.forEach(function(alarm) {
-	    if (!alarm || !alarm.roomId || !alarm.messageId) return;
-	    if (msgIdSet.has(alarm.messageId)) return;
+	  const deduped = alarms.filter(alarm => {
+	    if (!alarm || !alarm.roomId || !alarm.messageId) return false;
+	    if (msgIdSet.has(alarm.messageId)) return false;
 	    msgIdSet.add(alarm.messageId);
-	    deduped.push(alarm);
+	    return true;
 	  });
+
 	  deduped.forEach(function(alarm) {
 	    html += '<li>'
 	      + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
@@ -300,7 +333,7 @@ a{text-decoration:none;color:inherit;}
 	  html += '</ul>';
 	  alarmArea.innerHTML = html;
 	  alarmArea.style.display = "block";
-  }
+	}
   
   
   async function loadCategory(categoryName) {
