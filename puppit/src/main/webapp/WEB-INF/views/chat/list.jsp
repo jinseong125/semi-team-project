@@ -1,5 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.Map" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="org.puppit.model.dto.ChatListDTO" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
@@ -17,12 +20,39 @@ if (sessionMap != null) {
         userId = Integer.parseInt(userIdObj.toString());
     }
 }
+
+Integer highlightRoomId = null;
+String highlightRoomIdStr = request.getParameter("highlightRoomId");
+if (highlightRoomIdStr != null) {
+    try { highlightRoomId = Integer.parseInt(highlightRoomIdStr); } catch(Exception e) {}
+}
+
+// 기존 chatList를 받아와서, highlightRoomId가 있으면 해당 방을 맨 앞에 오도록 정렬
+List<ChatListDTO>  sortedChatList = new ArrayList<>();
+List<ChatListDTO> chatList = (List<ChatListDTO>) request.getAttribute("chatList");
+if (chatList != null && !chatList.isEmpty()) {
+    if (highlightRoomId != null) {
+        for (ChatListDTO chat : chatList) {
+            if (chat.getRoomId() == highlightRoomId) sortedChatList.add(chat);
+        }
+        for (ChatListDTO chat : chatList) {
+            if (chat.getRoomId() != highlightRoomId) sortedChatList.add(chat);
+        }
+    } else {
+        sortedChatList.addAll(chatList);
+    }
+}
+request.setAttribute("sortedChatList", sortedChatList);
+
+
+
 %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <c:set var="loginUserId" value="<%= accountId %>" />
 <c:set var="userId" value="<%=userId %>"/>
 <c:set var="highlightRoomIdStr" value="${highlightRoomIdStr}"/>
-
+<c:set var="highlightRoomId" value="<%= highlightRoomId %>" />
+<c:set var="sortedChatList" value="${chatList}" />
 <!DOCTYPE html>
 <html>
 <head>
@@ -96,7 +126,7 @@ if (sessionMap != null) {
     <div class="chatlist-container" id="chatlist-container">
         <div id="chatListRenderArea">
             <c:forEach items="${chatList}" var="chat">
-                <div class="chatList" data-room-id="${chat.roomId}">
+                <div class="chatList${highlightRoomId eq chat.roomId ? ' highlight' : ''}" data-room-id="${chat.roomId}">
                     <span class="chat-profile-img chat-profile-icon">
                         <i class="fa-solid fa-user"></i>
                     </span>
@@ -163,15 +193,53 @@ let buyerId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     const chatlist = document.getElementById('chatlist-container');
-    chatlist.addEventListener('click', function(e) {
+    chatlist.addEventListener('click', async function(e) {
         const chatDiv = e.target.closest('.chatList');
         if (chatDiv) {
+        	 // 하이라이트 클래스 제거 (추가)
+            document.querySelectorAll('.chatList.highlight').forEach(function(el) {
+                el.classList.remove('highlight');
+            });
+
             const roomId = chatDiv.dataset.roomId;
             currentRoomId = roomId;
             if (roomId) {
-                loadChatHistory(roomId).then(() => {
-                    connectAndSubscribe(roomId);
-                });
+            	// 1. await만 사용 (then은 필요 없음)
+                await loadChatHistory(roomId);
+                connectAndSubscribe(roomId);
+               
+               // 새로운 메시지(알림) 읽음 처리 fetch 추가
+               // alarmReadMessageId가 null이면 '안읽음'이므로 읽음 처리
+               fetch(contextPath + '/chat/message?roomId=' + roomId)
+               	  .then(response => response.json())
+               	  .then(data => {
+               		if (data.chatMessages && Array.isArray(data.chatMessages)) {
+                        data.chatMessages.forEach(msg => {
+                            if (msg.alarmReadMessageId === null) { // null이면 안읽음
+                                fetch(contextPath + "/chat/readAlarm?messageId=" + encodeURIComponent(msg.messageId) , {
+                                    method: "GET",
+                                })
+                                .then(res => res.json())
+                                .then(result => {
+                                    if (result.success) {
+                                        console.log("알림 읽음 처리 완료:", msg.messageId);
+                                    } else {
+                                        console.warn("알림 읽음 처리 실패:", result.error);
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error("fetch 오류:", err);
+                                });
+                            }
+                        });
+               		}
+               		  
+               		  
+               		  
+               		  
+               		  
+               		  
+               	  });
             }
         }
     });
@@ -188,6 +256,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // websocket 연결 시작
     connectAndSubscribe();
 });
+
+
+
+
+
+
+
+
 
 function loadChatHeader(product, buyerId, sellerId, sellerAccountId, buyerAccountId) {
     const chatHeader = document.getElementById('chat-header');

@@ -23,12 +23,16 @@ public class NotificationDTO {
 	private String productName;
 	private Integer alarmReadMessageId;
 	private Integer alarmId;
+	private Integer messageId;
 	
 	@Override
 	public String toString() {
 		return "NotificationDTO [roomId=" + roomId + ", userId=" + userId + ", senderAccountId=" + senderAccountId
 				+ ", receiverAccountId=" + receiverAccountId + ", chatMessage=" + chatMessage + ", senderRole="
 				+ senderRole + ", chatCreatedAt=" + chatCreatedAt + ", productName=" + productName
-				+ ", alarmReadMessageId=" + alarmReadMessageId + "]";
-	}	
+				+ ", alarmReadMessageId=" + alarmReadMessageId + ", alarmId=" + alarmId + ", messageId=" + messageId
+				+ "]";
+	}
+	
+	
 }

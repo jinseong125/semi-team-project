@@ -196,6 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
 function loadAlarms() {
   if (!userId || isNaN(userId)) {
     document.getElementById("alarmArea").innerHTML = "";
+    document.getElementById("alarmArea").style.display = "none";
     return;
   }
   
@@ -206,15 +207,19 @@ function loadAlarms() {
       return res.json();
     })
     .then(data => {
+      var alarmArea = document.getElementById("alarmArea");	
+      console.log("data: ", data);
       var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
       if (data.length === 0) {
-        html = '<span style="color:#888;">새 알림이 없습니다.</span>';
+    	  // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
+          alarmArea.innerHTML = "";
+          alarmArea.style.display = "none";
       } else {
         html += '<ul>';
         data.forEach(function(alarm) {
         	console.log('알림 데이터 : ', alarm);
           html += '<li>'
-        	   + '<a href="' + contextPath + '/chat/room/' + alarm.roomId + '" style="color:inherit;text-decoration:none;">'
+        	   + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
                + '<b>새 메시지:</b> ' + alarm.chatMessage
                + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
                + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
@@ -222,12 +227,16 @@ function loadAlarms() {
                + '</li>';
         });
         html += '</ul>';
+        alarmArea.innerHTML = html;
+        alarmArea.style.display = "block";
+        showAlarmPopup(); // 알림이 있을 때만 팝업 띄움
       }
-      document.getElementById("alarmArea").innerHTML = html;
-      showAlarmPopup();
+      //document.getElementById("alarmArea").innerHTML = html;
+      //showAlarmPopup();
     })
     .catch(err => {
       document.getElementById("alarmArea").innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
+      document.getElementById("alarmArea").style.display = "block";
       showAlarmPopup();
     });
 }
