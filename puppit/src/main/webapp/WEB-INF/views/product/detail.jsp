@@ -42,17 +42,6 @@ if (sessionMap != null) {
   </div>
 
 
-  <!-- 내 상품일 때만 수정 버튼 보이도록 -->
-  <div class="actions">
-    <c:set var="sessionMap" value="${sessionScope.sessionMap}" />
-    <c:if test="${sessionMap.userId eq product.sellerId}">
-      <a href="${contextPath}/product/edit/${product.productId}" class="btn btn-outline">상품 수정</a>
-      <form action="${contextPath}/product/delete" method="post" style="display:inline;">
-        <input type="hidden" name="productId" value="${product.productId}"/>
-      </form>
-    </c:if>
-
-  </div>
 
 
   <!-- 우측: 상품 정보 -->
@@ -119,10 +108,13 @@ if (sessionMap != null) {
         </form>
       </c:if>
 
+
       <!-- 공통 버튼 -->
       <button type="button" class="btn outline" onclick="history.back()">목록</button>
-      <button type="button" class="btn outline" id="btnWish">찜</button>
+      <c:if test="${sessionMap.userId ne product.sellerId}">
+        <button type="button" class="btn outline" id="btnWish">찜</button>
       <button type="button" class="btn solid" id="btnPay">채팅하기</button>
+      </c:if>
     </div>
   </div>
 </div>
@@ -180,7 +172,9 @@ document.addEventListener("DOMContentLoaded", () => {
     getProductFetch(productId);
   });
 
+
 const contextPath = "${pageContext.request.contextPath}";
+
 
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
 document.getElementById('btnPay')?.addEventListener('click',function() {

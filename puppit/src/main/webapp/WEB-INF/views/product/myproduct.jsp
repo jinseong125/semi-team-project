@@ -54,6 +54,9 @@
     border-radius: 4px;
   }
 </style>
+
+
+
 <div class="nav-menu" style="display:flex; gap:20px; margin-bottom:20px;">
   <!-- 상품 등록 페이지로 이동 -->
   <a href="${contextPath}/product/new"

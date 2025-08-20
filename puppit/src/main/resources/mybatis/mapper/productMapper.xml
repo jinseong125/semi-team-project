@@ -2,9 +2,10 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="product">
 
-    <!-- 상품 등록 -->
+    <!-- ================= 상품 등록 ================= -->
     <insert id="insertProduct" parameterType="org.puppit.model.dto.ProductDTO"
             useGeneratedKeys="true" keyProperty="productId">
         INSERT INTO product
@@ -15,7 +16,7 @@
              #{productName}, #{productPrice}, #{productDescription})
     </insert>
 
-    <!-- 상품 수정-->
+    <!-- ================= 상품 수정 ================= -->
     <update id="updateProduct" parameterType="org.puppit.model.dto.ProductDTO">
         UPDATE product
         SET  category_id = #{categoryId},
@@ -28,28 +29,28 @@
         WHERE product_id = #{productId}
     </update>
 
-    <!-- 상품 삭제-->
+    <!-- ================= 상품 삭제 ================= -->
     <delete id="deleteProduct" parameterType="int">
         DELETE FROM product WHERE product_id = #{productId}
     </delete>
 
-    <!-- 카테고리 -->
+    <!-- ================= 카테고리 ================= -->
     <select id="getCategories" resultType="org.puppit.model.dto.CategoryDTO">
         SELECT category_id   AS categoryId,
                category_name AS categoryName
-          FROM product_category
-         ORDER BY category_id
+        FROM product_category
+        ORDER BY category_id
     </select>
 
-    <!-- 지역 -->
+    <!-- ================= 지역 ================= -->
     <select id="getLocations" resultType="org.puppit.model.dto.LocationDTO">
         SELECT location_id AS locationId,
                region
-          FROM location
-         ORDER BY location_id
+        FROM location
+        ORDER BY location_id
     </select>
 
-    <!-- 컨디션 -->
+    <!-- ================= 상품 상태 ================= -->
     <select id="getConditions" resultType="org.puppit.model.dto.ConditionDTO">
         SELECT condition_id   AS conditionId,
                condition_name AS conditionName
@@ -57,195 +58,221 @@
         ORDER BY condition_id
     </select>
 
-
-
-    <!-- 상품 이미지 삽입 -->
+    <!-- ================= 상품 이미지 ================= -->
+    <!-- 이미지 삽입 -->
     <insert id="insertProductImage" parameterType="org.puppit.model.dto.ProductImageDTO"
-            useGeneratedKeys="true" keyProperty="imageId" >
+            useGeneratedKeys="true" keyProperty="imageId">
         INSERT INTO product_image
-        (product_id, image_url, image_id, image_key, is_thumbnail)
+            (product_id, image_url, image_key, is_thumbnail)
         VALUES
-            (#{productId} , #{imageUrl},#{imageId},#{imageKey},#{isThumbnail})
+            (#{productId}, #{imageUrl}, #{imageKey}, #{thumbnail})
     </insert>
 
-    <!-- 상품 이미지 조회-->
-    <select id="getProductImages"  parameterType="int" resultType="org.puppit.model.dto.ProductImageDTO">
-        SELECT image_id AS imageId,
-               product_id AS productId,
-               image_url AS imageUrl,
-               is_thumbnail AS isThumbnail
+    <!-- 이미지 조회 -->
+    <select id="getProductImages" parameterType="int" resultType="org.puppit.model.dto.ProductImageDTO">
+        SELECT image_id     AS imageId,
+               product_id   AS productId,
+               image_url    AS imageUrl,
+               image_key    AS imageKey,
+               is_thumbnail AS thumbnail
         FROM product_image
         WHERE product_id = #{productId}
         ORDER BY is_thumbnail DESC, image_id ASC
     </select>
 
-    <select id="getProductById"
-            parameterType="int"
-            resultType="org.puppit.model.dto.ProductDTO">
+    <!-- 단건 이미지 조회 -->
+    <select id="getImageById" parameterType="int" resultType="org.puppit.model.dto.ProductImageDTO">
+        SELECT image_id     AS imageId,
+               product_id   AS productId,
+               image_url    AS imageUrl,
+               image_key    AS imageKey,
+               is_thumbnail AS thumbnail
+        FROM product_image
+        WHERE image_id = #{imageId}
+    </select>
 
+    <!-- 이미지 삭제 -->
+    <delete id="deleteImage" parameterType="int">
+        DELETE FROM product_image WHERE image_id = #{imageId}
+    </delete>
+
+    <!-- ================= 썸네일 관리 ================= -->
+
+    <!-- 모든 썸네일 해제 -->
+    <update id="unsetAllThumbnails" parameterType="int">
+        UPDATE product_image
+        SET is_thumbnail = 0
+        WHERE product_id = #{productId}
+    </update>
+
+    <!-- 특정 이미지 썸네일 설정 -->
+    <update id="setThumbnail" parameterType="int">
+        UPDATE product_image
+        SET is_thumbnail = 1
+        WHERE image_id = #{imageId}
+    </update>
+
+    <!-- product 테이블에도 대표 이미지 반영 -->
+    <update id="updateThumbnail" parameterType="map">
+        UPDATE product
+        SET thumbnail_id = #{imageId}
+        WHERE product_id = #{productId}
+    </update>
+
+    <!-- 현재 썸네일 조회 -->
+    <select id="getThumbnailImage" parameterType="int" resultType="org.puppit.model.dto.ProductImageDTO">
+        SELECT image_id     AS imageId,
+               product_id   AS productId,
+               image_url    AS imageUrl,
+               image_key    AS imageKey,
+               is_thumbnail AS thumbnail
+        FROM product_image
+        WHERE product_id = #{productId}
+          AND is_thumbnail = 1
+            LIMIT 1
+    </select>
+
+    <!-- ================= 상품 조회 ================= -->
+    <select id="getProductById" parameterType="int" resultType="org.puppit.model.dto.ProductDTO">
         SELECT p.product_id          AS productId,
-        p.seller_id           AS sellerId,
-        p.product_name        AS productName,
-        p.product_price       AS productPrice,
-        p.product_description AS productDescription,
-        p.category_id         AS categoryId,
-        p.location_id         AS locationId,
-        p.condition_id        AS conditionId,
-        p.status_id           AS statusId,
-        s.status_name         AS statusName
+               p.seller_id           AS sellerId,
+               p.product_name        AS productName,
+               p.product_price       AS productPrice,
+               p.product_description AS productDescription,
+               p.category_id         AS categoryId,
+               p.location_id         AS locationId,
+               p.condition_id        AS conditionId,
+               p.status_id           AS statusId,
+               s.status_name         AS statusName
         FROM product p
-        JOIN product_status s ON p.status_id = s.status_id
+                 JOIN product_status s ON p.status_id = s.status_id
         WHERE p.product_id = #{productId}
     </select>
 
+    <!-- 상품 전체목록 조회 -->
+    <select id="getProductList" resultType="org.puppit.model.dto.ProductDTO">
+        SELECT p.product_id AS productId,
+               p.product_name AS productName,
+               p.product_price AS productPrice,
+               c.category_name AS categoryName,
+               s.status_name AS statusName
+        FROM product p
+                 JOIN product_category c ON p.category_id = c.category_id
+                 JOIN product_condition con ON p.condition_id = con.condition_id
+                 JOIN product_status s ON p.status_id = s.status_id
+        ORDER BY p.product_created_at DESC
+    </select>
 
-            <!-- 상품 전체목록 조회 -->
-	<select id="getProductList"
-	resultType="org.puppit.model.dto.ProductDTO">
-	SELECT p.product_id AS productId, p.product_name AS productName, p.product_price AS productPrice, c.category_name AS categoryName, s.status_name AS statusName
-	  FROM product p
-	  JOIN product_category c ON p.category_id = c.category_id
-      JOIN product_condition con ON p.condition_id = con.condition_id
-	  JOIN product_status s ON p.status_id = s.status_id
-	 ORDER BY p.product_created_at DESC
-          
-	</select>
-	
-	<!-- 상품 상세 조회 -->
-<select id="getProductDetail"
-    resultType="org.puppit.model.dto.ProductDTO"
-    parameterType="java.lang.Integer">
-    SELECT
-        p.product_id        AS productId,
+    <!-- 상품 상세 조회 -->
+    <select id="getProductDetail" parameterType="int" resultType="org.puppit.model.dto.ProductDTO">
+        SELECT p.product_id          AS productId,
+               p.product_name        AS productName,
+               p.product_price       AS productPrice,
+               p.seller_id           AS sellerId,
+               c.category_name       AS categoryName,
+               s.status_name         AS statusName,
+               p.product_description AS productDescription
+        FROM product p
+                 JOIN product_category c    ON p.category_id  = c.category_id
+                 JOIN product_condition con ON p.condition_id = con.condition_id
+                 JOIN product_status s      ON p.status_id    = s.status_id
+        WHERE p.product_id = #{productId}
+    </select>
+
+    <!-- 스크롤 페이징용: 상품 개수 -->
+    <select id="getScrollProduct" resultType="int">
+        SELECT COUNT(*) FROM product
+    </select>
+
+    <!-- ================= 마이페이지 내 상품 관리 ================= -->
+    <resultMap id="MyProducts" type="org.puppit.model.dto.ProductDTO">
+        <id     property="productId"        column="product_id"/>
+        <result property="productName"      column="product_name"/>
+        <result property="productPrice"     column="product_price"/>
+        <result property="productCreatedAt" column="product_created_at"/>
+        <result property="productUpdatedAt" column="product_updated_at"/>
+        <result property="categoryId"       column="category_id"/>
+        <result property="statusId"         column="status_id"/>
+
+        <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
+            <id     property="categoryId"   column="category_id"/>
+            <result property="categoryName" column="category_name"/>
+        </association>
+
+        <association property="status" javaType="org.puppit.model.dto.ProductStatusDTO">
+            <id     property="statusId"   column="status_id"/>
+            <result property="statusName" column="status_name"/>
+        </association>
+
+        <association property="thumbnail" javaType="org.puppit.model.dto.ProductImageDTO">
+            <id     property="imageId"    column="thumb_image_id"/>
+            <result property="productId"  column="product_id"/>
+            <result property="imageUrl"   column="thumb_image_url"/>
+            <result property="thumbnail"  column="thumb_is_thumbnail"/>
+        </association>
+    </resultMap>
+
+    <select id="selectMyProducts" parameterType="int" resultMap="MyProducts">
+        SELECT p.product_id,
+               p.product_name,
+               p.product_price,
+               p.product_created_at,
+               p.product_updated_at,
+               p.category_id,
+               p.status_id,
+               c.category_name,
+               s.status_name,
+               t.image_id     AS thumb_image_id,
+               t.image_url    AS thumb_image_url,
+               t.is_thumbnail AS thumb_is_thumbnail
+        FROM product p
+                 JOIN product_category c ON p.category_id = c.category_id
+                 JOIN product_status   s ON p.status_id   = s.status_id
+                 LEFT JOIN product_image t
+                           ON t.product_id = p.product_id
+                               AND t.is_thumbnail = 1
+        WHERE p.seller_id = #{value}
+        ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+    </select>
+
+    <!-- 커서 기반 스크롤 -->
+    <select id="findProductsAfter" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
+        SELECT p.product_id        AS productId,
         p.product_name      AS productName,
         p.product_price     AS productPrice,
-        p.seller_id         AS sellerId,           -- 추가된 부분
-        c.category_name     AS categoryName,
-        s.status_name       AS statusName,
-        p.product_description AS productDescription
-    FROM product p
-        JOIN product_category c    ON p.category_id  = c.category_id
-        JOIN product_condition con ON p.condition_id = con.condition_id
-        JOIN product_status s      ON p.status_id    = s.status_id
-    WHERE p.product_id = #{productId}
-</select>
-	
-	<select id="getScrollProduct" resultType="org.puppit.model.dto.ProductDTO">
-	SELECT COUNT(*)
-	  FROM product p
-	</select>
+        p.product_created_at AS productCreatedAt
+        FROM product p
+        WHERE 1=1
+        <if test="cursor != null">
+            AND p.product_id &lt; #{cursor}
+        </if>
+        ORDER BY p.product_id DESC
+        LIMIT #{size}
+    </select>
 
+    <!-- 페이징 기반 조회 -->
+    <select id="getProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
+        SELECT product_id        AS productId,
+               product_name      AS productName,
+               product_description AS productDescription,
+               product_price     AS productPrice
+        FROM product
+        ORDER BY product_created_at DESC
+            LIMIT #{offset}, #{size}
+    </select>
 
+    <!-- 상품 전체 개수 -->
+    <select id="getProductCount" resultType="int">
+        SELECT COUNT(*) FROM product
+    </select>
 
-    <!--상품 관리-->
-        <resultMap id="MyProducts" type="org.puppit.model.dto.ProductDTO">
-            <!-- Product 본체 -->
-            <id     property="productId"        column="product_id"/>
-            <result property="productName"      column="product_name"/>
-            <result property="productPrice"     column="product_price"/>
-            <result property="productCreatedAt" column="product_created_at"/>
-            <result property="productUpdatedAt" column="product_updated_at"/>
-            <result property="categoryId"       column="category_id"/>
-            <result property="statusId"         column="status_id"/>
+    <!-- ================= 자동완성 (검색) ================= -->
+    <select id="getAutoComplete" parameterType="string" resultType="string">
+        SELECT product_name
+        FROM product
+        WHERE product_name LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY product_name
+            LIMIT 50
+    </select>
 
-            <!-- 하위: Category -->
-            <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
-                <id     property="categoryId"   column="category_id"/>
-                <result property="categoryName" column="category_name"/>
-            </association>
-
-            <!-- 하위: Status -->
-            <association property="status" javaType="org.puppit.model.dto.ProductStatusDTO">
-                <id     property="statusId"   column="status_id"/>
-                <result property="statusName" column="status_name"/>
-            </association>
-
-            <!-- 하위: Thumbnail (1장) -->
-            <association property="thumbnail" javaType="org.puppit.model.dto.ProductImageDTO">
-                <id     property="imageId"    column="thumb_image_id"/>
-                <result property="productId"  column="product_id"/>
-                <result property="imageUrl"   column="thumb_image_url"/>
-                <!-- boolean isThumbnail -> 자바빈 프로퍼티명 'thumbnail' -->
-                <result property="isThumbnail"  column="thumb_is_thumbnail"/>
-            </association>
-        </resultMap>
-
-        <select id="selectMyProducts" parameterType="int" resultMap="MyProducts">
-            SELECT
-            p.product_id,
-            p.product_name,
-            p.product_price,
-            p.product_created_at,
-            p.product_updated_at,
-            p.category_id,
-            p.status_id,
-            c.category_name,
-            s.status_name,
-            -- 썸네일 1장만 JOIN
-            t.image_id     AS thumb_image_id,
-            t.image_url    AS thumb_image_url,
-            t.is_thumbnail AS thumb_is_thumbnail
-
-            FROM product p
-            JOIN product_category c ON p.category_id = c.category_id
-            JOIN product_status   s ON p.status_id   = s.status_id
-            LEFT JOIN product_image t
-            ON t.product_id = p.product_id
-            AND t.is_thumbnail = 1
-
-            WHERE p.seller_id = #{value}   <!-- DAO가 Integer 하나를 그대로 넘기면 #{value} -->
-
-            ORDER BY p.product_updated_at DESC, p.product_created_at DESC
-        </select><!-- 주석 -->
-        <select id="findProductsAfter" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
-              SELECT    p.product_id      	 AS productId  , 
-            			p.product_name 		 AS productName,
-            			p.product_price      AS productPrice,
-                        p.product_created_at AS productCreatedAt
-                FROM product p
-               WHERE 1=1
-               <if test="cursor != null">
-                 AND p.product_id &lt; #{cursor}
-               </if>
-               ORDER BY p.product_id DESC
-               LIMIT #{size}
-        </select>
-        
-<!--         
-       <select id="selectProducts" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">
-  SELECT 
-    product_id AS productId,
-    product_name AS productName,
-    product_description AS productDescription,
-    product_price AS productPrice
-  FROM product
-  ORDER BY product_created_at DESC
-  LIMIT #{size} OFFSET #{offset}
-</select>
-      -->   
-        
-          <select id="getProducts" parameterType="Map" resultType="org.puppit.model.dto.ProductDTO">
-    SELECT 
-    product_id AS productId,
-    product_name AS productName,
-    product_description AS productDescription,
-    product_price AS productPrice
-  FROM product
-  ORDER BY product_created_at DESC
-   LIMIT #{offset}, #{size}
-  </select>
-  
-  <select id="getProductCount" resultType="java.lang.Integer">
-    SELECT COUNT(*)
-      FROM product
-  </select>
-  
-  <select id="getAutoComplete" resultType="string" parameterType="string">
-  	SELECT product_name
-  	  FROM product
-  	 WHERE product_name LIKE CONCAT('%', #{keyword}, '%')
-  	 ORDER BY product_name
-  	 LIMIT 50
-  </select>
-        
 </mapper>
