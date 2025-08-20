@@ -90,8 +90,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request) {
-        return null;
+
+      return null;
     }
+
 
     @Override
     public List<ProductSearchDTO> searchByNew(String searchName) {
@@ -165,6 +167,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductDTO> getProductsByCategory(String categoryName) {
+      return productDAO.getProductsByCategory(categoryName);
+    }
+
+
     public ProductImageDTO getThumbnailImage(Integer productId) {
         return productDAO.getThumbnailImage(productId);
     }
@@ -172,6 +179,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductImageDTO> getProductImages(Integer productId) {
         return productDAO.getProductImages(productId);
+
     }
 
     @Transactional

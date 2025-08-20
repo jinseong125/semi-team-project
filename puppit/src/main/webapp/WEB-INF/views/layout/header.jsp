@@ -206,19 +206,19 @@ function loadAlarms() {
       return res.json();
     })
     .then(data => {
-      var alarmArea = document.getElementById("alarmArea");	
+      var alarmArea = document.getElementById("alarmArea");   
       console.log("data: ", data);
       var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
       if (data.length === 0) {
-    	  // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
+         // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
           alarmArea.innerHTML = "";
           alarmArea.style.display = "none";
       } else {
         html += '<ul>';
         data.forEach(function(alarm) {
-        	console.log('알림 데이터 : ', alarm);
+           console.log('알림 데이터 : ', alarm);
           html += '<li>'
-        	   + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
+              + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
                + '<b>새 메시지:</b> ' + alarm.chatMessage
                + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
                + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
