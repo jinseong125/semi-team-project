@@ -12,6 +12,7 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
+import org.puppit.model.dto.NotificationDTO;
 
 
 public interface ChatService {
@@ -30,8 +31,9 @@ public interface ChatService {
 	public ChatUserDTO getSellerByProductId(Integer productId);
 	public boolean isFirstChat(Integer chatRoomId);
 	public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO);
-	public Integer saveAlarmData(Map<String, Object> messageAlarm);
+	public Integer saveAlarmData(NotificationDTO messageAlarm);
 	public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId);
 	public String getProductNameById(int parseInt);
+	public List<NotificationDTO> getUnreadAlarms(Integer userId);
 }
 

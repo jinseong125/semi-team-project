@@ -16,6 +16,7 @@
     <typeAlias type="org.puppit.model.dto.ChatMessageSearchDTO" alias="ChatMessageSearchDTO"/>
     <typeAlias type="org.puppit.model.dto.ChatRoomPeopleDTO" alias="ChatRoomPeopleDTO"/>
     <typeAlias type="org.puppit.model.dto.ChatUserDTO" alias="ChatUserDTO"/>
+    <typeAlias type="org.puppit.model.dto.NotificationDTO" alias="NotificationDTO"/>
     <typeAlias type="org.puppit.model.dto.UserDTO" alias="UserDTO"/>
     <typeAlias type="org.puppit.model.dto.UserStatusDTO" alias="UserStatusDTO"/>
     <typeAlias type="org.puppit.model.dto.PointDTO" alias="PointDTO"/>
