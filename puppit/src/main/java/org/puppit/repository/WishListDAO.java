@@ -1,6 +1,8 @@
 package org.puppit.repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.puppit.model.dto.ProductDTO;
@@ -20,6 +22,17 @@ public class WishListDAO {
   }
   public ProductDTO getProductById(Integer productId) {
     return sst.selectOne("mybatis.mapper.wishListMapper.getProductById", productId);
+  }
+  public Integer deleteWishListByUserAndProduct(Integer userId, Integer productId) {
+    Map<String, Object> map = new HashMap<>();
+    
+    map.put("userId", userId);
+    map.put("productId", productId);
+    
+    return sst.delete("mybatis.mapper.wishListMapper.deleteWishListByUserAndProduct", map);
+  }
+  public Integer deleteAllWishListByUser(Integer userId) {
+    return sst.delete("mybatis.mapper.wishListMapper.deleteAllWishListByUser", userId);
   }
 
 }

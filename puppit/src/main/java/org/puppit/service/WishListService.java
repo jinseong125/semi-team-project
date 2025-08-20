@@ -21,5 +21,11 @@ public class WishListService {
   public ProductDTO getProductById(Integer productId) {
     return wishListDAO.getProductById(productId);
   }
+  public boolean deleteWishListByUserAndProduct(Integer userId, Integer productId) {
+    return wishListDAO.deleteWishListByUserAndProduct(userId, productId) == 1;
+  }
+  public boolean deleteAllWishListByUser(Integer userId) {
+    return wishListDAO.deleteAllWishListByUser(userId) == 1;
+  }
 
 }

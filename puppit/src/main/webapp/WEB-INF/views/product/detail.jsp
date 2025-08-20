@@ -2,6 +2,7 @@
 <%@ page import="java.util.Map" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
 <%
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
 String accountId = "";
@@ -173,7 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
+
 //const contextPath = "${pageContext.request.contextPath}";
+
 
 
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
@@ -187,7 +190,7 @@ document.getElementById('btnPay')?.addEventListener('click',function() {
         return;
     }
     else {
-    	window.location.href = contextPath + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;	
+    	window.location.href = "${contextPath}/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;	
     }
     
 });
