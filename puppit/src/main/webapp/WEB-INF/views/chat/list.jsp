@@ -91,7 +91,7 @@ request.setAttribute("sortedChatList", sortedChatList);
         .chat-history .chat-message .chat-time { font-size: 12px; color: #aaa; margin-top: 2px; align-self: flex-end; }
         .chatList.highlight { background: #fff8e1; border: 2px solid #ffb300; }	
         .center-message { text-align:center; margin:20px 0; color:#888; }
-        .notification {
+        /*.notification {
             position: fixed;
             right: -100px;
             top: 20px;
@@ -102,7 +102,7 @@ request.setAttribute("sortedChatList", sortedChatList);
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             transition: right 1s;
-        }
+        }*/
         .chat-input-group textarea {
 		    flex: 1; /* 입력창이 버튼보다 넓게 설정 */
 		    height: 180px; /* 20줄을 입력할 수 있는 높이 */

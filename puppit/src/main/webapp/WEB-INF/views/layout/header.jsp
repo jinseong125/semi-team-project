@@ -165,21 +165,59 @@ a{text-decoration:none;color:inherit;}
 	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
 	      document.getElementById("alarmArea").style.display = "block";
 	      loadAlarms();
-	      setInterval(loadAlarms, 30000);
+	      //setInterval(loadAlarms, 30000);
 	    }
   });
- 
-  document.addEventListener("DOMContentLoaded", function() {
-    
-  });
+  
+  //채팅방 접속 상태
+  let currentChatRoomId = null;
+
+  // 채팅방 입장 시
+  function enterChatRoom(roomId) {
+    currentChatRoomId = roomId;
+  }
+
+  // 채팅방 퇴장 시
+  function leaveChatRoom() {
+    currentChatRoomId = null;
+  }
+
+  // 알림 메시지 수신 시
+  function handleIncomingAlarm(alarm) {
+	// 내가 현재 그 채팅방에 접속중이면 알림을 띄우지 않는다
+	  if (String(currentChatRoomId) === String(alarm.roomId)) {
+	    return;
+	  }
+	  // 알림 영역에 메시지 추가
+	  showAlarmInPopup(alarm);
+  }
+  
+  
 
   console.log("userId JS:", userId); // 값이 없다면 fetch 요청 안 감
 
-  function showAlarmPopup() {
-    var alarmArea = document.getElementById("alarmArea");
-    alarmArea.style.display = "block";
-    var alarmBell = document.getElementById("alarmBell");
-    if (alarmBell) alarmBell.style.display = "none";
+  function showAlarmPopup(alarm) {
+	  var alarmArea = document.getElementById("alarmArea");
+	  var html = alarmArea.innerHTML || '';
+	  
+	  
+	  if (!alarm || !alarm.roomId) {
+	    console.error("알림 객체가 없습니다 또는 roomId가 없습니다.", alarm);
+	    return;
+	  }
+	  
+	  
+	  
+	
+	  html += '<li>'
+	        + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
+	        + '<b>새 메시지:</b> ' + alarm.chatMessage
+	        + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
+	        + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
+	        + '<span style="font-size:13px;">From: ' + alarm.senderAccountId + ' | To: ' + alarm.receiverAccountId + '</span>'
+	        + '</li>';
+	  alarmArea.innerHTML = html;
+	  alarmArea.style.display = "block";
   }
 
   function closeAlarmPopup() {
@@ -223,24 +261,10 @@ a{text-decoration:none;color:inherit;}
         var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
         if (data.length === 0) {
            // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
-            alarmArea.innerHTML = "";
-            alarmArea.style.display = "none";
+            document.getElementById("alarmArea").innerHTML = "";
+            document.getElementById("alarmArea").style.display = "none";
         } else {
-          html += '<ul>';
-          data.forEach(function(alarm) {
-             console.log('알림 데이터 : ', alarm);
-            html += '<li>'
-                + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
-                 + '<b>새 메시지:</b> ' + alarm.chatMessage
-                 + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
-                 + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
-                 + '<span style="font-size:13px;">From: ' + alarm.senderAccountId + ' | To: ' + alarm.receiverAccountId + '</span>'
-                 + '</li>';
-          });
-          html += '</ul>';
-          alarmArea.innerHTML = html;
-          alarmArea.style.display = "block";
-          showAlarmPopup(); // 알림이 있을 때만 팝업 띄움
+        	showAlarmPopup(data); // 알림 객체 배열을 넘겨줌!
         }
       })
       .catch(err => {
@@ -251,7 +275,32 @@ a{text-decoration:none;color:inherit;}
       });
   }
 
-  setInterval(loadAlarms, 30000); 
+  function showAlarmPopup(alarms) {
+	  var alarmArea = document.getElementById("alarmArea");
+	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
+	  if (!Array.isArray(alarms)) alarms = [alarms];
+	  // 중복 제거: 메시지ID 기준
+	  const deduped = [];
+	  const msgIdSet = new Set();
+	  alarms.forEach(function(alarm) {
+	    if (!alarm || !alarm.roomId || !alarm.messageId) return;
+	    if (msgIdSet.has(alarm.messageId)) return;
+	    msgIdSet.add(alarm.messageId);
+	    deduped.push(alarm);
+	  });
+	  deduped.forEach(function(alarm) {
+	    html += '<li>'
+	      + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
+	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
+	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
+	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
+	      + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
+	      + '</li>';
+	  });
+	  html += '</ul>';
+	  alarmArea.innerHTML = html;
+	  alarmArea.style.display = "block";
+  }
   
   
   async function loadCategory(categoryName) {
