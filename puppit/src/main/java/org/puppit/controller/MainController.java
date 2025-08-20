@@ -45,7 +45,7 @@ public class MainController {
   @GetMapping(value = "/product/list", produces = "application/json" )
   public ResponseEntity<Map<String, Object>> getProducts(
 		  @RequestParam(value="offset", defaultValue="0") int offset,
-		    @RequestParam(value="size", defaultValue="20") int size, HttpServletRequest request) {
+		    @RequestParam(value="size", defaultValue="60") int size, HttpServletRequest request) {
 	  PageDTO dto = new PageDTO();
 	    dto.setOffset(offset);
 	    dto.setSize(size);

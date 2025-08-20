@@ -55,7 +55,7 @@
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var mainGrid = document.getElementById('productGrid');
-  var size = 20;
+  var size = 60;
   var loading = false;
   var endOfData = false;
 
@@ -142,7 +142,6 @@
   // ------- 무한 스크롤 기능 -------
   function appendProducts(list) {
     if (!Array.isArray(list) || !list.length) {
-      console.log("appendProducts: 추가할 상품 없음");
       return;
     }
     var cards = list.map(function (p) {
@@ -161,41 +160,63 @@
     mainGrid.insertAdjacentHTML('beforeend', cards);
   }
 
-  window.addEventListener('scroll', async function () {
-	  if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
-	  if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
 
-	  if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 200) {
-	    loading = true;
+  // 실제로 상품을 fetch하는 함수
+  async function fetchProducts() {
+    if (loading || endOfData) return;
+    loading = true;
+    
+    const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
+    try {
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error("HTTP " + res.status);
 
-	    // 스크롤 시점에서 최신 offset 계산
-	    offset = mainGrid ? mainGrid.children.length : offset;
-	    console.log("offset:", offset);
+      const data = await res.json();
+      const products = Array.isArray(data.products) ? data.products : [];
+      if (products.length > 0) {
+        appendProducts(products);
+        offset = mainGrid.children.length;
+        
+        // 🔑 핵심: 스크롤 강제로 살짝 위로
+        window.scrollTo({
+          top: document.documentElement.scrollTop - 1,
+          behavior: "instant"
+        });
+        
+        
+        if (products.length < size) endOfData = true;
+      } else {
+        endOfData = true;
+      }
+    } catch (e) {
+      endOfData = true;
+      console.error(e);
+    }
+    loading = false;
+  }
+  
+  // 화면이 꽉 찰 때까지 fetch를 반복
+  async function fillScreenIfNeeded() {
+    // 이미 로딩 중이거나 데이터가 끝났으면 중단
+    if (loading || endOfData) return;
+    // 화면에 스크롤이 없으면 추가 fetch 반복
+    while (document.documentElement.scrollHeight <= window.innerHeight && !endOfData) {
+      await fetchProducts();
+    }
+  }
+  
+  let scrollTimer;
+  //스크롤이 땅에 닿을 때만 요청 (검색 결과 활성화시 동작 X)
+  window.addEventListener('scroll', function () {
+	  if (scrollTimer) clearTimeout(scrollTimer);
+	  scrollTimer = setTimeout(() => {
+	    if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
+	    if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
 
-	    const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
-	    console.log("Fetching:", url);
-
-	    try {
-	      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-	      if (!res.ok) throw new Error("HTTP " + res.status);
-	      
-	      const data = await res.json();
-	      const products = Array.isArray(data.products) ? data.products : [];
-	      console.log("products.length:", products.length);
-
-	      if (products.length > 0) {
-	        appendProducts(products);
-	        // fetch 성공 후 offset 업데이트
-	        offset = mainGrid.children.length;
-	        if (products.length < size) endOfData = true;
-	      } else {
-	        endOfData = true;
-	      }
-	    } catch (e) {
-	      console.error(e);
+	    if (document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 100) {
+	      fetchProducts();
 	    }
-	    loading = false;
-	  }
+	  }, 200); // 0.2초 디바운스
 	});
 })();
 </script>
