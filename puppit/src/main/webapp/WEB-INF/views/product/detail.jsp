@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-const contextPath = "${pageContext.request.contextPath}";
+//const contextPath = "${pageContext.request.contextPath}";
 
 
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));

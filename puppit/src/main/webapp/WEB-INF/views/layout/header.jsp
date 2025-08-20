@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<c:set var="contextPath" value="${pageContext.request.contextPath}" scope="request" />
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -149,8 +149,11 @@ a{text-decoration:none;color:inherit;}
 <div id="search-results"></div>
 <hr>
 <script>
-  const contextPath = "${pageContext.request.contextPath}";
-  const input = document.getElementById("search-input");
+	// JSP에서 세션 정보를 JS 변수로 전달
+	var contextPath = "${pageContext.request.contextPath}";
+	const userId = "${sessionScope.sessionMap.userId}";
+	const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
+	const input = document.getElementById("search-input");
 
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
@@ -209,7 +212,7 @@ a{text-decoration:none;color:inherit;}
     }
     
     console.log("userId: ", userId);
-    fetch("${contextPath}/api/alarm?userId=" + userId)
+    fetch(contextPath + "/api/alarm?userId=" + userId)
       .then(res => {
         if (!res.ok) throw new Error("서버 오류");
         return res.json();
@@ -239,10 +242,9 @@ a{text-decoration:none;color:inherit;}
           alarmArea.style.display = "block";
           showAlarmPopup(); // 알림이 있을 때만 팝업 띄움
         }
-        //document.getElementById("alarmArea").innerHTML = html;
-        //showAlarmPopup();
       })
       .catch(err => {
+    	  console.error(err);
         document.getElementById("alarmArea").innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
         document.getElementById("alarmArea").style.display = "block";
         showAlarmPopup();
@@ -280,7 +282,7 @@ a{text-decoration:none;color:inherit;}
   // ===================== 인기검색어 =====================
   async function loadTopKeywords() {
     try {
-      const res = await fetch(contextPath + "/search/top");
+      const res = await fetch("${contextPath}/search/top");
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
 
