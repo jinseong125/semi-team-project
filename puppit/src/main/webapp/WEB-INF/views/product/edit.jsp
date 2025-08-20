@@ -36,29 +36,32 @@
 </style>
 
 <div class="wrap">
+  <!-- 상품 수정 form -->
   <form id="editForm" method="post" action="${contextPath}/product/update" enctype="multipart/form-data">
-  <h2>상품 수정</h2>
+    <h2>상품 수정</h2>
     <input type="hidden" name="productId" value="${product.productId}"/>
 
-    <!-- 이미지 업로더 (기존 이미지 표시 포함) -->
+    <!-- 이미지 업로더 -->
     <div class="field">
       <div class="label">상품이미지 <span class="help">(최대 3장, 첫 장이 썸네일)</span></div>
       <div id="tiles" class="tiles">
-        <!-- 기존 이미지 미리 출력 -->
+        <!-- 기존 이미지 출력 -->
         <c:forEach var="img" items="${images}" varStatus="status">
-          <div class="tile">
+          <div class="tile" id="tile-${img.imageId}">
             <div class="thumb">
               <img src="${img.imageUrl}" alt="기존 이미지"/>
             </div>
             <c:if test="${status.first}">
               <div class="badge">썸네일</div>
             </c:if>
+            <button type="button" class="remove" onclick="deleteImage(${img.imageId})">&times;</button>
           </div>
         </c:forEach>
       </div>
-      <div class="help">이미지를 교체하려면 새로 업로드하세요.</div>
+      <div class="help">이미지를 교체하거나 삭제 후 새로 업로드할 수 있습니다.</div>
     </div>
 
+    <!-- 상품명 -->
     <div class="field">
       <label class="label">상품명</label>
       <input class="input" type="text" name="productName" value="${product.productName}" required />
@@ -83,6 +86,7 @@
       </div>
     </div>
 
+    <!-- 상품 상태 -->
     <div class="field">
       <label class="label">상품 상태</label>
       <div style="display:flex;flex-wrap:wrap;gap:14px;">
@@ -95,11 +99,13 @@
       </div>
     </div>
 
+    <!-- 설명 -->
     <div class="field">
       <label class="label">설명</label>
-      <textarea name="productDescription" required>${product.productDescription}</textarea><br/>
+      <textarea name="productDescription" required>${product.productDescription}</textarea>
     </div>
 
+    <!-- 가격 -->
     <div class="row">
       <div class="col field">
         <label class="label">가격</label>
@@ -107,105 +113,116 @@
       </div>
     </div>
 
+    <!-- 수정 버튼 -->
     <div class="actions">
       <a class="btn" href="${contextPath}/product/detail/${product.productId}">취소</a>
-      <button class="btn primary" type="submit" form="editForm">수정 완료</button>
-
-      <!-- 삭제 버튼 -->
-      <form id="deleteForm" action="${contextPath}/product/delete" method="post">
-        <input type="hidden" name="productId" value="${product.productId}"/>
-        <button type="submit" class="btn"
-                onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
-      </form>
+      <button class="btn primary" type="submit">수정 완료</button>
     </div>
+  </form>
 
-<script>
-  (function(){
-    const MAX_IMAGES = 3;
-    const tiles = document.getElementById('tiles');
-
-    // 빈(add) 타일 생성
-    function createAddTile(){
-      const count = tiles.querySelectorAll('.tile').length;
-      if (count >= MAX_IMAGES) return;
-
-      // 이미 빈 타일이 있으면 또 만들지 않음
-      if ([...tiles.children].some(t => !t.querySelector('img'))) return;
-
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.name = 'imageFiles';
-      input.accept = 'image/*';
-
-      const ph = document.createElement('div');
-      ph.className = 'placeholder';
-      ph.innerHTML = `
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-          <path d="M12 5v14M5 12h14" stroke="#8a8f98" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div>이미지 추가</div>
-      `;
-
-      input.addEventListener('change', () => handleFileSelect(tile, input));
-      tile.appendChild(input);
-      tile.appendChild(ph);
-      tiles.appendChild(tile);
-    }
-
-    // 파일 선택 처리 + 미리보기 + 삭제 버튼
-    function handleFileSelect(tile, input){
-      if (!input.files || !input.files[0]) return;
-      const file = input.files[0];
-
-      tile.querySelector('.placeholder')?.remove();
-
-      const url = URL.createObjectURL(file);
-      const preview = document.createElement('div');
-      preview.className = 'thumb';
-      const img = document.createElement('img');
-      img.src = url;
-      preview.appendChild(img);
-
-      const remove = document.createElement('button');
-      remove.type = 'button';
-      remove.className = 'remove';
-      remove.innerHTML = '&times;';
-      remove.addEventListener('click', () => {
-        URL.revokeObjectURL(url);
-        tile.remove();
-        updateThumbnailBadges();
-        createAddTile();
-      });
-
-      tile.appendChild(preview);
-      tile.appendChild(remove);
-
-      updateThumbnailBadges();
-      createAddTile();
-    }
-
-    // 썸네일 배지 재지정
-    function updateThumbnailBadges(){
-      tiles.querySelectorAll('.badge').forEach(b => b.remove());
-      const firstPreviewTile = [...tiles.children].find(t => t.querySelector('img'));
-      if (firstPreviewTile) {
-        const badge = document.createElement('div');
-        badge.className = 'badge';
-        badge.textContent = '썸네일';
-        firstPreviewTile.appendChild(badge);
-      }
-    }
-
-    // 초기: 기존 이미지 수가 MAX보다 적으면 추가타일 생성
-    if (tiles.querySelectorAll('.tile').length < MAX_IMAGES) {
-      createAddTile();
-    }
-  })();
-</script>
+  <!-- 상품 삭제 form (별도 분리) -->
+  <form id="deleteForm" action="${contextPath}/product/delete" method="post" style="margin-top:10px;">
+    <input type="hidden" name="productId" value="${product.productId}"/>
+    <button type="submit" class="btn"
+            onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
   </form>
 </div>
-</body>
-</html>
+
+<script>
+  const MAX_IMAGES = 3;
+  const tiles = document.getElementById('tiles');
+  const form = document.getElementById('editForm');
+
+  // 이미지 삭제
+  function deleteImage(imageId) {
+    const tile = document.getElementById("tile-" + imageId);
+    if (tile) tile.remove();
+
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.name = "deleteImageIds";
+    hidden.value = imageId;
+    form.appendChild(hidden);
+
+    updateThumbnailBadges();
+    createAddTile();
+  }
+
+  // 새 이미지 추가 버튼
+  function createAddTile() {
+    const count = tiles.querySelectorAll('.tile').length;
+    if (count >= MAX_IMAGES) return;
+    if ([...tiles.children].some(t => !t.querySelector('img'))) return;
+
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.name = 'imageFiles'; // 여러개 업로드 → name 동일
+    input.accept = 'image/*';
+
+    const ph = document.createElement('div');
+    ph.className = 'placeholder';
+    ph.innerHTML = `
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+        <path d="M12 5v14M5 12h14" stroke="#8a8f98" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <div>이미지 추가</div>
+    `;
+
+    input.addEventListener('change', () => handleFileSelect(tile, input));
+    tile.appendChild(input);
+    tile.appendChild(ph);
+    tiles.appendChild(tile);
+  }
+
+  // 파일 선택 미리보기
+  function handleFileSelect(tile, input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+
+    tile.querySelector('.placeholder')?.remove();
+
+    const url = URL.createObjectURL(file);
+    const preview = document.createElement('div');
+    preview.className = 'thumb';
+    const img = document.createElement('img');
+    img.src = url;
+    preview.appendChild(img);
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'remove';
+    remove.innerHTML = '&times;';
+    remove.addEventListener('click', () => {
+      URL.revokeObjectURL(url);
+      tile.remove();
+      updateThumbnailBadges();
+      createAddTile();
+    });
+
+    tile.appendChild(preview);
+    tile.appendChild(remove);
+
+    updateThumbnailBadges();
+    createAddTile();
+  }
+
+  // 썸네일(첫 번째 이미지) 갱신
+  function updateThumbnailBadges() {
+    tiles.querySelectorAll('.badge').forEach(b => b.remove());
+    const firstPreviewTile = [...tiles.children].find(t => t.querySelector('img'));
+    if (firstPreviewTile) {
+      const badge = document.createElement('div');
+      badge.className = 'badge';
+      badge.textContent = '썸네일';
+      firstPreviewTile.appendChild(badge);
+    }
+  }
+
+  // 초기 실행
+  if (tiles.querySelectorAll('.tile').length < MAX_IMAGES) {
+    createAddTile();
+  }
+</script>

@@ -11,11 +11,13 @@ import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
+import org.puppit.service.ChatAlarmService;
 import org.puppit.service.ChatService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatController {
 	
 	private final ChatService chatService;
+	private final ChatAlarmService chatAlarmService;
 	
 	@GetMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -102,7 +105,9 @@ public class ChatController {
 	
 	// 2. 채팅방 목록 조회(생성일 기준 내림차순) - 상품상세에서 채팅하기 클릭 등
 	@GetMapping("/recentRoomList")
-	public String recentRoomList(@RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId, Model model, HttpSession session) {
+	public String recentRoomList(@RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId,
+								 @RequestParam(value = "highlightMessageId", required = false)	Integer highlightMessageId,
+								 Model model, HttpSession session) {
 	    Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
 	    if (map == null || map.get("userId") == null) {
 	        throw new IllegalStateException("세션 정보가 없습니다. 로그인이 필요합니다.");
@@ -123,9 +128,17 @@ public class ChatController {
 
 	    model.addAttribute("chatList", chatList);
 	    model.addAttribute("highlightRoomId", highlightRoomId);
+	    model.addAttribute("highlightMessageId", highlightMessageId);
 	    return "chat/list";
 	}
 	
+	
+	@GetMapping( value = "/readAlarm", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Integer readAlarm(@RequestParam("messageId") Integer messageId) {
+		// 변경된 행 수를 리턴
+        return chatAlarmService.readAlarm(messageId);
+	}
 	
 	
 }

@@ -16,9 +16,7 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
-
-
-
+import org.puppit.model.dto.NotificationDTO;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -137,7 +135,7 @@ public boolean isMessageDuplicate(ChatMessageDTO chatMessageDTO) {
 	    return count != null && count > 0;
 }
 
-public Integer saveAlarmData(Map<String, Object> messageAlarm) {
+public Integer saveAlarmData(NotificationDTO messageAlarm) {
 	
 	return sqlSession.insert("mybatis.mapper.chatMessageMapper.saveAlarmData", messageAlarm);
 }
@@ -150,6 +148,11 @@ public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId) {
 public String getProductNameById(int parseInt) {
 	
 	return sqlSession.selectOne("mybatis.mapper.chatMessageMapper.getProductNameById", parseInt);
+}
+
+public List<NotificationDTO> getUnreadAlarms(Integer userId) {
+	
+	return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUnreadAlarms", userId);
 }
 
 
