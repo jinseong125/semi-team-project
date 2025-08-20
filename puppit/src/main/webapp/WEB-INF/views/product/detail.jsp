@@ -174,6 +174,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
+
+//const contextPath = "${pageContext.request.contextPath}";
+
+
+
 document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
 document.getElementById('btnPay')?.addEventListener('click',function() {
     const productId = "${product.productId}";

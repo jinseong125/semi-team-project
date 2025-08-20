@@ -6,6 +6,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<jsp:include page="/WEB-INF/views/layout/header.jsp?dt=<%=System.currentTimeMillis()%>"/>
 <%
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
 String accountId = "";
@@ -47,6 +48,7 @@ request.setAttribute("sortedChatList", sortedChatList);
 
 
 %>
+
 
 <c:set var="loginUserId" value="<%= accountId %>" />
 <c:set var="userId" value="<%=userId %>"/>
@@ -173,9 +175,8 @@ request.setAttribute("sortedChatList", sortedChatList);
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
-const contextPath = "${pageContext.request.contextPath}";
-const loginUserId = '<c:out value="${loginUserId}" />'; // 작은따옴표로 감싸 JS 문자열로 안전하게
-const userId = <c:out value="${userId}" />;             // 숫자는 그대로
+var contextPath = "${contextPath}";
+var loginUserId = "${loginUserId}";
 
 const centerMessage = document.getElementById('center-message');
 const chatHistory = document.getElementById('chat-history');
@@ -193,6 +194,9 @@ let buyerId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     const chatlist = document.getElementById('chatlist-container');
+ // header.jsp에서 선언한 변수 사용
+    console.log("userId JS:", userId);
+    
     chatlist.addEventListener('click', async function(e) {
         const chatDiv = e.target.closest('.chatList');
         if (chatDiv) {
@@ -212,34 +216,35 @@ document.addEventListener('DOMContentLoaded', function() {
                // alarmReadMessageId가 null이면 '안읽음'이므로 읽음 처리
                fetch(contextPath + '/chat/message?roomId=' + roomId)
                	  .then(response => response.json())
-               	  .then(data => {
-               		if (data.chatMessages && Array.isArray(data.chatMessages)) {
-                        data.chatMessages.forEach(msg => {
-                            if (msg.alarmReadMessageId === null) { // null이면 안읽음
-                                fetch(contextPath + "/chat/readAlarm?messageId=" + encodeURIComponent(msg.messageId) , {
-                                    method: "GET",
-                                })
-                                .then(res => res.json())
-                                .then(result => {
-                                    if (result.success) {
-                                        console.log("알림 읽음 처리 완료:", msg.messageId);
-                                    } else {
-                                        console.warn("알림 읽음 처리 실패:", result.error);
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error("fetch 오류:", err);
-                                });
-                            }
-                        });
-               		}
-               		  
-               		  
-               		  
-               		  
-               		  
-               		  
-               	  });
+             	  .then(data => {
+               	    var alarmArea = document.getElementById("alarmArea");
+               	    var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
+               	    if (!Array.isArray(data) || data.length === 0) {
+               	      alarmArea.innerHTML = "";
+               	      alarmArea.style.display = "none";
+               	    } else {
+               	      html += '<ul>';
+               	      data.forEach(function(alarm) {
+               	       html += '<li>'
+               	        + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId
+               	        + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
+               	        + '<b>새 메시지:</b> ' + (alarm.chatMessage || "메시지 없음")
+               	        + ' <span style="color:#aaa;">(' + (alarm.productName || "상품명 없음") + ')</span>'
+               	        + ' <span style="color:#888;">' + (alarm.messageCreatedAt || "") + '</span><br>'
+               	        + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || "-") + ' | To: ' + (alarm.receiverAccountId || "-") + '</span>'
+               	        + '</li>';
+               	    });
+               	    html += '</ul>';
+               	    alarmArea.innerHTML = html;
+               	    alarmArea.style.display = "block";
+               	    showAlarmPopup();
+               	  }
+               	})
+               	.catch(err => {
+               	  document.getElementById("alarmArea").innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
+               	  document.getElementById("alarmArea").style.display = "block";
+               	  showAlarmPopup();
+               	});
             }
         }
     });
@@ -406,8 +411,6 @@ function addChatMessageToHistory(chat) {
     // 최신 메시지로 스크롤 이동
     chatHistory.scrollTop = chatHistory.scrollHeight;
 
-    // 마지막 렌더링된 메시지 시간 저장
-    //chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
 }
 
 
@@ -508,10 +511,6 @@ function subscribeRoom(currentRoomId) {
 
         // 렌더링된 messageId를 저장
         renderedMessageIds.add(chat.messageId);
-
-        // 마지막 렌더링된 메시지 시간 저장
-        //chatHistory.lastRenderedMessageTime = chat.chatCreatedAt;
-
 
         // 안내 문구 숨기기
         centerMessage.style.display = "none";
@@ -646,75 +645,14 @@ async function sendMessage(currentRoomId) {
     const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
     const receiverRole = (senderRole === "SELLER") ? "BUYER" : "SELLER";
     
-    // 1. payBtn 요소에서 데이터를 가져오는 시도
-   // const payBtn = document.querySelector('#pay-btn');
-   // if (payBtn) {
-   //     productSellerId = payBtn.dataset.sellerId || null;
-   //     buyerId = payBtn.dataset.buyerId || null;
-   // }
-
-    // 2. payBtn 데이터가 없을 경우, currentRoomId를 기반으로 데이터를 가져오기
-   // if (!productSellerId || !buyerId) {
-  //      const roomData = await getChatRoomData(currentRoomId); // 서버 또는 클라이언트에서 데이터를 가져오는 함수
-    //    if (roomData) {
-   //     	  productSellerId = roomData.product?.sellerId || null;
-        	  // buyerId는 chatMessages 배열에서 추출
-   //           buyerId =
-    //              roomData.chatMessages?.find((msg) => msg.buyerId)?.buyerId ||
-    //              roomData.product?.buyerId ||
-    //              null;
-    //    }
-   // }
+ 
     
     console.log('userId: ', userId , ' productSellerId: ', productSellerId, ' buyerId: ', buyerId);
-    //console.log('payBtn:', payBtn);
-    
-    // 로그인한 사용자가 구매자인 경우 판매자를 수신자로 설정, 판매자인 경우 구매자를 수신자로 설정
-       // 채팅 상대방을 구분하여 수신자(chatReceiver) 설정
-    //const chatReceiver = (() => {
-   //   if (String(userId) === String(productSellerId)) {
-          // 현재 사용자가 판매자인 경우, 수신자는 구매자
-    //      return buyerId && !isNaN(parseInt(buyerId)) ? parseInt(buyerId) : null;
-    //  } else {
-          // 현재 사용자가 구매자가 아닌 경우, 수신자는 판매자
-    //      return productSellerId && !isNaN(parseInt(productSellerId)) ? parseInt(productSellerId) : null;
-    //  }
-   // })();
-    
-    // 수신자 값 검증
-    //if (!chatReceiver) {
-   //     console.error('chatReceiver 값이 유효하지 않습니다. 메시지를 전송할 수 없습니다.');
-   //     return;
-   // }
-
-    
-    
-    
-    
-   // const chatReceiverAccountId = (String(userId) === String(productSellerId)) ? buyerId : productSellerId;
     
     console.log('chatSender: ', chatSender);
     console.log('chatReceiver: ', chatReceiver);
     
     
-	 // 발신자와 수신자가 동일한지 확인
-   // if (chatSender === chatReceiver) {
-   //     console.error('발신자와 수신자가 동일합니다. 메시지를 전송할 수 없습니다.');
-  //      return;
-   // }
-
-    // 발신자 역할 설정
-  //  const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
-
-    // 수신자 역할 설정
-   // const receiverRole = (senderRole === "SELLER") ? "BUYER" : "SELLER";
-    
-    //const buyerId = userId;
-    
-    //const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
-    //const receiverAccountId = (String(userId) === String(productSellerId)) ? buyerId : productSellerId; // 수신자 ID 설정
-    //const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
-
     const chatMessage = {
         chatRoomId: currentRoomId,
         chatMessage: message,
@@ -752,10 +690,6 @@ async function sendMessage(currentRoomId) {
     
     stompClient.send("/app/chat.notify", {}, JSON.stringify(notification));
     
-    
-    // 메시지를 화면에 추가 (서버 응답 없이 클라이언트에서 바로 렌더링)
-    //addChatMessageToHistory(chatMessage);
-
     // 입력창 초기화
     input.value = "";
     
