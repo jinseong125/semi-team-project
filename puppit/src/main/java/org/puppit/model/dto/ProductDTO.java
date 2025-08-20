@@ -32,7 +32,7 @@ public class ProductDTO {
 
     private CategoryDTO      category;
     private ProductStatusDTO  status;
-    private ProductImageDTO   thumbnail;  // 썸네일 1장
+    private ProductImageDTO   thumbnail;
 
     
     

@@ -1,46 +1,43 @@
 package org.puppit.service;
 
-import org.puppit.model.dto.PageDTO;
-import org.puppit.model.dto.ProductDTO;
-import org.puppit.model.dto.ProductSearchDTO;
+import org.puppit.model.dto.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
 public interface ProductService {
-    /** 상품 등록 후 생성된 productId 반환 */
+
     int registerProduct(ProductDTO productDTO, List<MultipartFile> imageFiles);
 
-    // org.puppit.service.ProductService
-    public Map<String, List<?>> getProductFormData();
-    
-    public List<ProductDTO> getProductList();
-    
-    public ProductDTO getProductDetail(Integer productId);
-    
+    Map<String, List<?>> getProductFormData();
 
-    public ProductDTO getProductById(Integer productId);
+    ProductDTO getProductById(Integer productId);
 
-    
-    public Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request);
+    List<ProductDTO> selectMyProducts(Integer sellerId);
 
+    List<ProductDTO> getProductList();
 
-    public List<ProductDTO> selectMyProducts(Integer sellerId);
+    ProductDTO getProductDetail(Integer productId);
 
-    public List<ProductSearchDTO> searchByNew(String searchName);
-    
+    Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request);
+
+    List<ProductSearchDTO> searchByNew(String searchName);
+
     Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
 
-    
-    public List<String> getAutoComplete(String keyword);
+    List<String> getAutoComplete(String keyword);
 
+    int updateProduct(ProductDTO productDTO, List<Integer> deleteImageIds, List<MultipartFile> imageFiles) throws Exception;
 
-    int updateProduct(ProductDTO productDTO, List<MultipartFile> imageFiles);
     int deleteProduct(Integer productId);
 
+    ProductImageDTO getThumbnailImage(Integer productId);
 
+    List<ProductImageDTO> getProductImages(Integer productId);
 
+    void setThumbnail(Integer productId, Integer imageId);
+
+    void deleteImage(Integer imageId) throws Exception;
 }
