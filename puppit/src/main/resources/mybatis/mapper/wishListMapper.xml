@@ -10,6 +10,17 @@
     WHERE user_id = #{userId}
   </select>
   
+  <delete id="deleteWishListByUserAndProduct">
+    DELETE FROM wishlist
+    WHERE user_id = #{userId}
+    AND product_id = #{productId}
+  </delete>
+  
+  <delete id="deleteAllWishListByUser">
+    DELETE FROM wishlist
+    WHERE user_id = #{userId}
+  </delete>
+  
   <select id="getProductById" resultType="org.puppit.model.dto.ProductDTO">
     SELECT product_id, product_name, product_price, product_description
     FROM product

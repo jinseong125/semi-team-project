@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+<c:set var="contextPath" value="${pageContext.request.contextPath}" scope="request" />
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -148,10 +148,19 @@ a{text-decoration:none;color:inherit;}
   <div id="alarmArea"></div>
 <div id="search-results"></div>
 <hr>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
-  const contextPath = "${pageContext.request.contextPath}";
-  const input = document.getElementById("search-input");
+	// JSP에서 세션 정보를 JS 변수로 전달
+	var contextPath = "${pageContext.request.contextPath}";
+	const userId = "${sessionScope.sessionMap.userId}";
+	const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
+	const input = document.getElementById("search-input");
 
+	let stompClient = null;
+	//채팅방 접속 상태
+	let currentChatRoomId = null;
+	
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
@@ -160,6 +169,7 @@ a{text-decoration:none;color:inherit;}
   
   document.addEventListener("DOMContentLoaded", () => {
 	  loadTopKeywords();
+
 	  //로그인 상태일 때만 알림 영역 보이고 함수 실행
 	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
 	      document.getElementById("alarmArea").style.display = "block";
@@ -170,15 +180,89 @@ a{text-decoration:none;color:inherit;}
  
   document.addEventListener("DOMContentLoaded", function() {
    
+
+	  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
+		    document.getElementById("alarmArea").style.display = "block";
+		    loadAlarms();
+		    setInterval(loadAlarms, 30000);
+		    connectNotificationSocket(); // 실시간 알림 연결 추가
+		  }
+
   });
+  
+//웹소켓(Stomp) 연결 및 구독
+  function connectNotificationSocket() {
+    var socket = new SockJS(contextPath + '/ws-stomp'); // 서버의 SockJS endpoint 맞게 수정
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+      stompClient.subscribe('/topic/notification', function (notificationMsg) {
+        let notification = JSON.parse(notificationMsg.body);
+
+        // 본인에게 온 알림만 표시
+        if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
+
+        // 중복 방지: messageId 기준
+        // 기존 알림 리스트에 중복 messageId가 있으면 건너뜀
+        let alarmArea = document.getElementById("alarmArea");
+        let existing = alarmArea.innerHTML || "";
+        if (existing.includes(notification.messageId)) return;
+
+        // 알림 새로 추가
+        showAlarmPopup([notification]);
+      });
+    });
+  }
+
+  
+  
+
+
+  // 채팅방 입장 시
+  function enterChatRoom(roomId) {
+    currentChatRoomId = roomId;
+  }
+
+  // 채팅방 퇴장 시
+  function leaveChatRoom() {
+    currentChatRoomId = null;
+  }
+
+  // 알림 메시지 수신 시
+  function handleIncomingAlarm(alarm) {
+	// 내가 현재 그 채팅방에 접속중이면 알림을 띄우지 않는다
+	  if (String(currentChatRoomId) === String(alarm.roomId)) {
+	    return;
+	  }
+	  // 알림 영역에 메시지 추가
+	  showAlarmInPopup(alarm);
+  }
+  
+  
 
   console.log("userId JS:", userId); // 값이 없다면 fetch 요청 안 감
 
-  function showAlarmPopup() {
-    var alarmArea = document.getElementById("alarmArea");
-    alarmArea.style.display = "block";
-    var alarmBell = document.getElementById("alarmBell");
-    if (alarmBell) alarmBell.style.display = "none";
+  function showAlarmPopup(alarm) {
+	  var alarmArea = document.getElementById("alarmArea");
+	  var html = alarmArea.innerHTML || '';
+	  
+	  
+	  if (!alarm || !alarm.roomId) {
+	    console.error("알림 객체가 없습니다 또는 roomId가 없습니다.", alarm);
+	    return;
+	  }
+	  
+	  
+	  
+	
+	  html += '<li>'
+	        + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
+	        + '<b>새 메시지:</b> ' + alarm.chatMessage
+	        + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
+	        + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
+	        + '<span style="font-size:13px;">From: ' + alarm.senderAccountId + ' | To: ' + alarm.receiverAccountId + '</span>'
+	        + '</li>';
+	  alarmArea.innerHTML = html;
+	  alarmArea.style.display = "block";
   }
 
   function closeAlarmPopup() {
@@ -211,7 +295,7 @@ a{text-decoration:none;color:inherit;}
     }
     
     console.log("userId: ", userId);
-    fetch("${contextPath}/api/alarm?userId=" + userId)
+    fetch(contextPath + "/api/alarm?userId=" + userId)
       .then(res => {
         if (!res.ok) throw new Error("서버 오류");
         return res.json();
@@ -222,36 +306,49 @@ a{text-decoration:none;color:inherit;}
         var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
         if (data.length === 0) {
            // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
-            alarmArea.innerHTML = "";
-            alarmArea.style.display = "none";
+            document.getElementById("alarmArea").innerHTML = "";
+            document.getElementById("alarmArea").style.display = "none";
         } else {
-          html += '<ul>';
-          data.forEach(function(alarm) {
-             console.log('알림 데이터 : ', alarm);
-            html += '<li>'
-                + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
-                 + '<b>새 메시지:</b> ' + alarm.chatMessage
-                 + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
-                 + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
-                 + '<span style="font-size:13px;">From: ' + alarm.senderAccountId + ' | To: ' + alarm.receiverAccountId + '</span>'
-                 + '</li>';
-          });
-          html += '</ul>';
-          alarmArea.innerHTML = html;
-          alarmArea.style.display = "block";
-          showAlarmPopup(); // 알림이 있을 때만 팝업 띄움
+        	showAlarmPopup(data); // 알림 객체 배열을 넘겨줌!
         }
-        //document.getElementById("alarmArea").innerHTML = html;
-        //showAlarmPopup();
       })
       .catch(err => {
+    	  console.error(err);
         document.getElementById("alarmArea").innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
         document.getElementById("alarmArea").style.display = "block";
         showAlarmPopup();
       });
   }
 
-  setInterval(loadAlarms, 30000); 
+  function showAlarmPopup(alarms) {
+	  var alarmArea = document.getElementById("alarmArea");
+	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
+	  
+	  // 알림 데이터가 배열이 아닐 경우 배열로 변환
+	  if (!Array.isArray(alarms)) alarms = [alarms];
+
+	  // 중복 제거: messageId 기준
+	  const msgIdSet = new Set();
+	  const deduped = alarms.filter(alarm => {
+	    if (!alarm || !alarm.roomId || !alarm.messageId) return false;
+	    if (msgIdSet.has(alarm.messageId)) return false;
+	    msgIdSet.add(alarm.messageId);
+	    return true;
+	  });
+
+	  deduped.forEach(function(alarm) {
+	    html += '<li>'
+	      + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
+	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
+	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
+	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
+	      + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
+	      + '</li>';
+	  });
+	  html += '</ul>';
+	  alarmArea.innerHTML = html;
+	  alarmArea.style.display = "block";
+	}
   
   
   async function loadCategory(categoryName) {
@@ -282,7 +379,7 @@ a{text-decoration:none;color:inherit;}
   // ===================== 인기검색어 =====================
   async function loadTopKeywords() {
     try {
-      const res = await fetch(contextPath + "/search/top");
+      const res = await fetch("${contextPath}/search/top");
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
 

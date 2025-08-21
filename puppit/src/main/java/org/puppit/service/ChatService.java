@@ -35,5 +35,12 @@ public interface ChatService {
 	public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId);
 	public String getProductNameById(int parseInt);
 	public List<NotificationDTO> getUnreadAlarms(Integer userId);
+
+    /**
+     * 알림(Notification) 중복 여부 체크
+     * messageId, roomId, senderAccountId, receiverAccountId, chatMessage 등으로 체크
+     */
+    int isAlarmDuplicate(NotificationDTO notification);
+
 }
 
