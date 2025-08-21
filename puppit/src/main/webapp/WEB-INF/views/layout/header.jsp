@@ -175,16 +175,16 @@ a{text-decoration:none;color:inherit;}
   
 
   
-  document.addEventListener("DOMContentLoaded", () => {
-	  loadTopKeywords();
+//  document.addEventListener("DOMContentLoaded", () => {
+//	  loadTopKeywords();
 
 	  //로그인 상태일 때만 알림 영역 보이고 함수 실행
-	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-	      document.getElementById("alarmArea").style.display = "block";
-	      loadAlarms();
-	      setInterval(loadAlarms, 30000);
-	    }
-  });
+//	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
+	//      document.getElementById("alarmArea").style.display = "block";
+	 //     loadAlarms();
+	 //     setInterval(loadAlarms, 30000);
+	  //  }
+ // });
  
   document.addEventListener("DOMContentLoaded", function() {
    

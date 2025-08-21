@@ -192,7 +192,6 @@ if (sessionMap != null) {
 
 <script>
 
-console.log("상품 ${product}");
 
 document.addEventListener("DOMContentLoaded", () => {
 	const productId = "${product.productId}";
@@ -210,6 +209,7 @@ document.getElementById('btnPay')?.addEventListener('click',function() {
     const productId = "${product.productId}";
     const buyerId = "${userId}";
     const sellerId = "${product.sellerId}";
+    console.log("sellerId: ", sellerId);
     // 판매자와 구매자가 같을 때 경고창 띄우고 이동 막기
     if (buyerId === sellerId) {
         alert("상품에 등록된 판매자와 구매자가 같아서 채팅할 수 없습니다");
