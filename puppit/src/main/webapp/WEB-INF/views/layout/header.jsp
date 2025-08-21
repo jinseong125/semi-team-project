@@ -136,6 +136,9 @@ a{text-decoration:none;color:inherit;}
       <c:otherwise>
         <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
         <a href="${contextPath}/user/mypage">마이페이지</a>
+        <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
+	        <i class="fa-regular fa-bell"></i>
+	      </button>
         <a href="${contextPath}/user/logout">로그아웃</a>
       </c:otherwise>
     </c:choose>
@@ -201,13 +204,18 @@ a{text-decoration:none;color:inherit;}
         // 본인에게 온 알림만 표시
         if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
 
+     	// 채팅방에 접속중이면 알림 띄우지 않음
+        if (String(currentChatRoomId) === String(notification.roomId)) return;
+        
+     	
+        
         // 중복 방지: messageId 기준
         // 기존 알림 리스트에 중복 messageId가 있으면 건너뜀
         let alarmArea = document.getElementById("alarmArea");
         let existing = alarmArea.innerHTML || "";
         if (existing.includes(notification.messageId)) return;
 
-        // 알림 새로 추가
+        // 알림 영역에 바로 추가 (중복 messageId 확인 생략 가능, 필요하면 추가)
         showAlarmPopup([notification]);
       });
     });
