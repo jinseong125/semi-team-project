@@ -132,6 +132,14 @@ a{text-decoration:none;color:inherit;}
   padding:0;
   line-height:1;
 }
+
+#alarmBell.red {
+  color: #e74c3c !important;
+  transform: scale(1.2);
+  transition: color 0.2s, transform 0.2s;
+}
+
+
 </style>
 </head>
 
@@ -215,34 +223,45 @@ a{text-decoration:none;color:inherit;}
 	let stompClient = null;
 	//채팅방 접속 상태
 	let currentChatRoomId = null;
+	let alarmShownOnce = false;
+	// 1. LocalStorage에서 알림 닫힘 상태 읽기
+	let alarmClosed = localStorage.getItem('puppitAlarmClosed') === 'true';
 	
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
-  
-
-  
-  document.addEventListener("DOMContentLoaded", () => {
-	  loadTopKeywords();
-
-	  //로그인 상태일 때만 알림 영역 보이고 함수 실행
-	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-	      document.getElementById("alarmArea").style.display = "block";
-	      loadAlarms();
-	      setInterval(loadAlarms, 30000);
-	    }
-  });
  
+//종버튼 클릭 시 알림창 재오픈
   document.addEventListener("DOMContentLoaded", function() {
-   
-
-	  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-		    document.getElementById("alarmArea").style.display = "block";
-		    loadAlarms();
-		    setInterval(loadAlarms, 30000);
-		    connectNotificationSocket(); // 실시간 알림 연결 추가
-		  }
-
+	  var alarmArea = document.getElementById("alarmArea");
+	  var alarmBell = document.getElementById("alarmBell");
+	if (isLoggedIn === "true" && userId && !isNaN(userId)) {
+		  if (!alarmClosed) {
+	            alarmArea.style.display = "block";
+	            if (alarmBell) alarmBell.style.display = "none"; // 팝업 띄우면 종 숨김
+	            loadAlarms();
+	            setInterval(loadAlarms, 30000);
+	            connectNotificationSocket(); // 실시간 알림 연결
+	        } else {
+	            alarmArea.style.display = "none";
+	            alarmArea.innerHTML = "";
+	            if (alarmBell) alarmBell.style.display = "inline-block"; // 닫힌 상태엔 종 항상 보임!
+	        }
+     }  
+	  
+    var alarmBell = document.getElementById("alarmBell");
+    if (alarmBell) {
+    	alarmBell.addEventListener("click", function() {
+    		alarmClosed = false;
+			localStorage.setItem('puppitAlarmClosed', 'false');
+			alarmShownOnce = false;
+			loadAlarms();
+			alarmArea.style.display = "block";
+			alarmBell.style.display = "none";
+			window.alarmInterval = setInterval(loadAlarms, 30000);
+			alarmBell.classList.remove('red'); // 클릭하면 원상복구
+    	    });
+    }
   });
   
 //웹소켓(Stomp) 연결 및 구독
@@ -250,15 +269,13 @@ a{text-decoration:none;color:inherit;}
     var socket = new SockJS(contextPath + '/ws-stomp'); // 서버의 SockJS endpoint 맞게 수정
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
-      stompClient.subscribe('/topic/notification', function (notificationMsg) {
+      stompClient.subscribe('/topic/chat', function (notificationMsg) {
         let notification = JSON.parse(notificationMsg.body);
-
         // 본인에게 온 알림만 표시
         if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
-
      	// 채팅방에 접속중이면 알림 띄우지 않음
         if (String(currentChatRoomId) === String(notification.roomId)) return;
-        
+        onChatMessageReceived(notification);
      	
         
         // 중복 방지: messageId 기준
@@ -273,7 +290,18 @@ a{text-decoration:none;color:inherit;}
     });
   }
 
-  
+	// 접속자 관리 함수
+	function setUserInRoom(roomId, role) {
+		if (!activeRooms[roomId]) activeRooms[roomId] = { buyer: false, seller: false };
+		activeRooms[roomId][role.toLowerCase()] = true;
+	}
+	function setUserOutRoom(roomId, role) {
+		if (!activeRooms[roomId]) return;
+		activeRooms[roomId][role.toLowerCase()] = false;
+	}
+	function isUserInRoom(roomId, role) {
+		return activeRooms[roomId] && activeRooms[roomId][role.toLowerCase()];
+	}
   
 
 
@@ -301,91 +329,14 @@ a{text-decoration:none;color:inherit;}
 
   console.log("userId JS:", userId); // 값이 없다면 fetch 요청 안 감
 
-  function showAlarmPopup(alarm) {
-	  var alarmArea = document.getElementById("alarmArea");
-	  var html = alarmArea.innerHTML || '';
-	  
-	  
-	  if (!alarm || !alarm.roomId) {
-	    console.error("알림 객체가 없습니다 또는 roomId가 없습니다.", alarm);
-	    return;
-	  }
-	  
-	  
-	  
-	
-	  html += '<li>'
-	        + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
-	        + '<b>새 메시지:</b> ' + alarm.chatMessage
-	        + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
-	        + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
-	        + '<span style="font-size:13px;">From: ' + alarm.senderAccountId + ' | To: ' + alarm.receiverAccountId + '</span>'
-	        + '</li>';
-	  alarmArea.innerHTML = html;
-	  alarmArea.style.display = "block";
-  }
+  function showAlarmPopup(alarms = [], force = false) {
+	  if (alarmClosed && !force) return;
+	  if (alarmShownOnce && !force) return;
 
-  function closeAlarmPopup() {
-    var alarmArea = document.getElementById("alarmArea");
-    alarmArea.style.display = "none";
-    var alarmBell = document.getElementById("alarmBell");
-    if (alarmBell) alarmBell.style.display = "inline-block";
-    if(window.alarmInterval) clearInterval(window.alarmInterval);
-  }
+	  if (!Array.isArray(alarms)) alarms = [alarms];
 
-  //종버튼 클릭 시 알림창 재오픈
-  document.addEventListener("DOMContentLoaded", function() {
-    var alarmBell = document.getElementById("alarmBell");
-    if (alarmBell) {
-      alarmBell.addEventListener("click", function() {
-        showAlarmPopup();
-        loadAlarms();
-        window.alarmInterval = setInterval(loadAlarms, 30000);
-      });
-    }
-  });
-
-
-
-  function loadAlarms() {
-    if (!userId || isNaN(userId)) {
-      document.getElementById("alarmArea").innerHTML = "";
-      document.getElementById("alarmArea").style.display = "none";
-      return;
-    }
-    
-    console.log("userId: ", userId);
-    fetch(contextPath + "/api/alarm?userId=" + userId)
-      .then(res => {
-        if (!res.ok) throw new Error("서버 오류");
-        return res.json();
-      })
-      .then(data => {
-        var alarmArea = document.getElementById("alarmArea");   
-        console.log("data: ", data);
-        var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
-        if (data.length === 0) {
-           // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
-            document.getElementById("alarmArea").innerHTML = "";
-            document.getElementById("alarmArea").style.display = "none";
-        } else {
-        	showAlarmPopup(data); // 알림 객체 배열을 넘겨줌!
-        }
-      })
-      .catch(err => {
-    	  console.error(err);
-        document.getElementById("alarmArea").innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
-        document.getElementById("alarmArea").style.display = "block";
-        showAlarmPopup();
-      });
-  }
-
-  function showAlarmPopup(alarms) {
 	  var alarmArea = document.getElementById("alarmArea");
 	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
-	  
-	  // 알림 데이터가 배열이 아닐 경우 배열로 변환
-	  if (!Array.isArray(alarms)) alarms = [alarms];
 
 	  // 중복 제거: messageId 기준
 	  const msgIdSet = new Set();
@@ -408,8 +359,82 @@ a{text-decoration:none;color:inherit;}
 	  html += '</ul>';
 	  alarmArea.innerHTML = html;
 	  alarmArea.style.display = "block";
-	}
+	  alarmShownOnce = true;
+  }
   
+  function closeAlarmPopup() {
+    var alarmArea = document.getElementById("alarmArea");
+    alarmArea.style.display = "none";
+    alarmArea.innerHTML = ""; // 요소 내용 완전히 비움!
+    var alarmBell = document.getElementById("alarmBell");
+    if (alarmBell) alarmBell.style.display = "inline-block";
+    if(window.alarmInterval) clearInterval(window.alarmInterval);
+    alarmClosed = true; // 알림창 닫힘 상태로 변경
+    localStorage.setItem('puppitAlarmClosed', 'true'); // 닫힘상태 저장
+  }
+
+  
+
+
+
+  function loadAlarms() {
+	var alarmArea = document.getElementById("alarmArea");  
+	if (alarmClosed) {
+	    alarmArea.style.display = "none";
+	    alarmArea.innerHTML = ""; // 닫힘상태면 html도 완전히 비움!
+	    var alarmBell = document.getElementById("alarmBell");
+		if (alarmBell) alarmBell.style.display = "inline-block";
+		return;
+	}
+	
+    if (!userId || isNaN(userId)) {
+    	alarmArea.innerHTML = "";
+        alarmArea.style.display = "none";
+        return;
+    }
+    
+    console.log("userId: ", userId);
+    fetch(contextPath + "/api/alarm?userId=" + userId)
+      .then(res => {
+        if (!res.ok) throw new Error("서버 오류");
+        return res.json();
+      })
+      .then(data => {
+        //var alarmArea = document.getElementById("alarmArea");   
+        console.log("data: ", data);
+        //var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
+        if (data.length === 0) {
+           // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
+        	 alarmArea.innerHTML = "";
+             alarmArea.style.display = "none";
+             var alarmBell = document.getElementById("alarmBell");
+		if (alarmBell) alarmBell.style.display = "inline-block";
+        } else {
+        	showAlarmPopup(data); // 알림 객체 배열을 넘겨줌!
+        }
+      })
+      .catch(err => {
+    	  console.error(err);
+    	  alarmArea.innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
+          alarmArea.style.display = "block";
+          showAlarmPopup([], true);
+      });
+  }
+
+//메시지 수신시 접속자 체크 후 종모양 색/크기 변경
+	function onChatMessageReceived(chat) {
+		console.log('chat: ', chat);
+		const buyerInRoom = isUserInRoom(chat.chatRoomId, "BUYER");
+		const sellerInRoom = isUserInRoom(chat.chatRoomId, "SELLER");
+		const alarmBell = document.getElementById("alarmBell");
+		// 구매자 또는 판매자 중 한 명이라도 접속 중이 아니면 종모양 빨간색/크기 변경
+		if (!buyerInRoom || !sellerInRoom) {
+			if (alarmBell) {
+				alarmBell.classList.add('red');
+				alarmBell.style.display = "inline-block";
+			}
+		}
+	}
   
   async function loadCategory(categoryName) {
 	  results.innerHTML = '<div class="empty">카테고리 불러오는 중...</div>';
