@@ -147,11 +147,6 @@ let currentSubscription = null;
 let isConnected = false;
 let productId = null;
 let buyerId = null;
-let buyerAccountId = "";
-//3. 채팅방 접속자 관리 (프론트 전역)
-let activeRooms = {}; // { roomId: { buyer: true/false, seller: true/false } }
-//하이라이트 타이머 관리용 객체
-let highlightTimers = {}; // { roomId: timerId }
 
 document.addEventListener('DOMContentLoaded', function() {
     const chatlist = document.getElementById('chatlist-container');
@@ -205,47 +200,36 @@ function loadChatHistory(roomId) {
         .then(response => response.json())
         .then(data => {
             console.log('Server Response:', data); // 서버 응답 로그 출력
-            chatHistory.innerHTML = "";
-            renderedMessageIds.clear();
-            
-            buyerId = null;
-            buyerAccountId = "";
+
+            let buyerId = null; // 구매자 ID 초기화
             const sellerId = data.product.sellerId || null; // 판매자 ID
             const sellerAccountId = data.product.chatSellerAccountId || ""; // 판매자의 accountId
-            //let buyerAccountId = ""; // 구매자의 accountId 초기화
+            let buyerAccountId = ""; // 구매자의 accountId 초기화
 
-           // === buyerId와 buyerAccountId 추출 ===
-            if (Array.isArray(data.chatMessages) && data.chatMessages.length > 0) {
-                // BUYER가 보낸 메시지 중 첫 번째에서 buyer 정보 추출
+            // 🔥 buyerId와 buyerAccountId 추출
+            if (data.chatMessages && data.chatMessages.length > 0) {
                 const buyerMessage = data.chatMessages.find(msg => msg.senderRole === "BUYER");
                 if (buyerMessage) {
-                    buyerId = buyerMessage.buyerId || buyerMessage.chatSender || null;
-                    buyerAccountId = buyerMessage.chatSenderAccountId || "";
+                    buyerId = buyerMessage.buyerId || null;
+                    buyerAccountId = buyerMessage.chatSenderAccountId || ""; // 구매자의 accountId 추출
                 }
             }
-         	// 만약 위에서 못 찾았으면 product에서 시도 (없으면 null/"")
-            if (!buyerId && data.product && data.product.buyerId) {
-                buyerId = data.product.buyerId;
-            }
-            if (!buyerAccountId && data.product && data.product.buyerAccountId) {
-                buyerAccountId = data.product.buyerAccountId;
-            }
-            
-            // ★ 여기에 추가!
-            window.lastProductInfo = data.product;
-            
-            
-            // 디버깅 출력
+
             console.log("buyerId: ", buyerId, " sellerId: ", sellerId, " sellerAccountId: ", sellerAccountId, " buyerAccountId: ", buyerAccountId);
 
+            //loadChatHeader(data.product, buyerId, sellerId, sellerAccountId, buyerAccountId);
             renderProductInfo(data.product, data.chatMessages || []);
 
+            chatHistory.innerHTML = "";
             const messages = Array.isArray(data.chatMessages) ? data.chatMessages : [];
-            messages.forEach(chat => {
-                addChatMessageToHistory(chat);
-            });
+            messages.forEach(chat => addChatMessageToHistory(chat));
 
-            centerMessage.style.display = messages.length > 0 ? "none" : "block";
+            // 🔥 메시지가 있으면 안내 문구 숨기기
+            if (messages.length > 0) {
+                centerMessage.style.display = "none";
+            } else {
+                centerMessage.style.display = "block";
+            }
         });
 }
 function renderProductInfo(product, chatMessages) {
@@ -311,7 +295,7 @@ function addChatMessageToHistory(chat) {
     const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
     const currentUserRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // 현재 사용자 역할 결정
 
- 	// 이미 렌더링된 메시지는 건너뜀
+    // 이미 렌더링된 메시지는 건너뜀
     if (chat.messageId && renderedMessageIds.has(chat.messageId)) {
         return;
     }
@@ -359,6 +343,7 @@ function addChatMessageToHistory(chat) {
 //시간 형식 변환 함수 추가
 function formatChatTime(timeString) {
     if (!timeString) return "시간 정보 없음";
+    // 숫자(밀리초)인지 확인
     if (/^\d+$/.test(timeString)) {
         const date = new Date(Number(timeString));
         if (!isNaN(date.getTime())) {
@@ -369,11 +354,8 @@ function formatChatTime(timeString) {
             });
         }
     }
-    let date = new Date(timeString);
-    console.log('date: ', date);
-    if (isNaN(date.getTime()) && timeString.includes('+09:00')) {
-        date = new Date(timeString.replace('+09:00', 'Z'));
-    }
+    // 일반 날짜 문자열 및 ISO 포맷
+    const date = new Date(timeString);
     if (!isNaN(date.getTime())) {
         return date.toLocaleString("ko-KR", {
             year: "numeric", month: "2-digit", day: "2-digit",
@@ -402,45 +384,28 @@ function connectAndSubscribe(currentRoomId) {
     }
 }
 
-
-
+//function getFormattedCurrentTime() {
+//    const now = new Date();
+    // 오전/오후 처리
+//    const ampm = now.getHours() < 12 ? "오전" : "오후";
+    // 12시간제로
+  //  let hour = now.getHours() % 12;
+  //  if (hour === 0) hour = 12;
+  //  return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${ampm} ${String(hour).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+//}
 
 
 function subscribeRoom(currentRoomId) {
-	if (currentSubscription) currentSubscription.unsubscribe();
+    if (currentSubscription) currentSubscription.unsubscribe();
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
-       
-        let rawTime = chat.chatCreatedAt || "";
-        console.log("addChatMessageToHistory: rawTime =", rawTime, typeof rawTime);
-       
-         // === 하이라이트 처리 코드 START ===
-        // 메시지 송신자 역할
-        const senderRole = chat.senderRole; // "BUYER" 또는 "SELLER"
-        
-        // 현재 사용자 역할
-        let currentUserRole = (String(userId) === String(chat.chatSender)) ? senderRole : (senderRole === "BUYER" ? "SELLER" : "BUYER");
 
-        // 구매자/판매자 접속자 기록
-        setUserInRoom(chat.chatRoomId, senderRole);
-        setUserInRoom(chat.chatRoomId, currentUserRole);
+        // 시간 포맷 변환
+        chat.chatCreatedAt = formatChatTime(chat.chatCreatedAt);
 
-        // === 하이라이트 처리 코드 START ===
-        // 메시지의 수신자가 현재 로그인한 사용자일 때만 하이라이트!
-        // userId(숫자)와 chat.chatReceiver(숫자) 또는
-        // loginUserId(문자열)와 chat.chatReceiverAccountId(문자열) 비교
-        if (
-            String(chat.chatReceiver) === String(userId) ||
-            String(chat.chatReceiverAccountId) === String(loginUserId)
-        ) {
-            highlightChatRoom(chat.chatRoomId);
-        } else {
-            removeHighlightChatRoom(chat.chatRoomId);
-        }
-        // === 하이라이트 처리 코드 END ===
-        
+        // 수신자가 현재 채팅방을 보고 있는 경우만 메시지 렌더링
         if (String(currentRoomId) === String(chat.chatRoomId)) {
-            addChatMessageToHistory(chat); // 이미 렌더링된 메시지는 내부에서 필터됨
+        	addChatMessageToHistory(chat);    // ★ 메시지 수신시 화면에 추가
             centerMessage.style.display = "none";
         } else {
             displayNotification(
@@ -453,7 +418,6 @@ function subscribeRoom(currentRoomId) {
         }
     });
 }
-
 function subscribeNotifications() {
     stompClient.subscribe('/topic/notification', function(notification) {
         const data = JSON.parse(notification.body);
@@ -499,110 +463,52 @@ function enableChatInput(enable) {
     }
 }
 
-function getCurrentChatTime() {
-	return new Date().toISOString(); // 예: "2025-08-21T13:23:59.000Z"
-}
-
-
-//1. 채팅방 하이라이트 함수
-function highlightChatRoom(roomId) {
-    const chatLists = document.querySelectorAll('.chatList');
-    chatLists.forEach(chatDiv => {
-        if (String(chatDiv.dataset.roomId) === String(roomId)) {
-            chatDiv.classList.add('highlight'); // 노란색 하이라이트
-        }
-    });
-    
-    // 기존 타이머 있으면 클리어
-    if (highlightTimers[roomId]) {
-        clearTimeout(highlightTimers[roomId]);
-    }
-    // 2초 후 하이라이트 제거
-    highlightTimers[roomId] = setTimeout(() => {
-        removeHighlightChatRoom(roomId);
-        highlightTimers[roomId] = null;
-    }, 2000); // 2초(2000ms) 후 제거, 필요시 시간 조절
-    
-}
-
-//2. 하이라이트 제거 함수
-function removeHighlightChatRoom(roomId) {
-    const chatLists = document.querySelectorAll('.chatList');
-    chatLists.forEach(chatDiv => {
-        if (String(chatDiv.dataset.roomId) === String(roomId)) {
-            chatDiv.classList.remove('highlight');
-        }
-    });
-}
-
-//4. 채팅방 입장시 접속자 기록 (간단 예시, 실제는 서버에서 WebSocket으로 관리)
-function setUserInRoom(roomId, role) {
-    if (!activeRooms[roomId]) activeRooms[roomId] = { buyer: false, seller: false };
-    activeRooms[roomId][role.toLowerCase()] = true;
-}
-
-
-
-
 function sendMessage(currentRoomId) {
     if (!stompClient || !isConnected) return;
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value;
     if (!message.trim() || !currentRoomId) return;
 
-    // 버튼에서 값 추출
-    let productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
-    let productSellerAccountId = document.querySelector('#pay-btn')?.dataset.sellerAccountId;
-    console.log('productSellerId: ', productSellerId);
+    const productId = document.querySelector('#pay-btn')?.dataset.productId; // 버튼에서 productId 가져오기
+    const buyerId = userId; // 로그인된 사용자의 userId를 buyerId로 설정
+    const productSellerAccountId = document.querySelector('#pay-btn')?.dataset.sellerAccountId;
+    
+    // senderRole을 동적으로 설정 (로그인한 사용자와 상품 판매자 비교)
+    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
+    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // SELLER 또는 BUYER 여부 확인
+    const chatSender = userId; // 본인 userId
+    const chatReceiver = (senderRole === "SELLER") ? buyerId : productSellerId; // 상대방 userId
 
-    // 버튼이 없으면, productInfoArea에서 직접 값 추출
-    if (!productSellerId || !productSellerAccountId) {
-        // productInfoArea에서 product 정보가 있다면 가져오기
-        // 예시: loadChatHistory에서 sellerId, sellerAccountId를 전역변수로 보관
-        if (window.lastProductInfo) {
-            productSellerId = window.lastProductInfo.sellerId || productSellerId;
-            productSellerAccountId = window.lastProductInfo.chatSellerAccountId || productSellerAccountId;
-        }
-    }
-
-    // senderRole을 동적으로 설정
-    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
-    const chatSender = userId;
-    console.log("send: chatSender: ", chatSender);
-
-    // ★ productSellerId, buyerId 값이 undefined일 때 전역 값을 반드시 보완할 것
-    const chatReceiver = (senderRole === "SELLER") ? buyerId : productSellerId;
+    
+    
+    // chatReceiverAccountId 결정
+    // 내가 판매자라면 구매자에게, 내가 구매자라면 판매자에게 보내는 것
     const chatReceiverAccountId = (senderRole === "SELLER") ? buyerAccountId : productSellerAccountId;
 
-    console.log('send: chatReceiver: ', chatReceiver);
-
-    // 방어 코드
-    if (senderRole === "SELLER" && (!buyerId || !buyerAccountId)) {
-        alert("구매자 정보가 없어 메시지 전송이 불가능합니다.");
-        return;
-    }
-    if (senderRole === "BUYER" && !productSellerId) {
-        alert("판매자 정보가 없어 메시지 전송이 불가능합니다.");
-        return;
-    }
     
-    // ★ 여기! 현재 시간 넣기
-    const chatCreatedAt = getCurrentChatTime();
-
     const chatMessage = {
         chatRoomId: currentRoomId,
         chatMessage: message,
         chatSenderAccountId: loginUserId,
-        chatReceiverAccountId: chatReceiverAccountId,
+        chatReceiverAccountId: chatReceiverAccountId, // ★ 추가!
         productId: productId,
         buyerId: buyerId,
-        senderRole: senderRole,
-        chatSender: chatSender,
-        chatReceiver: chatReceiver,
-        chatCreatedAt: chatCreatedAt // ★ 추가!
+        senderRole: senderRole, // 동적으로 계산된 senderRole 설정
+        chatSender: chatSender,           // ★ userId (숫자)
+        chatReceiver: chatReceiver        // ★ userId (숫자)
     };
 
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+
+    // 메시지를 채팅 창에 즉시 추가
+    addChatMessageToHistory({
+        chatSenderAccountId: loginUserId,
+        message: message,
+        senderRole: senderRole, // 동적으로 설정된 senderRole 사용
+        chatCreatedAt: getFormagttedCurrentTime() // 그냥 number로 넘겨도 됨
+
+    });
+
     input.value = "";
 }
 </script>

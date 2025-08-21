@@ -33,11 +33,15 @@ public interface ProductService {
 
     int deleteProduct(Integer productId);
 
+
+    List<ProductDTO> getProductsByCategory(String categoryName);
+
     ProductImageDTO getThumbnailImage(Integer productId);
 
     List<ProductImageDTO> getProductImages(Integer productId);
 
     void setThumbnail(Integer productId, Integer imageId);
+
 
     void deleteImage(Integer imageId) throws Exception;
 }

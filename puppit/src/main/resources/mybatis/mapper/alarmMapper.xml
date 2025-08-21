@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="mybatis.mapper.alarmMapper">
+  
+  <select id="countDuplicateAlarm" parameterType="org.puppit.model.dto.AlarmDuplicationDTO" resultType="Integer">
+SELECT COUNT(*)
+FROM room r
+JOIN alarm a ON r.room_id = a.room_id
+JOIN chat c ON a.message_id = c.message_id
+WHERE r.room_id = #{roomId}
+  AND a.user_id = #{userId}
+  AND c.chat_message = #{chatMessage}
+  
+  
+  </select>	
+  
+</mapper>

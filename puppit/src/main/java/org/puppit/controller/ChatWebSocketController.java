@@ -1,5 +1,7 @@
 package org.puppit.controller;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +51,7 @@ public class ChatWebSocketController {
 	    System.out.println("sender: " + sender.toString());
 
 	    // receiver 정보 조회
-	    ChatUserDTO chatReceiver = chatService.getReceiverInfoByUserId(Integer.parseInt(chatMessageDTO.getChatReceiverAccountId()));
+	    ChatUserDTO chatReceiver = chatService.getReceiverInfoByUserId(chatMessageDTO.getChatReceiver());
 	    if (chatReceiver == null) {
 	        System.out.println("chatReceiver 정보를 찾을 수 없습니다. 메시지 처리 중단.");
 	        return;
@@ -166,10 +168,26 @@ public class ChatWebSocketController {
         notification.setSenderRole(chatMessageDTO.getSenderRole());
         notification.setChatCreatedAt(chatMessageDTO.getChatCreatedAt());
         notification.setProductName(chatService.getProductNameById(productId));
+        notification.setMessageId(Integer.parseInt(chatMessageDTO.getMessageId())); // 메시지 고유 ID 사용
 
         Integer alarmInsertRowId = chatService.saveAlarmData(notification);
         System.out.println("메시지 알림 저장 성공: " + alarmInsertRowId);
                 
+        // ======= [중복 알림 방지] =======
+       // if (chatService.isAlarmDuplicate(notification) == 0) {
+        //    try {
+        //        Integer alarmCount = chatService.saveAlarmData(notification);
+        //        System.out.println("메시지 알림 저장 성공: " + alarmCount);
+        //    } catch (Exception e) {
+        //        System.out.println("알림 저장 중 오류 발생: " + e.getMessage());
+        //        e.printStackTrace();
+         //   }
+       // } else {
+       //     System.out.println("중복 알림이라 저장하지 않음: " + notification);
+        //}
+        
+        
+        
         // 알림을 브로드캐스트
         messagingTemplate.convertAndSend("/topic/notification", notification);
         System.out.println("Notification sent: " + notification);
