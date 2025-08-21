@@ -16,21 +16,27 @@ public class UserDAO {
   
   private final SqlSessionTemplate sqlSession;
   
+  // 회원가입
   public Integer userSignUp(UserDTO user) {
     return sqlSession.insert("mybatis.mapper.userMapper.userSignUp", user);
   }
-  public Integer countByAccountId(String accountId) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.countByAccountId", accountId);
-  }
-  public Integer countByNickName(String nickName) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.countByNickName", nickName);
-  }
-  public Integer countByEmail(String userEmail) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.countByEmail", userEmail);
-  }
+  // 로그인
   public UserDTO selectLogin(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.selectLogin", accountId);
   }
+  // 아이디 중복 확인
+  public Integer countByAccountId(String accountId) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.countByAccountId", accountId);
+  }
+  // 닉네임 중복확인
+  public Integer countByNickName(String nickName) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.countByNickName", nickName);
+  }
+  // 이메일 중복 확인
+  public Integer countByEmail(String userEmail) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.countByEmail", userEmail);
+  }
+  // 로그인 정보
   public Integer insertLogStatus(UserStatusDTO log) {
     return sqlSession.insert("mybatis.mapper.userMapper.insertLogStatus", log);
   }
@@ -38,12 +44,13 @@ public class UserDAO {
   public UserDTO getUserByAccountId(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByAccountId", accountId);
   }
-  public String findAccountIdByNameAndEmail(UserDTO user) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.findAccountIdByNameAndEmail", user);
-  }
   // user 정보 조회 (user_id)
   public UserDTO getUserByUserId(Integer userId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", userId);
+  }
+  // 아이디 찾기
+  public String findAccountIdByNameAndEmail(UserDTO user) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.findAccountIdByNameAndEmail", user);
   }
   public Integer updateUser(Map<String, Object> map) {
     return sqlSession.update("mybatis.mapper.userMapper.updateUser", map);

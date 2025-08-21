@@ -90,9 +90,11 @@ public class UserServiceImpl implements UserService {
   }
   // 비밀번호를 이용한 본인 확인
   @Override
-  public Boolean passwordCheck(Integer userID, String password) {
-    // TODO Auto-generated method stub
-    return null;
+  public UserDTO passwordCheck(Integer userID, String password) {
+    if(userID == null) {
+      return null;
+    }
+    return userDAO.getUserByUserId(userID);
   }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
