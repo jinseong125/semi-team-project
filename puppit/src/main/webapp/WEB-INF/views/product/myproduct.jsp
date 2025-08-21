@@ -42,6 +42,10 @@
     object-fit: cover;
     border-radius: 4px;
   }
+
+  .thumbnail img:hover {
+    transform: scale(1.10);
+  }
   .no-image {
     width: 80px;
     height: 80px;
