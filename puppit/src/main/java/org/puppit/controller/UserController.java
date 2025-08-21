@@ -161,6 +161,7 @@ public class UserController {
       return "redirect:/user/login";
     }
   }
+
   @GetMapping("/profile")
   public String profileForm() {
     return "user/profile";
@@ -174,6 +175,7 @@ public class UserController {
                             @RequestParam("nickName") String nickName,
                             @RequestParam("userEmail") String userEmail) {
     
+    @SuppressWarnings("unchecked")
     Map sessionMap = (Map<String, Object>)session.getAttribute("sessionMap");
     String prevAccountId = (String) sessionMap.get("accountId");
     UserDTO user = userService.getUserId(prevAccountId);
@@ -217,7 +219,7 @@ public class UserController {
       String newKey = uploaded.get("fileName"); // ex) profile/123/uuid_filename.jpg
       
       // 기존 키 조회 후 삭제(옵션)
-      String oldKey = userService.getProfileImageKey(userId);
+      String oldKey = userService.getProfileImageKey(userId).getProfileImageKey();
       if (oldKey != null && !oldKey.isBlank()) {
           try {
               amazonS3.deleteObject(BUCKET, oldKey);

@@ -18,7 +18,7 @@
   </insert>
   
   <!-- 로그인(아이디, 비밀번호) -->
-  <select id="getUserByaccountId" parameterType="String" resultType="UserDTO">
+  <select id="selectLogin" parameterType="String" resultType="UserDTO">
     SELECT user_id, account_id, nick_name, user_name, user_password, user_email, salt
       FROM user
      WHERE account_id = #{accountId}
@@ -52,11 +52,18 @@
      WHERE user_name = #{userName} AND user_email = #{userEmail}
   </select>
   
-  <!-- account 사용해서 user_id(PK) 조회 -->
-  <select id="getUserId" parameterType="String" resultType="UserDTO">
-    SELECT user_id, account_id, user_name, nick_name, user_password, user_email, user_phone, created_at, updated_at, point, profile_image_key 
+  <!-- account 사용해서 user 정보 조회 -->
+  <select id="getUserByAccountId" parameterType="String" resultType="UserDTO">
+    SELECT user_id, account_id, user_name, nick_name, user_email, user_phone, created_at, updated_at, point, profile_image_key 
       FROM user
      WHERE account_id = #{accountId}
+  </select>
+  
+  <!-- userId를 이용해 user 정보 조회 -->
+  <select id="getUserByUserId" parameterType="java.lang.Integer" resultType="UserDTO">
+    SELECT user_password, profile_image_key
+      FROM user
+     WHERE user_id = #{userId}
   </select>
   
   <!-- 로그인 로그 저장 -->
@@ -64,35 +71,30 @@
     INSERT INTO user_status (user_id, account_id, login_at)
     VALUES (#{userId}, #{accountId}, #{loginAt})
   </insert>
-
-  
-  <!-- 채팅 보낸 사람의 사용자 정보 조회 -->
-  <select id="getUserByUserId" parameterType="String" resultType="ChatUserDTO">
-  	SELECT user_id, account_id,user_name, nick_name
-  	FROM user
-  	WHERE account_id = #{account_id}
-  </select>
   
   <!-- 유저 정보 수정 -->
   <update id="updateUser" parameterType="Map">
     UPDATE user
-    SET account_id = #{user.accountId},
-        user_name  = #{user.userName},
+    SET user_name  = #{user.userName},
         user_email = #{user.userEmail},
-        nick_name  = #{user.nickName}
+        nick_name  = #{user.nickName},
     WHERE account_id = #{prevAccountId}
   </update>
-  
-  <select id="selectProfileImageKey" parameterType="int" resultType="string">
-    SELECT profile_image_key
-    FROM user
-    WHERE user_id = #{userId}
-  </select>
 
   <update id="updateProfileImageKey">
     UPDATE user
     SET profile_image_key = #{profileImageKey}
     WHERE user_id = #{userId}
   </update>
+  
+  <!-- 비밀번호 변경 -->
+  <update id="changeUserPassword" parameterType="userDTO">
+    UPDATE user
+       SET user_password = #{userPassword},
+           salt = #{salt},
+           update_at = NOW()
+     WHERE user_id = #{userId}
+  </update>
+  
   
 </mapper>

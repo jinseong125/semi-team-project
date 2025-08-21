@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
       if(emptyCheck(user.getAccountId(), user.getUserPassword(), user.getUserName(), user.getNickName(), user.getUserEmail(), user.getUserPhone())) {
         return false;
       }
-      return userDAO.userSignUp(user) == 1 ? true : false;
+      return userDAO.userSignUp(user) == 1;
     } catch (Exception e) {
       e.printStackTrace();
       return false;
@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
       }
       
       // 1) DB에서 accountId로 사용자 정보(솔트, 저장된 해시) 가져오기
-      UserDTO dbUser = userDAO.getUserByaccountId(user.getAccountId());
+      UserDTO dbUser = userDAO.getUserByAccountId(user.getAccountId());
       if (dbUser == null) {
         return null; // 계정 없음
       }
@@ -88,6 +88,7 @@ public class UserServiceImpl implements UserService {
   public String findAccountIdByUserNameUserEmail(UserDTO user) {
     return userDAO.findAccountIdByNameAndEmail(user);
   }
+  // 비밀번호를 이용한 본인 확인
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
     return userDAO.countByAccountId(accountId.trim().toLowerCase()) == 0; 
@@ -106,13 +107,7 @@ public class UserServiceImpl implements UserService {
   }
   @Override
   public UserDTO getUserId(String accountId) {
-    return userDAO.getUserId(accountId);
-  }
-
-  // 채팅 보낸 사람의 사용자 정보 조회
-  @Override
-  public ChatUserDTO getUserByUserId(String senderUserId) {
-	return userDAO.getUserByUserId(senderUserId);
+    return userDAO.getUserByAccountId(accountId);
   }
 
   @Override
@@ -120,10 +115,10 @@ public class UserServiceImpl implements UserService {
     return userDAO.updateUser(map) == 1;
    
   }
-
+  // userId를 이용해 db에서 ProfileImageKey가져오기
   @Override
-  public String getProfileImageKey(Integer userId) {
-    return userDAO.selectProfileImageKey(userId);
+  public UserDTO getProfileImageKey(Integer userId) {
+    return userDAO.getUserByUserId(userId);
   }
 
   @Override
@@ -135,7 +130,6 @@ public class UserServiceImpl implements UserService {
     System.out.println("[updateProfileImageKey] rows=" + rows + ", userId=" + userId + ", key=" + profileImageKey);
     return rows == 1;
   }
-
 }
 
 

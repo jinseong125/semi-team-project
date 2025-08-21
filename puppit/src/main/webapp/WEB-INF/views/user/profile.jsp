@@ -69,8 +69,7 @@
       <th>아이디</th>
       <td>
         <div class="form-row">
-          <input id="accountId" type="text" name="accountId" value="${sessionScope.sessionMap.accountId}">
-          <button type="button" class="button button-check" id="checkIdBtn">중복확인</button>
+          <input id="accountId" type="text" name="accountId" value="${sessionScope.sessionMap.accountId}" readOnly>
         </div>
       </td>
     </tr>
@@ -109,36 +108,10 @@
   
 <script type="text/javascript">
 
-  let idChecked = false;
   let nicknameChecked = false;
   let emailChecked = false;
 
-  //아이디 중복 검사
-  document.getElementById("checkIdBtn").addEventListener("click", function(e) {
-	  // 빈 문자 입력
-    const accountId = document.getElementById("accountId").value.trim();
-    if(!accountId) {
-    	  alert("아이디를 입력 해주세요");
-    	  return;
-    }
-    // 아이디 형식 (정규식 검사) 소문자, 숫자 4~12자리
-    const isRegex = /^[a-z0-9]{4,12}$/;
-    if(!isRegex.test(accountId)) {
-    	  alert("아이디 형식이 올바르지 않습니다 다시 입력 해주세요");
-    	  return false;
-    }
-   fetch("${contextPath}/user/check?accountId=" + accountId)
-   .then(response => {
-      if(response.status === 200) {
-       alert("사용 가능한 아이디 입니다");
-       idChecked = true;
-       return;
-    } else if(response.status === 409) {
-       alert("중복 된 아이디 입니다");
-       return;
-    }
-   })
-  })
+
   // 닉네임 중복 검사
   document.getElementById("checkNickNameBtn").addEventListener("click", function(e) {
   // 빈 문자 입력
@@ -193,11 +166,8 @@
   })
   
   document.getElementById("btn-submit").addEventListener("click", e => {
-	  if(!idChecked || !nicknameChecked || !emailChecked) {
-		  if(!idChecked) {
-			  alert("아이디 중복확인을 해주세요")
-		  }
-		  else if(!nicknameChecked) {
+	  if(!nicknameChecked || !emailChecked) {
+		  if(!nicknameChecked) {
 			  alert("닉네임 중복확인을 해주세요")
 		  }
 		  else if(!emailChecked) {

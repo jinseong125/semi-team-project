@@ -28,39 +28,26 @@ public class UserDAO {
   public Integer countByEmail(String userEmail) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.countByEmail", userEmail);
   }
-  public String getUserById(String userId) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserById", userId);
-  }
-  public UserDTO getUserByaccountId(String accountId) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByaccountId", accountId);
+  public UserDTO selectLogin(String accountId) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.selectLogin", accountId);
   }
   public Integer insertLogStatus(UserStatusDTO log) {
     return sqlSession.insert("mybatis.mapper.userMapper.insertLogStatus", log);
   }
-  public UserDTO getUserId(String accountId) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserId", accountId);
+  // user 정보 조회 (accountId)
+  public UserDTO getUserByAccountId(String accountId) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByAccountId", accountId);
   }
   public String findAccountIdByNameAndEmail(UserDTO user) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.findAccountIdByNameAndEmail", user);
   }
-  
-  //채팅 보낸 사람의 사용자 정보 조회
-  public ChatUserDTO getUserByUserId(String senderUserId) {
-
-    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", senderUserId);
-
-
- 
+  // user 정보 조회 (user_id)
+  public UserDTO getUserByUserId(Integer userId) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByUserId", userId);
   }
-  
   public Integer updateUser(Map<String, Object> map) {
     return sqlSession.update("mybatis.mapper.userMapper.updateUser", map);
   }
-  
-  public String selectProfileImageKey(Integer userId) {
-    return sqlSession.selectOne("mybatis.mapper.userMapper.selectProfileImageKey", userId);
-  }
-  
   public Integer updateProfileImageKey(Map<String, Object> map) {
     return sqlSession.update("mybatis.mapper.userMapper.updateProfileImageKey", map);
   }

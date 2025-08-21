@@ -25,12 +25,13 @@ public interface UserService {
   UserDTO getUserId(String accountId);
   // accountId 찾기
   String findAccountIdByUserNameUserEmail(UserDTO user);
+  // 비밀번호 변경
+//  Boolean changeUserPasswordByuserId(UserDTO user);
+  // 기존 비밀번호 확인
+//  Boolean passwordCheck(Integer userID, String password);
 
-  // 채팅 보낸 사람의 사용자 정보 조회
-  ChatUserDTO getUserByUserId(String senderUserId);
-  
   boolean updateUser(Map<String, Object> map);
-  String getProfileImageKey(Integer userId);
+  UserDTO getProfileImageKey(Integer userId);
   boolean updateProfileImageKey(Integer userId, String profileImageKey);
   
 }
