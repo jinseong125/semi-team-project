@@ -34,12 +34,16 @@ public class TradeDAO {
     
   }
   
-    // dto 불러오기
-    public List<TradeDTO> selectTradeById(Integer userId) {
-      Map<String, Object> paraMap = new HashMap<>();
-      paraMap.put("userId", userId);
-      
-      return sst.selectList("mybatis.mapper.tradeMapper.selectTradeById", paraMap);
-    }
+  // dto 불러오기
+  public List<TradeDTO> selectTradeById(Integer userId) {
+    Map<String, Object> paraMap = new HashMap<>();
+    paraMap.put("userId", userId);
+    
+    return sst.selectList("mybatis.mapper.tradeMapper.selectTradeById", paraMap);
+  }
+  // 상품상태코드 3(판매완료)로 변경
+  public Integer updateProductStatus(Integer productId) {
+    return sst.update("mybatis.mapper.tradeMapper.updateProductStatus", productId);
+  }
 
 }

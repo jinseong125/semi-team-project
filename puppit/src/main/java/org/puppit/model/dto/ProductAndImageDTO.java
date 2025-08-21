@@ -1,0 +1,54 @@
+package org.puppit.model.dto;
+
+import java.sql.Timestamp;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductAndImageDTO {
+
+
+  private Integer productId;
+  private Integer locationId;
+  private Integer categoryId;
+  private Integer sellerId;
+  private Integer conditionId;
+  private Integer statusId;
+  private String productName;
+  private Integer productPrice;
+  private String productDescription;
+  private Timestamp productCreatedAt;
+  private Timestamp productUpdatedAt;
+  private int totalCount;
+  private Integer imageId;
+  private String imageUrl;
+  private String imageKey;
+  private boolean thumbnail;
+  
+  @Override
+  public String toString() {
+    return "ProductAndImageDTO [productId=" + productId + ", locationId=" + locationId + ", categoryId=" + categoryId
+        + ", sellerId=" + sellerId + ", conditionId=" + conditionId + ", statusId=" + statusId + ", productName="
+        + productName + ", productPrice=" + productPrice + ", productDescription=" + productDescription
+        + ", productCreatedAt=" + productCreatedAt + ", productUpdatedAt=" + productUpdatedAt + ", totalCount="
+        + totalCount + ", imageId=" + imageId + ", imageUrl=" + imageUrl + ", imageKey=" + imageKey + ", thumbnail="
+        + thumbnail + "]";
+  }
+  
+  
+  
+  
+  
+  
+
+
+  
+  
+
+}

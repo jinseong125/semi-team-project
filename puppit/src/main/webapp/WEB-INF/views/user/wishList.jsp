@@ -22,6 +22,7 @@
   .inline-form { display:inline; }
   .empty { padding:60px 0; text-align:center; color:#666; }
   .flash { margin: 8px 0 16px; padding:10px 12px; border:1px solid #dfe3ea; border-radius:10px; background:#f7f8fa; }
+  .wishListImage {width: 200px; height: 200px;}
 </style>
 
 <div class="wrap">
@@ -44,14 +45,14 @@
   <c:choose>
     <c:when test="${not empty products}">
       <div class="cards">
-        <c:forEach var="p" items="${products}">
+        <c:forEach var="p" items="${productAndImages}">
           <div class="product-card">
             <a href="${contextPath}/product/detail/${p.productId}" class="product-link">
               <div class="product-name">${p.productName}</div>
               <div class="product-price">
                 <fmt:formatNumber value="${p.productPrice}" type="currency" currencySymbol="₩" />
               </div>
-              <div class="product-desc">${p.productDescription}</div>
+              <img class="wishListImage" src="${p.imageUrl}" alt="찜목록이미지">
             </a>
 
             <div class="actions">
