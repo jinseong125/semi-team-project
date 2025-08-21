@@ -13,6 +13,7 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.NotificationDTO;
+import org.puppit.model.dto.UserDTO;
 import org.puppit.service.ChatService;
 import org.puppit.service.UserService;
 
@@ -42,7 +43,7 @@ public class ChatWebSocketController {
 	    Integer productId = 0;
 
 	    // Sender 정보 조회
-	    ChatUserDTO sender = userService.getUserByUserId(chatMessageDTO.getChatSenderAccountId());
+	    UserDTO sender = userService.getUserId(chatMessageDTO.getChatSenderAccountId());
 	    if (sender == null) {
 	        System.out.println("Sender 정보를 찾을 수 없습니다. 메시지 처리 중단.");
 	        return;
