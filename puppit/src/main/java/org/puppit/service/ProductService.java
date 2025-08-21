@@ -44,4 +44,8 @@ public interface ProductService {
 
 
     void deleteImage(Integer imageId) throws Exception;
+    List<ProductDTO> mainProducts();
+    
+    ProductDTO detailProducts(Integer product);
+    
 }

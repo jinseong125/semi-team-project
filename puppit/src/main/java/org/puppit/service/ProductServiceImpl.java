@@ -199,4 +199,14 @@ public class ProductServiceImpl implements ProductService {
             productDAO.deleteImage(imageId);
         }
     }
+
+    @Override
+    public List<ProductDTO> mainProducts() {
+      return productDAO.mainProducts();
+    }
+
+    @Override
+    public ProductDTO detailProducts(Integer productId) {
+      return productDAO.detailProducts(productId);
+    }
 }

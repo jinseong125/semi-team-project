@@ -193,6 +193,8 @@
         <result property="productUpdatedAt" column="product_updated_at"/>
         <result property="categoryId"       column="category_id"/>
         <result property="statusId"         column="status_id"/>
+        <result property="sellerId"			column="seller_id" />
+        <result property="productDescription" column="product_description" />
 
         <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
             <id     property="categoryId"   column="category_id"/>
@@ -232,6 +234,52 @@
                            ON t.product_id = p.product_id
                                AND t.is_thumbnail = 1
         WHERE p.seller_id = #{value}
+        ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+    </select>
+    
+    <select id="mainProducts" parameterType="int" resultMap="MyProducts">
+        SELECT p.product_id,
+               p.product_name,
+               p.product_price,
+               p.product_created_at,
+               p.product_updated_at,
+               p.category_id,
+               p.status_id,
+               c.category_name,
+               s.status_name,
+               t.image_id     AS thumb_image_id,
+               t.image_url    AS thumb_image_url,
+               t.is_thumbnail AS thumb_is_thumbnail
+        FROM product p
+                 JOIN product_category c ON p.category_id = c.category_id
+                 JOIN product_status   s ON p.status_id   = s.status_id
+                 LEFT JOIN product_image t
+                           ON t.product_id = p.product_id
+                               AND t.is_thumbnail = 1
+        ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+    </select>
+    
+    <select id="detailProducts" parameterType="int" resultMap="MyProducts">
+        SELECT p.product_id,
+               p.product_name,
+               p.product_price,
+               p.product_created_at,
+               p.product_updated_at,
+               p.category_id,
+               p.status_id,
+               p.seller_id,
+               p.product_description,
+               c.category_name,
+               s.status_name,
+               t.image_id     AS thumb_image_id,
+               t.image_url    AS thumb_image_url,
+               t.is_thumbnail AS thumb_is_thumbnail
+        FROM product p
+                 JOIN product_category c ON p.category_id = c.category_id
+                 JOIN product_status   s ON p.status_id   = s.status_id
+                 LEFT JOIN product_image t
+                           ON t.product_id = p.product_id                     
+        WHERE p.product_id = #{productId}
         ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
     </select>
 

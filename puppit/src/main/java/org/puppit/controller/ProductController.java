@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.ProductDTO;
 
 import org.puppit.model.dto.ProductImageDTO;
-import org.puppit.model.dto.ProductImageLIstDTO;
 import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.repository.ProductDAO;
 import org.puppit.service.ProductService;
@@ -86,12 +85,13 @@ public class ProductController {
     /** 상품 상세 조회 */
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, Model model) {
-        var productDetail = productService.getProductDetail(productId);
-        if (productDetail == null) {
+      ProductDTO product = productService.detailProducts(productId);
+        System.out.println("상품상품상품" + product);
+        if (product == null) {
             model.addAttribute("error", "해당 상품을 찾을 수 없습니다.");
             return "error/404";
         }
-        model.addAttribute("product", productDetail);
+        model.addAttribute("product", product);
         return "product/detail";
     }
 
@@ -243,4 +243,6 @@ public class ProductController {
         productService.deleteImage(imageId);
         return "이미지가 삭제되었습니다.";
     }
+
+    
 }

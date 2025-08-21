@@ -113,6 +113,16 @@ public class ProductDAO {
     public List<ProductDTO> getProductsByCategory (String categoryName) {
         return sqlSession.selectList("product.getProductsByCategory", categoryName);
     }
+    
+    public List<ProductDTO> mainProducts () {
+      return sqlSession.selectList("product.mainProducts");
+  }
+    
+    public ProductDTO detailProducts (Integer productId) {
+      /*
+       * System.out.println("상품상품" + sqlSession.selectList("product.detailProducts"));
+       */      return sqlSession.selectOne("product.detailProducts", productId);
+    }
  
     
 
