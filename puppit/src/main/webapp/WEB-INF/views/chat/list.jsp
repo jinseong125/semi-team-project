@@ -148,6 +148,10 @@ let isConnected = false;
 let productId = null;
 let buyerId = null;
 let buyerAccountId = "";
+//3. 채팅방 접속자 관리 (프론트 전역)
+let activeRooms = {}; // { roomId: { buyer: true/false, seller: true/false } }
+//하이라이트 타이머 관리용 객체
+let highlightTimers = {}; // { roomId: timerId }
 
 document.addEventListener('DOMContentLoaded', function() {
     const chatlist = document.getElementById('chatlist-container');
@@ -406,11 +410,35 @@ function subscribeRoom(currentRoomId) {
 	if (currentSubscription) currentSubscription.unsubscribe();
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
-        //chat.chatCreatedAt = formatChatTime(chat.chatCreatedAt);
+       
         let rawTime = chat.chatCreatedAt || "";
         console.log("addChatMessageToHistory: rawTime =", rawTime, typeof rawTime);
-        //let formattedTime = formatChatTime(rawTime);
+       
+         // === 하이라이트 처리 코드 START ===
+        // 메시지 송신자 역할
+        const senderRole = chat.senderRole; // "BUYER" 또는 "SELLER"
+        
+        // 현재 사용자 역할
+        let currentUserRole = (String(userId) === String(chat.chatSender)) ? senderRole : (senderRole === "BUYER" ? "SELLER" : "BUYER");
 
+        // 구매자/판매자 접속자 기록
+        setUserInRoom(chat.chatRoomId, senderRole);
+        setUserInRoom(chat.chatRoomId, currentUserRole);
+
+        // === 하이라이트 처리 코드 START ===
+        // 메시지의 수신자가 현재 로그인한 사용자일 때만 하이라이트!
+        // userId(숫자)와 chat.chatReceiver(숫자) 또는
+        // loginUserId(문자열)와 chat.chatReceiverAccountId(문자열) 비교
+        if (
+            String(chat.chatReceiver) === String(userId) ||
+            String(chat.chatReceiverAccountId) === String(loginUserId)
+        ) {
+            highlightChatRoom(chat.chatRoomId);
+        } else {
+            removeHighlightChatRoom(chat.chatRoomId);
+        }
+        // === 하이라이트 처리 코드 END ===
+        
         if (String(currentRoomId) === String(chat.chatRoomId)) {
             addChatMessageToHistory(chat); // 이미 렌더링된 메시지는 내부에서 필터됨
             centerMessage.style.display = "none";
@@ -474,6 +502,46 @@ function enableChatInput(enable) {
 function getCurrentChatTime() {
 	return new Date().toISOString(); // 예: "2025-08-21T13:23:59.000Z"
 }
+
+
+//1. 채팅방 하이라이트 함수
+function highlightChatRoom(roomId) {
+    const chatLists = document.querySelectorAll('.chatList');
+    chatLists.forEach(chatDiv => {
+        if (String(chatDiv.dataset.roomId) === String(roomId)) {
+            chatDiv.classList.add('highlight'); // 노란색 하이라이트
+        }
+    });
+    
+    // 기존 타이머 있으면 클리어
+    if (highlightTimers[roomId]) {
+        clearTimeout(highlightTimers[roomId]);
+    }
+    // 2초 후 하이라이트 제거
+    highlightTimers[roomId] = setTimeout(() => {
+        removeHighlightChatRoom(roomId);
+        highlightTimers[roomId] = null;
+    }, 2000); // 2초(2000ms) 후 제거, 필요시 시간 조절
+    
+}
+
+//2. 하이라이트 제거 함수
+function removeHighlightChatRoom(roomId) {
+    const chatLists = document.querySelectorAll('.chatList');
+    chatLists.forEach(chatDiv => {
+        if (String(chatDiv.dataset.roomId) === String(roomId)) {
+            chatDiv.classList.remove('highlight');
+        }
+    });
+}
+
+//4. 채팅방 입장시 접속자 기록 (간단 예시, 실제는 서버에서 WebSocket으로 관리)
+function setUserInRoom(roomId, role) {
+    if (!activeRooms[roomId]) activeRooms[roomId] = { buyer: false, seller: false };
+    activeRooms[roomId][role.toLowerCase()] = true;
+}
+
+
 
 
 function sendMessage(currentRoomId) {
