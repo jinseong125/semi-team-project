@@ -113,13 +113,13 @@ a{text-decoration:none;color:inherit;}
       <div class="meta-row">
         <label class="category">
           <select id="categorySelect">
-            <option>카테고리</option>
-            <option>사료</option>
-            <option>간식</option>
-            <option>외출용품</option>
-            <option>기타용품</option>
-          </select>
-          <i class="fa-solid fa-chevron-down chev"></i>
+            <option value="">카테고리</option>
+			<option value="사료">사료</option>
+			<option value="간식">간식</option>
+			<option value="외출용품">외출용품</option>
+			<option value="기타용품">기타용품</option>
+		  </select>
+         <i class="fa-solid fa-chevron-down chev"></i>
         </label>
       </div>
     </div>
@@ -156,6 +156,8 @@ a{text-decoration:none;color:inherit;}
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
   
+
+  
   document.addEventListener("DOMContentLoaded", () => {
 	  loadTopKeywords();
 	  //로그인 상태일 때만 알림 영역 보이고 함수 실행
@@ -167,7 +169,7 @@ a{text-decoration:none;color:inherit;}
   });
  
   document.addEventListener("DOMContentLoaded", function() {
-    
+   
   });
 
   console.log("userId JS:", userId); // 값이 없다면 fetch 요청 안 감
@@ -414,6 +416,18 @@ a{text-decoration:none;color:inherit;}
   btn.addEventListener('click', function () {
     search(input.value);
   });
+  document.addEventListener("DOMContentLoaded", function() {
+	  const categorySelect = document.getElementById("categorySelect");
+	  if (categorySelect) {
+	    categorySelect.addEventListener("change", function() {
+	      const selected = this.value;
+	      if (selected && selected !== "카테고리") {
+	        loadCategory(selected);
+	      }
+	    });
+	  }
+	});
+
 
   window.__search = search;
 </script>
