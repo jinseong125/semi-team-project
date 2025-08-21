@@ -355,7 +355,6 @@ function addChatMessageToHistory(chat) {
 //시간 형식 변환 함수 추가
 function formatChatTime(timeString) {
     if (!timeString) return "시간 정보 없음";
-    // 숫자(밀리초)인지 확인
     if (/^\d+$/.test(timeString)) {
         const date = new Date(Number(timeString));
         if (!isNaN(date.getTime())) {
@@ -366,8 +365,11 @@ function formatChatTime(timeString) {
             });
         }
     }
-    // 일반 날짜 문자열 및 ISO 포맷
-    const date = new Date(timeString);
+    let date = new Date(timeString);
+    console.log('date: ', date);
+    if (isNaN(date.getTime()) && timeString.includes('+09:00')) {
+        date = new Date(timeString.replace('+09:00', 'Z'));
+    }
     if (!isNaN(date.getTime())) {
         return date.toLocaleString("ko-KR", {
             year: "numeric", month: "2-digit", day: "2-digit",
@@ -404,7 +406,10 @@ function subscribeRoom(currentRoomId) {
 	if (currentSubscription) currentSubscription.unsubscribe();
     currentSubscription = stompClient.subscribe('/topic/chat/' + currentRoomId, function (msg) {
         const chat = JSON.parse(msg.body);
-        chat.chatCreatedAt = formatChatTime(chat.chatCreatedAt);
+        //chat.chatCreatedAt = formatChatTime(chat.chatCreatedAt);
+        let rawTime = chat.chatCreatedAt || "";
+        console.log("addChatMessageToHistory: rawTime =", rawTime, typeof rawTime);
+        //let formattedTime = formatChatTime(rawTime);
 
         if (String(currentRoomId) === String(chat.chatRoomId)) {
             addChatMessageToHistory(chat); // 이미 렌더링된 메시지는 내부에서 필터됨
@@ -466,6 +471,11 @@ function enableChatInput(enable) {
     }
 }
 
+function getCurrentChatTime() {
+	return new Date().toISOString(); // 예: "2025-08-21T13:23:59.000Z"
+}
+
+
 function sendMessage(currentRoomId) {
     if (!stompClient || !isConnected) return;
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
@@ -507,6 +517,9 @@ function sendMessage(currentRoomId) {
         alert("판매자 정보가 없어 메시지 전송이 불가능합니다.");
         return;
     }
+    
+    // ★ 여기! 현재 시간 넣기
+    const chatCreatedAt = getCurrentChatTime();
 
     const chatMessage = {
         chatRoomId: currentRoomId,
@@ -517,7 +530,8 @@ function sendMessage(currentRoomId) {
         buyerId: buyerId,
         senderRole: senderRole,
         chatSender: chatSender,
-        chatReceiver: chatReceiver
+        chatReceiver: chatReceiver,
+        chatCreatedAt: chatCreatedAt // ★ 추가!
     };
 
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));

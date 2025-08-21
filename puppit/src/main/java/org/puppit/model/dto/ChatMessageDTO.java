@@ -5,6 +5,7 @@ package org.puppit.model.dto;
 
 import java.sql.Timestamp;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class ChatMessageDTO {
 	private String chatReceiverAccountId;
 	private String chatReceiverUserName;
 	private String chatMessage;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX", timezone = "Asia/Seoul")
 	private Timestamp chatCreatedAt;
 	private String senderRole;
 	private String receiverRole;
