@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
       }
       
       // 1) DB에서 accountId로 사용자 정보(솔트, 저장된 해시) 가져오기
-      UserDTO dbUser = userDAO.getUserByAccountId(user.getAccountId());
+      UserDTO dbUser = userDAO.selectLogin(user.getAccountId());
       if (dbUser == null) {
         return null; // 계정 없음
       }
@@ -89,6 +89,11 @@ public class UserServiceImpl implements UserService {
     return userDAO.findAccountIdByNameAndEmail(user);
   }
   // 비밀번호를 이용한 본인 확인
+  @Override
+  public Boolean passwordCheck(Integer userID, String password) {
+    // TODO Auto-generated method stub
+    return null;
+  }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
     return userDAO.countByAccountId(accountId.trim().toLowerCase()) == 0; 

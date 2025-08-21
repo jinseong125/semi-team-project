@@ -54,7 +54,7 @@
   
   <!-- account 사용해서 user 정보 조회 -->
   <select id="getUserByAccountId" parameterType="String" resultType="UserDTO">
-    SELECT user_id, account_id, user_name, nick_name, user_email, user_phone, created_at, updated_at, point, profile_image_key 
+    SELECT user_id, account_id, user_name, nick_name, user_email, user_phone, created_at, updated_at, point, profile_image_key, user_password
       FROM user
      WHERE account_id = #{accountId}
   </select>
