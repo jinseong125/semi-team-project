@@ -339,5 +339,7 @@
         WHERE c.category_name = #{categoryName}
         ORDER BY p.product_created_at DESC
     </select>
+    
+
 
 </mapper>

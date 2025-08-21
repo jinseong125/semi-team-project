@@ -10,7 +10,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* ===== 기존 스타일 ===== */
+/* ===== 헤더 기본 레이아웃 ===== */
 .header {display:flex;justify-content:space-between;align-items:flex-start;max-width:1200px;margin:0 auto;padding:16px 20px;}
 .left {display:flex;align-items:flex-start;gap:18px;}
 .left-col {display:flex;flex-direction:column;gap:14px;min-width:420px;}
@@ -18,9 +18,6 @@
 .searchBar .input {width:85%;height:44px;padding:0 44px 0 40px;border:1px solid #e5e7eb;border-radius:12px;background:#f5f7fa;outline:none;}
 .searchBar .fa-magnifying-glass {position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#666;cursor:pointer;}
 .meta-row{display:flex;align-items:center;gap:16px;}
-.category{position:relative;display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;}
-.category select{appearance:none;border:none;background:transparent;font:inherit;outline:none;padding-right:22px;}
-.category .chev{position:absolute;right:10px;pointer-events:none;color:#444;font-size:12px;}
 .right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
 a{text-decoration:none;color:inherit;}
 .top-actions{display:flex;gap:10px;}
@@ -35,6 +32,54 @@ a{text-decoration:none;color:inherit;}
 .card .name {margin-top:8px;font-weight:600;}
 .card .price {margin-top:4px;color:#555;}
 
+/* ===== 카테고리 셀렉트 박스 ===== */
+.category {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.category select {
+  appearance: none;
+  border: 1px solid #d1e3ff;
+  border-radius: 12px;
+  background: #f9fbff;
+  font: inherit;
+  outline: none;
+  padding: 10px 36px 10px 14px;
+  cursor: pointer;
+  color: #333;
+  transition: all 0.2s ease-in-out;
+}
+
+/* hover 효과 */
+.category select:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74,144,226,0.3);
+}
+
+/* focus 효과 */
+.category select:focus {
+  border-color: #1c6dd0;
+  box-shadow: 0 0 6px rgba(28,109,208,0.4);
+}
+
+/* 옵션 스타일 */
+.category select option {
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* 드롭다운 아이콘 */
+.category .chev {
+  position: absolute;
+  right: 14px;
+  pointer-events: none;
+  color: #4a90e2;
+  font-size: 12px;
+}
+
 /* 자동완성 리스트 */
 #autocompleteList {
   position:absolute;top:48px;left:0;width:85%;
@@ -48,11 +93,11 @@ a{text-decoration:none;color:inherit;}
 #autocompleteList li:hover {background:#f9f9f9;}
 
 /* 인기검색어 */
-
 #top-keywords {margin-top:4px;font-size:14px;color:#444;}
 #top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
 #top-keywords .keyword:hover {text-decoration:underline;}
 
+/* 알림 팝업 */
 #alarmArea {
   background:#fffbe7;
   border:1px solid #ffe066;
@@ -114,12 +159,12 @@ a{text-decoration:none;color:inherit;}
         <label class="category">
           <select id="categorySelect">
             <option value="">카테고리</option>
-			<option value="사료">사료</option>
-			<option value="간식">간식</option>
-			<option value="외출용품">외출용품</option>
-			<option value="기타용품">기타용품</option>
-		  </select>
-         <i class="fa-solid fa-chevron-down chev"></i>
+            <option value="사료">사료</option>
+            <option value="간식">간식</option>
+            <option value="외출용품">외출용품</option>
+            <option value="기타용품">기타용품</option>
+          </select>
+          <i class="fa-solid fa-chevron-down chev"></i>
         </label>
       </div>
     </div>
@@ -141,7 +186,7 @@ a{text-decoration:none;color:inherit;}
 	       <i class="fa-regular fa-bell"></i>
 	    </button>
         <a href="${contextPath}/user/logout">로그아웃</a>
-        <!-- 채팅 버튼: 로그인 했을 때만 노출 -->
+        <!-- 채팅 버튼 -->
         <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" onclick="location.href='${contextPath}/chat/recentRoomList'" title="채팅방 목록으로 이동">
           <i class="fa-regular fa-comment-dots"></i> 채팅
         </button>
@@ -155,7 +200,9 @@ a{text-decoration:none;color:inherit;}
 </div>
   <div id="alarmArea"></div>
 <div id="search-results"></div>
+
 <hr>
+
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
@@ -410,14 +457,26 @@ a{text-decoration:none;color:inherit;}
       if (!topKeywordsElement) throw new Error("top-keywords element not found");
       topKeywordsElement.innerHTML = html;
 
-      // 클릭 이벤트 바인딩
+      
+   // 클릭 이벤트 바인딩
       document.querySelectorAll("#top-keywords .keyword").forEach(el => {
         el.addEventListener("click", () => {
-          const kw = el.textContent.replace("#", "");
+          const kw = el.textContent.replace("#", "").trim();
           input.value = kw;
+
+          // 메인 상품 숨기기
+          const mainGrid = document.getElementById("productGrid");
+          if (mainGrid) mainGrid.style.setProperty("display", "none", "important");
+
+          // 결과 영역 보이기
+          results.style.display = "block";
+          results.innerHTML = '<div class="empty">"' + kw + '" 검색 중...</div>';
+
+          // 기존 검색 함수 실행
           search(kw);
         });
       });
+
     } catch (err) {
       console.error("인기검색어 불러오기 에러:", err);
       document.getElementById("top-keywords").innerHTML = "인기검색어를 불러올 수 없습니다.";
