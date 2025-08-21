@@ -233,15 +233,16 @@ a{text-decoration:none;color:inherit;}
   
   // 1. 페이지가 로딩될 때마다 알림 닫힘 상태를 항상 false로 초기화!
 
-let alarmClosed = false; // 변수 초기화 OK
+
+
+let alarmClosed = false; // 팝업 닫힘 상태
+let alarmArea, alarmBell;
 
 document.addEventListener("DOMContentLoaded", function() {
-  var alarmArea = document.getElementById("alarmArea");
-  var alarmBell = document.getElementById("alarmBell");
+  alarmArea = document.getElementById("alarmArea");
+  alarmBell = document.getElementById("alarmBell");
 
-  // 로그인 상태일 때만 알림 로직
   if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-    // 최초 접속/새로고침: localStorage 값 없으면 팝업 열림
     if (localStorage.getItem('puppitAlarmClosed') === null) {
       alarmClosed = false;
       localStorage.setItem('puppitAlarmClosed', 'false');
@@ -259,23 +260,22 @@ document.addEventListener("DOMContentLoaded", function() {
       alarmArea.style.display = "none";
       alarmArea.innerHTML = "";
       alarmBell.style.display = "inline-block";
+      connectSocket(); // 팝업이 닫혀있어도 소켓은 연결!
     }
   }
-  // 종버튼 클릭: 알림창 오픈, 닫힘상태 false
+
   if (alarmBell) {
     alarmBell.addEventListener("click", function() {
       alarmClosed = false;
       localStorage.setItem('puppitAlarmClosed', 'false');
-      alarmShownOnce = false;
-      loadAlarms();
       alarmArea.style.display = "block";
       alarmBell.style.display = "none";
+      loadAlarms();
       window.alarmInterval = setInterval(loadAlarms, 30000);
       alarmBell.classList.remove('red');
     });
   }
 });
-  
 //1. 웹소켓 연결 및 구독 (알림+채팅 모두)
   function connectSocket() {
     var socket = new SockJS(contextPath + '/ws-chat');
@@ -285,10 +285,17 @@ document.addEventListener("DOMContentLoaded", function() {
         stompClient.subscribe('/topic/notification', function(msg) {
           console.log('msg: ', msg);
           let notification = JSON.parse(msg.body);
+          console.log('notification: ', notification);
           // 본인에게 온 알림만
-          if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
+          if (String(notification.receiverAccountId || notification.userId) !== String(userId)) {
+        	  console.log('여기서 걸리나');
+        	  showAlarmPopup([notification]);
+        	  return;
+          }
+        	  
           // [핵심] 채팅방에 접속중이 아닐 때 알림 팝업!
           if (String(currentChatRoomId) !== String(notification.roomId)) {
+        	  console.log('현재 채팅방 접속중 아님');
             showAlarmPopup([notification]);
             const alarmBell = document.getElementById("alarmBell");
             if (alarmBell) {
@@ -330,34 +337,46 @@ document.addEventListener("DOMContentLoaded", function() {
 		return activeRooms[roomId] && activeRooms[roomId][role.toLowerCase()];
 	}
 	// 알림 팝업 처리
-   function showAlarmPopup(alarms = [], force = false) {
-    console.log('alarms: ', alarms);
-    if (alarmClosed && !force) return;
-    if (alarmShownOnce && !force) return;
-    if (!Array.isArray(alarms)) alarms = [alarms];
-    var alarmArea = document.getElementById("alarmArea");
-    var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
-    const msgIdSet = new Set();
-    const deduped = alarms.filter(alarm => {
-      if (!alarm || !alarm.roomId || !alarm.messageId) return false;
-      if (msgIdSet.has(alarm.messageId)) return false;
-      msgIdSet.add(alarm.messageId);
-      return true;
-    });
-    deduped.forEach(function(alarm) {
-      html += '<li>'
-        + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
-        + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
-        + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
-        + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
-        + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
-        + '</li>';
-    });
-    html += '</ul>';
-    alarmArea.innerHTML = html;
-    alarmArea.style.display = "block";
-    alarmShownOnce = true;
-   }
+	function showAlarmPopup(alarms = [], force = false) {
+	  console.log('showAlarmPopup 호출, alarms:', alarms);
+
+	  // alarms가 배열인지 확인 및 변환
+	  if (!Array.isArray(alarms)) alarms = [alarms];
+
+	  // forEach로 먼저 모든 값 찍기 (디버깅)
+	  alarms.forEach((alarm, idx) => {
+	    console.log(`forEach alarm[${idx}]:`, alarm);
+	  });
+
+	  // filter 내부에서도 찍힘
+	  const msgIdSet = new Set();
+	  const deduped = alarms.filter((alarm, idx) => {
+	    console.log(`filter alarm[${idx}]:`, alarm);
+	    if (!alarm || !alarm.roomId || !alarm.messageId) return false;
+	    if (msgIdSet.has(alarm.messageId)) return false;
+	    msgIdSet.add(alarm.messageId);
+	    return true;
+	  });
+
+	  // deduped 결과도 찍기
+	  console.log('deduped:', deduped);
+
+	  var alarmArea = document.getElementById("alarmArea");
+	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
+	  deduped.forEach(function(alarm) {
+	    html += '<li>'
+	      + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
+	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
+	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
+	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
+	      + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
+	      + '</li>';
+	  });
+	  html += '</ul>';
+	  alarmArea.innerHTML = html;
+	  alarmArea.style.display = "block";
+	  alarmShownOnce = true;
+	}
 
 	  function closeAlarmPopup() {
 		    var alarmArea = document.getElementById("alarmArea");
