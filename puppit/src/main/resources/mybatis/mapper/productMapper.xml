@@ -171,6 +171,7 @@
                p.seller_id           AS sellerId,
                c.category_name       AS categoryName,
                s.status_name         AS statusName,
+               
                p.product_description AS productDescription
         FROM product p
                  JOIN product_category c    ON p.category_id  = c.category_id
@@ -274,7 +275,7 @@
         ORDER BY product_name
             LIMIT 50
     </select>
-    
+
     <!-- 카테고리별 상품 조회 -->
     <select id="getProductsByCategory" parameterType="string" resultType="org.puppit.model.dto.ProductDTO">
         SELECT p.product_id       AS productId,
