@@ -168,11 +168,12 @@ a{text-decoration:none;color:inherit;}
   document.addEventListener("DOMContentLoaded", () => {
 	  loadTopKeywords();
 	  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-		    document.getElementById("alarmArea").style.display = "block";
-		    loadAlarms();
-		    setInterval(loadAlarms, 30000);
-		    connectNotificationSocket(); // 실시간 알림 연결 추가
-		  }
+		  connectNotificationSocket(); // 실시간 알림 연결 추가  
+		  document.getElementById("alarmArea").style.display = "block";
+		  loadAlarms();
+		  setInterval(loadAlarms, 30000);
+		   
+	  }
   });
   
 //웹소켓(Stomp) 연결 및 구독
@@ -186,13 +187,18 @@ a{text-decoration:none;color:inherit;}
         // 본인에게 온 알림만 표시
         if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
 
+     	// 채팅방에 접속중이면 알림 띄우지 않음
+        if (String(currentChatRoomId) === String(notification.roomId)) return;
+        
+     	
+        
         // 중복 방지: messageId 기준
         // 기존 알림 리스트에 중복 messageId가 있으면 건너뜀
         let alarmArea = document.getElementById("alarmArea");
         let existing = alarmArea.innerHTML || "";
         if (existing.includes(notification.messageId)) return;
 
-        // 알림 새로 추가
+        // 알림 영역에 바로 추가 (중복 messageId 확인 생략 가능, 필요하면 추가)
         showAlarmPopup([notification]);
       });
     });
