@@ -87,6 +87,14 @@ a{text-decoration:none;color:inherit;}
   padding:0;
   line-height:1;
 }
+
+#alarmBell.red {
+  color: #e74c3c !important;
+  transform: scale(1.2);
+  transition: color 0.2s, transform 0.2s;
+}
+
+
 </style>
 </head>
 
@@ -197,14 +205,14 @@ a{text-decoration:none;color:inherit;}
     var alarmBell = document.getElementById("alarmBell");
     if (alarmBell) {
     	alarmBell.addEventListener("click", function() {
-    	      alarmClosed = false;
-    	  	  localStorage.setItem('puppitAlarmClosed', 'false'); // 다시 열림
-    	      alarmShownOnce = false;
-    	      loadAlarms();
-    	      //var alarmArea = document.getElementById("alarmArea");
-    	      alarmArea.style.display = "block";
-    	      alarmBell.style.display = "none";
-    	      window.alarmInterval = setInterval(loadAlarms, 30000);
+    		alarmClosed = false;
+			localStorage.setItem('puppitAlarmClosed', 'false');
+			alarmShownOnce = false;
+			loadAlarms();
+			alarmArea.style.display = "block";
+			alarmBell.style.display = "none";
+			window.alarmInterval = setInterval(loadAlarms, 30000);
+			alarmBell.classList.remove('red'); // 클릭하면 원상복구
     	    });
     }
   });
@@ -214,13 +222,13 @@ a{text-decoration:none;color:inherit;}
     var socket = new SockJS(contextPath + '/ws-stomp'); // 서버의 SockJS endpoint 맞게 수정
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
-      stompClient.subscribe('/topic/notification', function (notificationMsg) {
+      stompClient.subscribe('/topic/chat', function (notificationMsg) {
         let notification = JSON.parse(notificationMsg.body);
         // 본인에게 온 알림만 표시
         if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
      	// 채팅방에 접속중이면 알림 띄우지 않음
         if (String(currentChatRoomId) === String(notification.roomId)) return;
-        
+        onChatMessageReceived(notification);
      	
         
         // 중복 방지: messageId 기준
@@ -235,7 +243,18 @@ a{text-decoration:none;color:inherit;}
     });
   }
 
-  
+	// 접속자 관리 함수
+	function setUserInRoom(roomId, role) {
+		if (!activeRooms[roomId]) activeRooms[roomId] = { buyer: false, seller: false };
+		activeRooms[roomId][role.toLowerCase()] = true;
+	}
+	function setUserOutRoom(roomId, role) {
+		if (!activeRooms[roomId]) return;
+		activeRooms[roomId][role.toLowerCase()] = false;
+	}
+	function isUserInRoom(roomId, role) {
+		return activeRooms[roomId] && activeRooms[roomId][role.toLowerCase()];
+	}
   
 
 
@@ -342,7 +361,7 @@ a{text-decoration:none;color:inherit;}
         	 alarmArea.innerHTML = "";
              alarmArea.style.display = "none";
              var alarmBell = document.getElementById("alarmBell");
-		     if (alarmBell) alarmBell.style.display = "inline-block";
+		if (alarmBell) alarmBell.style.display = "inline-block";
         } else {
         	showAlarmPopup(data); // 알림 객체 배열을 넘겨줌!
         }
@@ -355,7 +374,20 @@ a{text-decoration:none;color:inherit;}
       });
   }
 
- 
+//메시지 수신시 접속자 체크 후 종모양 색/크기 변경
+	function onChatMessageReceived(chat) {
+		console.log('chat: ', chat);
+		const buyerInRoom = isUserInRoom(chat.chatRoomId, "BUYER");
+		const sellerInRoom = isUserInRoom(chat.chatRoomId, "SELLER");
+		const alarmBell = document.getElementById("alarmBell");
+		// 구매자 또는 판매자 중 한 명이라도 접속 중이 아니면 종모양 빨간색/크기 변경
+		if (!buyerInRoom || !sellerInRoom) {
+			if (alarmBell) {
+				alarmBell.classList.add('red');
+				alarmBell.style.display = "inline-block";
+			}
+		}
+	}
   
   async function loadCategory(categoryName) {
 	  results.innerHTML = '<div class="empty">카테고리 불러오는 중...</div>';
