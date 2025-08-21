@@ -26,6 +26,7 @@
   .search-box { display:flex; gap:8px; margin-bottom:24px; align-items:center; }
   .search-input { flex:1; padding:8px 14px; font-size:15px; border:1px solid #bbb; border-radius:6px; }
   .search-btn { padding:8px 18px; font-size:15px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+  .thumbnailImage{ width:200px; height:200px;}
   #search-results { background: #fff; }
 </style>
 
@@ -36,6 +37,7 @@
     <div class="product-grid" id="productGrid">
       <c:forEach items="${products}" var="p">
         <a class="product-card" href="${contextPath}/product/detail/${p.productId}">
+          <img class="thumbnailImage" src="${p.thumbnail.imageUrl}" alt="상품이미지 없음">
           <div class="title">${p.productName}</div>
           <div class="desc">${p.productDescription}</div>
           <div class="price">
@@ -47,6 +49,8 @@
   </c:if>
   <div id="search-results" style="display:none;"></div>
 </div>
+
+
 
 <script>
 (function () {
@@ -177,7 +181,7 @@
         appendProducts(products);
         offset = mainGrid.children.length;
         
-        // 🔑 핵심: 스크롤 강제로 살짝 위로
+        // 핵심: 스크롤 강제로 살짝 위로
         window.scrollTo({
           top: document.documentElement.scrollTop - 1,
           behavior: "instant"

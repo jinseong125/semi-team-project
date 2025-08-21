@@ -25,23 +25,22 @@ if (sessionMap != null) {
 
 <div class="detail-wrap">
   <!-- 좌측: 이미지 -->
-  <div class="detail-left">
-    <c:choose>
-      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.url}">
-        <img src="${product.thumbnail.url}" alt="${product.productName}" class="main-img"/>
-      </c:when>
-      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
-        <img src="${product.thumbnail.imageUrl}" alt="${product.productName}" class="main-img"/>
-      </c:when>
-      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.path}">
-        <img src="${product.thumbnail.path}" alt="${product.productName}" class="main-img"/>
-      </c:when>
-      <c:otherwise>
-        <div class="thumb-placeholder">이미지 없음</div>
-      </c:otherwise>
-    </c:choose>
-  </div>
+  
 
+<div class="detail-left">
+  	
+  	
+	    <c:choose>
+	      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
+	        <img class="productsPicture" src="${product.thumbnail.imageUrl}" alt="${product.productName}" class="main-img"/>
+	      </c:when>
+	     
+	      <c:otherwise>
+	        <div class="thumb-placeholder">이미지 없음</div>
+	      </c:otherwise>
+	    </c:choose>
+ 
+  </div>
 
 
 
@@ -138,7 +137,28 @@ if (sessionMap != null) {
   max-width:1100px; margin:40px auto; padding:0 20px;
   display:flex; gap:32px;
 }
-.detail-left { flex:1; }
+.detail-left {
+  flex: 1;
+  width: 100%;
+  max-width: 500px;   /* 원하는 가로 크기 */
+  height: 500px;      /* 원하는 세로 크기 */
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;   /* 이미지 넘치면 잘리게 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa; /* 빈공간 배경 */
+}
+
+.detail-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;   /* 박스에 꽉 채우되 잘릴 수 있음 */
+  /* object-fit: contain;  잘리지 않고 다 보이지만 여백 생김 */
+}
+
+
 .main-img {
   width:100%; max-height: 500px;
   border-radius:12px; border:1px solid #eee;
@@ -165,9 +185,15 @@ if (sessionMap != null) {
 .detail-desc h2 { font-size:18px; font-weight:700; margin-bottom:12px; }
 .desc { white-space:pre-wrap; line-height:1.6; font-size:15px; }
 .empty { color:#6b7280; font-size:14px; }
+.productsPicture {width:200px; heigth:250px;}
+
+
 </style>
 
 <script>
+
+console.log("상품 ${product}");
+
 document.addEventListener("DOMContentLoaded", () => {
 	const productId = "${product.productId}";
     getProductFetch(productId);
