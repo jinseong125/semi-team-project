@@ -64,7 +64,7 @@ if (sessionMap != null) {
       <fmt:formatNumber value="${product.productPrice}" pattern="#,###"/>원
     </div>
 
-    <!-- 상태 / 등록일 -->
+    <!-- 상태 / 등록일 / 판매자 정보 -->
     <ul class="meta-list">
       <li>
         <span class="label">상품상태</span>
@@ -82,17 +82,10 @@ if (sessionMap != null) {
         <span class="value">
           <fmt:formatDate value="${product.productCreatedAt}" pattern="yyyy.MM.dd HH:mm"/>
         </span>
+        <span class="label">판매자 정보</span>
+        <span>${product.sellerId}</span>
       </li>
-   <%--    <li>
-	       <span class="value">
-			 <c:choose>
-			   <c:when test="${not empty product.location}">
-			     ${product.location}
-			   </c:when>
-			   <c:otherwise>지역 정보 없음</c:otherwise>
-			 </c:choose>
-		  </span>
-	    </li> --%>
+		
     </ul>
 
     <!-- 버튼 영역 -->
@@ -107,7 +100,7 @@ if (sessionMap != null) {
                   onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
         </form>
       </c:if>
-
+	
 
       <!-- 공통 버튼 -->
       <button type="button" class="btn outline" onclick="history.back()">목록</button>
