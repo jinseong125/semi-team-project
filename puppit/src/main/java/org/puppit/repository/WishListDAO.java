@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
+import org.puppit.model.dto.ProductAndImageDTO;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.WishListDTO;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +35,12 @@ public class WishListDAO {
   }
   public Integer deleteAllWishListByUser(Integer userId) {
     return sst.delete("mybatis.mapper.wishListMapper.deleteAllWishListByUser", userId);
+  }
+  public ProductImageDTO getProductImage(Integer productId) {
+    return sst.selectOne("mybatis.mapper.wishListMapper.getProductImage", productId);
+  }
+  public ProductAndImageDTO getProductAndImage(Integer productId) {
+    return sst.selectOne("mybatis.mapper.wishListMapper.getProductAndImage", productId);
   }
 
 }

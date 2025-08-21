@@ -27,4 +27,18 @@
     WHERE product_id = #{productId}
   </select>
   
+  <select id="getProductImage" resultType="org.puppit.model.dto.ProductImageDTO">
+    SELECT image_id, product_id, image_url, image_key, is_thumbnail
+    FROM product_image
+    WHERE product_id = #{productId} AND is_thumbnail = 1;
+  </select>
+  
+  <select id="getProductAndImage" resultType="org.puppit.model.dto.ProductAndImageDTO">
+    SELECT p.product_id, p.product_name, p.product_price, p.product_description, i.image_id, i.image_url, i.image_key, i.is_thumbnail
+    FROM product p
+    JOIN product_image i
+    ON p.product_id = i.product_id AND i.is_thumbnail = 1
+    WHERE p.product_id = #{productId}
+  </select>
+  
 </mapper>

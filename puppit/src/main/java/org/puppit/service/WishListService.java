@@ -2,7 +2,9 @@ package org.puppit.service;
 
 import java.util.List;
 
+import org.puppit.model.dto.ProductAndImageDTO;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.WishListDTO;
 import org.puppit.repository.WishListDAO;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,12 @@ public class WishListService {
   }
   public boolean deleteAllWishListByUser(Integer userId) {
     return wishListDAO.deleteAllWishListByUser(userId) == 1;
+  }
+  public ProductImageDTO getProductImage(Integer productId) {
+    return wishListDAO.getProductImage(productId);
+  }
+  public ProductAndImageDTO getProductAndImage(Integer productId) {
+    return wishListDAO.getProductAndImage(productId);
   }
 
 }

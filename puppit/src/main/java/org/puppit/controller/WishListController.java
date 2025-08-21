@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.puppit.model.dto.ProductAndImageDTO;
 import org.puppit.model.dto.ProductDTO;
+import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.WishListDTO;
 import org.puppit.service.WishListService;
 import org.springframework.stereotype.Controller;
@@ -31,11 +33,19 @@ public class WishListController {
   public String wishList(Integer userId, Model model) {
     List<WishListDTO> likes = wishListService.getWishListByUserId(userId);
     List<ProductDTO> products = new ArrayList<>();
+    List<ProductImageDTO> productImages = new ArrayList<>();
+    List<ProductAndImageDTO> productAndImages = new ArrayList<>();
     
     for(WishListDTO like : likes) {
       products.add(wishListService.getProductById(like.getProductId()));
+      productImages.add(wishListService.getProductImage(like.getProductId()));
+      productAndImages.add(wishListService.getProductAndImage(like.getProductId()));
+      
     }
+    System.out.println("상품123" + productAndImages);
     model.addAttribute("products", products);
+    model.addAttribute("productImages", productImages);
+    model.addAttribute("productAndImages", productAndImages);
     model.addAttribute("likes", likes);
     return "user/wishList";
   }
