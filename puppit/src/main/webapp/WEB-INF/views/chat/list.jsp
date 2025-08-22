@@ -18,11 +18,11 @@ if (sessionMap != null) {
     }
 }
 %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
 <c:set var="loginUserId" value="<%= accountId %>" />
 <c:set var="userId" value="<%=userId %>"/>
 <c:set var="highlightRoomIdStr" value="${highlightRoomIdStr}"/>
-
+<jsp:include page="/WEB-INF/views/layout/header.jsp?dt=<%=System.currentTimeMillis()%>"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,10 +31,8 @@ if (sessionMap != null) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background: #fff; margin: 0; padding: 0; }
-        .container-header { text-align: center; margin-top: 40px; margin-bottom: 24px; }
-        .container-header h1 { font-size: 24px; font-weight: bold; letter-spacing: -1px; color: #222; }
-        .container { width: 1000px; min-height: 700px; display: flex; flex-direction: row; gap: 20px; justify-content: center; align-items: flex-start; margin: 0 auto; background: #fff; }
-        .chatlist-container { width: 400px; height: 600px; border: none; padding: 0; margin: 0; overflow-y: auto; }
+        .container { width: 1400px; min-height: 700px;  padding-top: 100px; display: flex; flex-direction: row; gap: 20px; justify-content: center; align-items: flex-start; margin: 0 auto; background: #fff; }
+        .chatlist-container { width: 1400px; height: 600px; border: none; padding: 0; margin: 0; overflow-y: auto; }
         .chat-list { display: flex; flex-direction: column; gap: 20px; }
         .chatList { display: flex; flex-direction: row; align-items: center; padding: 0 10px; gap: 16px; cursor: pointer; background: #fff; border-radius: 18px; min-height: 80px; transition: background 0.15s; box-shadow: none; border: none; }
         .chatList:hover { background: #f5f5f5; }
@@ -77,9 +75,9 @@ if (sessionMap != null) {
     </style>
 </head>
 <body>
-<div class="container-header">
+<!--  <div class="container-header">
     <h1>채팅방 목록</h1>
-</div>
+</div> -->
 <div class="container">
     <div class="chatlist-container" id="chatlist-container">
         <div id="chatListRenderArea">
@@ -131,17 +129,16 @@ if (sessionMap != null) {
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
-const contextPath = "${contextPath}";
-const loginUserId = "${loginUserId}";
-const userId = "${userId}";
 
 const centerMessage = document.getElementById('center-message');
 const chatHistory = document.getElementById('chat-history');
 const productInfoArea = document.getElementById('product-info-area');
 const renderedMessageIds = new Set();
+console.log("contextPath", contextPath);
+console.log("loginUserId", loginUserId);
+console.log("userId", userId);
 
-
-let stompClient = null;
+//let stompClient = null;
 let currentRoomId = null;
 let currentSubscription = null;
 let isConnected = false;
@@ -177,6 +174,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     enableChatInput(false);
 });
+
+function enableChatInput(enable) {
+    const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
+    const button = document.querySelector('button[type="submit"]');
+    if (input && button) {
+        input.disabled = !enable;
+        button.disabled = !enable;
+    }
+}
+
 
 function loadChatHeader(product, buyerId, sellerId, sellerAccountId, buyerAccountId) {
     const chatHeader = document.getElementById('chat-header');
@@ -394,11 +401,18 @@ function connectAndSubscribe(currentRoomId) {
             subscribeRoom(currentRoomId);
             enableChatInput(true);
             //subscribeNotifications(); // 알림 구독
+            console.log("[DEBUG] enableChatInput(true) called");
+             
         });
     } else {
+    	// 이미 연결된 경우에도 반드시 isConnected = true로 보완!
+        if (stompClient.connected) {
+            isConnected = true; // ★ 추가!
+        }
         subscribeRoom(currentRoomId);
-        enableChatInput(isConnected);
+        enableChatInput(true);
         //subscribeNotifications(); // 알림 구독
+        console.log("[DEBUG] enableChatInput(isConnected) called", isConnected);
     }
 }
 
@@ -430,8 +444,9 @@ function subscribeRoom(currentRoomId) {
         // userId(숫자)와 chat.chatReceiver(숫자) 또는
         // loginUserId(문자열)와 chat.chatReceiverAccountId(문자열) 비교
         if (
-            String(chat.chatReceiver) === String(userId) ||
-            String(chat.chatReceiverAccountId) === String(loginUserId)
+        		String(chat.chatReceiver) === String(userId) ||
+        	     String(chat.chatReceiverAccountId) === String(loginUserId)
+        	    && String(chat.chatSenderAccountId) !== String(loginUserId) 
         ) {
             highlightChatRoom(chat.chatRoomId);
         } else {
@@ -439,10 +454,11 @@ function subscribeRoom(currentRoomId) {
         }
         // === 하이라이트 처리 코드 END ===
         
-        if (String(currentRoomId) === String(chat.chatRoomId)) {
-            addChatMessageToHistory(chat); // 이미 렌더링된 메시지는 내부에서 필터됨
+       if (String(currentRoomId) === String(chat.chatRoomId)) {
+            addChatMessageToHistory(chat);
             centerMessage.style.display = "none";
-        } else {
+        } else if (!isMine) {
+            // 수신자인 경우에만 알림 표시
             displayNotification(
                 chat.chatSenderAccountId,
                 chat.chatMessage,
@@ -455,16 +471,21 @@ function subscribeRoom(currentRoomId) {
 }
 
 function subscribeNotifications() {
-    stompClient.subscribe('/topic/notification', function(notification) {
-        const data = JSON.parse(notification.body);
-        displayNotification(
-            data.senderAccountId,
-            data.chatMessage,
-            data.senderRole,
-            data.chatCreatedAt,
-            data.productName
-        );
-    });
+	 stompClient.subscribe('/topic/notification', function(notification) {
+    const data = JSON.parse(notification.body);
+
+    // receiverAccountId가 로그인된 사용자와 같을 때만 표시
+    if (String(data.receiverAccountId) !== String(loginUserId)) {
+      return;
+    }
+    displayNotification(
+      data.senderAccountId,
+      data.chatMessage,
+      data.senderRole,
+      data.chatCreatedAt,
+      data.productName
+    );
+  });
 }
 
 function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
@@ -545,6 +566,13 @@ function setUserInRoom(roomId, role) {
 
 
 function sendMessage(currentRoomId) {
+	 console.log("sendMessage called", {
+	      stompClient,
+	      isConnected,
+	      currentRoomId,
+	      input: document.querySelector('input[placeholder="채팅메시지를 입력하세요"]'),
+	      message: document.querySelector('input[placeholder="채팅메시지를 입력하세요"]').value
+	    });
     if (!stompClient || !isConnected) return;
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const message = input.value;

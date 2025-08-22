@@ -1,7 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" scope="request" />
+<!-- contextPath 변수 선언 (조건부!) -->
+<c:if test="${empty contextPath}">
+  <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+</c:if>
+<c:if test="${empty loginUserId}">
+  <c:set var="loginUserId" value="${sessionScope.sessionMap.accountId}" />
+</c:if>
+<c:if test="${empty userId}">
+  <c:set var="userId" value="${sessionScope.sessionMap.userId}" />
+</c:if>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -215,8 +224,8 @@ a{text-decoration:none;color:inherit;}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
 	// JSP에서 세션 정보를 JS 변수로 전달
-	var contextPath = "${pageContext.request.contextPath}";
-	const userId = "${sessionScope.sessionMap.userId}";
+	 //var contextPath = "${contextPath}";
+	//const userId = "${sessionScope.sessionMap.userId}";
 	const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
 	const input = document.getElementById("search-input");
 
@@ -224,13 +233,16 @@ a{text-decoration:none;color:inherit;}
 	//채팅방 접속 상태
 	let currentChatRoomId = null;
 	let alarmShownOnce = false;
-	
+	let contextPath = "${contextPath}";
+	  let loginUserId = "${loginUserId}";
+	  let userId = "${userId}";
 	
 	
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
   
+
   // 1. 페이지가 로딩될 때마다 알림 닫힘 상태를 항상 false로 초기화!
 
 
@@ -239,6 +251,8 @@ let alarmClosed = false; // 팝업 닫힘 상태
 let alarmArea, alarmBell;
 
 document.addEventListener("DOMContentLoaded", function() {
+	//여기에서 콘솔로 찍기!
+	  console.log("loginUserId:", loginUserId, "userId:", userId);
   alarmArea = document.getElementById("alarmArea");
   alarmBell = document.getElementById("alarmBell");
 
@@ -276,39 +290,48 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 });
+
+
+
+
+
+
+
 //1. 웹소켓 연결 및 구독 (알림+채팅 모두)
   function connectSocket() {
     var socket = new SockJS(contextPath + '/ws-chat');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function(frame) {
         // 알림 메시지 구독 (모든 알림)
-        stompClient.subscribe('/topic/notification', function(msg) {
-          console.log('msg: ', msg);
-          let notification = JSON.parse(msg.body);
-          console.log('notification: ', notification);
-          // 본인에게 온 알림만
-          if (String(notification.receiverAccountId || notification.userId) !== String(userId)) {
-        	  console.log('여기서 걸리나');
-        	  showAlarmPopup([notification]);
-        	  return;
-          }
-        	  
-          // [핵심] 채팅방에 접속중이 아닐 때 알림 팝업!
-          if (String(currentChatRoomId) !== String(notification.roomId)) {
-        	  console.log('현재 채팅방 접속중 아님');
-            showAlarmPopup([notification]);
-            const alarmBell = document.getElementById("alarmBell");
-            if (alarmBell) {
-              alarmBell.classList.add('red');
-              alarmBell.style.display = "inline-block";
-            }
-          }
-        });
+       stompClient.subscribe('/topic/notification', function(msg) {
+		  console.log('msg: ', msg);
+		  let notification = JSON.parse(msg.body);
+		  console.log('notification: ', notification);
+		
+		  // 🚩 메시지의 receiverAccountId가 로그인한 사용자와 다르면 return (수신자만 알림)
+		  if (String(notification.receiverAccountId) !== String(loginUserId)) {
+		    return;
+		  }
+		
+		  // [채팅방에 접속 중이 아닐 때만 알림]
+		  if (String(currentChatRoomId) !== String(notification.roomId)) {
+			  console.log('currentChatRoomId: ', currentChatRoomId);
+		    showAlarmPopup([notification]);
+		    const alarmBell = document.getElementById("alarmBell");
+		    if (alarmBell) {
+		      alarmBell.classList.add('red');
+		      alarmBell.style.display = "inline-block";
+		    }
+		  }
+		});
         // 채팅 메시지 구독 (모든 채팅방)
         stompClient.subscribe('/topic/chat', function(msg) {
           let chat = JSON.parse(msg.body);
-          // 본인에게 온 메시지라면 무시 (알림만 뜨게 할 경우 상대방이 보낸 것만)
-          if (String(chat.chatSenderAccountId) === String(userId)) return;
+       // [핵심] 메시지의 수신자가 나일 때만 알림!
+          if (String(chat.chatReceiverAccountId) !== String(loginUserId) && String(chat.chatReceiver) !== String(userId)) {
+            return;
+          }
+
           // [핵심] 채팅방에 접속중이 아닐 때 알림 팝업!
           if (String(currentChatRoomId) !== String(chat.chatRoomId)) {
             showAlarmPopup([chat]);
@@ -362,6 +385,12 @@ document.addEventListener("DOMContentLoaded", function() {
 	  console.log('deduped:', deduped);
 
 	  var alarmArea = document.getElementById("alarmArea");
+	  // 🚩 여기! 알림이 오면 무조건 팝업을 띄움
+	  alarmClosed = false;
+	  localStorage.setItem('puppitAlarmClosed', 'false');
+
+	  
+	  
 	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
 	  deduped.forEach(function(alarm) {
 	    html += '<li>'
