@@ -30,9 +30,45 @@ if (sessionMap != null) {
     <title>채팅방 목록</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background: #fff; margin: 0; padding: 0; }
-        .container { width: 1400px; min-height: 700px;  padding-top: 100px; display: flex; flex-direction: row; gap: 20px; justify-content: center; align-items: flex-start; margin: 0 auto; background: #fff; }
-        .chatlist-container { width: 1400px; height: 600px; border: none; padding: 0; margin: 0; overflow-y: auto; }
+     body { font-family: 'Noto Sans KR', sans-serif; background: #fff; margin: 0; padding: 0; }
+        /* 수정: container max-width 1200px로 헤더에 맞춤, 가운데 정렬 */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            min-height: 700px;
+            padding-top: 100px;
+            display: flex;
+            flex-direction: row;
+            gap: 0;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 0 auto;
+            background: #fff;
+            box-sizing: border-box;
+        }
+
+        /* 40%: 채팅목록 / 60%: 채팅창 */
+        .chatlist-container {
+            width: 40%;
+            min-width: 0;
+            height: 600px;
+            border: none;
+            padding: 0;
+            margin: 0;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .chat-container {
+            width: 60%;
+            min-width: 0;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            box-sizing: border-box;
+            background: #fafafa;
+        }
         .chat-list { display: flex; flex-direction: column; gap: 20px; }
         .chatList { display: flex; flex-direction: row; align-items: center; padding: 0 10px; gap: 16px; cursor: pointer; background: #fff; border-radius: 18px; min-height: 80px; transition: background 0.15s; box-shadow: none; border: none; }
         .chatList:hover { background: #f5f5f5; }
@@ -43,10 +79,6 @@ if (sessionMap != null) {
         .chat-meta { display: flex; flex-direction: column; align-items: flex-end; min-width: 90px; gap: 8px; }
         .chat-time { font-size: 14px; color: #757575; font-weight: 400; }
         .chat-unread-badge { display: inline-block; width: 22px; height: 22px; line-height: 20px; font-size: 15px; background: #fff; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 50%; text-align: center; font-weight: 700; margin-top: 2px; margin-right: 5px; }
-        .chat-container { width: 400px; height: 600px; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; box-sizing: border-box; background: #fafafa; }
-        .chat-input-group { display: flex; flex-direction: row; gap: 8px; width: 100%; }
-        .chat-container input { min-width: 0; padding: 0 10px; font-size: 16px; height: 38px; border: 1px solid #ccc; border-radius: 8px; background: #fff; box-sizing: border-box; }
-        .chat-container button { height: 38px; padding: 0 24px; font-size: 16px; border: none; border-radius: 8px; background: #888; color: #fff; cursor: pointer; box-sizing: border-box; margin-top: 10px; }
         .chat-history { display: flex; flex-direction: column; align-items: flex-start; width: 100%; gap: 12px; margin-bottom: 16px; overflow-y: auto; flex: 1; scrollbar-width: none; -ms-overflow-style: none; }
         .chat-history::-webkit-scrollbar { display: none; }
         .chat-history .chat-message { max-width: 60%; min-width: 80px; padding: 10px 16px; border-radius: 12px; margin-bottom: 4px; display: flex; flex-direction: column; background: #eee; box-sizing: border-box; word-break: break-word; height: auto; overflow: visible; }
@@ -61,7 +93,7 @@ if (sessionMap != null) {
 	        position: fixed;
 	        right: -100px;
 	        top: 20px;
-	        width: 300px; /* 알림의 너비를 300px로 설정 */
+	        width: 300px;
 	        background-color: #f9f9f9;
 	        border: 1px solid #ccc;
 	        padding: 10px;
@@ -69,18 +101,35 @@ if (sessionMap != null) {
 	        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 	        transition: right 1s;
 	    }
-        
+
+        /* 반응형 대응: 모바일 화면에서 100%로 */
+        @media (max-width: 1200px) {
+            .container { max-width: 100vw; }
+            .chatlist-container, .chat-container { width: 100%; }
+            .container { flex-direction: column; }
+        }
         
         
     </style>
 </head>
 <body>
-<!--  <div class="container-header">
-    <h1>채팅방 목록</h1>
-</div> -->
 <div class="container">
+   
+    
     <div class="chatlist-container" id="chatlist-container">
+     
+        <div style="display: flex; align-items: center; margin-bottom: 12px; box-sizing: border-box;">
+            <button id="back-btn"
+                style="background: none; border: none; color: #222; font-size: 24px; font-weight: 700; cursor: pointer; padding: 0; margin-right: 8px; display: flex; align-items: center;">
+                <i class="fa-solid fa-arrow-left" style="font-size: 24px;"></i>
+            </button>
+            
+        </div>
         <div id="chatListRenderArea">
+	         <div style="text-align: center; font-size: 22px; font-weight: 700; color: #222; margin-bottom: 16px;">
+	            채팅목록
+	        </div>
+        
             <c:forEach items="${chatList}" var="chat">
                 <div class="chatList" data-room-id="${chat.roomId}">
                     <span class="chat-profile-img chat-profile-icon">
@@ -114,9 +163,6 @@ if (sessionMap != null) {
         </div>
     </div>
     <div class="chat-container">
-	   <!--   <div class="chat-header" id="chat-header" style="padding: 10px; font-size: 16px; font-weight: bold; background: #f5f5f5; border-bottom: 1px solid #ddd;">
-	        
-	    </div>  -->
         <div class="product-info-area" id="product-info-area"></div>
         <div class="center-message" id="center-message">상품 판매자와 채팅을 시작해보세요</div>
         <div class="chat-history" id="chat-history"></div>
@@ -633,6 +679,20 @@ function sendMessage(currentRoomId) {
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
     input.value = "";
 }
+
+//뒤로가기 버튼 기능 추가
+document.addEventListener('DOMContentLoaded', function() {
+    // ... 기존 chatlist, sendBtn 등 이벤트 바인딩 ...
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.history.back();
+        });
+    }
+});
+
+
+
 </script>
 </body>
 </html>
