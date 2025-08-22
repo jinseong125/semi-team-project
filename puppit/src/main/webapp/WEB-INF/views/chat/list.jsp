@@ -198,6 +198,17 @@ let highlightTimers = {}; // { roomId: timerId }
 
 document.addEventListener('DOMContentLoaded', function() {
     const chatlist = document.getElementById('chatlist-container');
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightRoomId = urlParams.get('highlightRoomId');
+    const highlightMessage = urlParams.get('highlightMessage');
+    
+    if (highlightRoomId) {
+        highlightChatRoom(highlightRoomId);
+        if (highlightMessage) {
+          updateChatListLastMessage(highlightRoomId, highlightMessage);
+        }
+      }
+    
     chatlist.addEventListener('click', function(e) {
         const chatDiv = e.target.closest('.chatList');
         if (chatDiv) {
@@ -693,7 +704,6 @@ function updateChatListLastMessage(roomId, chatMessage) {
 
 //뒤로가기 버튼 기능 추가
 document.addEventListener('DOMContentLoaded', function() {
-    // ... 기존 chatlist, sendBtn 등 이벤트 바인딩 ...
     const backBtn = document.getElementById('back-btn');
     if (backBtn) {
         backBtn.addEventListener('click', function() {

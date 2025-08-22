@@ -413,29 +413,30 @@ document.addEventListener("DOMContentLoaded", function() {
 	  
 	  // 🚩 알림 팝업의 알림 메시지 클릭 이벤트 바인딩
 	  setTimeout(function() {
-	    document.querySelectorAll('#alarmArea .alarm-link').forEach(function(alarmLink) {
-	      alarmLink.addEventListener('click', function(e) {
-	        var roomId = alarmLink.getAttribute('data-room-id');
-	        var messageId = alarmLink.getAttribute('data-message-id');
-	        var chatMessage = alarmLink.getAttribute('data-chat-message');
-	        // 1. 채팅방 목록 하이라이트
-	        window.highlightChatRoom(roomId);
+		  document.querySelectorAll('#alarmArea .alarm-link').forEach(function(alarmLink) {
+		    alarmLink.addEventListener('click', function(e) {
+		      var roomId = alarmLink.getAttribute('data-room-id');
+		      var chatMessage = alarmLink.getAttribute('data-chat-message');
 
-	        // 2. 채팅방 목록의 해당 방의 마지막 메시지 업데이트
-	        window.updateChatListLastMessage(roomId, chatMessage);
+		      // 페이지가 채팅방 목록(/chat/recentRoomList)인지 체크
+		      var isChatListPage = window.location.pathname.indexOf('/chat/recentRoomList') !== -1;
 
-	        // 3. 알림 팝업 닫기
-	        closeAlarmPopup();
-
-	        // 4. (선택) 채팅방 열기 등 기존 동작 유지 (원하면 loadChatHistory 등 호출)
-	        // 만약 방 이동까지 원하면 아래 주석 해제
-	        // if (typeof loadChatHistory === 'function') {
-	        //   loadChatHistory(roomId);
-	        // }
-	      });
-	    });
-	  }, 30); // DOM 반영 후 바인딩
-	  
+		      if (typeof window.highlightChatRoom === 'function' && isChatListPage) {
+		        // ✅ 현재 목록 페이지라면 기존 기능 수행
+		        window.highlightChatRoom(roomId);
+		        window.updateChatListLastMessage(roomId, chatMessage);
+		        closeAlarmPopup();
+		        // (원하면 loadChatHistory 등 추가)
+		      } else {
+		        // ✅ 다른 페이지라면 목록 페이지로 이동, 파라미터 전달
+		        var url = contextPath + '/chat/recentRoomList'
+		          + '?highlightRoomId=' + encodeURIComponent(roomId)
+		          + '&highlightMessage=' + encodeURIComponent(chatMessage);
+		        window.location.href = url;
+		      }
+		    });
+		  });
+		}, 30);
 	  
 	}
 
