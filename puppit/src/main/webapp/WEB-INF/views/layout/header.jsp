@@ -394,17 +394,49 @@ document.addEventListener("DOMContentLoaded", function() {
 	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
 	  deduped.forEach(function(alarm) {
 	    html += '<li>'
-	      + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
-	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
-	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
-	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
-	      + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
-	      + '</li>';
+	    	+ '<a href="javascript:void(0);" '
+	        + 'class="alarm-link" '
+	        + 'data-room-id="' + alarm.roomId + '" '
+	        + 'data-message-id="' + (alarm.messageId || '') + '" '
+	        + 'data-chat-message="' + (alarm.chatMessage || '').replace(/"/g, '&quot;') + '" '
+	        + '>'
+	      	+ '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
+	      	+ ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
+	      	+ ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
+	      	+ '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
+	      	+ '</li>';
 	  });
 	  html += '</ul>';
 	  alarmArea.innerHTML = html;
 	  alarmArea.style.display = "block";
 	  alarmShownOnce = true;
+	  
+	  // 🚩 알림 팝업의 알림 메시지 클릭 이벤트 바인딩
+	  setTimeout(function() {
+	    document.querySelectorAll('#alarmArea .alarm-link').forEach(function(alarmLink) {
+	      alarmLink.addEventListener('click', function(e) {
+	        var roomId = alarmLink.getAttribute('data-room-id');
+	        var messageId = alarmLink.getAttribute('data-message-id');
+	        var chatMessage = alarmLink.getAttribute('data-chat-message');
+	        // 1. 채팅방 목록 하이라이트
+	        window.highlightChatRoom(roomId);
+
+	        // 2. 채팅방 목록의 해당 방의 마지막 메시지 업데이트
+	        window.updateChatListLastMessage(roomId, chatMessage);
+
+	        // 3. 알림 팝업 닫기
+	        closeAlarmPopup();
+
+	        // 4. (선택) 채팅방 열기 등 기존 동작 유지 (원하면 loadChatHistory 등 호출)
+	        // 만약 방 이동까지 원하면 아래 주석 해제
+	        // if (typeof loadChatHistory === 'function') {
+	        //   loadChatHistory(roomId);
+	        // }
+	      });
+	    });
+	  }, 30); // DOM 반영 후 바인딩
+	  
+	  
 	}
 
 	  function closeAlarmPopup() {
