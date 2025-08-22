@@ -86,7 +86,6 @@ public class ProductController {
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, Model model) {
       ProductDTO product = productService.detailProducts(productId);
-        System.out.println("상품상품상품" + product);
         if (product == null) {
             model.addAttribute("error", "해당 상품을 찾을 수 없습니다.");
             return "error/404";
@@ -243,6 +242,7 @@ public class ProductController {
         productService.deleteImage(imageId);
         return "이미지가 삭제되었습니다.";
     }
-
+    
+    
     
 }

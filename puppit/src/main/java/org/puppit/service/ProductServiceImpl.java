@@ -108,10 +108,27 @@ public class ProductServiceImpl implements ProductService {
         }
         int itemCount = productDAO.getProductCount();
         dto.setItemCount(itemCount);
+        
+        // 범위 넘어가면 빈 리스트 반환
+        if (dto.getOffset() >= itemCount) {
+            return Map.of(
+                "products", List.of(),
+                "itemCount", itemCount,
+                "hasMore", false
+            );
+        }
 
-        List<ProductDTO> products = productDAO.getProductList(); // 단순화
+        List<ProductDTO> products = productDAO.selectPagedProducts(
+        Map.of("offset", dto.getOffset(), 
+               "size", dto.getSize(), 
+               "sort", sort)); 
 
-        return Map.of("products", products, "pageCount", dto.getPageCount());
+        boolean hasMore = dto.getOffset() + products.size() < itemCount;
+        return Map.of(
+            "products", products,
+            "itemCount", itemCount,
+            "hasMore", hasMore
+        );
     }
 
     @Override

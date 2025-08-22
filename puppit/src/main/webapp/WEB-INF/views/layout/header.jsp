@@ -1,7 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<c:set var="contextPath" value="${pageContext.request.contextPath}" scope="request" />
+<!-- contextPath 변수 선언 (조건부!) -->
+<c:if test="${empty contextPath}">
+  <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+</c:if>
+<c:if test="${empty loginUserId}">
+  <c:set var="loginUserId" value="${sessionScope.sessionMap.accountId}" />
+</c:if>
+<c:if test="${empty userId}">
+  <c:set var="userId" value="${sessionScope.sessionMap.userId}" />
+</c:if>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -10,7 +19,7 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-/* ===== 기존 스타일 ===== */
+/* ===== 헤더 기본 레이아웃 ===== */
 .header {display:flex;justify-content:space-between;align-items:flex-start;max-width:1200px;margin:0 auto;padding:16px 20px;}
 .left {display:flex;align-items:flex-start;gap:18px;}
 .left-col {display:flex;flex-direction:column;gap:14px;min-width:420px;}
@@ -18,9 +27,6 @@
 .searchBar .input {width:85%;height:44px;padding:0 44px 0 40px;border:1px solid #e5e7eb;border-radius:12px;background:#f5f7fa;outline:none;}
 .searchBar .fa-magnifying-glass {position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#666;cursor:pointer;}
 .meta-row{display:flex;align-items:center;gap:16px;}
-.category{position:relative;display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e5e7eb;border-radius:12px;background:#fff;cursor:pointer;}
-.category select{appearance:none;border:none;background:transparent;font:inherit;outline:none;padding-right:22px;}
-.category .chev{position:absolute;right:10px;pointer-events:none;color:#444;font-size:12px;}
 .right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
 a{text-decoration:none;color:inherit;}
 .top-actions{display:flex;gap:10px;}
@@ -35,6 +41,54 @@ a{text-decoration:none;color:inherit;}
 .card .name {margin-top:8px;font-weight:600;}
 .card .price {margin-top:4px;color:#555;}
 
+/* ===== 카테고리 셀렉트 박스 ===== */
+.category {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.category select {
+  appearance: none;
+  border: 1px solid #d1e3ff;
+  border-radius: 12px;
+  background: #f9fbff;
+  font: inherit;
+  outline: none;
+  padding: 10px 36px 10px 14px;
+  cursor: pointer;
+  color: #333;
+  transition: all 0.2s ease-in-out;
+}
+
+/* hover 효과 */
+.category select:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74,144,226,0.3);
+}
+
+/* focus 효과 */
+.category select:focus {
+  border-color: #1c6dd0;
+  box-shadow: 0 0 6px rgba(28,109,208,0.4);
+}
+
+/* 옵션 스타일 */
+.category select option {
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* 드롭다운 아이콘 */
+.category .chev {
+  position: absolute;
+  right: 14px;
+  pointer-events: none;
+  color: #4a90e2;
+  font-size: 12px;
+}
+
 /* 자동완성 리스트 */
 #autocompleteList {
   position:absolute;top:48px;left:0;width:85%;
@@ -48,11 +102,11 @@ a{text-decoration:none;color:inherit;}
 #autocompleteList li:hover {background:#f9f9f9;}
 
 /* 인기검색어 */
-
 #top-keywords {margin-top:4px;font-size:14px;color:#444;}
 #top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
 #top-keywords .keyword:hover {text-decoration:underline;}
 
+/* 알림 팝업 */
 #alarmArea {
   background:#fffbe7;
   border:1px solid #ffe066;
@@ -87,6 +141,14 @@ a{text-decoration:none;color:inherit;}
   padding:0;
   line-height:1;
 }
+
+#alarmBell.red {
+  color: #e74c3c !important;
+  transform: scale(1.2);
+  transition: color 0.2s, transform 0.2s;
+}
+
+
 </style>
 </head>
 
@@ -114,12 +176,12 @@ a{text-decoration:none;color:inherit;}
         <label class="category">
           <select id="categorySelect">
             <option value="">카테고리</option>
-			<option value="사료">사료</option>
-			<option value="간식">간식</option>
-			<option value="외출용품">외출용품</option>
-			<option value="기타용품">기타용품</option>
-		  </select>
-         <i class="fa-solid fa-chevron-down chev"></i>
+            <option value="사료">사료</option>
+            <option value="간식">간식</option>
+            <option value="외출용품">외출용품</option>
+            <option value="기타용품">기타용품</option>
+          </select>
+          <i class="fa-solid fa-chevron-down chev"></i>
         </label>
       </div>
     </div>
@@ -141,7 +203,7 @@ a{text-decoration:none;color:inherit;}
 	       <i class="fa-regular fa-bell"></i>
 	    </button>
         <a href="${contextPath}/user/logout">로그아웃</a>
-        <!-- 채팅 버튼: 로그인 했을 때만 노출 -->
+        <!-- 채팅 버튼 -->
         <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" onclick="location.href='${contextPath}/chat/recentRoomList'" title="채팅방 목록으로 이동">
           <i class="fa-regular fa-comment-dots"></i> 채팅
         </button>
@@ -155,213 +217,281 @@ a{text-decoration:none;color:inherit;}
 </div>
   <div id="alarmArea"></div>
 <div id="search-results"></div>
+
 <hr>
+
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
 	// JSP에서 세션 정보를 JS 변수로 전달
-	var contextPath = "${pageContext.request.contextPath}";
-	const userId = "${sessionScope.sessionMap.userId}";
+	 //var contextPath = "${contextPath}";
+	//const userId = "${sessionScope.sessionMap.userId}";
 	const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
 	const input = document.getElementById("search-input");
 
 	let stompClient = null;
 	//채팅방 접속 상태
 	let currentChatRoomId = null;
+	let alarmShownOnce = false;
+	let contextPath = "${contextPath}";
+	  let loginUserId = "${loginUserId}";
+	  let userId = "${userId}";
+	
 	
   var btn = document.getElementById('do-search');
   var results = document.getElementById('search-results');
   var autoList = document.getElementById('autocompleteList');
   
 
-  
-  document.addEventListener("DOMContentLoaded", () => {
-	  loadTopKeywords();
+  // 1. 페이지가 로딩될 때마다 알림 닫힘 상태를 항상 false로 초기화!
 
-	  //로그인 상태일 때만 알림 영역 보이고 함수 실행
-	    if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-	      document.getElementById("alarmArea").style.display = "block";
-	      loadAlarms();
-	      setInterval(loadAlarms, 30000);
-	    }
-  });
- 
-  document.addEventListener("DOMContentLoaded", function() {
-   
 
-	  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
-		    document.getElementById("alarmArea").style.display = "block";
-		    loadAlarms();
-		    setInterval(loadAlarms, 30000);
-		    connectNotificationSocket(); // 실시간 알림 연결 추가
-		  }
 
-  });
-  
-//웹소켓(Stomp) 연결 및 구독
-  function connectNotificationSocket() {
-    var socket = new SockJS(contextPath + '/ws-stomp'); // 서버의 SockJS endpoint 맞게 수정
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, function (frame) {
-      stompClient.subscribe('/topic/notification', function (notificationMsg) {
-        let notification = JSON.parse(notificationMsg.body);
+let alarmClosed = false; // 팝업 닫힘 상태
+let alarmArea, alarmBell;
 
-        // 본인에게 온 알림만 표시
-        if (String(notification.receiverAccountId || notification.userId) !== String(userId)) return;
+document.addEventListener("DOMContentLoaded", function() {
+	//여기에서 콘솔로 찍기!
+	  console.log("loginUserId:", loginUserId, "userId:", userId);
+  alarmArea = document.getElementById("alarmArea");
+  alarmBell = document.getElementById("alarmBell");
 
-     	// 채팅방에 접속중이면 알림 띄우지 않음
-        if (String(currentChatRoomId) === String(notification.roomId)) return;
-        
-     	
-        
-        // 중복 방지: messageId 기준
-        // 기존 알림 리스트에 중복 messageId가 있으면 건너뜀
-        let alarmArea = document.getElementById("alarmArea");
-        let existing = alarmArea.innerHTML || "";
-        if (existing.includes(notification.messageId)) return;
+  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
+    if (localStorage.getItem('puppitAlarmClosed') === null) {
+      alarmClosed = false;
+      localStorage.setItem('puppitAlarmClosed', 'false');
+    } else {
+      alarmClosed = localStorage.getItem('puppitAlarmClosed') === 'true';
+    }
 
-        // 알림 영역에 바로 추가 (중복 messageId 확인 생략 가능, 필요하면 추가)
-        showAlarmPopup([notification]);
-      });
+    if (!alarmClosed) {
+      alarmArea.style.display = "block";
+      alarmBell.style.display = "none";
+      loadAlarms();
+      setInterval(loadAlarms, 30000);
+      connectSocket();
+    } else {
+      alarmArea.style.display = "none";
+      alarmArea.innerHTML = "";
+      alarmBell.style.display = "inline-block";
+      connectSocket(); // 팝업이 닫혀있어도 소켓은 연결!
+    }
+  }
+
+  if (alarmBell) {
+    alarmBell.addEventListener("click", function() {
+      alarmClosed = false;
+      localStorage.setItem('puppitAlarmClosed', 'false');
+      alarmArea.style.display = "block";
+      alarmBell.style.display = "none";
+      loadAlarms();
+      window.alarmInterval = setInterval(loadAlarms, 30000);
+      alarmBell.classList.remove('red');
     });
   }
-
-  
-  
+});
 
 
-  // 채팅방 입장 시
-  function enterChatRoom(roomId) {
-    currentChatRoomId = roomId;
-  }
 
-  // 채팅방 퇴장 시
-  function leaveChatRoom() {
-    currentChatRoomId = null;
-  }
 
-  // 알림 메시지 수신 시
-  function handleIncomingAlarm(alarm) {
-	// 내가 현재 그 채팅방에 접속중이면 알림을 띄우지 않는다
-	  if (String(currentChatRoomId) === String(alarm.roomId)) {
-	    return;
-	  }
-	  // 알림 영역에 메시지 추가
-	  showAlarmInPopup(alarm);
-  }
-  
-  
 
-  console.log("userId JS:", userId); // 값이 없다면 fetch 요청 안 감
 
-  function showAlarmPopup(alarm) {
-	  var alarmArea = document.getElementById("alarmArea");
-	  var html = alarmArea.innerHTML || '';
-	  
-	  
-	  if (!alarm || !alarm.roomId) {
-	    console.error("알림 객체가 없습니다 또는 roomId가 없습니다.", alarm);
-	    return;
-	  }
-	  
-	  
-	  
-	
-	  html += '<li>'
-	        + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + alarm.messageId + '" style="color:inherit;text-decoration:none;">'
-	        + '<b>새 메시지:</b> ' + alarm.chatMessage
-	        + ' <span style="color:#aaa;">(' + alarm.productName + ')</span>'
-	        + ' <span style="color:#888;">' + alarm.messageCreatedAt + '</span><br>'
-	        + '<span style="font-size:13px;">From: ' + alarm.senderAccountId + ' | To: ' + alarm.receiverAccountId + '</span>'
-	        + '</li>';
-	  alarmArea.innerHTML = html;
-	  alarmArea.style.display = "block";
-  }
 
-  function closeAlarmPopup() {
-    var alarmArea = document.getElementById("alarmArea");
-    alarmArea.style.display = "none";
-    var alarmBell = document.getElementById("alarmBell");
-    if (alarmBell) alarmBell.style.display = "inline-block";
-    if(window.alarmInterval) clearInterval(window.alarmInterval);
-  }
+//1. 웹소켓 연결 및 구독 (알림+채팅 모두)
+  function connectSocket() {
+    var socket = new SockJS(contextPath + '/ws-chat');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function(frame) {
+        // 알림 메시지 구독 (모든 알림)
+       stompClient.subscribe('/topic/notification', function(msg) {
+		  console.log('msg: ', msg);
+		  let notification = JSON.parse(msg.body);
+		  console.log('notification: ', notification);
+		
+		  // 🚩 메시지의 receiverAccountId가 로그인한 사용자와 다르면 return (수신자만 알림)
+		  if (String(notification.receiverAccountId) !== String(loginUserId)) {
+		    return;
+		  }
+		
+		  // [채팅방에 접속 중이 아닐 때만 알림]
+		  if (String(currentChatRoomId) !== String(notification.roomId)) {
+			  console.log('currentChatRoomId: ', currentChatRoomId);
+		    showAlarmPopup([notification]);
+		    const alarmBell = document.getElementById("alarmBell");
+		    if (alarmBell) {
+		      alarmBell.classList.add('red');
+		      alarmBell.style.display = "inline-block";
+		    }
+		  }
+		});
+        // 채팅 메시지 구독 (모든 채팅방)
+        stompClient.subscribe('/topic/chat', function(msg) {
+          let chat = JSON.parse(msg.body);
+       // [핵심] 메시지의 수신자가 나일 때만 알림!
+          if (String(chat.chatReceiverAccountId) !== String(loginUserId) && String(chat.chatReceiver) !== String(userId)) {
+            return;
+          }
 
-  //종버튼 클릭 시 알림창 재오픈
-  document.addEventListener("DOMContentLoaded", function() {
-    var alarmBell = document.getElementById("alarmBell");
-    if (alarmBell) {
-      alarmBell.addEventListener("click", function() {
-        showAlarmPopup();
-        loadAlarms();
-        window.alarmInterval = setInterval(loadAlarms, 30000);
+          // [핵심] 채팅방에 접속중이 아닐 때 알림 팝업!
+          if (String(currentChatRoomId) !== String(chat.chatRoomId)) {
+            showAlarmPopup([chat]);
+            const alarmBell = document.getElementById("alarmBell");
+            if (alarmBell) {
+              alarmBell.classList.add('red');
+              alarmBell.style.display = "inline-block";
+            }
+          }
+        });
       });
-    }
-  });
+ }
 
+//접속자 관리 함수 (채팅방 입장/퇴장시 호출)
+	function setUserInRoom(roomId, role) {
+		if (!activeRooms[roomId]) activeRooms[roomId] = { buyer: false, seller: false };
+		activeRooms[roomId][role.toLowerCase()] = true;
+		currentChatRoomId = roomId;
+	}
+	function setUserOutRoom(roomId, role) {
+		if (!activeRooms[roomId]) return;
+		activeRooms[roomId][role.toLowerCase()] = false;
+		currentChatRoomId = null;
+	}
+	function isUserInRoom(roomId, role) {
+		return activeRooms[roomId] && activeRooms[roomId][role.toLowerCase()];
+	}
+	// 알림 팝업 처리
+	function showAlarmPopup(alarms = [], force = false) {
+	  console.log('showAlarmPopup 호출, alarms:', alarms);
 
-
-  function loadAlarms() {
-    if (!userId || isNaN(userId)) {
-      document.getElementById("alarmArea").innerHTML = "";
-      document.getElementById("alarmArea").style.display = "none";
-      return;
-    }
-    
-    console.log("userId: ", userId);
-    fetch(contextPath + "/api/alarm?userId=" + userId)
-      .then(res => {
-        if (!res.ok) throw new Error("서버 오류");
-        return res.json();
-      })
-      .then(data => {
-        var alarmArea = document.getElementById("alarmArea");   
-        console.log("data: ", data);
-        var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>';
-        if (data.length === 0) {
-           // 알림이 하나도 없으면 알림 팝업/영역을 숨긴다
-            document.getElementById("alarmArea").innerHTML = "";
-            document.getElementById("alarmArea").style.display = "none";
-        } else {
-        	showAlarmPopup(data); // 알림 객체 배열을 넘겨줌!
-        }
-      })
-      .catch(err => {
-    	  console.error(err);
-        document.getElementById("alarmArea").innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
-        document.getElementById("alarmArea").style.display = "block";
-        showAlarmPopup();
-      });
-  }
-
-  function showAlarmPopup(alarms) {
-	  var alarmArea = document.getElementById("alarmArea");
-	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
-	  
-	  // 알림 데이터가 배열이 아닐 경우 배열로 변환
+	  // alarms가 배열인지 확인 및 변환
 	  if (!Array.isArray(alarms)) alarms = [alarms];
 
-	  // 중복 제거: messageId 기준
+	  // forEach로 먼저 모든 값 찍기 (디버깅)
+	  alarms.forEach((alarm, idx) => {
+	    console.log(`forEach alarm[${idx}]:`, alarm);
+	  });
+
+	  // filter 내부에서도 찍힘
 	  const msgIdSet = new Set();
-	  const deduped = alarms.filter(alarm => {
+	  const deduped = alarms.filter((alarm, idx) => {
+	    console.log(`filter alarm[${idx}]:`, alarm);
 	    if (!alarm || !alarm.roomId || !alarm.messageId) return false;
 	    if (msgIdSet.has(alarm.messageId)) return false;
 	    msgIdSet.add(alarm.messageId);
 	    return true;
 	  });
 
+	  // deduped 결과도 찍기
+	  console.log('deduped:', deduped);
+
+	  var alarmArea = document.getElementById("alarmArea");
+	  // 🚩 여기! 알림이 오면 무조건 팝업을 띄움
+	  alarmClosed = false;
+	  localStorage.setItem('puppitAlarmClosed', 'false');
+
+	  
+	  
+	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
 	  deduped.forEach(function(alarm) {
 	    html += '<li>'
-	      + '<a href="' + contextPath + '/chat/recentRoomList?highlightRoomId=' + alarm.roomId  + '&highlightMessageId=' + (alarm.messageId || '') + '" style="color:inherit;text-decoration:none;">'
-	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
-	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
-	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
-	      + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
-	      + '</li>';
+	    	+ '<a href="javascript:void(0);" '
+	        + 'class="alarm-link" '
+	        + 'data-room-id="' + alarm.roomId + '" '
+	        + 'data-message-id="' + (alarm.messageId || '') + '" '
+	        + 'data-chat-message="' + (alarm.chatMessage || '').replace(/"/g, '&quot;') + '" '
+	        + '>'
+	      	+ '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
+	      	+ ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
+	      	+ ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span><br>'
+	      	+ '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
+	      	+ '</li>';
 	  });
 	  html += '</ul>';
 	  alarmArea.innerHTML = html;
 	  alarmArea.style.display = "block";
+	  alarmShownOnce = true;
+	  
+	  // 🚩 알림 팝업의 알림 메시지 클릭 이벤트 바인딩
+	  setTimeout(function() {
+	    document.querySelectorAll('#alarmArea .alarm-link').forEach(function(alarmLink) {
+	      alarmLink.addEventListener('click', function(e) {
+	        var roomId = alarmLink.getAttribute('data-room-id');
+	        var messageId = alarmLink.getAttribute('data-message-id');
+	        var chatMessage = alarmLink.getAttribute('data-chat-message');
+	        // 1. 채팅방 목록 하이라이트
+	        window.highlightChatRoom(roomId);
+
+	        // 2. 채팅방 목록의 해당 방의 마지막 메시지 업데이트
+	        window.updateChatListLastMessage(roomId, chatMessage);
+
+	        // 3. 알림 팝업 닫기
+	        closeAlarmPopup();
+
+	        // 4. (선택) 채팅방 열기 등 기존 동작 유지 (원하면 loadChatHistory 등 호출)
+	        // 만약 방 이동까지 원하면 아래 주석 해제
+	        // if (typeof loadChatHistory === 'function') {
+	        //   loadChatHistory(roomId);
+	        // }
+	      });
+	    });
+	  }, 30); // DOM 반영 후 바인딩
+	  
+	  
 	}
+
+	  function closeAlarmPopup() {
+		    var alarmArea = document.getElementById("alarmArea");
+		    alarmArea.style.display = "none";
+		    alarmArea.innerHTML = "";
+		    var alarmBell = document.getElementById("alarmBell");
+		    if (alarmBell) alarmBell.style.display = "inline-block";
+		    if(window.alarmInterval) clearInterval(window.alarmInterval);
+		    alarmClosed = true;
+		    localStorage.setItem('puppitAlarmClosed', 'true');
+		  }
+
+	  function loadAlarms() {
+		    var alarmArea = document.getElementById("alarmArea");  
+		    if (alarmClosed) {
+		    	console.log('alarm closed');
+		      alarmArea.style.display = "none";
+		      alarmArea.innerHTML = "";
+		      var alarmBell = document.getElementById("alarmBell");
+		      if (alarmBell) alarmBell.style.display = "inline-block";
+		      return;
+		    }
+		    if (!userId || isNaN(userId)) {
+		      alarmArea.innerHTML = "";
+		      alarmArea.style.display = "none";
+		      return;
+		    }
+		    fetch(contextPath + "/api/alarm?userId=" + userId)
+		      .then(res => {
+		        if (!res.ok) throw new Error("서버 오류");
+		        return res.json();
+		      })
+		      .then(data => {
+		    	  console.log('data: ', data);
+		        if (data.length === 0) {
+		          alarmArea.innerHTML = "";
+		          alarmArea.style.display = "none";
+		          var alarmBell = document.getElementById("alarmBell");
+		          if (alarmBell) alarmBell.style.display = "inline-block";
+		        } else {
+		          showAlarmPopup(data);
+		        }
+		      })
+		      .catch(err => {
+		        console.error(err);
+		        alarmArea.innerHTML = '<span style="color:red;">알림을 불러올 수 없습니다.</span>';
+		        alarmArea.style.display = "block";
+		        showAlarmPopup([], true);
+		      });
+		  }
+
+  
+
+  
   
   
   async function loadCategory(categoryName) {
@@ -410,14 +540,26 @@ a{text-decoration:none;color:inherit;}
       if (!topKeywordsElement) throw new Error("top-keywords element not found");
       topKeywordsElement.innerHTML = html;
 
-      // 클릭 이벤트 바인딩
+      
+   // 클릭 이벤트 바인딩
       document.querySelectorAll("#top-keywords .keyword").forEach(el => {
         el.addEventListener("click", () => {
-          const kw = el.textContent.replace("#", "");
+          const kw = el.textContent.replace("#", "").trim();
           input.value = kw;
+
+          // 메인 상품 숨기기
+          const mainGrid = document.getElementById("productGrid");
+          if (mainGrid) mainGrid.style.setProperty("display", "none", "important");
+
+          // 결과 영역 보이기
+          results.style.display = "block";
+          results.innerHTML = '<div class="empty">"' + kw + '" 검색 중...</div>';
+
+          // 기존 검색 함수 실행
           search(kw);
         });
       });
+
     } catch (err) {
       console.error("인기검색어 불러오기 에러:", err);
       document.getElementById("top-keywords").innerHTML = "인기검색어를 불러올 수 없습니다.";

@@ -123,6 +123,10 @@ public class ProductDAO {
        * System.out.println("상품상품" + sqlSession.selectList("product.detailProducts"));
        */      return sqlSession.selectOne("product.detailProducts", productId);
     }
+    
+    public List<ProductDTO> selectPagedProducts(Map<String, Object> map) {
+      return sqlSession.selectList("product.selectPagedProducts", map);
+    }
  
     
 

@@ -12,32 +12,124 @@
 </script>
 
 <style>
-  html, body { height: 100%; margin: 0; padding: 0; background: #fff; }
-  body { min-height: 100vh; background: #fff; }
-  .container { max-width:1200px; margin:0 auto; padding:24px 20px 60px; background:#fff; min-height: 400px; }
-  .product-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
-  @media (max-width:1024px){ .product-grid { grid-template-columns:repeat(3,1fr) } }
-  @media (max-width:768px){ .product-grid { grid-template-columns:repeat(2,1fr) } }
-  .product-card { display:block; text-decoration:none; color:inherit; min-height:200px; }
-  .thumb { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; border:1px solid #ececef; background:#fafafa; }
-  .title { margin-top:8px; font-size:14px; color:#111; font-weight:600; line-height:1.3 }
-  .desc { margin-top:2px; font-size:12px; color:#6b7280; line-height:1.35; max-height:3.6em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
-  .price { margin-top:4px; font-size:14px; font-weight:700; }
-  .search-box { display:flex; gap:8px; margin-bottom:24px; align-items:center; }
-  .search-input { flex:1; padding:8px 14px; font-size:15px; border:1px solid #bbb; border-radius:6px; }
-  .search-btn { padding:8px 18px; font-size:15px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; }
-  .thumbnailImage{ width:200px; height:200px;}
-  #search-results { background: #fff; }
+  html, body {
+    height: 100%; margin: 0; padding: 0; background: #fff; font-family: 'Pretendard', sans-serif;
+  }
+  body {
+    min-height: 100vh; background: #fff;
+  }
+  .container {
+    max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; background: #fff;
+    min-height: 400px;
+  }
+
+  /* ===== 검색 박스 ===== */
+  .search-box {
+    display: flex; justify-content: center; gap: 8px; margin: 0 auto 28px auto;
+    max-width: 600px;
+  }
+  .search-input {
+    flex: 1; padding: 10px 14px; font-size: 15px;
+    border: 1px solid #d1d5db; border-radius: 9999px;
+    outline: none; transition: border .2s;
+  }
+  .search-input:focus {
+    border-color: #111;
+  }
+  .search-btn {
+    padding: 10px 18px; font-size: 15px; font-weight: 600;
+    background: #111; color: #fff; border: none; border-radius: 9999px;
+    cursor: pointer; transition: background .2s;
+  }
+  .search-btn:hover { background: #333; }
+
+  /* ===== 상품 그리드 ===== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 22px;
+  justify-content: center;   /* 가운데 정렬 */
+}
+
+#search-results .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  justify-content: center;   /* 가운데 정렬 */
+}
+
+  @media (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 768px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .product-grid { grid-template-columns: repeat(1, 1fr); } }
+
+  .product-card {
+    display: block; text-decoration: none; color: inherit;
+    border-radius: 12px; padding: 8px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .thumb {
+    width: 100%; aspect-ratio: 1/1; object-fit: cover;
+    border-radius: 12px; border: 1px solid #ececef; background: #fafafa;
+  }
+  .title {
+    margin-top: 10px; font-size: 15px; font-weight: 600; color: #111;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .desc {
+    margin-top: 4px; font-size: 13px; color: #6b7280;
+    line-height: 1.35; max-height: 2.7em;
+    overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .price {
+    margin-top: 6px; font-size: 15px; font-weight: 700; color: #111;
+  }
+
+  /* ===== 검색 결과 ===== */
+  #search-results {
+    margin-top: 20px;
+  }
+  #search-results .result-head {
+    font-size: 14px; margin-bottom: 12px;
+  }
+  #search-results .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  #search-results .card {
+    border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+  }
+  #search-results .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  #search-results .name {
+    font-size: 14px; font-weight: 500; margin: 6px 8px; overflow: hidden;
+    white-space: nowrap; text-overflow: ellipsis;
+  }
+  #search-results .price {
+    font-size: 14px; font-weight: 600; margin: 0 8px 8px 8px;
+  }
+  .empty {
+    padding: 40px 0; text-align: center; color: #6b7280;
+  }
 </style>
 
 <div class="container">
+
+
+
 
   <!-- 상품 리스트 -->
   <c:if test="${not empty products}">
     <div class="product-grid" id="productGrid">
       <c:forEach items="${products}" var="p">
         <a class="product-card" href="${contextPath}/product/detail/${p.productId}">
-          <img class="thumbnailImage" src="${p.thumbnail.imageUrl}" alt="상품이미지 없음">
+          <img class="thumb" src="${p.thumbnail.imageUrl}" alt="상품이미지 없음">
           <div class="title">${p.productName}</div>
           <div class="desc">${p.productDescription}</div>
           <div class="price">
@@ -50,21 +142,18 @@
   <div id="search-results" style="display:none;"></div>
 </div>
 
-
-
 <script>
 (function () {
+	  var results = document.getElementById('search-results');
+	  var mainGrid = document.getElementById('productGrid');
+	  var input = document.getElementById('search-input');
+	  var btn = document.getElementById('do-search');
 
-  var input = document.getElementById('search-input');
-  var btn = document.getElementById('do-search');
-  var results = document.getElementById('search-results');
-  var mainGrid = document.getElementById('productGrid');
-  var size = 60;
-  var loading = false;
-  var endOfData = false;
-
-  // offset을 직접 관리 (최초 렌더링된 상품 개수로 초기화)
-  var offset = mainGrid ? mainGrid.children.length : 0;
+	  var size = 60;
+	  var loading = false;
+	  var endOfData = false;
+	  var offset = mainGrid ? mainGrid.children.length : 0; // ✅ 초기 렌더 개수 기준
+	  var lastRequestedOffset = -1; // 같은 offset 중복 호출 방지
 
   function formatPrice(v) {
     if (v === null || v === undefined) return '';
@@ -103,7 +192,7 @@
     results.style.display = "block";
     results.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
-
+  
   async function search(keyword) {
     var q = (keyword || '').trim();
     if (!q) {
@@ -153,8 +242,12 @@
       var name = p.productName || '';
       var price = p.productPrice ? new Intl.NumberFormat('ko-KR').format(p.productPrice) + '원' : '';
       var desc = p.productDescription || '';
+      var imgUrl =
+        (p.thumbnail && p.thumbnail.imageUrl) ? p.thumbnail.imageUrl :
+        (p.thumbImageUrl ? p.thumbImageUrl : (contextPath + '/resources/image/no-image.png'));
       return (
         '<a class="product-card" href="' + contextPath + '/product/detail/' + id + '">' +
+        '<img class="thumb" src="' + imgUrl + '" alt="상품이미지 없음">' +
         '<div class="title">' + name + '</div>' +
         '<div class="desc">' + desc + '</div>' +
         '<div class="price">' + price + '</div>' +
@@ -164,63 +257,111 @@
     mainGrid.insertAdjacentHTML('beforeend', cards);
   }
 
-
-  // 실제로 상품을 fetch하는 함수
   async function fetchProducts() {
-    if (loading || endOfData) return;
-    loading = true;
-    
-    const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
-    try {
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+	  if (loading || endOfData) return;
 
-      const data = await res.json();
-      const products = Array.isArray(data.products) ? data.products : [];
-      if (products.length > 0) {
-        appendProducts(products);
-        offset = mainGrid.children.length;
-        
-        // 핵심: 스크롤 강제로 살짝 위로
-        window.scrollTo({
-          top: document.documentElement.scrollTop - 1,
-          behavior: "instant"
-        });
-        
-        
-        if (products.length < size) endOfData = true;
-      } else {
-        endOfData = true;
+	  // 같은 offset 중복 요청 가드
+	  if (offset === lastRequestedOffset) return;
+	  lastRequestedOffset = offset;
+
+	  loading = true;
+	  const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
+
+	  try {
+	    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	    if (!res.ok) throw new Error("HTTP " + res.status);
+
+	    const data = await res.json();
+
+	    // 백엔드 키 사용: products, itemCount, hasMore
+	    const list = Array.isArray(data.products) ? data.products : [];
+	    const total = Number.isFinite(data.itemCount) ? data.itemCount : null;
+	    const more  = (typeof data.hasMore === 'boolean') ? data.hasMore : null;
+
+	    if (list.length > 0) {
+	      appendProducts(list);
+
+	      // ① offset 갱신 (append 이후)
+	      offset = mainGrid.children.length;
+	      
+	      if (more !== null) {
+	          endOfData = !more;
+	        }
+	        else if (total !== null && offset >= total) {
+	          endOfData = true;
+	        }
+	    } else {
+	      endOfData = true;
+	    }
+	  } catch (e) {
+	    console.error(e);
+	    endOfData = true; // 실패 시 무한 루프 방지
+	  } finally {
+	    loading = false;
+	  }
+	}
+
+
+  let scrollTimer;
+  window.addEventListener('scroll', function () {
+    if (scrollTimer) clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
+      if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
+
+      if (document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 100) {
+        fetchProducts();
       }
-    } catch (e) {
-      endOfData = true;
-      console.error(e);
+    }, 200);
+  });
+
+  // ------- 카테고리 선택 이벤트 ------- 
+  var categorySelect = document.getElementById('categorySelect');
+
+  categorySelect && categorySelect.addEventListener('change', function () {
+    var value = categorySelect.value;
+
+    if (!value) {
+      // 카테고리 선택 안 했으면 메인 상품 다시 보이게
+      if (mainGrid) mainGrid.style.display = 'grid';
+      results.style.display = 'none';
+      return;
     }
-    loading = false;
-  }
-  
-  // 화면이 꽉 찰 때까지 fetch를 반복
-  async function fillScreenIfNeeded() {
-    // 이미 로딩 중이거나 데이터가 끝났으면 중단
-    if (loading || endOfData) return;
-    // 화면에 스크롤이 없으면 추가 fetch 반복
-    while (document.documentElement.scrollHeight <= window.innerHeight && !endOfData) {
+
+    // 카테고리 선택 시 메인 상품 숨기고 결과 영역 보여줌
+    if (mainGrid) mainGrid.style.setProperty("display", "none", "important");
+    results.style.display = 'block';
+    results.innerHTML = '<div class="empty">카테고리 검색 중...</div>';
+
+    var url = contextPath + '/product/category?categoryName=' + encodeURIComponent(value);
+    fetch(url, { headers: { 'Accept': 'application/json' } })
+      .then(res => res.json())
+      .then(data => {
+        var list = Array.isArray(data) ? data : [];
+        renderSearch(list, value); // 기존 검색 결과 함수 재활용
+      })
+      .catch(() => {
+        results.innerHTML = '<div class="empty">카테고리 검색 중 오류 발생</div>';
+      });
+  });
+
+})(); 
+
+  async function fillIfShort() {
+    // 검색 모드가 아니고, 메인 그리드가 보이며, 스크롤이 안 생겼을 때
+    while (!endOfData &&
+           mainGrid &&
+           mainGrid.style.display !== 'none' &&
+           document.documentElement.scrollHeight <= window.innerHeight) {
       await fetchProducts();
     }
   }
-  
-  let scrollTimer;
-  //스크롤이 땅에 닿을 때만 요청 (검색 결과 활성화시 동작 X)
-  window.addEventListener('scroll', function () {
-	  if (scrollTimer) clearTimeout(scrollTimer);
-	  scrollTimer = setTimeout(() => {
-	    if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
-	    if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
 
-	    if (document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 100) {
-	      fetchProducts();
-	    }
-	  }, 200); // 0.2초 디바운스
-	});
-})();
+  // DOM 준비되면 한 번 호출
+  document.addEventListener('DOMContentLoaded', fillIfShort);
+
+
+
+	
+
 </script>
