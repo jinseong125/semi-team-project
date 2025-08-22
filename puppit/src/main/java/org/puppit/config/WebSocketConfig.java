@@ -14,7 +14,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		// ws://localhost:8080/puppit/ws-chat 엔드포인트로 접속
         registry.addEndpoint("/ws-chat")
-        .setAllowedOrigins("http://localhost:8080")
+        .setAllowedOrigins("http://localhost:8080", "http://172.16.2.18:8080", "http://172.16.2.12:8080")
         .withSockJS();
 	}
 	
