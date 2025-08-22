@@ -118,6 +118,13 @@ public class ProductController {
         return productService.searchByNew(searchName);
     }
 
+    /** 카테고리별 상품 조회 */
+    @GetMapping(value = "/category", produces = "application/json; charset=UTF-8")
+    @ResponseBody
+    public List<ProductSearchDTO> searchByCategory(@RequestParam String categoryName) {
+      return productService.searchByCategory(categoryName);
+    }
+    
     /** 자동완성 */
     @GetMapping(value = "/autocomplete", produces = "application/json; charset=UTF-8")
     @ResponseBody
@@ -243,6 +250,6 @@ public class ProductController {
         return "이미지가 삭제되었습니다.";
     }
     
-    
+
     
 }

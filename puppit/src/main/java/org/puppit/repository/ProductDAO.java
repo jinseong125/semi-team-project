@@ -128,6 +128,8 @@ public class ProductDAO {
       return sqlSession.selectList("product.selectPagedProducts", map);
     }
  
-    
+    public List<ProductSearchDTO> searchByCategory(String categoryName) {
+      return sqlSession.selectList("product.searchByCategory", categoryName);
+    }
 
 }

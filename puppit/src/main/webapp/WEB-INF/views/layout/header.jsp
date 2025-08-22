@@ -38,6 +38,7 @@ a{text-decoration:none;color:inherit;}
 .empty {padding:24px 8px;color:#6b7280;}
 .grid {display:grid;grid-template-columns:repeat(4, 1fr);gap:16px;}
 .card {border:1px solid #ececef;border-radius:12px;padding:10px;background:#fff;}
+.card img{width: 100%; height: 180px; object-fit: cover; border-radius: 8px;}
 .card .name {margin-top:8px;font-weight:600;}
 .card .price {margin-top:4px;color:#555;}
 
@@ -175,7 +176,7 @@ a{text-decoration:none;color:inherit;}
       <div class="meta-row">
         <label class="category">
           <select id="categorySelect">
-            <option value="">카테고리</option>
+            <option value="" disabled selected hidden>카테고리</option>
             <option value="사료">사료</option>
             <option value="간식">간식</option>
             <option value="외출용품">외출용품</option>
@@ -255,6 +256,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	  console.log("loginUserId:", loginUserId, "userId:", userId);
   alarmArea = document.getElementById("alarmArea");
   alarmBell = document.getElementById("alarmBell");
+  loadTopKeywords();
 
   if (isLoggedIn === "true" && userId && !isNaN(userId)) {
     if (localStorage.getItem('puppitAlarmClosed') === null) {
@@ -541,6 +543,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (!topKeywordsElement) throw new Error("top-keywords element not found");
       topKeywordsElement.innerHTML = html;
 
+     
       
    // 클릭 이벤트 바인딩
       document.querySelectorAll("#top-keywords .keyword").forEach(el => {
@@ -585,13 +588,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var head = '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 ' + list.length + '건</div>';
     var cards = list.map(function (p) {
+      console.log('카테고리 검색 p: ', p);	
       var id = p.productId;
       var name = p.productName || '';
       var price = formatPrice(p.productPrice);
+      var img = p.productImage || "";
+      var imgSrc = (img.startsWith("http"))
+          ? img
+          : (contextPath + "/uploads/" + img);
+      console.log('p.productImage: ', p.productImage);
+      console.log('img: ', img);
 
       return ''
         + '<div class="card">'
         + '  <a href="' + contextPath + '/product/detail/' + id + '">'
+        + '    <img src="' + imgSrc + '" alt="' + name + '"/>'
         + '    <div class="name">' + name + '</div>'
         + '    <div class="price">' + price + '</div>'
         + '  </a>'
