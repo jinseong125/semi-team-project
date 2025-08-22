@@ -4,7 +4,7 @@
 
 <jsp:include page="../layout/header.jsp"/>
 
-<! -- 페이지 전용 스타일 -->
+<!-- 페이지 전용 스타일 -->
 <style>
   :root{
     --page-bg: #f6f8fb;
@@ -39,7 +39,7 @@
     padding: 36px 16px;
     min-height: calc(100vh - 90px); /* header 높이(대략) — 아래 JS가 런타임에 보정 */
     box-sizing: border-box;
-    margin-top: -250px;
+    /* margin-top: -250px; */
   }
 
   .login-wrap{
