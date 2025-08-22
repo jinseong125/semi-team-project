@@ -31,44 +31,45 @@ if (sessionMap != null) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
      body { font-family: 'Noto Sans KR', sans-serif; background: #fff; margin: 0; padding: 0; }
-        /* 수정: container max-width 1200px로 헤더에 맞춤, 가운데 정렬 */
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            min-height: 700px;
-            padding-top: 100px;
-            display: flex;
-            flex-direction: row;
-            gap: 0;
-            justify-content: center;
-            align-items: flex-start;
-            margin: 0 auto;
-            background: #fff;
-            box-sizing: border-box;
-        }
-
-        /* 40%: 채팅목록 / 60%: 채팅창 */
-        .chatlist-container {
-            width: 40%;
-            min-width: 0;
-            height: 600px;
-            border: none;
-            padding: 0;
-            margin: 0;
-            overflow-y: auto;
-            box-sizing: border-box;
-        }
-        .chat-container {
-            width: 60%;
-            min-width: 0;
-            height: 600px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 20px;
-            box-sizing: border-box;
-            background: #fafafa;
-        }
+		.container {
+		    max-width: 1200px;
+		    width: 100%;
+		    min-height: 700px;
+		    padding-top: 100px;
+		    display: flex;
+		    flex-direction: row;
+		    gap: 0;
+		    justify-content: center;
+		    align-items: flex-start;
+		    margin: 0 auto;
+		    background: #fff;
+		    box-sizing: border-box;
+		}
+		
+		/* 채팅목록 영역 50% */
+		.chatlist-container {
+		    width: 50%;
+		    min-width: 0;
+		    height: 600px;
+		    border: none;
+		    padding: 0;
+		    margin: 0;
+		    overflow-y: auto;
+		    box-sizing: border-box;
+		}
+		
+		/* 채팅창 영역 50% */
+		.chat-container {
+		    width: 50%;
+		    min-width: 0;
+		    height: 600px;
+		    display: flex;
+		    flex-direction: column;
+		    justify-content: flex-end;
+		    padding: 20px;
+		    box-sizing: border-box;
+		    background: #fafafa;
+		}
         .chat-list { display: flex; flex-direction: column; gap: 20px; }
         .chatList { display: flex; flex-direction: row; align-items: center; padding: 0 10px; gap: 16px; cursor: pointer; background: #fff; border-radius: 18px; min-height: 80px; transition: background 0.15s; box-shadow: none; border: none; }
         .chatList:hover { background: #f5f5f5; }
@@ -102,29 +103,70 @@ if (sessionMap != null) {
 	        transition: right 1s;
 	    }
 
-        /* 반응형 대응: 모바일 화면에서 100%로 */
-        @media (max-width: 1200px) {
-            .container { max-width: 100vw; }
-            .chatlist-container, .chat-container { width: 100%; }
-            .container { flex-direction: column; }
+		/* 반응형 대응: 모바일 화면에서는 100%로 */
+		@media (max-width: 1200px) {
+		    .container { max-width: 100vw; }
+		    .chatlist-container, .chat-container { width: 100%; }
+		    .container { flex-direction: column; }
+		}
+        /* 채팅이 두 번 이상 이루어졌을 때 보이는 결제하기 버튼(#pay-btn)의 스타일 오버라이드 */
+		#pay-btn {
+		  background: #000 !important;    /* 검정색 배경 */
+		  color: #fff !important;         /* 흰색 글자 */
+		  border: none !important;
+		  width: 200px !important;        /* 너비 200px */
+		  height: 50px !important;        /* 높이 50px */
+		  font-size: 20px;
+		  font-weight: 700;
+		  border-radius: 8px;
+		  cursor: pointer;
+		  box-shadow: 0 2px 8px rgba(25, 25, 25, 0.15);
+		  text-align: center;
+		  display: inline-block;
+		  margin-top: 10px;
+		  transition: background 0.2s;
+		}
+		
+		#pay-btn:hover {
+		  background: #222 !important;    /* 호버시 어두운 회색 */
+		}
+		/* 채팅 입력 textarea 스타일 */
+        .chat-input-group textarea#chatMessageInput {
+            width: 400px;
+            height: 100px;
+            resize: none;
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            box-sizing: border-box;
+            margin-right: 12px;
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.5;
         }
-        .pay-btn {
-		    background: #1976d2;
-		    color: #fff;
-		    font-size: 20px;
-		    font-weight: 700;
-		    border: none;
-		    border-radius: 8px;
-		    padding: 16px 32px;
-		    margin-top: 10px;
-		    cursor: pointer;
-		    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
-		    transition: background 0.2s;
-		}
-		.pay-btn:hover {
-		    background: #1565c0;
-		}
-        
+        /* 전송 버튼 스타일 */
+        .chat-input-group button {
+            width: 200px;
+            height: 50px;
+            background: #000 !important;
+            color: #fff !important;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .chat-input-group button#sendChatButton:hover {
+            background: #222 !important;
+        }
+        .chat-input-group {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            gap: 12px;
+            margin-top: 8px;
+        }
     </style>
 </head>
 <body>
@@ -142,7 +184,7 @@ if (sessionMap != null) {
         </div>
         <div id="chatListRenderArea">
 	         <div style="text-align: center; font-size: 22px; font-weight: 700; color: #222; margin-bottom: 16px;">
-	            채팅목록
+	            채팅방목록
 	        </div>
         
             <c:forEach items="${chatList}" var="chat">
@@ -182,8 +224,8 @@ if (sessionMap != null) {
         <div class="center-message" id="center-message">상품 판매자와 채팅을 시작해보세요</div>
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-input-group">
-            <input placeholder="채팅메시지를 입력하세요"/>
-            <button type="submit">전송</button>
+             <textarea id="chatMessageInput" placeholder="채팅메시지를 입력하세요" rows="5"></textarea>
+            <button type="submit"  id="sendChatButton">전송</button>
         </div>
     </div>
 </div>
@@ -212,7 +254,7 @@ let activeRooms = {}; // { roomId: { buyer: true/false, seller: true/false } }
 let highlightTimers = {}; // { roomId: timerId }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const chatlist = document.getElementById('chatlist-container');
+    //const chatlist = document.getElementById('chatlist-container');
     const urlParams = new URLSearchParams(window.location.search);
     const highlightRoomId = urlParams.get('highlightRoomId');
     const highlightMessage = urlParams.get('highlightMessage');
@@ -224,20 +266,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     
-    chatlist.addEventListener('click', function(e) {
-        const chatDiv = e.target.closest('.chatList');
-        if (chatDiv) {
-            const roomId = chatDiv.dataset.roomId;
-            currentRoomId = roomId;
-            if (roomId) {
-                loadChatHistory(roomId).then(() => {
-                    connectAndSubscribe(roomId);
-                });
+    //chatlist.addEventListener('click', function(e) {
+      //  const chatDiv = e.target.closest('.chatList');
+       // if (chatDiv) {
+        //    const roomId = chatDiv.dataset.roomId;
+        //    currentRoomId = roomId;
+        //    if (roomId) {
+        //        loadChatHistory(roomId).then(() => {
+        //            connectAndSubscribe(roomId);
+        //        });
+        //    }
+       // }
+    //});
+    
+    
+    const chatlist = document.getElementById('chatlist-container');
+    if (chatlist) {
+        chatlist.addEventListener('click', function(e) {
+            // e.target.closest('.chatList')로 클릭된 채팅방 div 탐색
+            const chatDiv = e.target.closest('.chatList');
+            if (chatDiv) {
+                const roomId = chatDiv.dataset.roomId;
+                currentRoomId = roomId;
+                highlightChatRoom(roomId);
+                if (roomId) {
+                    loadChatHistory(roomId).then(() => {
+                        connectAndSubscribe(roomId);
+                    });
+                }
             }
-        }
-    });
+        });
+    }
 
-    const sendBtn = document.querySelector('button[type="submit"]');
+    const sendBtn = document.getElementById('sendChatButton');
     if (sendBtn) {
         sendBtn.addEventListener('click', function(e){
             e.preventDefault();
@@ -662,11 +723,19 @@ function sendMessage(currentRoomId) {
 	      isConnected,
 	      currentRoomId,
 	      input: document.querySelector('input[placeholder="채팅메시지를 입력하세요"]'),
-	      message: document.querySelector('input[placeholder="채팅메시지를 입력하세요"]').value
+	      message: document.getElementById('chatMessageInput') ? document.getElementById('chatMessageInput').value : ''
 	    });
-    if (!stompClient || !isConnected) return;
-    const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
+	 const input = document.getElementById('chatMessageInput');
+	 if (!input) {
+        alert("채팅 입력창을 찾을 수 없습니다.");
+        return;
+    }
     const message = input.value;
+    if (!stompClient || !isConnected) return;
+    if (!message.trim() || !currentRoomId) return;
+    if (!stompClient || !isConnected) return;
+ 
+    
     if (!message.trim() || !currentRoomId) return;
 
     // 버튼에서 값 추출
