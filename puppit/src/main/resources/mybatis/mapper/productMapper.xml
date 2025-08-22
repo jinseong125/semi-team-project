@@ -258,6 +258,7 @@
                            ON t.product_id = p.product_id
                                AND t.is_thumbnail = 1
         ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+        LIMIT 20
     </select>
     
     <select id="detailProducts" parameterType="int" resultMap="MyProducts">
@@ -339,6 +340,33 @@
         WHERE c.category_name = #{categoryName}
         ORDER BY p.product_created_at DESC
     </select>
+    
+    <!-- product.selectPagedProducts -->
+    <select id="selectPagedProducts" parameterType="map"
+        resultMap="MyProducts">
+      SELECT
+        p.product_id,
+        p.product_name,
+        p.product_price,
+        p.product_created_at,
+        p.product_updated_at,
+        p.category_id,
+        p.status_id,
+        c.category_name,
+        s.status_name,
+        t.image_id     AS thumb_image_id,
+        t.image_url    AS thumb_image_url,
+        t.is_thumbnail AS thumb_is_thumbnail
+      FROM product p
+      JOIN product_category c ON p.category_id = c.category_id
+      JOIN product_status   s ON p.status_id   = s.status_id
+      LEFT JOIN product_image t
+             ON t.product_id = p.product_id
+            AND t.is_thumbnail = 1
+      ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+      LIMIT #{size} OFFSET #{offset}
+    </select>
+
     
 
 

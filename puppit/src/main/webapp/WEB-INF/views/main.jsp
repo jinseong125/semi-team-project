@@ -144,14 +144,16 @@
 
 <script>
 (function () {
-  var input = document.getElementById('search-input');
-  var btn = document.getElementById('do-search');
-  var results = document.getElementById('search-results');
-  var mainGrid = document.getElementById('productGrid');
-  var size = 60;
-  var loading = false;
-  var endOfData = false;
-  var offset = mainGrid ? mainGrid.children.length : 0;
+	  var results = document.getElementById('search-results');
+	  var mainGrid = document.getElementById('productGrid');
+	  var input = document.getElementById('search-input');
+	  var btn = document.getElementById('do-search');
+
+	  var size = 60;
+	  var loading = false;
+	  var endOfData = false;
+	  var offset = mainGrid ? mainGrid.children.length : 0; // ✅ 초기 렌더 개수 기준
+	  var lastRequestedOffset = -1; // 같은 offset 중복 호출 방지
 
   function formatPrice(v) {
     if (v === null || v === undefined) return '';
@@ -240,8 +242,12 @@
       var name = p.productName || '';
       var price = p.productPrice ? new Intl.NumberFormat('ko-KR').format(p.productPrice) + '원' : '';
       var desc = p.productDescription || '';
+      var imgUrl =
+        (p.thumbnail && p.thumbnail.imageUrl) ? p.thumbnail.imageUrl :
+        (p.thumbImageUrl ? p.thumbImageUrl : (contextPath + '/resources/image/no-image.png'));
       return (
         '<a class="product-card" href="' + contextPath + '/product/detail/' + id + '">' +
+        '<img class="thumb" src="' + imgUrl + '" alt="상품이미지 없음">' +
         '<div class="title">' + name + '</div>' +
         '<div class="desc">' + desc + '</div>' +
         '<div class="price">' + price + '</div>' +
@@ -252,28 +258,47 @@
   }
 
   async function fetchProducts() {
-    if (loading || endOfData) return;
-    loading = true;
-    const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
-    try {
-      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (!res.ok) throw new Error("HTTP " + res.status);
+	  if (loading || endOfData) return;
 
-      const data = await res.json();
-      const products = Array.isArray(data.products) ? data.products : [];
-      if (products.length > 0) {
-        appendProducts(products);
-        offset = mainGrid.children.length;
-        if (products.length < size) endOfData = true;
-      } else {
-        endOfData = true;
-      }
-    } catch (e) {
-      endOfData = true;
-      console.error(e);
-    }
-    loading = false;
-  }
+	  // 같은 offset 중복 요청 가드
+	  if (offset === lastRequestedOffset) return;
+	  lastRequestedOffset = offset;
+
+	  loading = true;
+	  const url = contextPath + "/product/list?offset=" + offset + "&size=" + size;
+
+	  try {
+	    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+	    if (!res.ok) throw new Error("HTTP " + res.status);
+
+	    const data = await res.json();
+
+	    // 백엔드 키 사용: products, itemCount, hasMore
+	    const list = Array.isArray(data.products) ? data.products : [];
+	    const total = Number.isFinite(data.itemCount) ? data.itemCount : null;
+	    const more  = (typeof data.hasMore === 'boolean') ? data.hasMore : null;
+
+	    if (list.length > 0) {
+	      appendProducts(list);
+
+	      // ① offset 갱신 (append 이후)
+	      offset = mainGrid.children.length;
+
+	      // ② hasMore 우선 반영, 없으면 길이로 판단
+	      if (more === false || (total != null && offset >= total) || list.length < size) {
+	        endOfData = true;
+	      }
+	    } else {
+	      endOfData = true;
+	    }
+	  } catch (e) {
+	    console.error(e);
+	    endOfData = true; // 실패 시 무한 루프 방지
+	  } finally {
+	    loading = false;
+	  }
+	}
+
 
   let scrollTimer;
   window.addEventListener('scroll', function () {
@@ -319,6 +344,20 @@
   });
 
 })(); 
+
+  async function fillIfShort() {
+    // 검색 모드가 아니고, 메인 그리드가 보이며, 스크롤이 안 생겼을 때
+    while (!endOfData &&
+           mainGrid &&
+           mainGrid.style.display !== 'none' &&
+           document.documentElement.scrollHeight <= window.innerHeight) {
+      await fetchProducts();
+    }
+  }
+
+  // DOM 준비되면 한 번 호출
+  document.addEventListener('DOMContentLoaded', fillIfShort);
+
 
 
 	
