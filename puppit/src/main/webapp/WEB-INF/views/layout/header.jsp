@@ -281,8 +281,9 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   if (alarmBell) {
-    alarmBell.addEventListener("click", function() {
+	  alarmBell.addEventListener("click", function() {
       alarmClosed = false;
+      console.log("alarmBell button clicked"); // 버튼 클릭시 찍힘
       localStorage.setItem('puppitAlarmClosed', 'false');
       alarmArea.style.display = "block";
       alarmBell.style.display = "none";
@@ -389,12 +390,14 @@ document.addEventListener("DOMContentLoaded", function() {
 	  // filter 내부에서도 찍힘
 	  const msgIdSet = new Set();
 	  const deduped = alarms.filter((alarm, idx) => {
-	    console.log(`filter alarm[${idx}]:`, alarm);
-	    if (!alarm || !alarm.roomId || !alarm.messageId) return false;
-	    if (msgIdSet.has(alarm.messageId)) return false;
-	    msgIdSet.add(alarm.messageId);
-	    return true;
-	  });
+		  console.log(`filter alarm[${idx}]:`, alarm);
+		  if (!alarm || !alarm.roomId || !alarm.messageId) return false;
+		  if (msgIdSet.has(alarm.messageId)) return false;
+		  // receiverAccountId와 loginUserId가 같을 때만
+		  if (String(alarm.receiverAccountId) !== String(loginUserId)) return false;
+		  msgIdSet.add(alarm.messageId);
+		  return true;
+		});
 
 	  // deduped 결과도 찍기
 	  console.log('deduped:', deduped);
@@ -488,6 +491,11 @@ document.addEventListener("DOMContentLoaded", function() {
 		      })
 		      .then(data => {
 		    	  console.log('data: ', data);
+		    	// === 로그인한 사용자가 receiver로 받은 알림만 보여주기 ===
+			    const filtered = Array.isArray(data)
+  ? data.filter(alarm => String(alarm.receiverAccountId) === String(loginUserId))
+  : [];
+  console.log('filtered: ', filtered);
 		        if (data.length === 0) {
 		          alarmArea.innerHTML = "";
 		          alarmArea.style.display = "none";
