@@ -108,7 +108,22 @@ if (sessionMap != null) {
             .chatlist-container, .chat-container { width: 100%; }
             .container { flex-direction: column; }
         }
-        
+        .pay-btn {
+		    background: #1976d2;
+		    color: #fff;
+		    font-size: 20px;
+		    font-weight: 700;
+		    border: none;
+		    border-radius: 8px;
+		    padding: 16px 32px;
+		    margin-top: 10px;
+		    cursor: pointer;
+		    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+		    transition: background 0.2s;
+		}
+		.pay-btn:hover {
+		    background: #1565c0;
+		}
         
     </style>
 </head>
@@ -295,6 +310,11 @@ function loadChatHistory(roomId) {
                 buyerAccountId = data.product.buyerAccountId;
             }
             
+            // ★ 추가: 전역 저장!
+            window.buyerId = buyerId;
+            window.buyerAccountId = buyerAccountId;
+            
+            
             // ★ 여기에 추가!
             window.lastProductInfo = data.product;
             
@@ -333,7 +353,7 @@ function renderProductInfo(product, chatMessages) {
         
         
     // 🔥 로그인된 사용자와 판매자가 다른 경우 결제 버튼 추가
-    if (String(userId) !== String(product.sellerId) && buyerCount > 0 && sellerCount > 0 && chatMessages.length >= 2) {
+    if ( chatMessages.length >= 2) {
         html += `<button
             id="pay-btn"
             	    data-buyer-id="\${userId}" // 로그인된 사용자를 buyerId로 설정
@@ -514,6 +534,24 @@ function subscribeRoom(currentRoomId) {
        if (String(currentRoomId) === String(chat.chatRoomId)) {
             addChatMessageToHistory(chat);
             centerMessage.style.display = "none";
+             // === 결제버튼 갱신을 위해 상품영역 재렌더링 ===
+            // chatHistory.innerHTML에 메시지 추가 후, product, chatMessages를 다시 계산
+            // window.lastProductInfo, chatHistory에서 메시지 목록 추출
+            if (window.lastProductInfo) {
+                // 채팅 메시지 목록을 chatHistory에서 직접 추출 (이미 렌더링된 메시지들)
+                // 하지만 서버에서 내려온 chatMessages가 최신일 수 있으니, 아래처럼 메시지 배열 관리가 필요
+                // 간단하게: chatHistory에 있는 메시지들을 모을 수도 있지만, 
+                // 최신 메시지(chat)까지 포함하여 productInfoArea 갱신
+                // 기존 채팅방 메시지 배열이 있으면 거기에 push
+                if (!window.currentChatMessages) window.currentChatMessages = [];
+                window.currentChatMessages.push(chat);
+
+                // productInfoArea 재렌더링
+                renderProductInfo(window.lastProductInfo, window.currentChatMessages);
+            }
+            
+            
+            
         } else if (!isMine) {
             // 수신자인 경우에만 알림 표시
             displayNotification(
