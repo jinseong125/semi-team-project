@@ -206,7 +206,16 @@ document.getElementById('btnPay')?.addEventListener('click',function() {
     const productId = "${product.productId}";
     const buyerId = "${userId}";
     const sellerId = "${product.sellerId}";
+    const loginUserId = "${sessionScope.sessionMap.accountId}"; // JSP에서 세션 값을 직접 가져옴
     console.log("sellerId: ", sellerId);
+    
+ 	// 🚩 로그인 체크: buyerId가 0 또는 loginUserId가 비어있으면 로그인 페이지로 이동
+    if (!loginUserId || buyerId === "0" || !buyerId) {
+        alert("채팅을 하시려면 먼저 로그인해주세요.");
+        window.location.href = "${contextPath}/user/login";
+        return;
+    }
+    
     // 판매자와 구매자가 같을 때 경고창 띄우고 이동 막기
     if (buyerId === sellerId) {
         alert("상품에 등록된 판매자와 구매자가 같아서 채팅할 수 없습니다");
