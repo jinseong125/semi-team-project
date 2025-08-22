@@ -283,11 +283,13 @@
 
 	      // ① offset 갱신 (append 이후)
 	      offset = mainGrid.children.length;
-
-	      // ② hasMore 우선 반영, 없으면 길이로 판단
-	      if (more === false || (total != null && offset >= total) || list.length < size) {
-	        endOfData = true;
-	      }
+	      
+	      if (more !== null) {
+	          endOfData = !more;
+	        }
+	        else if (total !== null && offset >= total) {
+	          endOfData = true;
+	        }
 	    } else {
 	      endOfData = true;
 	    }

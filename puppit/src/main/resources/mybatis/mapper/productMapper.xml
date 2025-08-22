@@ -257,7 +257,8 @@
                  LEFT JOIN product_image t
                            ON t.product_id = p.product_id
                                AND t.is_thumbnail = 1
-        ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+        ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC,
+        p.product_id DESC
         LIMIT 20
     </select>
     
@@ -363,7 +364,8 @@
       LEFT JOIN product_image t
              ON t.product_id = p.product_id
             AND t.is_thumbnail = 1
-      ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+      ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC,
+      p.product_id DESC
       LIMIT #{size} OFFSET #{offset}
     </select>
 
