@@ -573,22 +573,18 @@ function getCurrentChatTime() {
 
 //1. 채팅방 하이라이트 함수
 function highlightChatRoom(roomId) {
-    const chatLists = document.querySelectorAll('.chatList');
-    chatLists.forEach(chatDiv => {
-        if (String(chatDiv.dataset.roomId) === String(roomId)) {
-            chatDiv.classList.add('highlight'); // 노란색 하이라이트
-        }
-    });
-    
-    // 기존 타이머 있으면 클리어
-    if (highlightTimers[roomId]) {
-        clearTimeout(highlightTimers[roomId]);
-    }
-    // 2초 후 하이라이트 제거
-    highlightTimers[roomId] = setTimeout(() => {
-        removeHighlightChatRoom(roomId);
-        highlightTimers[roomId] = null;
-    }, 2000); // 2초(2000ms) 후 제거, 필요시 시간 조절
+	const chatLists = document.querySelectorAll('.chatList');
+	  chatLists.forEach(chatDiv => {
+	    if (String(chatDiv.dataset.roomId) === String(roomId)) {
+	      chatDiv.classList.add('highlight');
+	      // 2초 후 하이라이트 제거
+	      if (highlightTimers[roomId]) clearTimeout(highlightTimers[roomId]);
+	      highlightTimers[roomId] = setTimeout(() => {
+	        chatDiv.classList.remove('highlight');
+	        highlightTimers[roomId] = null;
+	      }, 2000);
+	    }
+	  });
     
 }
 
@@ -680,6 +676,21 @@ function sendMessage(currentRoomId) {
     input.value = "";
 }
 
+function updateChatListLastMessage(roomId, chatMessage) {
+	  // chatListRenderArea 안의 .chatList[data-room-id]에서 .chat-message를 찾아서 수정
+	  var chatRenderArea = document.getElementById('chatListRenderArea');
+	  if (!chatRenderArea) return;
+	  var chatDiv = chatRenderArea.querySelector('.chatList[data-room-id="' + roomId + '"]');
+	  if (chatDiv) {
+	    var msgDiv = chatDiv.querySelector('.chat-message');
+	    if (msgDiv) {
+	      msgDiv.textContent = chatMessage;
+	    }
+	  }
+	}
+
+
+
 //뒤로가기 버튼 기능 추가
 document.addEventListener('DOMContentLoaded', function() {
     // ... 기존 chatlist, sendBtn 등 이벤트 바인딩 ...
@@ -692,7 +703,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
+//window에 등록
+window.highlightChatRoom = highlightChatRoom;
+window.updateChatListLastMessage = updateChatListLastMessage;
 </script>
 </body>
 </html>
