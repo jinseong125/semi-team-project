@@ -291,6 +291,19 @@ document.addEventListener("DOMContentLoaded", function() {
       alarmBell.classList.remove('red');
     });
   }
+  
+  const categorySelect = document.getElementById("categorySelect");
+  if (categorySelect) {
+    categorySelect.addEventListener("change", function() {
+      const selected = this.value;
+      if (selected && selected !== "카테고리") {
+        loadCategory(selected);
+      }
+    });
+  }
+  
+  
+  
 });
 
 
@@ -578,40 +591,64 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function render(list, keyword) {
-    if (!Array.isArray(list)) list = [];
-    if (!list.length) {
-      results.innerHTML =
-        '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 0건</div>' +
-        '<div class="empty">조건에 맞는 상품이 없습니다.</div>';
-      return;
-    }
+	  
+	  console.log('list: ', list);
+	  
+	  if (!Array.isArray(list)) list = [];
+	  if (!list.length) {
+	    results.innerHTML =
+	      '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 0건</div>' +
+	      '<div class="empty">조건에 맞는 상품이 없습니다.</div>';
+	    return;
+	  }
 
-    var head = '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 ' + list.length + '건</div>';
-    var cards = list.map(function (p) {
-      console.log('카테고리 검색 p: ', p);	
-      var id = p.productId;
-      var name = p.productName || '';
-      var price = formatPrice(p.productPrice);
-      var img = p.productImage || "";
-      var imgSrc = (img.startsWith("http"))
-          ? img
-          : (contextPath + "/uploads/" + img);
-      console.log('p.productImage: ', p.productImage);
-      console.log('img: ', img);
+	  var head = '<div class="result-head"><b>"' + keyword + '"</b> 검색 결과 ' + list.length + '건</div>';
+	  
+	  var cards = list.map(function (p) {
+		  
+	    console.log('카테고리 검색 p: ', p);	
+	    
+	    var id = p.productId;
+	    var name = p.productName || '';
+	    var price = formatPrice(p.productPrice);
 
-      return ''
-        + '<div class="card">'
-        + '  <a href="' + contextPath + '/product/detail/' + id + '">'
-        + '    <img src="' + imgSrc + '" alt="' + name + '"/>'
-        + '    <div class="name">' + name + '</div>'
-        + '    <div class="price">' + price + '</div>'
-        + '  </a>'
-        + '</div>';
-    }).join('');
+	    // 이미지 처리
+	    var img = p.productImage || "";
+	    //var imgSrc = "";
+	    if (img) {
+	      if (img.startsWith("http")) {
+	        // S3 같은 절대경로
+	        //imgSrc = img;
+	        console.log('s3 imgSrc: ', img);
+	      } else if (img.startsWith("/uploads/")) {
+	        // 이미 /uploads/가 포함된 상대경로
+	       // imgSrc = contextPath + img;
+	        console.log('이미 /uploads/가 포함된 상대경로 imgSrc: ', img);
+	      } else {
+	        // 단순 파일명만 있는 경우
+	        imgSrc = contextPath + "/uploads/" + img;
+	        console.log('단순 파일명만 있는 경우 imgSrc: ', img);
+	      }
+	    } else {
+	      // 이미지가 아예 없을 때 기본 이미지 지정
+	      img = contextPath + "/resources/image/no-image.png";
+	    }
+	    
+	    const resultCard = '<div class="card">'
+		    + '  <a href="' + contextPath + '/product/detail/' + id + '">'
+		    + '    <img src="' + img + '" alt="' + name + '"/>'   // 🚩 여기 반드시 imgSrc 사용
+		    + '    <div class="name">' + name + '</div>'
+		    + '    <div class="price">' + price + '</div>'
+		    + '  </a>'
+		    + '</div>'; 
+		 return resultCard;
 
-    results.innerHTML = head + '<div class="grid">' + cards + '</div>';
-    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+	  }).join('');
+
+	  results.innerHTML = head + '<div class="grid">' + cards + '</div>';
+	  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
+
 
   async function search(keyword) {
     var q = (keyword || '').trim();
@@ -639,7 +676,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // ===================== 이벤트 =====================
   input.addEventListener("keyup", async () => {
+	  console.log('엔터이벤트');
     const keyword = input.value.trim();
+    console.log('keyword: ', keyword);
     if (keyword.length === 0) {
       autoList.style.display = "none";
       return;
@@ -647,11 +686,12 @@ document.addEventListener("DOMContentLoaded", function() {
     try {
       const res = await fetch(contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword));
       const data = await res.json();
-
+	  console.log('data: ', data);
       autoList.innerHTML = "";
       if (data.length > 0) {
         data.forEach(item => {
           const li = document.createElement("li");
+          console.log('item: ', item);
           li.textContent = item;
           li.addEventListener("click", () => {
             input.value = item;
@@ -680,17 +720,7 @@ document.addEventListener("DOMContentLoaded", function() {
   btn.addEventListener('click', function () {
     search(input.value);
   });
-  document.addEventListener("DOMContentLoaded", function() {
-	  const categorySelect = document.getElementById("categorySelect");
-	  if (categorySelect) {
-	    categorySelect.addEventListener("change", function() {
-	      const selected = this.value;
-	      if (selected && selected !== "카테고리") {
-	        loadCategory(selected);
-	      }
-	    });
-	  }
-	});
+
 
 
   window.__search = search;
