@@ -367,7 +367,31 @@
       LIMIT #{size} OFFSET #{offset}
     </select>
 
-    
+<!-- 카테고리별 상품 검색 -->
+
+<select id="searchByCategory" parameterType="string"
+        resultType="org.puppit.model.dto.ProductSearchDTO">
+    SELECT 
+        p.product_id   AS productId,
+        p.product_name AS productName,
+        p.product_price AS productPrice,
+        (
+          SELECT i.image_url
+          FROM product_image i
+          WHERE i.product_id = p.product_id
+          ORDER BY i.image_id ASC
+          LIMIT 1
+        ) AS productImage
+    FROM product p
+    WHERE p.category_id = (
+      SELECT c.category_id
+      FROM product_category c
+      WHERE c.category_name = #{categoryName}
+    )
+</select>
+
+
+
 
 
 </mapper>

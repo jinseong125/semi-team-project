@@ -48,4 +48,9 @@ public interface ProductService {
     
     ProductDTO detailProducts(Integer product);
     
+    public List<ProductSearchDTO> searchByCategory(String categoryName); 
+     
+  
+
+    
 }

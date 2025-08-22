@@ -88,6 +88,10 @@ if (sessionMap != null) {
 		
     </ul>
 
+
+
+	
+
     <!-- 버튼 영역 -->
     <div class="buttons">
       <!-- 내 상품일 때만 수정/삭제 -->
@@ -178,7 +182,7 @@ if (sessionMap != null) {
 .detail-desc h2 { font-size:18px; font-weight:700; margin-bottom:12px; }
 .desc { white-space:pre-wrap; line-height:1.6; font-size:15px; }
 .empty { color:#6b7280; font-size:14px; }
-.productsPicture {width:200px; heigth:250px;}
+.productsPicture {width:200px; height:250px;}
 
 
 </style>

@@ -13,9 +13,10 @@
         (
           SELECT image_url 
           FROM product_image i 
-          WHERE i.product_id = p.product_id 
+          WHERE i.product_id = p.product_id
+		  ORDER BY i.image_id ASC
           LIMIT 1
-        ) AS productImage
+        )  AS productImage
     FROM product p
     WHERE p.product_name LIKE CONCAT('%', #{searchName}, '%')
 </select>
@@ -31,6 +32,9 @@
     ORDER BY cnt DESC
     LIMIT 5
 </select>
+
+
+
 
 
 <insert id="insertTopKeywords" parameterType="org.puppit.model.dto.SearchLogDTO">

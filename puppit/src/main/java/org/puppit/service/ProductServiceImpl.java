@@ -226,4 +226,10 @@ public class ProductServiceImpl implements ProductService {
     public ProductDTO detailProducts(Integer productId) {
       return productDAO.detailProducts(productId);
     }
+
+    @Override
+    public List<ProductSearchDTO> searchByCategory(String categoryName) {
+      System.out.println("productSearchDTO: " + productDAO.searchByCategory(categoryName));
+      return productDAO.searchByCategory(categoryName);
+    }
 }
