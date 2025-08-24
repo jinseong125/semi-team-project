@@ -85,4 +85,12 @@ public class ChatApiAlarmController {
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
 	    }
 	}
+	
+	@GetMapping(value = "/chat/unreadCount", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<Integer, Integer> getUnreadCounts(@RequestParam Integer userId) {
+	    return alarmService.getUnreadCountsForUser(userId);
+	}
+	
+	
 }

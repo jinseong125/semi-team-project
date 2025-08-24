@@ -1,5 +1,7 @@
 package org.puppit.service;
 
+import java.util.Map;
+
 import org.puppit.model.dto.AlarmReadDTO;
 import org.puppit.repository.AlarmDAO;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,12 @@ public class ChatAlarmServiceImpl implements ChatAlarmService {
 	@Override
 	public int markAllAsRead(Integer roomId, Integer userId, Integer groupCount) {
 	 return alarmDAO.updateAllReadStatus(roomId, userId, groupCount);
+	}
+	
+	@Override
+	public Map<Integer, Integer> getUnreadCountsForUser(Integer userId) {
+	    // 쿼리: SELECT room_id, COUNT(*) FROM alarm WHERE user_id = :userId AND is_read = 1 GROUP BY room_id
+	    return alarmDAO.getUnreadCountsForUser(userId);
 	}
 
 }
