@@ -171,5 +171,10 @@ public class ChatServiceImpl implements ChatService{
         // return alarmMapper.existsAlarm(notification.getMessageId(), notification.getRoomId(), notification.getSenderAccountId(), notification.getReceiverAccountId(), notification.getChatMessage());
     }
 
+	@Override
+	public int getTotalChatCount(int roomId, int buyerId, int sellerId) {
+		return chatDAO.getTotalChatCount(roomId, buyerId, sellerId);
+	}
+
 
 }

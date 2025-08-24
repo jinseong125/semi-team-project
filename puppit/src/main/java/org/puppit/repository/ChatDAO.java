@@ -155,6 +155,16 @@ public List<NotificationDTO> getUnreadAlarms(Integer userId) {
 	return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUnreadAlarms", userId);
 }
 
+public int getTotalChatCount(int roomId, int buyerId, int sellerId) {
+	 Map<String, Object> paramMap = new HashMap<>();
+	 paramMap.put("roomId", roomId);
+	 paramMap.put("buyerId", buyerId);
+	 paramMap.put("sellerId", sellerId);
+
+	 Integer count = sqlSession.selectOne("mybatis.mapper.chatMapper.getTotalChatCount", paramMap);
+	 return count != null ? count : 0;
+}
+
 
    
    

@@ -489,7 +489,7 @@ function loadChatHistory(roomId) {
             // ★ 추가: 전역 저장!
             window.buyerId = buyerId;
             window.buyerAccountId = buyerAccountId;
-            
+            window.sellerId = sellerId; // ★ 추가!
             
             // ★ 여기에 추가!
             window.lastProductInfo = data.product;
@@ -506,9 +506,25 @@ function loadChatHistory(roomId) {
             });
 
             centerMessage.style.display = messages.length > 0 ? "none" : "block";
+            
+            // 여기서 DB에서 총 대화 횟수 API 호출 후 상품영역 렌더링
+            return fetchChatCount(roomId, buyerId, sellerId).then(totalChatCount => {
+            	renderProductInfo(data.product, data.chatMessages || [], totalChatCount);
+            })
         });
 }
-function renderProductInfo(product, chatMessages) {
+
+//fetchChatCount 함수 변경
+function fetchChatCount(roomId, buyerId, sellerId) {
+    return fetch(contextPath + '/api/chat/count?roomId=' + roomId 
+        + '&buyerId=' + buyerId + '&sellerId=' + sellerId)
+        .then(res => res.json())
+        .then(data => data.totalChatCount)
+        .catch(() => 0);
+}
+
+
+function renderProductInfo(product, chatMessages, totalChatCount) {
 	  console.log('Rendering Product Info:', product); // 서버에서 전달된 product 확인
     const price = Number(product.productPrice);
     let html =
@@ -516,29 +532,24 @@ function renderProductInfo(product, chatMessages) {
         + '<strong>상품명:</strong> ' + product.productName + '<br>'
         + '<strong>가격:</strong> ' + (isNaN(price) ? product.productPrice : price.toLocaleString()) + '원 <br>';
 
-     // === 구매자와 판매자가 2번 이상 대화했을 때만 결제 버튼 표시 ===
-     // 대화는 BUYER, SELLER가 번갈아 보내야 하므로, 두 사람 모두 최소 1번 이상 메시지를 보냈는지 확인
-     let buyerCount = 0, sellerCount = 0;
-     if (Array.isArray(chatMessages)) {
-            chatMessages.forEach(msg => {
-                if (msg.senderRole === "BUYER") buyerCount++;
-                if (msg.senderRole === "SELLER") sellerCount++;
-            });
-     }  
+
+        // 1. 구매자/판매자 구분
+        // 현재 로그인한 사용자가 구매자인 경우에만 결제 버튼 노출
+        const isBuyer = String(userId) === String(product.buyerId || window.buyerId);
         
         
-        
-    // 🔥 로그인된 사용자와 판매자가 다른 경우 결제 버튼 추가
-    if ( chatMessages.length >= 2) {
-        html += `<button
-            id="pay-btn"
-            	    data-buyer-id="\${userId}" // 로그인된 사용자를 buyerId로 설정
-                    data-seller-id="\${product.sellerId}"
-                    data-seller-account-id="\${product.chatSellerAccountId}" // Fix: Bind chatSellerAccountId directly from product object
-                    data-product-name="\${product.productName}"
-                    data-product-id="\${product.productId}"
-        >결제하기</button>`;
-    }
+     // 2. DB에서 받아온 구매자-판매자간 총 채팅 횟수(totalChatCount) 활용
+        // totalChatCount는 반드시 서버에서 받아온 값을 파라미터로 전달해야 함
+        if (isBuyer && totalChatCount >= 2) {
+            html += `<button
+                id="pay-btn"
+                data-buyer-id="${userId}"
+                data-seller-id="${product.sellerId}"
+                data-seller-account-id="${product.chatSellerAccountId}"
+                data-product-name="${product.productName}"
+                data-product-id="${product.productId}"
+            >결제하기</button>`;
+        }
 
     html += '</div>';
     productInfoArea.innerHTML = html;
