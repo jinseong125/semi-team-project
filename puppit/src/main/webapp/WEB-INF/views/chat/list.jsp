@@ -221,7 +221,7 @@ if (sessionMap != null) {
     </div>
     <div class="chat-container">
         <div class="product-info-area" id="product-info-area"></div>
-        <div class="center-message" id="center-message">상품 판매자와 채팅을 시작해보세요</div>
+        <div class="center-message" id="center-message">채팅방을 먼저 선택해주세요</div>
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-input-group">
              <textarea id="chatMessageInput" placeholder="채팅메시지를 입력하세요" rows="5"></textarea>
@@ -233,6 +233,7 @@ if (sessionMap != null) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 <script>
 
+const chatInputGroup = document.querySelector('.chat-input-group');
 const centerMessage = document.getElementById('center-message');
 const chatHistory = document.getElementById('chat-history');
 const productInfoArea = document.getElementById('product-info-area');
@@ -266,20 +267,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     
-    //chatlist.addEventListener('click', function(e) {
-      //  const chatDiv = e.target.closest('.chatList');
-       // if (chatDiv) {
-        //    const roomId = chatDiv.dataset.roomId;
-        //    currentRoomId = roomId;
-        //    if (roomId) {
-        //        loadChatHistory(roomId).then(() => {
-        //            connectAndSubscribe(roomId);
-        //        });
-        //    }
-       // }
-    //});
-    
-    
     const chatlist = document.getElementById('chatlist-container');
     if (chatlist) {
         chatlist.addEventListener('click', function(e) {
@@ -289,6 +276,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const roomId = chatDiv.dataset.roomId;
                 currentRoomId = roomId;
                 highlightChatRoom(roomId);
+                
+                // 채팅방 선택시 채팅 UI show/hide 처리
+                showChatUI();
                 
              // === [추가] 읽음 처리 + 알림뱃지 제거 ===
                 // 미읽음 뱃지 확인
@@ -338,6 +328,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     enableChatInput(false);
+ 	// [변경] 최초 진입시 채팅 UI 숨김
+    showChatUI(false);
     
     // === 미읽음 메시지 뱃지: 로그인 & 채팅방 목록 페이지에서만 실행 ===
     const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
@@ -345,7 +337,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isLoggedIn === "true" && isChatListPage) {
         loadUnreadCounts();
     }
+    
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.history.back();
+        });
+    }
+    
 });
+
+/* [추가] 채팅 UI show/hide 함수 */
+function showChatUI(isRoomSelected=true) {
+    if (isRoomSelected) {
+        // 채팅방 선택됨: 입력 보여주고, history 보여주고, 안내 메시지는 조건부
+        chatInputGroup.style.display = "flex";
+        chatHistory.style.display = "flex";
+        // 안내 메시지는 대화 내역 없을 때만 show
+        centerMessage.style.display = "none"; // hide "채팅방을 먼저 선택해주세요"
+    } else {
+        // 채팅방 미선택: 안내 메시지 show, 나머지 hide
+        centerMessage.textContent = "채팅방을 먼저 선택해주세요";
+        centerMessage.style.display = "block";
+        chatInputGroup.style.display = "none";
+        chatHistory.style.display = "none";
+        productInfoArea.innerHTML = ""; // 상품영역도 숨김
+    }
+}
 
 function loadUnreadCounts() {
     fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
@@ -505,12 +523,21 @@ function loadChatHistory(roomId) {
                 addChatMessageToHistory(chat);
             });
 
-            centerMessage.style.display = messages.length > 0 ? "none" : "block";
+            // [변경] 안내 메시지: 대화 없으면 "판매자와 채팅을 시작해보세요"
+            if (messages.length === 0) {
+                centerMessage.textContent = "판매자와 채팅을 시작해보세요";
+                centerMessage.style.display = "block";
+            } else {
+                centerMessage.style.display = "none";
+                // 대화가 있으면 상품정보 + 결제버튼 조건을 위해 count API 호출
+                return fetchChatCount(roomId, buyerId, sellerId).then(totalChatCount => {
+                	renderProductInfo(data.product, data.chatMessages || [], totalChatCount);
+                })
+            }
+
+            //centerMessage.style.display = messages.length > 0 ? "none" : "block";
             
-            // 여기서 DB에서 총 대화 횟수 API 호출 후 상품영역 렌더링
-            return fetchChatCount(roomId, buyerId, sellerId).then(totalChatCount => {
-            	renderProductInfo(data.product, data.chatMessages || [], totalChatCount);
-            })
+            
         });
 }
 
@@ -936,14 +963,14 @@ function updateChatListLastMessage(roomId, chatMessage) {
 
 
 //뒤로가기 버튼 기능 추가
-document.addEventListener('DOMContentLoaded', function() {
-    const backBtn = document.getElementById('back-btn');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.history.back();
-        });
-    }
-});
+//document.addEventListener('DOMContentLoaded', function() {
+  //  const backBtn = document.getElementById('back-btn');
+  //  if (backBtn) {
+  //      backBtn.addEventListener('click', function() {
+  //          window.history.back();
+  //      });
+  //  }
+//});
 
 
 //window에 등록
