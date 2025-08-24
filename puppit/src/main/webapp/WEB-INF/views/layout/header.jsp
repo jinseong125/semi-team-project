@@ -431,6 +431,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	  
 	  
+
 	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
 	  Object.values(roomGroups).forEach(group => {
 	    const alarm = group.lastAlarm;
@@ -443,19 +444,17 @@ document.addEventListener("DOMContentLoaded", function() {
 	      + '>'
 	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
 	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
-	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span>'
-	   // 아래 부분을 명확히
-	      + (group.count && group.count > 1
-	          ? ' <span style="color:#e74c3c; font-weight:bold;">(안읽은 메시지 ' + group.count + '개)</span>'
-	          : '')
-	      + '<span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
-	      + '</a>'
-	      + '</li>';
+	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span>';
+	      
+	      // 여기서 group.count가 2 이상이면 표시
+	      if (group.count && group.count > 1) {
+	        html += ' <span style="color:#e74c3c; font-weight:bold;">(안읽은 메시지 ' + group.count + '개)</span>';
+	      }
+	      html += '<br><span style="font-size:13px;">From: ' + (alarm.senderAccountId || '') + ' | To: ' + (alarm.receiverAccountId || '') + '</span>'
+	      + '</a></li>';
 	  });
 	  html += '</ul>';
 	  alarmArea.innerHTML = html;
-	  alarmArea.style.display = "block";
-	  alarmShownOnce = true;
 
 	  
 	  // 🚩 알림 팝업의 알림 메시지 클릭 이벤트 바인딩
@@ -465,55 +464,66 @@ document.addEventListener("DOMContentLoaded", function() {
 		      var roomId = alarmLink.getAttribute('data-room-id');
 		      var chatMessage = alarmLink.getAttribute('data-chat-message');
 		      var messageId = alarmLink.getAttribute('data-message-id'); // 메시지의 고유 ID
-		      var chatReceiver = deduped.receiverAccountId; // 또는 알림 객체에서 가져오기
-		      // 만약 chatReceiver 값을 알림 데이터에서 직접 꺼낼 수 있다면 그 값을 써주세요!
-		      console.log('알림 메시지Id: ', messageId);
-		      console.log('roomId: ', roomId);
-		      console.log('userId: ', userId);
-		      
+
 		      // deduped[idx]가 현재 alarm 객체!
 		      var alarm = deduped[idx];
-		      var chatReceiver = alarm.receiverAccountId; // 여기서 꺼내오기!
-		      console.log('chatReceiver: ', chatReceiver);
-		      
-		      
-		      // 1. 알림팝업에서 해당 메시지 li만 제거
+
+		      // 1. li 제거
 		      var liElem = alarmLink.closest('li');
 		      if (liElem) liElem.remove();
 
-		      // 2. DB에 읽음 상태로 변경 요청 (Ajax/fetch)
-		      if (messageId) {
+		      // 2. 현재 클릭한 roomId에 해당하는 group.count 찾기
+		      //var groupCount = 1; // 기본값
+	    	  var groupCount = roomGroups && roomGroups[roomId] && roomGroups[roomId].count ? roomGroups[roomId].count : 1;
+
+
+		      // 3. groupCount 값에 따라 분기
+		      if (groupCount === 1) {
 		        fetch(contextPath + '/api/alarm/read', {
 		          method: 'POST',
 		          headers: { 'Content-Type': 'application/json' },
-		          body: JSON.stringify({ roomId: roomId, userId: userId, chatReceiver, chatReceiver, messageId: messageId })
+		          body: JSON.stringify({ roomId: roomId, userId: userId, messageId: messageId })
 		        })
 		        .then(res => {
 		          if (!res.ok) throw new Error('알림 읽음 처리 실패');
 		          return res.json();
 		        })
 		        .then(data => {
-		          // 읽음 처리 성공 시 필요한 추가 작업(예: 콘솔 로그)
 		          console.log('알림 읽음 처리 완료', data);
 		        })
 		        .catch(err => {
 		          console.error('알림 읽음 처리 에러', err);
 		        });
-		      }	
-		      
-		      
+		      } else if (groupCount > 1) {
+		    	// groupCount 안전하게 가져오기
+		    	  fetch(contextPath + '/api/alarm/readAll', {
+		    		  method: 'POST',
+		    		  headers: { 'Content-Type': 'application/json' },
+		    		  body: JSON.stringify({
+		    		    roomId: roomId,
+		    		    userId: userId,
+		    		    count: groupCount // 반드시 숫자! (undefined/null 방지)
+		    		  })
+		    		})
+		    		.then(res => {
+		    		  if (!res.ok) throw new Error('채팅방 전체 알림 읽음 처리 실패');
+		    		  return res.json();
+		    		})
+		    		.then(data => {
+		    		  console.log('채팅방 전체 알림 읽음 처리 완료', data);
+		    		})
+		    		.catch(err => {
+		    		  console.error('채팅방 전체 알림 읽음 처리 에러', err);
+		    		});
+		      }
 
-		      // 페이지가 채팅방 목록(/chat/recentRoomList)인지 체크
+		      // 페이지 이동 처리 등 기존 로직은 그대로
 		      var isChatListPage = window.location.pathname.indexOf('/chat/recentRoomList') !== -1;
-
 		      if (typeof window.highlightChatRoom === 'function' && isChatListPage) {
-		        // ✅ 현재 목록 페이지라면 기존 기능 수행
 		        window.highlightChatRoom(roomId);
 		        window.updateChatListLastMessage(roomId, chatMessage);
 		        closeAlarmPopup();
-		        // (원하면 loadChatHistory 등 추가)
 		      } else {
-		        // ✅ 다른 페이지라면 목록 페이지로 이동, 파라미터 전달
 		        var url = contextPath + '/chat/recentRoomList'
 		          + '?highlightRoomId=' + encodeURIComponent(roomId)
 		          + '&highlightMessage=' + encodeURIComponent(chatMessage);

@@ -18,10 +18,28 @@ WHERE r.room_id = #{roomId}
   
      <!-- 알림 읽음 처리 (messageId로) -->
     <update id="updateReadStatus" parameterType="org.puppit.model.dto.AlarmReadDTO" >
-    UPDATE alarm
-SET is_read = 0
-WHERE message_id = #{messageId};
+	    UPDATE alarm
+	SET is_read = 0
+	WHERE message_id = #{messageId};
 		
     </update>
   
+  
+<update id="updateAllReadStatus" parameterType="map">
+   UPDATE alarm
+SET is_read = 0
+WHERE message_id IN (
+    SELECT t.message_id
+    FROM (
+        SELECT a.message_id
+        FROM alarm a
+        JOIN chat c ON a.message_id = c.message_id
+        WHERE a.room_id = #{roomId}
+          AND c.chat_receiver = #{userId}
+          AND a.is_read = 1
+        ORDER BY a.message_id DESC
+        LIMIT 7
+    ) t
+);
+</update>
 </mapper>
