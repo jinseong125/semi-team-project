@@ -16,4 +16,12 @@ WHERE r.room_id = #{roomId}
   
   </select>	
   
+     <!-- 알림 읽음 처리 (messageId로) -->
+    <update id="updateReadStatus" parameterType="org.puppit.model.dto.AlarmReadDTO" >
+    UPDATE alarm
+SET is_read = 0
+WHERE message_id = #{messageId};
+		
+    </update>
+  
 </mapper>
