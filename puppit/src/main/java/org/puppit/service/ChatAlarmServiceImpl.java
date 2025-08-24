@@ -26,4 +26,10 @@ public class ChatAlarmServiceImpl implements ChatAlarmService {
 		
 	}
 
+
+	@Override
+	public int markAllAsRead(Integer roomId, Integer userId, Integer groupCount) {
+	 return alarmDAO.updateAllReadStatus(roomId, userId, groupCount);
+	}
+
 }
