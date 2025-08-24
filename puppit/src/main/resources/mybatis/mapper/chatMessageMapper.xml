@@ -313,13 +313,10 @@ WHERE p.product_id = #{productId};
   	
   	</select>
   	
-  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarmId">
-  		  INSERT INTO alarm (room_id, user_id, alarm_read_message_id)
-    VALUES (#{roomId}, #{userId}, #{alarmReadMessageId})
-  	
-  	
-  	
-  	</insert>
+  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarm_id">
+    INSERT INTO alarm (room_id, message_id, user_id, is_read)
+    VALUES (#{roomId}, #{messageId}, #{userId}, #{isRead})
+</insert>
   	
   	<select id="getReceiverInfoByUserId" parameterType="Integer" resultType="ChatUserDTO">
   	    SELECT user_id, account_id, user_name, nick_name
@@ -338,31 +335,25 @@ WHERE p.product_id = #{productId};
   	</select>
   	
   	<select id="mybatis.mapper.chatMessageMapper.getUnreadAlarms" parameterType="Integer" resultType="NotificationDTO">
-  	  SELECT 
-		    a.*,
-		    c.message_id AS message_id,                      -- 메시지의 PK 추가!
-		    c.chat_message AS chat_message,                  -- 채팅 메시지 내용
-		    u.account_id AS sender_account_id,               -- 메시지 발신자 accountId
-		    u.user_name AS sender_user_name,                 -- 메시지 발신자 이름
-		    c.chat_created_at AS message_created_at,         -- 메시지 발신 시간
-		    p.product_name,                                  -- 채팅방의 상품 이름
-		    ur.account_id AS receiver_account_id,            -- 메시지 수신자 accountId
-		    ur.user_name AS receiver_user_name               -- 메시지 수신자 이름
-		FROM alarm a
-		LEFT JOIN chat c 
-		    ON a.room_id = c.chat_room_id
-		    AND a.alarm_read_message_id IS NULL
-		    AND c.message_id = (
-		        SELECT MAX(message_id)
-		        FROM chat
-		        WHERE chat_room_id = a.room_id
-		    )
-		LEFT JOIN user u ON c.chat_sender = u.user_id           -- 발신자 정보
-		LEFT JOIN user ur ON c.chat_receiver = ur.user_id       -- 수신자 정보 (추가)
-		LEFT JOIN room r ON a.room_id = r.room_id
-		LEFT JOIN product p ON r.product_id = p.product_id
-		WHERE a.user_id = #{userId}
-		  AND a.alarm_read_message_id IS NULL
+  	SELECT
+    a.*,
+    c.chat_message,
+    c.chat_created_at,
+    c.chat_sender,
+    sender.account_id AS senderAccountId,          -- 발신자 accountId
+    c.chat_room_id AS roomId,
+    c.chat_receiver,
+    receiver.account_id AS receiverAccountId,      -- 수신자 accountId
+    p.product_name                                -- 상품명
+FROM alarm a
+JOIN chat c ON a.message_id = c.message_id
+JOIN user sender ON c.chat_sender = sender.user_id         -- 발신자 정보 JOIN
+JOIN user receiver ON c.chat_receiver = receiver.user_id   -- 수신자 정보 JOIN
+JOIN room r ON a.room_id = r.room_id
+JOIN product p ON r.product_id = p.product_id
+WHERE c.chat_receiver = #{userId}   -- 로그인 사용자가 receiver
+  AND a.is_read = 1                 -- 읽지 않은 알림
+ORDER BY a.created_at DESC
   	</select>
   
   

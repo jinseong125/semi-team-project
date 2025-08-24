@@ -18,6 +18,7 @@
     <typeAlias type="org.puppit.model.dto.ChatUserDTO" alias="ChatUserDTO"/>
     <typeAlias type="org.puppit.model.dto.NotificationDTO" alias="NotificationDTO"/>
     <typeAlias type="org.puppit.model.dto.AlarmDuplicationDTO" alias="AlarmDuplicationDTO"/>
+    <typeAlias type="org.puppit.model.dto.AlarmReadDTO" alias="AlarmReadDTO"/>
     <typeAlias type="org.puppit.model.dto.UserDTO" alias="UserDTO"/>
     <typeAlias type="org.puppit.model.dto.UserStatusDTO" alias="UserStatusDTO"/>
     <typeAlias type="org.puppit.model.dto.PointDTO" alias="PointDTO"/>

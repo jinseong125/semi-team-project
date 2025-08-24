@@ -24,6 +24,9 @@ public class NotificationDTO {
 	private Integer alarmReadMessageId;
 	private Integer alarmId;
 	private Integer messageId;
+	private Integer isRead;
+	private Integer chatSender;
+	private Integer chatReceiver;
 	
 	@Override
 	public String toString() {
@@ -31,8 +34,10 @@ public class NotificationDTO {
 				+ ", receiverAccountId=" + receiverAccountId + ", chatMessage=" + chatMessage + ", senderRole="
 				+ senderRole + ", chatCreatedAt=" + chatCreatedAt + ", productName=" + productName
 				+ ", alarmReadMessageId=" + alarmReadMessageId + ", alarmId=" + alarmId + ", messageId=" + messageId
-				+ "]";
+				+ ", isRead=" + isRead + "]";
 	}
+	
+	
 	
 	
 }
