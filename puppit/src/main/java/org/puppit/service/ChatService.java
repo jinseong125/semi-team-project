@@ -41,6 +41,7 @@ public interface ChatService {
      * messageId, roomId, senderAccountId, receiverAccountId, chatMessage 등으로 체크
      */
     int isAlarmDuplicate(NotificationDTO notification);
+	public int getTotalChatCount(int roomId, int buyerId, int sellerId);
 
 }
 

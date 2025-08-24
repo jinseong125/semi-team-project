@@ -47,4 +47,16 @@ JOIN user receiver ON c.chat_receiver = receiver.user_id
 ORDER BY c.chat_created_at DESC
 </select>
   
+  <select id="getTotalChatCount" parameterType="int" resultType="int">
+  	    SELECT COUNT(*)
+    FROM chat
+    WHERE chat_room_id = #{roomId}
+      AND (
+        (chat_sender = #{buyerId} AND chat_receiver = #{sellerId})
+        OR (chat_sender = #{sellerId} AND chat_receiver = #{buyerId})
+      )
+  
+  </select>
+  
+  
 </mapper>
