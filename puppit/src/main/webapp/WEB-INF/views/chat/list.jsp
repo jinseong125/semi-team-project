@@ -289,6 +289,38 @@ document.addEventListener('DOMContentLoaded', function() {
                 const roomId = chatDiv.dataset.roomId;
                 currentRoomId = roomId;
                 highlightChatRoom(roomId);
+                
+             // === [추가] 읽음 처리 + 알림뱃지 제거 ===
+                // 미읽음 뱃지 확인
+                const badge = chatDiv.querySelector('.unread-badge');
+                const unreadCount = badge && badge.style.display !== 'none' ? parseInt(badge.textContent) || 0 : 0;
+                console.log('unreadCount: ', unreadCount);
+                if (unreadCount > 0) {
+                    // 읽음 처리 API 호출
+                    fetch(contextPath + '/api/alarm/readAll', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            roomId: roomId,
+                            userId: userId,
+                            count: unreadCount
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        // 뱃지 제거
+                        badge.style.display = 'none';
+                        badge.textContent = '';
+                        // 알림 팝업에서도 해당 채팅방 알림 제거
+                        if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
+                    })
+                    .catch(err => {
+                        console.error('안읽은 메시지 읽음 처리 에러:', err);
+                    });
+                }
+                
+                
+                
                 if (roomId) {
                     loadChatHistory(roomId).then(() => {
                         connectAndSubscribe(roomId);
@@ -306,7 +338,90 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     enableChatInput(false);
+    
+    // === 미읽음 메시지 뱃지: 로그인 & 채팅방 목록 페이지에서만 실행 ===
+    const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
+    const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
+    if (isLoggedIn === "true" && isChatListPage) {
+        loadUnreadCounts();
+    }
 });
+
+function loadUnreadCounts() {
+    fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
+        .then(res => res.json())
+        .then(unreadCounts => {
+            updateUnreadBadges(unreadCounts);
+        });
+}
+function updateUnreadBadges(unreadCounts) {
+    document.querySelectorAll('.chatList').forEach(function(roomElem) {
+        var roomId = roomElem.getAttribute('data-room-id');
+        var count = unreadCounts[roomId] || 0;
+        let badge = roomElem.querySelector('.unread-badge');
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.className = 'unread-badge';
+            roomElem.appendChild(badge);
+        }
+        if (count > 0) {
+            badge.textContent = count;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'none';
+        }
+    });
+}
+
+//--- 읽음 처리 ---
+function markRoomMessagesAsRead(roomId, unreadCount) {
+    // userId는 chat_receiver 기준(로그인 사용자)
+    fetch(contextPath + '/api/chat/readAll', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            roomId: roomId,
+            userId: userId, // chat_receiver
+            count: unreadCount
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        // 성공 시 뱃지 제거, 알림 팝업 제거
+        removeUnreadBadge(roomId);
+        removeAlarmPopupRoom(roomId);
+    })
+    .catch(err => {
+        console.error('안읽은 메시지 읽음 처리 에러:', err);
+    });
+}
+
+
+//--- 알림 팝업에서 읽음 처리 ---
+function removeAlarmPopupRoom(roomId) {
+    // 알림 팝업에서 해당 roomId의 메시지 제거
+    const alarmArea = document.getElementById('alarmArea');
+    if (alarmArea) {
+        const alarmLinks = alarmArea.querySelectorAll('.alarm-link[data-room-id="' + roomId + '"]');
+        alarmLinks.forEach(link => {
+            const liElem = link.closest('li');
+            if (liElem) liElem.remove();
+        });
+        // 알림이 모두 없어졌으면 팝업 닫기
+        const remainLinks = alarmArea.querySelectorAll('.alarm-link');
+        if (remainLinks.length === 0) {
+            closeAlarmPopup();
+        }
+    }
+}
+
+// --- 뱃지 제거 ---
+function removeUnreadBadge(roomId) {
+    document.querySelectorAll('.chatList[data-room-id="' + roomId + '"] .unread-badge').forEach(badge => {
+        badge.style.display = 'none';
+        badge.textContent = '';
+    });
+}
 
 function enableChatInput(enable) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');

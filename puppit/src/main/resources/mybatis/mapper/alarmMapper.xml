@@ -25,21 +25,33 @@ WHERE r.room_id = #{roomId}
     </update>
   
   
-<update id="updateAllReadStatus" parameterType="map">
-   UPDATE alarm
-SET is_read = 0
-WHERE message_id IN (
-    SELECT t.message_id
-    FROM (
-        SELECT a.message_id
-        FROM alarm a
-        JOIN chat c ON a.message_id = c.message_id
-        WHERE a.room_id = #{roomId}
-          AND c.chat_receiver = #{userId}
-          AND a.is_read = 1
-        ORDER BY a.message_id DESC
-        LIMIT 7
-    ) t
-);
-</update>
+	<update id="updateAllReadStatus" parameterType="map">
+	   UPDATE alarm
+	SET is_read = 0
+	WHERE message_id IN (
+	    SELECT t.message_id
+	    FROM (
+	        SELECT a.message_id
+	        FROM alarm a
+	        JOIN chat c ON a.message_id = c.message_id
+	        WHERE a.room_id = #{roomId}
+	          AND c.chat_receiver = #{userId}
+	          AND a.is_read = 1
+	        ORDER BY a.message_id DESC
+	        LIMIT 7
+	    ) t
+	);
+	</update>
+
+	<select id="getUnreadCountsForUser" parameterType="int" resultType="map">
+	    SELECT a.room_id, COUNT(*) AS unread_count
+		FROM alarm a
+		JOIN chat c ON a.message_id = c.message_id
+		WHERE a.is_read = 1
+		  AND c.chat_receiver = #{userId}
+		GROUP BY a.room_id;
+	</select>
+
+
+
 </mapper>

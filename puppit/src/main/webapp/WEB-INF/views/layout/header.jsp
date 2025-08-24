@@ -256,8 +256,13 @@ document.addEventListener("DOMContentLoaded", function() {
 	  console.log("loginUserId:", loginUserId, "userId:", userId);
   alarmArea = document.getElementById("alarmArea");
   alarmBell = document.getElementById("alarmBell");
+  const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
   loadTopKeywords();
-
+  
+  if (isLoggedIn === "true" && isChatListPage) {
+    loadUnreadCounts();
+  }
+  
   if (isLoggedIn === "true" && userId && !isNaN(userId)) {
     if (localStorage.getItem('puppitAlarmClosed') === null) {
       alarmClosed = false;
@@ -511,6 +516,9 @@ document.addEventListener("DOMContentLoaded", function() {
 		    		})
 		    		.then(data => {
 		    		  console.log('채팅방 전체 알림 읽음 처리 완료', data);
+		    		  // UI에서 알림 및 뱃지 제거
+		              removeUnreadBadge(roomId); // list.jsp와 동일 함수 (window로 등록 가능)
+		              removeAlarmPopupRoom(roomId);
 		    		})
 		    		.catch(err => {
 		    		  console.error('채팅방 전체 알림 읽음 처리 에러', err);
@@ -594,8 +602,55 @@ document.addEventListener("DOMContentLoaded", function() {
 		  }
 
   
+	  function loadUnreadCounts() {
+		  fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
+		    .then(res => res.json())
+		    .then(unreadCounts => {
+		      updateUnreadBadges(unreadCounts);
+		    });
+		}
+		function updateUnreadBadges(unreadCounts) {
+		  document.querySelectorAll('.chat-room-item').forEach(function(roomElem) {
+		    var roomId = roomElem.getAttribute('data-room-id');
+		    var count = unreadCounts[roomId] || 0;
+		    let badge = roomElem.querySelector('.unread-badge');
+		    if (!badge) {
+		      badge = document.createElement('span');
+		      badge.className = 'unread-badge';
+		      roomElem.appendChild(badge);
+		    }
+		    if (count > 0) {
+		      badge.textContent = count;
+		      badge.style.display = 'inline-block';
+		    } else {
+		      badge.style.display = 'none';
+		    }
+		  });
+		}	
 
-  
+		// 미읽음 뱃지 제거 함수 (list.jsp와 동일)
+		function removeUnreadBadge(roomId) {
+		  document.querySelectorAll('.chatList[data-room-id="' + roomId + '"] .unread-badge').forEach(badge => {
+		    badge.style.display = 'none';
+		    badge.textContent = '';
+		  });
+		}
+		// 알림 팝업에서 해당 roomId의 알림 메시지 삭제
+		function removeAlarmPopupRoom(roomId) {
+		  const alarmArea = document.getElementById('alarmArea');
+		  if (alarmArea) {
+		    const alarmLinks = alarmArea.querySelectorAll('.alarm-link[data-room-id="' + roomId + '"]');
+		    alarmLinks.forEach(link => {
+		      const liElem = link.closest('li');
+		      if (liElem) liElem.remove();
+		    });
+		    // 알림 모두 없어지면 팝업 닫기
+		    const remainLinks = alarmArea.querySelectorAll('.alarm-link');
+		    if (remainLinks.length === 0) {
+		      closeAlarmPopup();
+		    }
+		  }
+		}
   
   
   async function loadCategory(categoryName) {
@@ -812,6 +867,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   window.__search = search;
+  window.showAlarmPopup = showAlarmPopup;
+  window.removeUnreadBadge = removeUnreadBadge;
+  window.removeAlarmPopupRoom = removeAlarmPopupRoom;
+  window.closeAlarmPopup = closeAlarmPopup;
 </script>
 
 
