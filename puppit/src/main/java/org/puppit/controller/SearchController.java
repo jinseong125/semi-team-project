@@ -1,6 +1,7 @@
   package org.puppit.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.puppit.model.dto.SearchLogDTO;
 import org.puppit.service.SearchLogService;
@@ -22,7 +23,10 @@ public class SearchController {
   // 인기 검색어 조회
   @GetMapping(value = "/top", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public List<SearchLogDTO> getTopKeywords() {
-    return searchLogService.getTopKeywords();
-  }
+  public List<String> getTopKeywords() {
+    return searchLogService.getTopKeywords().stream()
+            .map(SearchLogDTO::getSearchKeyword)   // DTO → String
+            .filter(kw -> kw != null && !kw.trim().isEmpty())
+            .collect(Collectors.toList());         
+}
 }

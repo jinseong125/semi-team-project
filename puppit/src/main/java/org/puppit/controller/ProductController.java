@@ -114,7 +114,7 @@ public class ProductController {
     /** 검색 */
     @GetMapping(value = "/search", produces = "application/json; charset=UTF-8")
     @ResponseBody
-    public List<ProductSearchDTO> searchByNew(@RequestParam String searchName) {
+    public List<ProductDTO> searchByNew(@RequestParam String searchName) {
         return productService.searchByNew(searchName);
     }
 
