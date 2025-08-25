@@ -28,7 +28,7 @@ public interface UserService {
   // 비밀번호 변경
 //  Boolean changeUserPasswordByuserId(UserDTO user);
   // 기존 비밀번호 확인
-  UserDTO passwordCheck(Integer userID, String password);
+  UserDTO passwordCheck(UserDTO user);
 
   boolean updateUser(Map<String, Object> map);
   UserDTO getProfileImageKey(Integer userId);

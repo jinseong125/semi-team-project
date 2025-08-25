@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -96,40 +97,31 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public List<ProductSearchDTO> searchByNew(String searchName) {
+    public List<ProductDTO> searchByNew(String searchName) {
         return productDAO.searchByNew(searchName);
     }
 
     @Override
-    public Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request) {
-        String sort = request.getParameter("sort");
-        if (sort == null || !(sort.equalsIgnoreCase("ASC") || sort.equalsIgnoreCase("DESC"))) {
-            sort = "DESC";
-        }
-        int itemCount = productDAO.getProductCount();
-        dto.setItemCount(itemCount);
-        
-        // 범위 넘어가면 빈 리스트 반환
-        if (dto.getOffset() >= itemCount) {
-            return Map.of(
-                "products", List.of(),
-                "itemCount", itemCount,
-                "hasMore", false
-            );
-        }
+    public Map<String, Object> getProducts(PageDTO dto, Map<String,Object> filters) {
+      String sort = Objects.toString(filters.get("sort"), "DESC");
+      int itemCount = productDAO.getProductCountFiltered(filters);
+      dto.setItemCount(itemCount);
 
-        List<ProductDTO> products = productDAO.selectPagedProducts(
-        Map.of("offset", dto.getOffset(), 
-               "size", dto.getSize(), 
-               "sort", sort)); 
+      if (dto.getOffset() >= itemCount) {
+          return Map.of("products", List.of(), "itemCount", itemCount, "hasMore", false);
+      }
 
-        boolean hasMore = dto.getOffset() + products.size() < itemCount;
-        return Map.of(
-            "products", products,
-            "itemCount", itemCount,
-            "hasMore", hasMore
-        );
+      Map<String,Object> params = new HashMap<>(filters);
+      params.put("offset", dto.getOffset());
+      params.put("size",   dto.getSize());
+      params.put("sort",   sort);
+
+      List<ProductDTO> products = productDAO.selectPagedProductsFiltered(params);
+      boolean hasMore = dto.getOffset() + products.size() < itemCount;
+
+      return Map.of("products", products, "itemCount", itemCount, "hasMore", hasMore);
     }
+
 
     @Override
     public List<String> getAutoComplete(String keyword) {

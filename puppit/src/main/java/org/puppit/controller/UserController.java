@@ -58,7 +58,6 @@ public class UserController {
   public String showSignupForm() {
       return "user/signup";  
   }
-  
 
   @PostMapping("/signup")
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
@@ -161,11 +160,25 @@ public class UserController {
       return "redirect:/user/login";
     }
   }
+  @GetMapping("/checkPassword")
+  public String checkPwd() {
+    return "user/checkPassword";
+  }
+  @PostMapping("/checkPassword")
+  public String checkPwd(RedirectAttributes redirectAttr,
+                         HttpSession session,
+                         UserDTO user) {
+    Integer userId = (Integer)session.getAttribute("userId");
+    
+    
+    return "redirect:/user/profile";
+  }
 
   @GetMapping("/profile")
   public String profileForm() {
     return "user/profile";
   }
+  // 프로필 페이지
   @PostMapping("/profile")
   public String profileEdit(RedirectAttributes rttr,
                             HttpSession session,
