@@ -262,7 +262,7 @@ body {
     <div class="who">
       <div class="nick">${user.nickName != null ? user.nickName : 'happy'}</div>
     </div>
-    <button class="action-btn" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
+    <button class="action-btn" type="button" onclick="location.href='${contextPath}/user/checkPassword'">프로필 수정</button>
   </div>
   
     <!-- 프로필 이미지 업로드 폼 (숨김) -->
