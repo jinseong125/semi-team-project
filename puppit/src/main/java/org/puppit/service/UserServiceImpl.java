@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
       if (dbUser == null) {
         return null; // 계정 없음
       }
-      
       // 2) 솔트 꺼내기 (DB에 VARBINARY로 저장되어 있으면 byte[]로 매핑됨)
       byte[] salt = dbUser.getSalt();
       if (salt == null) {
@@ -90,11 +89,28 @@ public class UserServiceImpl implements UserService {
   }
   // 비밀번호를 이용한 본인 확인
   @Override
-  public UserDTO passwordCheck(Integer userID, String password) {
-    if(userID == null) {
+  public UserDTO passwordCheck(UserDTO user) {
+    UserDTO userId = userDAO.getUserByUserId(user.getUserId());
+    if(user.getUserId() == null) {
       return null;
     }
-    return userDAO.getUserByUserId(userID);
+    // 2) 솔트 꺼내기 (DB에 VARBINARY로 저장되어 있으면 byte[]로 매핑됨)
+    byte[] salt = userId.getSalt();
+    if (salt == null) {
+      return null; // 안전장치
+    }
+    
+    // 3) 클라이언트가 보낸 평문 비밀번호를 PBKDF2로 해시화
+    // secureUtil.hashPBKDF2(...)는 byte[] -> hex(String) 또는 byte[] 반환 등
+    // 아래는 "hex 문자열" 반환 가정
+    String Password = user.getUserPassword();
+    String encryptedPassword = secureUtil.hashPBKDF2(Password, salt); // returns hex string
+    
+    // 4) DB에 저장된 해시와 안전비교
+    String storedHash = userId.getUserPassword(); // DB에 저장된 해시 (hex)
+    if (storedHash == null) return null;
+    
+    return encryptedPassword.equals(userId.getUserPassword()) ? userId : null;
   }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
