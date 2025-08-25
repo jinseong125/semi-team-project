@@ -103,33 +103,21 @@ public class ChatController {
 	}
 	
 	
-	// 2. 채팅방 목록 조회(생성일 기준 내림차순) - 상품상세에서 채팅하기 클릭 등
+	
 	@GetMapping("/recentRoomList")
-	public String recentRoomList(@RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId,
-								 @RequestParam(value = "highlightMessageId", required = false)	Integer highlightMessageId,
-								 Model model, HttpSession session) {
+	public String roomList(
+	        @RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId,
+	        @RequestParam(value = "highlightMessageId", required = false) Integer highlightMessageId,
+	        Model model, HttpSession session) {
 	    Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
-	    if (map == null || map.get("userId") == null) {
-	        throw new IllegalStateException("세션 정보가 없습니다. 로그인이 필요합니다.");
-	    }
+	    int userId = Integer.parseInt(map.get("userId").toString());
+	    Map<String, Object> chatMap = chatService.getChatRoomsByCreatedDesc(userId);
 
-	    Object userIdObj = map.get("userId");
-	    int userId;
-	    try {
-	        userId = Integer.parseInt(userIdObj.toString());
-	    } catch (NumberFormatException e) {
-	        throw new IllegalArgumentException("사용자 ID 변환 중 오류가 발생했습니다.", e);
-	    }
-
-	    List<ChatListDTO> chatList = chatService.getChatRoomsByCreatedDesc(userId);
-	   System.out.println("chatList: " + chatList);
-	   
-
-
-	    model.addAttribute("chatList", chatList);
+	    model.addAttribute("chatList", chatMap.get("chats"));
+	    model.addAttribute("profileImage", chatMap.get("profileImage"));
 	    model.addAttribute("highlightRoomId", highlightRoomId);
 	    model.addAttribute("highlightMessageId", highlightMessageId);
-	    return "chat/list";
+	    return "chat/list"; // JSP 렌더링
 	}
 	
 	
@@ -139,6 +127,9 @@ public class ChatController {
 		// 변경된 행 수를 리턴
         return chatAlarmService.readAlarm(messageId);
 	}
+	
+	
+	
 	
 	
 }

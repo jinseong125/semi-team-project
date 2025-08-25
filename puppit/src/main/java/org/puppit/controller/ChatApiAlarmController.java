@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpSession;
+
 import org.puppit.model.dto.AlarmReadDTO;
 import org.puppit.model.dto.NotificationDTO;
 import org.puppit.model.dto.UserDTO;
@@ -14,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -93,17 +96,62 @@ public class ChatApiAlarmController {
 	    return alarmService.getUnreadCountsForUser(userId);
 	}
 	
-	 @GetMapping(value = "/chat/count", produces = MediaType.APPLICATION_JSON_VALUE)
-	 public Map<String, Integer> getTotalChatCount(@RequestParam("roomId") int roomId,
-			                                       @RequestParam("buyerId") int buyerId,
-			                                       @RequestParam("sellerId") int sellerId) {
+	@GetMapping(value = "/chat/count", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Integer> getTotalChatCount(@RequestParam("roomId") int roomId,
+	                                              @RequestParam("buyerId") int buyerId,
+	                                              @RequestParam("sellerId") int sellerId) {
+	    System.out.println("/api/chat/count");
+	    int totalChatCount = chatService.getTotalChatCount(roomId, buyerId, sellerId);
+	    int buyerToSellerCount = chatService.getBuyerToSellerCount(roomId, buyerId, sellerId); // ★ 추가!
+	    System.out.println("roomId: " + roomId + ", totalChatCount: " + totalChatCount + ", buyerToSellerCount: " + buyerToSellerCount);
+
+	    Map<String, Integer> result = new HashMap<>();
+	    result.put("totalChatCount", totalChatCount);
+	    result.put("buyerToSellerCount", buyerToSellerCount); // ★ 추가!
+	    return result;
+	}
+	
+//	@GetMapping(value = "/chat/countBuyerToSeller", produces = MediaType.APPLICATION_JSON_VALUE)
+//	@ResponseBody
+//	public Map<String, Integer> getBuyerToSellerCount(@RequestParam("roomId") int roomId,
+//	                                                 @RequestParam("buyerId") int buyerId,
+//	                                                 @RequestParam("sellerId") int sellerId) {
+//	    int count = chatService.getBuyerToSellerCount(roomId, buyerId, sellerId);
+//	    Map<String, Integer> result = new HashMap<>();
+//	    result.put("buyerToSellerCount", count);
+//	    return result;
+//	}
+	
+	
+	
+	
+	// 2. 채팅방 목록 조회(생성일 기준 내림차순) - 상품상세에서 채팅하기 클릭 등
+		@GetMapping(value = "/chat/recentRoomList", produces = MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public Map<String, Object> recentRoomList(@RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId,
+									 @RequestParam(value = "highlightMessageId", required = false)	Integer highlightMessageId,
+									 Model model, HttpSession session) {
+		    Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
+		    if (map == null || map.get("userId") == null) {
+		        throw new IllegalStateException("세션 정보가 없습니다. 로그인이 필요합니다.");
+		    }
+
+		    Object userIdObj = map.get("userId");
+		    int userId;
+		    try {
+		        userId = Integer.parseInt(userIdObj.toString());
+		    } catch (NumberFormatException e) {
+		        throw new IllegalArgumentException("사용자 ID 변환 중 오류가 발생했습니다.", e);
+		    }
+
+		    Map<String, Object> chatMap = chatService.getChatRoomsByCreatedDesc(userId);
+		   System.out.println("chatMap - chats: " + chatMap.get("chats"));
+		   System.out.println("profileImage: " + chatMap.get("profileImage"));
+		   chatMap.put("highlightRoomId", highlightRoomId);
+		   chatMap.put("highlightMessageId", highlightMessageId);
+		    return chatMap;
+		}
 		
-        int totalChatCount = chatService.getTotalChatCount(roomId, buyerId, sellerId);
-        Map<String, Integer> result = new HashMap<>();
-        result.put("totalChatCount", totalChatCount);
-        return result;
-	 }
-	
-	
 	
 }
