@@ -23,9 +23,9 @@ public interface ProductService {
 
     Map<String, Object> getUsers(ProductDTO dto, HttpServletRequest request);
 
-    List<ProductSearchDTO> searchByNew(String searchName);
+    List<ProductDTO> searchByNew(String searchName);
 
-    Map<String, Object> getProducts(PageDTO dto, HttpServletRequest request);
+    Map<String, Object> getProducts(PageDTO dto, Map<String,Object> filters);
 
     List<String> getAutoComplete(String keyword);
 
