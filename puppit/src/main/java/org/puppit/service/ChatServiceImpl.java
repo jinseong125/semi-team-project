@@ -96,7 +96,7 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId) {
+	public Map<String, Object> getChatRoomsByCreatedDesc(int userId) {
 	    return chatDAO.getChatListByCreatedDesc(userId);
 	}
 
@@ -174,6 +174,11 @@ public class ChatServiceImpl implements ChatService{
 	@Override
 	public int getTotalChatCount(int roomId, int buyerId, int sellerId) {
 		return chatDAO.getTotalChatCount(roomId, buyerId, sellerId);
+	}
+
+	@Override
+	public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId) {
+	    return chatDAO.getBuyerToSellerCount(roomId, buyerId, sellerId);
 	}
 
 

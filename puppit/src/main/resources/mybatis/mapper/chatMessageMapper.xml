@@ -356,7 +356,7 @@ WHERE c.chat_receiver = #{userId}   -- 로그인 사용자가 receiver
 ORDER BY a.created_at DESC
   	</select>
   
-  
+   
   
   
 </mapper>
