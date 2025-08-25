@@ -178,10 +178,32 @@ public class ProductServiceImpl implements ProductService {
         return productDTO.getProductId();
     }
 
+    @Transactional
     @Override
     public int deleteProduct(Integer productId) {
+
+        List<ProductImageDTO> images = productDAO.getProductImages(productId);
+
+        for (ProductImageDTO img : images) {
+            String key = img.getImageKey();
+
+            if (key != null && !key.isBlank()) {
+                try {
+                    s3Service.deleteFile(key);     
+                } catch (Exception e) {
+                   e.printStackTrace();
+                }
+            }
+        }
+        // 4) 상품 삭제
         return productDAO.deleteProduct(productId);
     }
+
+
+
+
+
+
 
     @Override
     public List<ProductDTO> getProductsByCategory(String categoryName) {
@@ -195,6 +217,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductImageDTO> getProductImages(Integer productId) {
+
+
         return productDAO.getProductImages(productId);
 
     }
