@@ -177,6 +177,20 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
             gap: 12px;
             margin-top: 8px;
         }
+        
+        .notification {
+    position: fixed;
+    right: 20px;
+    top: 20px;    /* 항상 화면 위쪽에 */
+    z-index: 9999;  /* 다른 요소 위에 보이게 */
+    width: 300px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: right 1s;
+}
     </style>
 </head>
 <body>
@@ -265,7 +279,7 @@ let buyerAccountId = "";
 let activeRooms = {}; // { roomId: { buyer: true/false, seller: true/false } }
 //하이라이트 타이머 관리용 객체
 let highlightTimers = {}; // { roomId: timerId }
-
+let notificationSubscription = null;
 window.chatList = <%= (chatListJson != null && !chatListJson.isEmpty() ? chatListJson : "[]") %>;
 window.profileImage = <%= (profileImageJson != null && !profileImageJson.isEmpty() ? profileImageJson : "null") %>;
 const chatList = window.chatList;
@@ -273,7 +287,22 @@ const profileImages = window.profileImage;
 window.myAccountId = "<%= accountId %>";
 
 document.addEventListener('DOMContentLoaded', function() {
-    // S3 프로필 이미지 처리
+	if (!window.stompClient || !window.stompClient.connected) {
+        const socket = new SockJS(contextPath + '/ws-chat');
+        console.log("Connecting websocket...");
+        window.stompClient = Stomp.over(socket);
+        window.stompClient.connect({}, function() {
+            window.isConnected = true;
+            console.log("STOMP connected!");
+            // 알림 구독은 무조건!
+            subscribeNotifications();
+            // 기존 채팅방 클릭시 connectAndSubscribe(roomId)에서 채팅방 구독(connect+subscribeRoom)는 그대로 두기
+        });
+    } else {
+    	  console.log("Websocket already connected, subscribing notifications...");
+        // 이미 연결된 경우에도 알림 구독은 항상 시도!
+        subscribeNotifications();
+    }
    
     const myAccountId = window.myAccountId;
     const defaultImg = contextPath + '/resources/image/profile-default.png';
@@ -636,6 +665,8 @@ function loadChatHistory(roomId) {
             if (messages.length === 0) {
                 centerMessage.textContent = "판매자와 채팅을 시작해보세요";
                 centerMessage.style.display = "block";
+                // 반드시 Promise를 반환!
+                return Promise.resolve();
             } else {
                 centerMessage.style.display = "none";
                 // 대화가 있으면 상품정보 + 결제버튼 조건을 위해 count API 호출
@@ -643,8 +674,6 @@ function loadChatHistory(roomId) {
                 	renderProductInfo(data.product, data.chatMessages || [], totalChatCount);
                 })
             }
-
-            //centerMessage.style.display = messages.length > 0 ? "none" : "block";
             
             
         });
@@ -692,14 +721,17 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
 
     const payBtn = document.getElementById('pay-btn');
     if (payBtn) {
-    	const chatSellerAccountId = btn.dataset.sellerAccountId; // Fix: Access chatSellerAccountId from dataset
-        console.log('결제버튼 클릭 - chatSellerAccountId1:', chatSellerAccountId);
+    	
+       
         payBtn.onclick = function(e) {
             const btn = e.currentTarget;
             console.log("btn.dataset: ", btn.dataset); // 버튼 데이터 확인
             const buyerId = btn.dataset.buyerId; // buyerId 가져오기
-
+            const chatSellerAccountId = btn.dataset.sellerAccountId; // Fix: Access chatSellerAccountId from dataset
+            console.log('결제버튼 클릭 - chatSellerAccountId1:', chatSellerAccountId);
             const quantity = 1;
+            
+            
             const productId = product.productId;
             const payUrl = contextPath + '/order/pay'
             	+ '?buyerId=' + encodeURIComponent(buyerId)
@@ -708,6 +740,7 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
                 + '&productName=' + encodeURIComponent(product.productName)
                 + '&productId=' + encodeURIComponent(product.productId)
                 + '&quantity=' + encodeURIComponent(quantity);
+            console.log('payUrl: ', payUrl);
             window.location.href = payUrl;
         };
     }
@@ -792,27 +825,42 @@ function formatChatTime(timeString) {
 
 
 function connectAndSubscribe(currentRoomId) {
-    if (!stompClient) {
-        const socket = new SockJS(contextPath + '/ws-chat');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function() {
-            isConnected = true;
-            subscribeRoom(currentRoomId);
-            enableChatInput(true);
-            subscribeNotifications(); // 알림 구독
-            console.log("[DEBUG] enableChatInput(true) called");
-             
-        });
-    } else {
-    	// 이미 연결된 경우에도 반드시 isConnected = true로 보완!
-        if (stompClient.connected) {
-            isConnected = true; // ★ 추가!
-        }
-        subscribeRoom(currentRoomId);
-        enableChatInput(true);
-        subscribeNotifications(); // 알림 구독
-        console.log("[DEBUG] enableChatInput(isConnected) called", isConnected);
-    }
+	try {
+		 if (!stompClient) {
+	    	 console.log('stompClient 없음, 소켓 연결 시작');
+	        const socket = new SockJS(contextPath + '/ws-chat');
+	        stompClient = Stomp.over(socket);
+	        stompClient.connect({}, function() {
+	        	 console.log('STOMP 연결됨, subscribeRoom 실행 직전');
+	            isConnected = true;
+	            subscribeRoom(currentRoomId);
+	            console.log('subscribeRoom 실행 완료, enableChatInput 직전');
+	            enableChatInput(true);
+	            console.log('enableChatInput 실행 완료, subscribeNotifications 직전');
+	            subscribeNotifications(); // 알림 구독
+	            console.log("[DEBUG] enableChatInput(true) called");
+	             
+	        });
+	    } else {
+	    	// 이미 연결된 경우에도 반드시 isConnected = true로 보완!
+	    	console.log('이미 stompClient 연결됨, subscribeRoom 실행 직전');
+	        if (stompClient.connected) {
+	            isConnected = true; // ★ 추가!
+	        }
+	        subscribeRoom(currentRoomId);
+	        console.log('subscribeRoom 실행 완료, enableChatInput 직전');
+	        enableChatInput(true);
+	        console.log('enableChatInput 실행 완료, subscribeNotifications 직전');
+	        subscribeNotifications(); // 알림 구독
+	        console.log("[DEBUG] enableChatInput(isConnected) called", isConnected);
+	    }
+		 console.log('subscribeRoom 정상 동작');
+		
+	} catch (err) {
+		 console.error('subscribeRoom 에러 발생:', err);
+		
+	}
+   
 }
 
 
@@ -887,46 +935,44 @@ function subscribeRoom(currentRoomId) {
     });
 }
 
-function subscribeNotifications() {
-	 stompClient.subscribe('/topic/notification', function(notification) {
-    const data = JSON.parse(notification.body);
-    if (notificationSubscription) return; // 이미 구독 중이면 재구독 방지
-    // receiverAccountId가 로그인된 사용자와 같을 때만 표시
-    if (String(data.receiverAccountId) !== String(loginUserId)) {
-      return;
-    }
-    displayNotification(
-      data.senderAccountId,
-      data.chatMessage,
-      data.senderRole,
-      data.chatCreatedAt,
-      data.productName
-    );
-  });
-}
 
-function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName) {
-    console.log('senderAccountId: ', senderAccountId);
-    console.log('chatMessage: ', chatMessage);
-    console.log('senderRole: ', senderRole);
-    console.log('chatCreatedAt: ', chatCreatedAt);
-    console.log('productName: ', productName);
-	const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.innerHTML = `
-        <strong>${senderRole}:</strong> ${chatMessage}<br>
-        <small>${chatCreatedAt} - ${productName}</small>
-    `;
-    document.body.appendChild(notification);
+//function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName, receiverAccountId) {
+ //   console.log('displayNotification - senderAccountId: ', senderAccountId);
+ //   console.log('displayNotification - chatMessage: ', chatMessage);
+ //   console.log('displayNotification - senderRole: ', senderRole);
+ //   console.log('displayNotification - chatCreatedAt: ', chatCreatedAt);
+ //   console.log('displayNotification - productName: ', productName);
+ //   console.log('displayNotification - receiverAccountId: ', receiverAccountId);
 
-    setTimeout(() => {
-        notification.style.right = '20px';
-    }, 100);
+//    const notification = document.createElement('div');
+//    notification.className = 'notification';
 
-    setTimeout(() => {
-        notification.remove();
-    }, 120000);
-}
+    // 문자열로 한 번에 바인딩!
+//    notification.innerHTML =
+ //       '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>' +
+  //      '<ul>' +
+   //         '<li>' +
+   //             '<a href="javascript:void(0);" ' +
+   //             'class="alarm-link" ' +
+   //             'data-chat-message="' + (chatMessage || '').replace(/"/g, '&quot;') + '">' +
+   //             '<b>새 메시지:</b> ' + (chatMessage || '') +
+   //             ' <span style="color:#aaa;">(' + (productName || '') + ')</span>' +
+   //             ' <span style="color:#888;">' + (chatCreatedAt || '') + '</span>' +
+    //            '<br><span style="font-size:13px;">From: ' + (senderAccountId || '') + ' | To: ' + (receiverAccountId || '') + '</span>' +
+      //          '</a>' +
+       //     '</li>' +
+        //'</ul>';
+
+    //document.body.appendChild(notification);
+
+//    setTimeout(() => {
+  //      notification.style.right = '20px';
+   // }, 100);
+
+//    setTimeout(() => {
+  //      notification.remove();
+ //   }, 120000);
+//}
 
 function enableChatInput(enable) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
@@ -1084,6 +1130,7 @@ function updateChatListLastMessage(roomId, chatMessage) {
 //window에 등록
 window.highlightChatRoom = highlightChatRoom;
 window.updateChatListLastMessage = updateChatListLastMessage;
+window.displayNotification = displayNotification;
 </script>
 </body>
 </html>

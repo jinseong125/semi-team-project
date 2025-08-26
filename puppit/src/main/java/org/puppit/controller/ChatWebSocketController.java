@@ -174,6 +174,7 @@ public class ChatWebSocketController {
 
         Integer alarmInsertRowId = chatService.saveAlarmData(notification);
         System.out.println("메시지 알림 저장 성공: " + alarmInsertRowId);
+        System.out.println("메시지 알림 내용: " + notification.toString());
                 
         // ======= [중복 알림 방지] =======
        // if (chatService.isAlarmDuplicate(notification) == 0) {
