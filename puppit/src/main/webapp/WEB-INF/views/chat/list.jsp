@@ -366,7 +366,6 @@ Promise.all(chatCountPromises).then(() => {
             else if (!imgSrc && info.otherProfileImageKey) {
                 imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + info.otherProfileImageKey;
             }
-         
         }
         if (!imgSrc) imgSrc = defaultImg;
         const profileSpan = chatDiv.querySelector('.chat-profile-img');
