@@ -921,91 +921,44 @@ function subscribeRoom(currentRoomId) {
     });
 }
 
-function subscribeNotifications() {
-	  console.log('subscribeNotifications 호출됨!');
-	if (notificationSubscription) return; // 이미 구독 중이면 재구독 방지
-	 window.notificationSubscription  = window.stompClient.subscribe('/topic/notification', function(notification) {
-    const data = JSON.parse(notification.body);
-    console.log('알림 메시지 도착:', notification);
-    console.log('알림 데이터 파싱:', data);
-    
 
-    
-    // 1. receiverAccountId가 로그인 사용자와 다르면 무시
-    if (String(data.receiverAccountId) !== String(loginUserId)) return;
+//function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName, receiverAccountId) {
+ //   console.log('displayNotification - senderAccountId: ', senderAccountId);
+ //   console.log('displayNotification - chatMessage: ', chatMessage);
+ //   console.log('displayNotification - senderRole: ', senderRole);
+ //   console.log('displayNotification - chatCreatedAt: ', chatCreatedAt);
+ //   console.log('displayNotification - productName: ', productName);
+ //   console.log('displayNotification - receiverAccountId: ', receiverAccountId);
 
-    // 2. 채팅방 목록/상세 페이지가 아닌 경우에는 무조건 알림 팝업
-      // 2. 현재 페이지 경로 로그 찍기 (정상적으로 찍힘)
-        console.log('현재 페이지 경로:', window.location.pathname);
-
-        // 3. /chat/recentRoomList가 아닌 경우 무조건 알림 팝업
-        if (window.location.pathname.indexOf("/chat/recentRoomList") === -1) {
-            displayNotification(
-                data.senderAccountId,
-                data.chatMessage,
-                data.senderRole,
-                data.chatCreatedAt,
-                data.productName,
-                data.receiverAccountId,
-            );
-            return; // 여기서 끝!
-        }
-
-        // 4. /chat/recentRoomList에 있으면서 해당 room에 접속 중이면 알림 X
-        if (
-            window.location.pathname.indexOf("/chat/recentRoomList") !== -1 &&
-            currentRoomId && String(currentRoomId) === String(data.roomId)
-        ) {
-            return;
-        }
-    displayNotification(
-      data.senderAccountId,
-      data.chatMessage,
-      data.senderRole,
-      data.chatCreatedAt,
-      data.productName,
-      data.receiverAccountId,
-    );
-  });
-}
-
-function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName, receiverAccountId) {
-    console.log('senderAccountId: ', senderAccountId);
-    console.log('chatMessage: ', chatMessage);
-    console.log('senderRole: ', senderRole);
-    console.log('chatCreatedAt: ', chatCreatedAt);
-    console.log('productName: ', productName);
-    console.log('receiverAccountId: ', receiverAccountId);
-
-    const notification = document.createElement('div');
-    notification.className = 'notification';
+//    const notification = document.createElement('div');
+//    notification.className = 'notification';
 
     // 문자열로 한 번에 바인딩!
-    notification.innerHTML =
-        '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>' +
-        '<ul>' +
-            '<li>' +
-                '<a href="javascript:void(0);" ' +
-                'class="alarm-link" ' +
-                'data-chat-message="' + (chatMessage || '').replace(/"/g, '&quot;') + '">' +
-                '<b>새 메시지:</b> ' + (chatMessage || '') +
-                ' <span style="color:#aaa;">(' + (productName || '') + ')</span>' +
-                ' <span style="color:#888;">' + (chatCreatedAt || '') + '</span>' +
-                '<br><span style="font-size:13px;">From: ' + (senderAccountId || '') + ' | To: ' + (receiverAccountId || '') + '</span>' +
-                '</a>' +
-            '</li>' +
-        '</ul>';
+//    notification.innerHTML =
+ //       '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>' +
+  //      '<ul>' +
+   //         '<li>' +
+   //             '<a href="javascript:void(0);" ' +
+   //             'class="alarm-link" ' +
+   //             'data-chat-message="' + (chatMessage || '').replace(/"/g, '&quot;') + '">' +
+   //             '<b>새 메시지:</b> ' + (chatMessage || '') +
+   //             ' <span style="color:#aaa;">(' + (productName || '') + ')</span>' +
+   //             ' <span style="color:#888;">' + (chatCreatedAt || '') + '</span>' +
+    //            '<br><span style="font-size:13px;">From: ' + (senderAccountId || '') + ' | To: ' + (receiverAccountId || '') + '</span>' +
+      //          '</a>' +
+       //     '</li>' +
+        //'</ul>';
 
-    document.body.appendChild(notification);
+    //document.body.appendChild(notification);
 
-    setTimeout(() => {
-        notification.style.right = '20px';
-    }, 100);
+//    setTimeout(() => {
+  //      notification.style.right = '20px';
+   // }, 100);
 
-    setTimeout(() => {
-        notification.remove();
-    }, 120000);
-}
+//    setTimeout(() => {
+  //      notification.remove();
+ //   }, 120000);
+//}
 
 function enableChatInput(enable) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
