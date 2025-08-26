@@ -41,4 +41,32 @@
     WHERE p.product_id = #{productId}
   </select>
   
+  <select id="selectWishListProducts" resultType="org.puppit.model.dto.ProductAndImageDTO">
+      SELECT
+        p.product_id,      
+        p.product_name,    
+        p.product_price,           
+        img.image_url 
+      FROM wishlist w
+      JOIN product p ON p.product_id = w.product_id
+      LEFT JOIN product_image img 
+             ON img.product_id = p.product_id
+            AND img.is_thumbnail = 1
+      WHERE w.user_id = #{userId}
+      ORDER BY w.created_at DESC
+  </select>
+  
+  <insert id="insertWishList">
+    INSERT INTO wishlist(user_id, product_id)
+    VALUES(#{userId}, #{productId})
+  </insert>
+  
+  <select id="existsByUserAndProduct" parameterType="map" resultType="int">
+    SELECT CASE WHEN EXISTS (
+      SELECT 1
+      FROM wishlist
+      WHERE user_id = #{userId} AND product_id = #{productId}
+    ) THEN 1 ELSE 0 END
+  </select>
+  
 </mapper>

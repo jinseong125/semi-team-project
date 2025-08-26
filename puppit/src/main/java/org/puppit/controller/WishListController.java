@@ -31,22 +31,10 @@ public class WishListController {
   
   @GetMapping("/list")
   public String wishList(Integer userId, Model model) {
-    List<WishListDTO> likes = wishListService.getWishListByUserId(userId);
-    List<ProductDTO> products = new ArrayList<>();
-    List<ProductImageDTO> productImages = new ArrayList<>();
-    List<ProductAndImageDTO> productAndImages = new ArrayList<>();
+    List<ProductAndImageDTO> productAndImages = wishListService.selectWishListProducts(userId);
     
-    for(WishListDTO like : likes) {
-      products.add(wishListService.getProductById(like.getProductId()));
-      productImages.add(wishListService.getProductImage(like.getProductId()));
-      productAndImages.add(wishListService.getProductAndImage(like.getProductId()));
-      
-    }
-    System.out.println("상품123" + productAndImages);
-    model.addAttribute("products", products);
-    model.addAttribute("productImages", productImages);
+    System.out.println("상품123123" + productAndImages);
     model.addAttribute("productAndImages", productAndImages);
-    model.addAttribute("likes", likes);
     return "user/wishList";
   }
   
@@ -65,5 +53,27 @@ public class WishListController {
       Integer userId = (Integer) sessionMap.get("userId");
       wishListService.deleteAllWishListByUser(userId);
       return "redirect:/wish/list?userId=" + userId;
+  }
+  
+  @PostMapping(value = "/toggle", produces = "application/json; charset=UTF-8")
+  @ResponseBody
+  public Map<String, Object> toggleWish(
+          @RequestParam Integer productId,
+          @SessionAttribute(value = "sessionMap", required = false) Map<String, Object> sessionMap) {
+
+    try {
+      if (sessionMap == null || sessionMap.get("userId") == null) {
+          return Map.of("ok", false, "reason", "UNAUTH");
+      }
+      Integer userId = (Integer) sessionMap.get("userId");
+
+      // 서비스 시그니처가 (userId, productId)이므로 그대로 호출 OK
+      boolean added = wishListService.toggle(userId, productId);
+      return Map.of("ok", true, "added", added);
+
+  } catch (Exception e) {
+      e.printStackTrace(); // 서버 콘솔에서 스택 확인
+      return Map.of("ok", false, "reason", "ERROR", "message", String.valueOf(e.getMessage()));
+  }
   }
 }

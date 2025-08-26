@@ -324,26 +324,25 @@ function applyFilter(partial) {
   window.dispatchEvent(new CustomEvent('puppit:applyFilter', { detail: partial || {} }));
 }
 
+
 	
 
 	
 	let alarmShownOnce = false;
-	//let contextPath = "${contextPath}";
-	//  let loginUserId = "${loginUserId}";
-	//  let userId = "${userId}";
-	
-	
+
+  var results = document.getElementById('search-results');
+
+	let stompClient = null;
+	//채팅방 접속 상태
+	let currentChatRoomId = null;
+	let alarmShownOnce = false;
+	let contextPath = "${contextPath}";
+	  let loginUserId = "${loginUserId}";
+	  let userId = "${userId}";
+		
  
-  var results = document.getElementById('search-results');
 
-
-
-
-
-  var results = document.getElementById('search-results');
 let alarmClosed = false; // 팝업 닫힘 상태
-
-
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -385,7 +384,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	        return response.json();
 	      })
 	      .then(data => {
-	        // 콘솔에 찍기!
+	        // 콘솔에 찍기
 	        console.log('profileImage:', data.profileImage);
 	        console.log('chats:', data.chats);
 	        // 2. 화면 이동 (JSP 렌더링)
@@ -449,10 +448,13 @@ document.addEventListener("DOMContentLoaded", function() {
 	      const selected = this.value;
 	      if (selected && selected !== "카테고리") {
 	        loadCategory(selected);
+	        // 헤더 → 메인에게 알림 보냄 (카테고리 값 전달)
+	        applyFilter({ category: selected, q: '' });
 	      }
 	    });
 	  }
 	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝
+
 	
 	function subscribeRoom(currentRoomId) {
 		if (currentSubscription) currentSubscription.unsubscribe();
@@ -533,6 +535,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		    if (String(data.receiverAccountId) !== String(loginUserId)) return;
 
+
 		    // 1. /chat/recentRoomList가 아닌 경우 무조건 알림 팝업
 		       if (window.location.pathname.indexOf("/chat/recentRoomList") === -1) {
 		           displayNotification(data.senderAccountId,
@@ -556,6 +559,43 @@ document.addEventListener("DOMContentLoaded", function() {
 		                   data.productName,
 		                   data.receiverAccountId);
 		       }
+
+		    // "채팅방 목록/상세 페이지(/chat/recentRoomList)"에 있고, 해당 room에 접속중이면만 알림 X
+		    if (
+		      window.location.pathname.indexOf("/chat/recentRoomList") !== -1 &&
+		      window.currentChatRoomId && String(window.currentChatRoomId) === String(data.roomId)
+		    ) {
+		      return;
+
+
+
+  function connectSocket() {
+	console.log("connectSocket called");
+    var socket = new SockJS(contextPath + '/ws-chat');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function(frame) {
+        // 알림 메시지 구독 (모든 알림)
+       stompClient.subscribe('/topic/notification', function(msg) {
+		  console.log('msg: ', msg);
+		  let notification = JSON.parse(msg.body);
+		  console.log('notification: ', notification);
+		
+		  // 메시지의 receiverAccountId가 로그인한 사용자와 다르면 return (수신자만 알림)
+		  if (String(notification.receiverAccountId) !== String(loginUserId)) {
+		    return;
+		  }
+		
+		  // [채팅방에 접속 중이 아닐 때만 알림]
+		  if (String(currentChatRoomId) !== String(notification.roomId)) {
+			  console.log('currentChatRoomId: ', currentChatRoomId);
+		    showAlarmPopup([notification]);
+		    const alarmBell = document.getElementById("alarmBell");
+		    if (alarmBell) {
+		      alarmBell.classList.add('red');
+		      alarmBell.style.display = "inline-block";
+
+		    }
+
 
 		  });
 		}
