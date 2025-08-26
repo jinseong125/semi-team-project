@@ -129,14 +129,16 @@ a{text-decoration:none;color:inherit;}
         <a href="${contextPath}/user/mypage">마이페이지</a>
          
         <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
-	       <i class="fa-regular fa-bell"></i>
-	    </button>
+          <i class="fa-regular fa-bell"></i>
+       </button>
         <a href="${contextPath}/user/logout">로그아웃</a>
-        <!-- 채팅 버튼 -->
-      	<!-- 채팅 버튼 -->
-		<button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
-		  <i class="fa-regular fa-comment-dots"></i> 채팅
-		</button>
+   
+
+         <!-- 채팅 버튼 -->
+      <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
+        <i class="fa-regular fa-comment-dots"></i> 채팅
+      </button>
+
       </c:otherwise>
     </c:choose>
 
