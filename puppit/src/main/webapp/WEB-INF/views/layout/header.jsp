@@ -291,7 +291,6 @@ background:#f9f9f9;
   </div>
 </div>
   <div id="alarmArea"></div>
-<div id="search-results"></div>
 
 <hr>
 
