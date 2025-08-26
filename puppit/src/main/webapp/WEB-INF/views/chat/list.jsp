@@ -177,6 +177,20 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
             gap: 12px;
             margin-top: 8px;
         }
+        
+        .notification {
+    position: fixed;
+    right: 20px;
+    top: 20px;    /* 항상 화면 위쪽에 */
+    z-index: 9999;  /* 다른 요소 위에 보이게 */
+    width: 300px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: right 1s;
+}
     </style>
 </head>
 <body>
