@@ -61,7 +61,7 @@
   
   <!-- userId를 이용해 user 정보 조회 -->
   <select id="getUserByUserId" parameterType="java.lang.Integer" resultType="UserDTO">
-    SELECT user_password, profile_image_key
+    SELECT user_password, salt, profile_image_key, account_id
       FROM user
      WHERE user_id = #{userId}
   </select>

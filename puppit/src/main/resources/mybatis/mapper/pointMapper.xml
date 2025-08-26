@@ -26,6 +26,7 @@
     SELECT charge_id, user_id, point_charge_amount, point_charge_order_number, point_charge_charged_at
     FROM point_charge
     WHERE user_id = #{userId}
+    ORDER BY point_charge_charged_at DESC
   </select>
   
 </mapper>

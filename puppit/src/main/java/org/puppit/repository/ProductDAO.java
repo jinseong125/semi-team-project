@@ -50,7 +50,7 @@ public class ProductDAO {
     }
 
     /** ------------------- 검색 ------------------- */
-    public List<ProductSearchDTO> searchByNew(String searchName) {
+    public List<ProductDTO> searchByNew(String searchName) {
         return sqlSession.selectList("search.searchByNew", searchName);
     }
 
@@ -116,12 +116,10 @@ public class ProductDAO {
     
     public List<ProductDTO> mainProducts () {
       return sqlSession.selectList("product.mainProducts");
-  }
+    }
     
     public ProductDTO detailProducts (Integer productId) {
-      /*
-       * System.out.println("상품상품" + sqlSession.selectList("product.detailProducts"));
-       */      return sqlSession.selectOne("product.detailProducts", productId);
+      return sqlSession.selectOne("product.detailProducts", productId);
     }
     
     public List<ProductDTO> selectPagedProducts(Map<String, Object> map) {
@@ -131,5 +129,16 @@ public class ProductDAO {
     public List<ProductSearchDTO> searchByCategory(String categoryName) {
       return sqlSession.selectList("product.searchByCategory", categoryName);
     }
+    
+    public Integer getProductCountFiltered(Map<String,Object> filters) {
+      return sqlSession.selectOne("product.getProductCountFiltered", filters);
+    }
+    
+    public List<ProductDTO> selectPagedProductsFiltered(Map<String,Object> params) {
+      return sqlSession.selectList("product.selectPagedProductsFiltered", params);
+    }
+    
+    
+    
 
 }

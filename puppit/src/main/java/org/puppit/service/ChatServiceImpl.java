@@ -96,7 +96,7 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId) {
+	public Map<String, Object> getChatRoomsByCreatedDesc(int userId) {
 	    return chatDAO.getChatListByCreatedDesc(userId);
 	}
 
@@ -170,6 +170,16 @@ public class ChatServiceImpl implements ChatService{
         // 또는 아래처럼 여러 필드를 조합하여 체크 가능
         // return alarmMapper.existsAlarm(notification.getMessageId(), notification.getRoomId(), notification.getSenderAccountId(), notification.getReceiverAccountId(), notification.getChatMessage());
     }
+
+	@Override
+	public int getTotalChatCount(int roomId, int buyerId, int sellerId) {
+		return chatDAO.getTotalChatCount(roomId, buyerId, sellerId);
+	}
+
+	@Override
+	public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId) {
+	    return chatDAO.getBuyerToSellerCount(roomId, buyerId, sellerId);
+	}
 
 
 }

@@ -24,7 +24,7 @@ public interface ChatService {
 	public List<ChatRoomPeopleDTO> getUserRoleANDAboutChatMessagePeople(ChatMessageSearchDTO chatMessageSearchDTO);	
 	public Integer findExistingRoom(int productId, int buyerId, int sellerId);
 	public Integer createRoom(int productId, int buyerId, int sellerId);
-	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId);              // 추가
+	public Map<String, Object> getChatRoomsByCreatedDesc(int userId);              // 추가
 	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size);
 	public Integer getProductIdByRoomId(int roomId);
 	public ChatMessageProductDTO getProductWithSellerAccountId(Integer productId);
@@ -41,6 +41,7 @@ public interface ChatService {
      * messageId, roomId, senderAccountId, receiverAccountId, chatMessage 등으로 체크
      */
     int isAlarmDuplicate(NotificationDTO notification);
-
+	public int getTotalChatCount(int roomId, int buyerId, int sellerId);
+	public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId);
 }
 

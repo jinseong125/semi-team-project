@@ -259,7 +259,7 @@
                                AND t.is_thumbnail = 1
         ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC,
         p.product_id DESC
-        LIMIT 20
+        LIMIT 40
     </select>
     
     <select id="detailProducts" parameterType="int" resultMap="MyProducts">
@@ -390,6 +390,63 @@
       FROM product_category c
       WHERE c.category_name = #{categoryName}
     )
+</select>
+
+
+<!-- getProductCountFiltered -->
+<select id="getProductCountFiltered" parameterType="map" resultType="int">
+  SELECT COUNT(*)
+  FROM product p
+  <where>
+    <if test="category != null and category != ''">
+      AND p.category_id = (
+        SELECT c.category_id
+        FROM product_category c
+        WHERE c.category_name = #{category}
+      )
+    </if>
+    <if test="q != null and q != ''">
+      AND (
+        p.product_name        LIKE CONCAT('%', #{q}, '%')
+        OR p.product_description LIKE CONCAT('%', #{q}, '%')
+      )
+    </if>
+  </where>
+</select>
+
+<!-- selectPagedProductsFiltered -->
+<select id="selectPagedProductsFiltered" parameterType="map" resultMap="MyProducts">
+  SELECT
+    p.product_id,
+    p.product_name,
+    p.product_price,
+    p.product_description,
+    p.product_created_at,
+    p.product_updated_at,
+    t.image_id     AS thumb_image_id,
+    t.image_url    AS thumb_image_url,
+    t.is_thumbnail AS thumb_is_thumbnail
+  FROM product p
+  LEFT JOIN product_image t
+    ON t.product_id = p.product_id
+   AND t.is_thumbnail = 1
+  <where>
+    <if test="category != null and category != ''">
+      AND p.category_id = (
+        SELECT c.category_id
+        FROM product_category c
+        WHERE c.category_name = #{category}
+      )
+    </if>
+    <if test="q != null and q != ''">
+      AND (
+        p.product_name        LIKE CONCAT('%', #{q}, '%')
+        OR p.product_description LIKE CONCAT('%', #{q}, '%')
+      )
+    </if>
+  </where>
+  ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC, p.product_id DESC
+  LIMIT #{size} OFFSET #{offset}
 </select>
 
 

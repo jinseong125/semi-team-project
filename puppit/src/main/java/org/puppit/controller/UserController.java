@@ -58,7 +58,6 @@ public class UserController {
   public String showSignupForm() {
       return "user/signup";  
   }
-  
 
   @PostMapping("/signup")
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
@@ -161,11 +160,41 @@ public class UserController {
       return "redirect:/user/login";
     }
   }
+  // mypage에서 profile 가기전 password 검사
+  @GetMapping("/checkPassword")
+  public String checkPwd() {
+    return "user/checkPassword";
+  }
+  @PostMapping("/checkPassword")
+  public String checkPwd(RedirectAttributes redirectAttr, 
+                         @SessionAttribute(name = "sessionMap", required = false) Map<String, Object> sessionMap, 
+                         @RequestParam("userPassword") String userPassword) {
+    try {
+      if(sessionMap == null || sessionMap.get("userId") == null) {
+        redirectAttr.addFlashAttribute("msg", "로그인이 필요합니다");
+        return "redirect:/user/login";
+      }
+
+      Integer userId = (Integer) sessionMap.get("userId"); // <-- 키는 "userId"
+
+      boolean ok = userService.passwordCheck(userId, userPassword);
+      if (!ok) {
+        redirectAttr.addFlashAttribute("msg", "비밀번호가 일치하지 않습니다");
+        return "redirect:/user/checkPassword";
+      }
+      return "redirect:/user/profile";
+    } catch (Exception e) {
+      e.printStackTrace();
+      redirectAttr.addFlashAttribute("error", "오류가 발생 했습니다");
+      return "redirect:/user/mypage";
+    }
+  }
 
   @GetMapping("/profile")
   public String profileForm() {
     return "user/profile";
   }
+  // 프로필 페이지
   @PostMapping("/profile")
   public String profileEdit(RedirectAttributes rttr,
                             HttpSession session,

@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
       if (dbUser == null) {
         return null; // 계정 없음
       }
-      
       // 2) 솔트 꺼내기 (DB에 VARBINARY로 저장되어 있으면 byte[]로 매핑됨)
       byte[] salt = dbUser.getSalt();
       if (salt == null) {
@@ -89,12 +88,13 @@ public class UserServiceImpl implements UserService {
     return userDAO.findAccountIdByNameAndEmail(user);
   }
   // 비밀번호를 이용한 본인 확인
-  @Override
-  public UserDTO passwordCheck(Integer userID, String password) {
-    if(userID == null) {
-      return null;
+  public Boolean passwordCheck(int userId, String rawPassword) {
+    UserDTO auth = userDAO.getUserByUserId(userId);
+    if (auth == null || auth.getSalt() == null || auth.getUserPassword() == null) {
+      return false;
     }
-    return userDAO.getUserByUserId(userID);
+    String encrypted = secureUtil.hashPBKDF2(rawPassword, auth.getSalt());
+    return encrypted.equals(auth.getUserPassword());
   }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {

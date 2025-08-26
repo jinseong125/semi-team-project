@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
+import org.puppit.model.dto.ChaListProfileImageDTO;
 import org.puppit.model.dto.ChatListDTO;
 
 import org.puppit.model.dto.ChatMessageDTO;
@@ -17,6 +18,7 @@ import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.NotificationDTO;
+import org.puppit.model.dto.UserDTO;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatDAO {
 	
 	private final SqlSessionTemplate sqlSession;
+	private final UserDAO userDAO;
     
 	public List<ChatListDTO> getChatList(int userId,  Integer highlightRoomId) {
 		Map<String, Object> param = new HashMap<>();
@@ -82,11 +85,27 @@ public class ChatDAO {
 	}
 
   // 추가: 생성일 기준 내림차순 목록
-   public List<ChatListDTO> getChatListByCreatedDesc(int userId) {
-         Map<String, Object> param = new HashMap<>();
-         param.put("userId", userId);
-         return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getChatRoomsByCreatedDesc", param);
+   public Map<String, Object> getChatListByCreatedDesc(int userId) {
+         Map<String, Object> paramMap = new HashMap<>();
+         paramMap.put("userId", userId);
+         
+         Map<String, Object> resultMap = new HashMap<>();
+         
+         List<ChaListProfileImageDTO> chatProfileImages = selectChatRoomListWithProfile(paramMap);
+         resultMap.put("profileImage", chatProfileImages);
+         List<ChatListDTO> chatList = sqlSession.selectList("mybatis.mapper.chatMessageMapper.getChatRoomsByCreatedDesc", paramMap);
+         resultMap.put("chats", chatList);
+         return resultMap;
    } 
+   
+   public List<ChaListProfileImageDTO> selectChatRoomListWithProfile(Map<String, Object> map) {
+	   System.out.println("userId: " + map.get("userId"));
+	   UserDTO user = userDAO.getUserByUserId((Integer) map.get("userId"));
+	   System.out.println("accountId: " + user.getAccountId());
+	   map.put("accountId", user.getAccountId());
+	   return sqlSession.selectList("mybatis.mapper.chatMapper.getChatMyProfileImage", map);
+   }
+   
    
 
    /**
@@ -153,6 +172,25 @@ public String getProductNameById(int parseInt) {
 public List<NotificationDTO> getUnreadAlarms(Integer userId) {
 	
 	return sqlSession.selectList("mybatis.mapper.chatMessageMapper.getUnreadAlarms", userId);
+}
+
+public int getTotalChatCount(int roomId, int buyerId, int sellerId) {
+	 Map<String, Object> paramMap = new HashMap<>();
+	 paramMap.put("roomId", roomId);
+	 paramMap.put("buyerId", buyerId);
+	 paramMap.put("sellerId", sellerId);
+
+	 Integer count = sqlSession.selectOne("mybatis.mapper.chatMapper.getTotalChatCount", paramMap);
+	 return count != null ? count : 0;
+}
+
+public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId) {
+	Map<String, Object> paramMap = new HashMap<>();
+    paramMap.put("roomId", roomId);
+    paramMap.put("buyerId", buyerId);
+    paramMap.put("sellerId", sellerId);
+    Integer count = sqlSession.selectOne("mybatis.mapper.chatMapper.getBuyerToSellerCount", paramMap);
+    return count != null ? count : 0;
 }
 
 

@@ -47,4 +47,59 @@ JOIN user receiver ON c.chat_receiver = receiver.user_id
 ORDER BY c.chat_created_at DESC
 </select>
   
+  <select id="getTotalChatCount" parameterType="int" resultType="int">
+  	    SELECT COUNT(*)
+    FROM chat
+    WHERE chat_room_id = #{roomId}
+      AND (
+        (chat_sender = #{buyerId} AND chat_receiver = #{sellerId})
+        OR (chat_sender = #{sellerId} AND chat_receiver = #{buyerId})
+      )
+  
+  </select>
+  
+  <select id="getBuyerToSellerCount" parameterType="map" resultType="int">
+	  SELECT COUNT(*)
+	  FROM chat
+	  WHERE chat_room_id = #{roomId}
+	    AND chat_sender = #{buyerId}
+	    AND chat_receiver = #{sellerId}
+	</select>
+  
+  
+ <select id="getChatMyProfileImage" parameterType="String"  resultType="org.puppit.model.dto.ChaListProfileImageDTO">
+  	  SELECT
+    c.chat_room_id,
+    p.product_name,
+    c.chat_message,
+    sender.account_id AS chat_sender_account_id,
+    receiver.account_id AS chat_receiver_account_id,
+    sender.profile_image_key AS senderProfileImageKey,
+    receiver.profile_image_key AS receiverProfileImageKey,
+    p.seller_id AS product_seller_id,
+    seller.account_id AS product_seller_account_id,
+    seller.profile_image_key AS sellerProfileImageKey,
+    -- 상대방 프로필 이미지 키 (로그인 계정 기준)
+    CASE 
+        WHEN #{accountId} = sender.account_id THEN receiver.profile_image_key
+        WHEN #{accountId} = receiver.account_id THEN sender.profile_image_key
+        ELSE NULL
+    END AS otherProfileImageKey
+FROM chat c
+INNER JOIN room r ON c.chat_room_id = r.room_id
+INNER JOIN product p ON r.product_id = p.product_id
+LEFT JOIN user sender ON c.chat_sender = sender.user_id
+LEFT JOIN user receiver ON c.chat_receiver = receiver.user_id
+LEFT JOIN user seller ON p.seller_id = seller.user_id
+WHERE sender.account_id = #{accountId}
+   OR receiver.account_id = #{accountId}
+ORDER BY c.chat_created_at DESC
+  
+  
+  </select>
+  
+  
+  
+  
+  
 </mapper>

@@ -132,11 +132,13 @@ a{text-decoration:none;color:inherit;}
           <i class="fa-regular fa-bell"></i>
        </button>
         <a href="${contextPath}/user/logout">로그아웃</a>
-        <!-- 채팅 버튼 -->
+   
+
          <!-- 채팅 버튼 -->
       <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
         <i class="fa-regular fa-comment-dots"></i> 채팅
       </button>
+
       </c:otherwise>
     </c:choose>
 
