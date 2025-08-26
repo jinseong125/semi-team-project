@@ -154,7 +154,10 @@ a{text-decoration:none;color:inherit;}
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
 
+
+
 <script>
+
 	// JSP에서 세션 정보를 JS 변수로 전달
 	//var contextPath = "${contextPath}";
 	//const userId = "${sessionScope.sessionMap.userId}";
@@ -268,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝 괄호!
 
 
-<script>
+
 // ===== 전역 컨텍스트 (한 번만 정의) =====
 window.contextPath = "${contextPath}";
 window.loginUserId = "${loginUserId}";
