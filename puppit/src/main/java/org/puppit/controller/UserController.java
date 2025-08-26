@@ -58,7 +58,7 @@ public class UserController {
   public String showSignupForm() {
       return "user/signup";  
   }
-
+  // 회원가입
   @PostMapping("/signup")
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
     // 회원가입
@@ -92,7 +92,7 @@ public class UserController {
   public String loginForm() {
     return "user/login";
   }
-  
+  // 로그인
   @PostMapping("/login")
   public String login(UserDTO user, HttpSession session, RedirectAttributes redirectAttr, HttpServletRequest request) {
     try {
@@ -143,7 +143,7 @@ public class UserController {
     session.invalidate();
     return "redirect:/";
   }
-  // 아이디 찾기 JSP
+  // 아이디 찾기 폼
   @GetMapping("/find")
   public String findCheckForm() {
     return "user/find";
@@ -160,25 +160,42 @@ public class UserController {
       return "redirect:/user/login";
     }
   }
+  // mypage에서 profile 가기전 password 검사 페이지
   @GetMapping("/checkPassword")
   public String checkPwd() {
     return "user/checkPassword";
   }
+  //mypage에서 profile 가기전 password 검사
   @PostMapping("/checkPassword")
-  public String checkPwd(RedirectAttributes redirectAttr,
-                         HttpSession session,
-                         UserDTO user) {
-    Integer userId = (Integer)session.getAttribute("userId");
-    
-    
-    return "redirect:/user/profile";
-  }
+  public String checkPwd(RedirectAttributes redirectAttr, 
+                         @SessionAttribute(name = "sessionMap", required = false) Map<String, Object> sessionMap, 
+                         @RequestParam("userPassword") String userPassword) {
+    try {
+      if(sessionMap == null || sessionMap.get("userId") == null) {
+        redirectAttr.addFlashAttribute("msg", "로그인이 필요합니다");
+        return "redirect:/user/login";
+      }
 
+      Integer userId = (Integer) sessionMap.get("userId"); // <-- 키는 "userId"
+
+      boolean ok = userService.passwordCheck(userId, userPassword);
+      if (!ok) {
+        redirectAttr.addFlashAttribute("msg", "비밀번호가 일치하지 않습니다");
+        return "redirect:/user/checkPassword";
+      }
+      return "redirect:/user/profile";
+    } catch (Exception e) {
+      e.printStackTrace();
+      redirectAttr.addFlashAttribute("error", "오류가 발생 했습니다");
+      return "redirect:/user/mypage";
+    }
+  }
+  // 프로필 페이지
   @GetMapping("/profile")
   public String profileForm() {
     return "user/profile";
   }
-  // 프로필 페이지
+  // 프로필 수정
   @PostMapping("/profile")
   public String profileEdit(RedirectAttributes rttr,
                             HttpSession session,
@@ -189,7 +206,7 @@ public class UserController {
                             @RequestParam("userEmail") String userEmail) {
     
     @SuppressWarnings("unchecked")
-    Map sessionMap = (Map<String, Object>)session.getAttribute("sessionMap");
+    Map<String, Object> sessionMap = (Map<String, Object>)session.getAttribute("sessionMap");
     String prevAccountId = (String) sessionMap.get("accountId");
     UserDTO user = userService.getUserId(prevAccountId);
     user.setAccountId(accountId);
@@ -217,7 +234,7 @@ public class UserController {
     
     return "redirect:/";
   }
-  
+  // 프로필 이미지 수정
   @PostMapping("/profile/image")
   public String changeProfileimage(@SessionAttribute("sessionMap") Map<String, Object> sessionMap,
                                    @RequestParam("file") MultipartFile file,

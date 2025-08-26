@@ -3,8 +3,6 @@ package org.puppit.service;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.puppit.model.dto.ChatUserDTO;
-
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 
@@ -28,7 +26,7 @@ public interface UserService {
   // 비밀번호 변경
 //  Boolean changeUserPasswordByuserId(UserDTO user);
   // 기존 비밀번호 확인
-  UserDTO passwordCheck(UserDTO user);
+  Boolean passwordCheck(int userId, String rawPassword);
 
   boolean updateUser(Map<String, Object> map);
   UserDTO getProfileImageKey(Integer userId);
