@@ -271,15 +271,11 @@ background:#f9f9f9;
         <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
         <a href="${contextPath}/user/mypage">마이페이지</a>
          
-<<<<<<< HEAD
+
         <button id="alarmBell" style="background:none;border:none;display:inline-block;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
 	       <i class="fa-regular fa-bell"></i>
 	    </button>
-=======
-        <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
-          <i class="fa-regular fa-bell"></i>
-       </button>
->>>>>>> 23db4e9cc92ce024fdbbf034216a2b06787f10e2
+
         <a href="${contextPath}/user/logout">로그아웃</a>
    
 
