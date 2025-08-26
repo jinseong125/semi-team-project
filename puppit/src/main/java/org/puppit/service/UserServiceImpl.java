@@ -3,7 +3,6 @@ package org.puppit.service;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.puppit.repository.UserDAO;
