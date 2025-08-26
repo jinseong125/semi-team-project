@@ -313,7 +313,7 @@ WHERE p.product_id = #{productId};
   	
   	</select>
   	
-  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarm_id">
+  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarmId">
     INSERT INTO alarm (room_id, message_id, user_id, is_read)
     VALUES (#{roomId}, #{messageId}, #{userId}, #{isRead})
 </insert>
