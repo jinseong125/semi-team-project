@@ -20,7 +20,7 @@
     height: 100%; 
     margin: 0; 
     padding: 0; 
-    background: #777; /* 살짝 회색톤 배경 */
+    background: #fff; /* 살짝 회색톤 배경 */
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
   }
 
