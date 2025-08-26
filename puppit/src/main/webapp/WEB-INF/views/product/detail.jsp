@@ -82,10 +82,11 @@ if (sessionMap != null) {
         <span class="value">
           <fmt:formatDate value="${product.productCreatedAt}" pattern="yyyy.MM.dd HH:mm"/>
         </span>
-        <span class="label">판매자 정보</span>
-        <span>${product.sellerId}</span>
       </li>
-		
+      <li>
+        <span class="label">판매자 ID</span>
+        <span>${product.sellerId}</span>
+		  </li>
     </ul>
 
 
@@ -109,8 +110,17 @@ if (sessionMap != null) {
       <!-- 공통 버튼 -->
       <button type="button" class="btn outline" onclick="history.back()">목록</button>
       <c:if test="${sessionMap.userId ne product.sellerId}">
-        <button type="button" class="btn outline" id="btnWish">찜</button>
-      <button type="button" class="btn solid" id="btnPay">채팅하기</button>
+        <button
+          id="btnWish"
+          class="btn outline wish-btn ${product.wished ? 'is-on' : ''}"
+          data-product-id="${product.productId}"
+          aria-pressed="${product.wished ? 'true' : 'false'}"
+          title="찜">
+          <i class="fa-regular fa-heart icon off"></i>
+          <i class="fa-solid fa-heart icon on"></i>
+          <span class="text">찜</span>
+        </button>
+        <button type="button" class="btn solid" id="btnPay">채팅하기</button>
       </c:if>
     </div>
   </div>
@@ -130,6 +140,32 @@ if (sessionMap != null) {
 </div>
 
 <style>
+
+.wish-btn { border:0; background:transparent; cursor:pointer; }
+.wish-btn .on { display:none; }
+.wish-btn.is-on .on { display:inline; }
+.wish-btn.is-on .off { display:none; }
+.wish-btn {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border-radius:8px;
+  padding:10px 14px;
+  line-height:1;
+}
+
+.wish-btn .icon { font-size:16px; }
+.wish-btn .on { display:none; }        /* 기본: 빈 하트 */
+.wish-btn.is-on .on { display:inline; }/* 찜 상태: 꽉 찬 하트 */
+.wish-btn.is-on .off { display:none; }
+
+/* 찜 상태일 때 살짝 강조 */
+.wish-btn.is-on {
+  border-color:#ff7b8a;
+  background:#fff7f8;
+  color:#d94164;
+}
+
 .detail-wrap {
   max-width:1100px; margin:40px auto; padding:0 20px;
   display:flex; gap:32px;
@@ -188,74 +224,114 @@ if (sessionMap != null) {
 </style>
 
 <script>
+const appContext = "${contextPath}";
 
+(function() {
+  const btn = document.getElementById('btnWish');
+  if (!btn) return;
+
+  let busy = false;
+
+  btn.addEventListener('click', async () => {
+    if (busy) return;
+    busy = true;
+
+    const productId = btn.dataset.productId;
+    const wasOn = btn.classList.contains('is-on');
+
+    // 1) 낙관적 UI
+    btn.classList.toggle('is-on', !wasOn);
+    btn.setAttribute('aria-pressed', String(!wasOn));
+
+    try {
+      const res = await fetch(appContext + "/wish/toggle", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          "Accept": "application/json"
+        },
+        body: new URLSearchParams({ productId })
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) {
+    	  btn.classList.toggle('is-on', wasOn);
+    	  btn.setAttribute('aria-pressed', String(wasOn));
+    	  if (data.reason === 'UNAUTH') {
+    	    alert('로그인이 필요합니다.');
+    	    location.href = appContext + '/user/login';
+    	  } else {
+    	    alert('처리 중 오류: ' + (data.message || ''));
+    	  }
+    	  return;
+    	}
+
+      // 3) 서버 판단에 맞춰 최종 확정(혹시 불일치 시 교정)
+      btn.classList.toggle('is-on', !!data.added);
+      btn.setAttribute('aria-pressed', String(!!data.added));
+
+      // 필요하면 data.count로 카운트 배지 업데이트
+      // document.querySelector('#wishCount')?.textContent = data.count;
+
+    } catch (e) {
+      // 네트워크 오류: 롤백
+      btn.classList.toggle('is-on', wasOn);
+      btn.setAttribute('aria-pressed', String(wasOn));
+      alert('네트워크 오류가 발생했습니다.');
+    } finally {
+      busy = false;
+    }
+  });
+})();
 
 document.addEventListener("DOMContentLoaded", () => {
-	const productId = "${product.productId}";
-    getProductFetch(productId);
-  });
+  const productId = "${product.productId}";
+  getProductFetch(productId);
+});
 
+document.getElementById('btnPay')?.addEventListener('click', function() {
+  const productId = "${product.productId}";
+  const buyerId = "${userId}";
+  const sellerId = "${product.sellerId}";
+  const loginUserId = "${sessionScope.sessionMap.accountId}"; // JSP에서 세션 값을 직접 가져옴
+  console.log("sellerId: ", sellerId);
 
+  // 🚩 로그인 체크
+  if (!loginUserId || buyerId === "0" || !buyerId) {
+    alert("채팅을 하시려면 먼저 로그인해주세요.");
+    window.location.href = appContext + "/user/login";
+    return;
+  }
 
-//const contextPath = "${pageContext.request.contextPath}";
-
-
-
-document.getElementById('btnWish')?.addEventListener('click',()=>alert('찜 기능 연결 예정'));
-document.getElementById('btnPay')?.addEventListener('click',function() {
-    const productId = "${product.productId}";
-    const buyerId = "${userId}";
-    const sellerId = "${product.sellerId}";
-    const loginUserId = "${sessionScope.sessionMap.accountId}"; // JSP에서 세션 값을 직접 가져옴
-    console.log("sellerId: ", sellerId);
-    
- 	// 🚩 로그인 체크: buyerId가 0 또는 loginUserId가 비어있으면 로그인 페이지로 이동
-    if (!loginUserId || buyerId === "0" || !buyerId) {
-        alert("채팅을 하시려면 먼저 로그인해주세요.");
-        window.location.href = "${contextPath}/user/login";
-        return;
-    }
-    
-    // 판매자와 구매자가 같을 때 경고창 띄우고 이동 막기
-    if (buyerId === sellerId) {
-        alert("상품에 등록된 판매자와 구매자가 같아서 채팅할 수 없습니다");
-        return;
-    }
-    else {
-    	window.location.href = "${contextPath}/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;	
-    }
-    
+  // 판매자와 구매자가 같을 때
+  if (buyerId === sellerId) {
+    alert("상품에 등록된 판매자와 구매자가 같아서 채팅할 수 없습니다");
+    return;
+  } else {
+    window.location.href = appContext + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;
+  }
 });
 
 async function getProductFetch(productId) {
-	  try {
-	    const res = await fetch(contextPath + "/api/product/detail/" + productId, {
-	      method: "GET",
-	      headers: {
-	        "Accept": "application/json"
-	      }
-	    });
-	    if (!res.ok) {
-	      throw new Error("HTTP 오류 " + res.status);
-	    }
+  try {
+    const res = await fetch(appContext + "/api/product/detail/" + productId, {
+      method: "GET",
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+    if (!res.ok) {
+      throw new Error("HTTP 오류 " + res.status);
+    }
 
-	    const data = await res.json();
-	    console.log("[getProductFetch] 응답:", data);
+    const data = await res.json();
+    console.log("[getProductFetch] 응답:", data);
 
-	    // 예시: 가격 업데이트
-	    /* const priceEl = document.querySelector(".price");
-	    if (priceEl && data.productPrice) {
-	      priceEl.textContent = new Intl.NumberFormat().format(data.productPrice) + "원";
-	    }
-
-	    // 예시: 상품 설명 업데이트
-	    const descEl = document.querySelector(".desc");
-	    if (descEl && data.productDescription) {
-	      descEl.textContent = data.productDescription;
-	    }
- */
-	  } catch (err) {
-	    console.error("상품 조회 실패:", err);
-	  }
+    // 필요하다면 DOM 업데이트 처리 가능
+  } catch (err) {
+    console.error("상품 조회 실패:", err);
+  }
 }
 </script>
+

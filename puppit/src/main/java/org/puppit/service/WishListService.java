@@ -8,6 +8,7 @@ import org.puppit.model.dto.ProductImageDTO;
 import org.puppit.model.dto.WishListDTO;
 import org.puppit.repository.WishListDAO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +35,22 @@ public class WishListService {
   }
   public ProductAndImageDTO getProductAndImage(Integer productId) {
     return wishListDAO.getProductAndImage(productId);
+  }
+  
+  @Transactional
+  public List<ProductAndImageDTO> selectWishListProducts(Integer userId) {
+    return wishListDAO.selectWishListProducts(userId);
+  }
+  public boolean toggle(Integer userId, Integer productId) {
+    Integer deleted = wishListDAO.deleteWishListByUserAndProduct(userId, productId);
+    if(deleted > 0) {
+      return false;
+    }
+    wishListDAO.insertWishList(userId, productId);
+    return true;
+  }
+  public boolean existsByUserAndProduct(Integer userId, Integer productId) {
+    return wishListDAO.existsByUserAndProduct(userId, productId) == 1 ? true : false;
   }
 
 }

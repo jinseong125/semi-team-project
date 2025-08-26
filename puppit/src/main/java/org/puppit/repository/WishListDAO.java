@@ -42,5 +42,21 @@ public class WishListDAO {
   public ProductAndImageDTO getProductAndImage(Integer productId) {
     return sst.selectOne("mybatis.mapper.wishListMapper.getProductAndImage", productId);
   }
+  public List<ProductAndImageDTO> selectWishListProducts(Integer userId) {
+    return sst.selectList("mybatis.mapper.wishListMapper.selectWishListProducts", userId);
+  }
+  public Integer insertWishList(Integer userId, Integer productId) {
+    Map<String, Object> info = new HashMap<>();
+    info.put("userId", userId);
+    info.put("productId", productId);
+    return sst.insert("mybatis.mapper.wishListMapper.insertWishList", info);
+  }
+  public Integer existsByUserAndProduct(Integer userId, Integer productId) {
+    Map<String, Object> info = new HashMap<>();
+    info.put("userId", userId);
+    info.put("productId", productId);
+    return sst.selectOne("mybatis.mapper.wishListMapper.existsByUserAndProduct", info);
+    
+  }
 
 }
