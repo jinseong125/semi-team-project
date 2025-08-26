@@ -192,17 +192,12 @@ public class ChatWebSocketController {
         
         // 알림을 브로드캐스트
         messagingTemplate.convertAndSend("/topic/notification", notification);
-        System.out.println("Notification sent: " + notification);
+        System.out.println("Broadcasting notification: " + notification);
 	    
 	    
 	    
 	}
 	
-	@MessageMapping("/chat.notify")
-	@SendTo("/topic/notification")
-	public NotificationDTO sendNotification(@Payload NotificationDTO notification) {
-	    System.out.println("Broadcasting notification: " + notification);
-	    return notification;
-	}
+	
 	
 }
