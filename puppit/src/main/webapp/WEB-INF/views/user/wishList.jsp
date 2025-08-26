@@ -43,7 +43,7 @@
   </c:if>
 
   <c:choose>
-    <c:when test="${not empty products}">
+    <c:when test="${not empty requestScope.productAndImages}">
       <div class="cards">
         <c:forEach var="p" items="${productAndImages}">
           <div class="product-card">

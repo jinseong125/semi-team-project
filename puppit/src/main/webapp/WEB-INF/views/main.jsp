@@ -20,12 +20,12 @@
     height: 100%; 
     margin: 0; 
     padding: 0; 
-    background: #fff; /* 살짝 회색톤 배경 */
+    background: #fff;
     font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
   }
 
   body { 
-  min-height: 100vh; 
+  min-height: 100vh;  /* vh - ViewPoint Height (브라우저 화면 높이) */
   }
 
   .container { 
@@ -246,13 +246,15 @@
     }
   };
 
+  let currentFilter = { q:'', category:'', sort:'DESC' };
+    
   const fetchProducts = async () => {
     if (loading || endOfData) return;
     if (offset === lastRequestedOffset) return; // 같은 offset 재요청 방지
     lastRequestedOffset = offset;
 
     loading = true;
-    const currentFilter = { q:'', category:'', sort:'DESC' };
+    
     const url =
     	  contextPath + "/product/list?offset=" + offset + "&size=" + size
     	  + (currentFilter.q ? "&q=" + encodeURIComponent(currentFilter.q) : "")
@@ -296,6 +298,7 @@
       loading = false;
     }
   };
+  window.fetchProducts = fetchProducts;
 
   // 검색(필요 시 유지)
   const search = async (keyword) => {
@@ -345,11 +348,11 @@
   window.addEventListener('scroll', () => {
     if (scrollTimer) clearTimeout(scrollTimer);
     scrollTimer = setTimeout(() => {
-      if (results && results.style.display !== "none" && results.innerHTML.trim() !== "") return;
-      if (loading || endOfData || !mainGrid || mainGrid.style.display === 'none') return;
-      if (document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 100) {
-        fetchProducts();
-      }
+    	if (loading || endOfData) return;
+    	if (document.documentElement.scrollTop + window.innerHeight >= document.documentElement.scrollHeight - 100) {
+    	  fetchProducts();
+    	}
+
     }, 50);
   });
 
@@ -364,41 +367,38 @@
   };
   document.addEventListener('DOMContentLoaded', fillIfShort);
   window.search = search;
-})();
 
   //메인에서 현재 필터(카테고리/검색어) 상태를 가지고 있다고 가정
   const filter = { category: '', q: '', sort: 'DESC' }; // 예시
   
-  //헤더에서 날아오는 필터 적용 이벤트 수신
+//헤더에서 날아오는 필터 적용 이벤트 수신
   window.addEventListener('puppit:applyFilter', (e) => {
     const { q = '', category = '' } = e.detail || {};
     const results = document.getElementById('search-results');
     const mainGrid = document.getElementById('productGrid');
+    console.log('category: ', category);
 
-    // 상태 초기화 (무한스크롤 사용중이면 필요 시 offset/flags도 초기화)
-    if (results) { results.style.display = 'block'; results.innerHTML = ''; }
-    if (mainGrid)  mainGrid.style.setProperty('display', 'none', 'important');
+    // 무한스크롤 상태 초기화
+    offset = 0;
+    endOfData = false;
+    lastRequestedOffset = -1;
+    seenIds.clear();
 
-    if (q) {
-      // 키워드 검색
-      if (typeof search === 'function') {
-        search(q);
-      } else {
-        console.warn('search(q) 함수가 메인에 없습니다.');
-      }
-    } else if (category) {
-      // 카테고리 검색
-      if (typeof loadCategory === 'function') {
-        loadCategory(category);
-      } else {
-        console.warn('loadCategory(name) 함수가 메인에 없습니다.');
-      }
-    } else {
-      // 둘 다 없으면 메인 목록 보여주기
-      if (results) results.style.display = 'none';
-      if (mainGrid) mainGrid.style.display = 'grid';
-    }
+    // 상태 초기화
+    if (results) { results.style.display = 'none'; results.innerHTML = ''; }
+    if (mainGrid) { mainGrid.innerHTML = ''; mainGrid.style.display = 'grid'; }
+
+    // 필터 갱신
+    currentFilter = { ...currentFilter, q, category };
+
+    // 검색창 input 값도 동기화
+    const input = document.getElementById('search-input');
+    if (input) input.value = q;
+
+    // ✅ 무조건 fetchProducts 실행
+    fetchProducts();
   });
+
   
   async function loadCategory(categoryName) {
 	    const results = document.getElementById('search-results');
@@ -409,6 +409,7 @@
 	    results.innerHTML = '<div class="empty">카테고리 불러오는 중...</div>';
 
 	    try {
+	    	//
 	      const url = contextPath + "/product/list?offset=0&size=40&category=" + encodeURIComponent(categoryName);
 	      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
 	      if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -452,6 +453,10 @@
 	    '</a>'
 	  );
 	}
+  
+  
+})();
+
 
 
 </script>
