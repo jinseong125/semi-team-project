@@ -324,11 +324,6 @@ function applyFilter(partial) {
   window.dispatchEvent(new CustomEvent('puppit:applyFilter', { detail: partial || {} }));
 }
 
-	
-	
-	
-	
-
 	let stompClient = null;
 	//채팅방 접속 상태
 	let currentChatRoomId = null;
@@ -336,18 +331,11 @@ function applyFilter(partial) {
 	let contextPath = "${contextPath}";
 	  let loginUserId = "${loginUserId}";
 	  let userId = "${userId}";
-	
-	
+		
  
   var results = document.getElementById('search-results');
 
-
-
-
-
 let alarmClosed = false; // 팝업 닫힘 상태
-
-
 
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -377,7 +365,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	        return response.json();
 	      })
 	      .then(data => {
-	        // 콘솔에 찍기!
+	        // 콘솔에 찍기
 	        console.log('profileImage:', data.profileImage);
 	        console.log('chats:', data.chats);
 	        // 2. 화면 이동 (JSP 렌더링)
@@ -441,6 +429,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	      const selected = this.value;
 	      if (selected && selected !== "카테고리") {
 	        loadCategory(selected);
+	        // 헤더 → 메인에게 알림 보냄 (카테고리 값 전달)
+	        applyFilter({ category: selected, q: '' });
 	      }
 	    });
 	  }
@@ -458,7 +448,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		  let notification = JSON.parse(msg.body);
 		  console.log('notification: ', notification);
 		
-		  // 🚩 메시지의 receiverAccountId가 로그인한 사용자와 다르면 return (수신자만 알림)
+		  // 메시지의 receiverAccountId가 로그인한 사용자와 다르면 return (수신자만 알림)
 		  if (String(notification.receiverAccountId) !== String(loginUserId)) {
 		    return;
 		  }
