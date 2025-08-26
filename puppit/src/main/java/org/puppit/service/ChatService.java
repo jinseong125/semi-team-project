@@ -44,4 +44,3 @@ public interface ChatService {
 	public int getTotalChatCount(int roomId, int buyerId, int sellerId);
 	public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId);
 }
-
