@@ -1,8 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.Map" %>
+<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
 <%
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
 String accountId = "";
@@ -17,6 +19,14 @@ if (sessionMap != null) {
         userId = Integer.parseInt(userIdObj.toString());
     }
 }
+
+
+ObjectMapper mapper = new ObjectMapper();
+String chatListJson = mapper.writeValueAsString(request.getAttribute("chatList"));
+String profileImageJson = mapper.writeValueAsString(request.getAttribute("profileImage"));
+//out.println("DEBUG chatList=" + request.getAttribute("chatList"));
+//out.println("DEBUG profileImage=" + request.getAttribute("profileImage"));
+
 %>
 
 <c:set var="loginUserId" value="<%= accountId %>" />
@@ -190,6 +200,8 @@ if (sessionMap != null) {
             <c:forEach items="${chatList}" var="chat">
                 <div class="chatList" data-room-id="${chat.roomId}">
                     <span class="chat-profile-img chat-profile-icon">
+                    
+                    
                         <i class="fa-solid fa-user"></i>
                     </span>
                     <div class="chat-info-area" style="cursor:pointer;">
@@ -254,72 +266,180 @@ let activeRooms = {}; // { roomId: { buyer: true/false, seller: true/false } }
 //하이라이트 타이머 관리용 객체
 let highlightTimers = {}; // { roomId: timerId }
 
+window.chatList = <%= (chatListJson != null && !chatListJson.isEmpty() ? chatListJson : "[]") %>;
+window.profileImage = <%= (profileImageJson != null && !profileImageJson.isEmpty() ? profileImageJson : "null") %>;
+const chatList = window.chatList;
+const profileImages = window.profileImage;
+window.myAccountId = "<%= accountId %>";
+
 document.addEventListener('DOMContentLoaded', function() {
-    //const chatlist = document.getElementById('chatlist-container');
-    const urlParams = new URLSearchParams(window.location.search);
-    const highlightRoomId = urlParams.get('highlightRoomId');
-    const highlightMessage = urlParams.get('highlightMessage');
+    // S3 프로필 이미지 처리
+   
+    const myAccountId = window.myAccountId;
+    const defaultImg = contextPath + '/resources/image/profile-default.png';
+
+    // 채팅 내역 없는 방의 roomId를 저장 (비동기 DB 조회 결과 활용)
+    // { roomId: true/false }
+    const noChatRooms = {};   
     
-    if (highlightRoomId) {
-        highlightChatRoom(highlightRoomId);
-        if (highlightMessage) {
-          updateChatListLastMessage(highlightRoomId, highlightMessage);
-        }
-      }
+ // 1. DB에서 로그인 사용자의 userId와 각 채팅방의 상품 seller_id 간 채팅내역이 있는지 fetch
+    // (비동기로 한 번에 가져오면 좋음, 예시 API: /api/chat/count?roomId=xxx&buyerId=yyy&sellerId=zzz)
+    // 아래는 모든 채팅방을 한 번에 조회하는 예시
+    const chatCountPromises = [];
     
-    const chatlist = document.getElementById('chatlist-container');
-    if (chatlist) {
-        chatlist.addEventListener('click', function(e) {
-            // e.target.closest('.chatList')로 클릭된 채팅방 div 탐색
-            const chatDiv = e.target.closest('.chatList');
-            if (chatDiv) {
-                const roomId = chatDiv.dataset.roomId;
-                currentRoomId = roomId;
-                highlightChatRoom(roomId);
-                
-                // 채팅방 선택시 채팅 UI show/hide 처리
-                showChatUI();
-                
-             // === [추가] 읽음 처리 + 알림뱃지 제거 ===
-                // 미읽음 뱃지 확인
-                const badge = chatDiv.querySelector('.unread-badge');
-                const unreadCount = badge && badge.style.display !== 'none' ? parseInt(badge.textContent) || 0 : 0;
-                console.log('unreadCount: ', unreadCount);
-                if (unreadCount > 0) {
-                    // 읽음 처리 API 호출
-                    fetch(contextPath + '/api/alarm/readAll', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({
-                            roomId: roomId,
-                            userId: userId,
-                            count: unreadCount
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        // 뱃지 제거
-                        badge.style.display = 'none';
-                        badge.textContent = '';
-                        // 알림 팝업에서도 해당 채팅방 알림 제거
-                        if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
-                    })
-                    .catch(err => {
-                        console.error('안읽은 메시지 읽음 처리 에러:', err);
-                    });
-                }
-                
-                
-                
-                if (roomId) {
-                    loadChatHistory(roomId).then(() => {
-                        connectAndSubscribe(roomId);
-                    });
+    // 콘솔에서 JS로 넘어온 값을 바로 확인
+    console.log("chatList =", chatList);
+    console.log("profileImages =", profileImages);
+    
+    chatList.forEach(chat => {
+        // chat.roomId, chat.buyerId (혹은 현재 로그인자), chat.sellerId 필요
+        // buyerId는 로그인자 userId
+        // sellerId는 chat.sellerId
+        // roomId: chat.roomId
+        // buyerId: 로그인자 userId
+        // sellerId: chat.sellerId 또는 chat.productSellerId
+        const roomId = chat.roomId || '';
+        const buyerId = userId || '';
+        const sellerId = chat.sellerId || chat.productSellerId || '';
+        
+        // 콘솔로 확인(디버깅)
+        console.log('카운트 fetch:', {roomId, buyerId, sellerId});
+        
+       
+        
+        // roomId, buyerId, sellerId가 올바르게 바인딩되어 API에 전달되도록!
+        chatCountPromises.push(
+            fetch(
+                contextPath + '/api/chat/count?roomId=' + chat.roomId + '&buyerId=' + userId + '&sellerId=' + chat.sellerId
+            )
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+            	console.log('data.totalChatCount: ', data.totalChatCount);
+            	noChatRooms[chat.roomId] = {
+                        totalChatCount: data.totalChatCount || 0,
+                        buyerToSellerCount: data.buyerToSellerCount || 0
+                    };
+            })
+            .catch(function() {
+            	 noChatRooms[chat.roomId] = { totalChatCount: false, buyerToSellerCount: false };
+            })
+        );
+    });
+    
+
+    // 채팅방 목록 이미지 바인딩은 모든 카운트 fetch 이후에 실행
+Promise.all(chatCountPromises).then(() => {
+    document.querySelectorAll('.chatList').forEach(function(chatDiv) {
+        const roomId = chatDiv.dataset.roomId;
+        let info = Array.isArray(profileImages) ? profileImages.find(pi => String(pi.chatRoomId) === String(roomId)) : null;
+        let imgSrc = '';
+        if (info) {
+            const sellerProfileImageKey = info.sellerProfileImageKey;
+            const receiverProfileImageKey = info.receiverProfileImageKey;
+            const buyerAccountId = String(info.chatReceiverAccountId);
+            const sellerAccountId = String(info.productSellerAccountId);
+            const myAccountId = String(window.myAccountId);
+            // API에서 받아온 값 사용
+            const totalChatCount = noChatRooms[roomId]?.totalChatCount || 0;
+
+         // 기존분기: 내가 판매자인데 채팅횟수 0이면 판매자 프로필
+            // 신규분기: 로그인된 사용자 accountId와 sellerAccountId가 같고 채팅횟수가 0이면 판매자 프로필
+            // 둘 다 만족시 무조건 sellerProfileImageKey 사용
+            if (
+                (myAccountId === sellerAccountId && totalChatCount === 0)
+                // 추가: buyer/seller accountId가 같고, 채팅횟수 0이면(자기 자신과의 채팅)
+                || (buyerAccountId === sellerAccountId && totalChatCount === 0)
+            ) {
+                if (sellerProfileImageKey) {
+                    imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + sellerProfileImageKey;
                 }
             }
+            // 내가 구매자인 경우 → 판매자 프로필 이미지
+            else if (myAccountId === buyerAccountId && sellerProfileImageKey) {
+                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + sellerProfileImageKey;
+            }
+            // 내가 판매자인데 대화가 1회 이상이면 → 상대방(receiver) 프로필 이미지
+            else if (myAccountId === sellerAccountId && totalChatCount > 0 && receiverProfileImageKey) {
+                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + receiverProfileImageKey;
+            }
+            // 기본 (otherProfileImageKey)
+            else if (!imgSrc && info.otherProfileImageKey) {
+                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + info.otherProfileImageKey;
+            }
+         
+        }
+        if (!imgSrc) imgSrc = defaultImg;
+        const profileSpan = chatDiv.querySelector('.chat-profile-img');
+        if (profileSpan) {
+            profileSpan.innerHTML = `<img src="\${imgSrc}" alt="프로필 이미지" width="64" height="64" style="width:64px;height:64px;object-fit:cover;border-radius:50%;" onerror="this.src='${defaultImg}'"/>`;
+        }
+    });
+});
+    
+    
+
+    // 채팅방 클릭 직접 바인딩 (이벤트 위임 중복 삭제)
+    document.querySelectorAll('.chatList').forEach(function(chatDiv) {
+        chatDiv.addEventListener('click', function(e) {
+            const roomId = chatDiv.dataset.roomId;
+            selectedRoomId = roomId;
+            currentRoomId = roomId;
+            console.log('roomId:', roomId);
+            console.log('selectedRoomId:', selectedRoomId);
+
+            // 선택/하이라이트 처리
+            document.querySelectorAll('.chatList').forEach(el => el.classList.remove('highlight', 'selected'));
+            chatDiv.classList.add('highlight', 'selected');
+            if (highlightTimers[roomId]) clearTimeout(highlightTimers[roomId]);
+            highlightTimers[roomId] = setTimeout(() => {
+                chatDiv.classList.remove('highlight');
+                highlightTimers[roomId] = null;
+            }, 2000);
+
+            showChatUI();
+            chatHistory.innerHTML = "";
+            renderedMessageIds.clear();
+            loadChatHistory(roomId).then(() => {
+                connectAndSubscribe(roomId);
+            });
+
+            // 읽음 처리 + 뱃지 제거
+            const badge = chatDiv.querySelector('.unread-badge');
+            const unreadCount = badge && badge.style.display !== 'none' ? parseInt(badge.textContent) || 0 : 0;
+            console.log('unreadCount:', unreadCount);
+            console.log({roomId, userId, count: unreadCount});
+            if (unreadCount > 0) {
+                fetch(contextPath + '/api/alarm/readAll', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        roomId: roomId,
+                        userId: userId,
+                        count: unreadCount
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    badge.style.display = 'none';
+                    badge.textContent = '';
+                    if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
+                })
+                .catch(err => {
+                    console.error('안읽은 메시지 읽음 처리 에러:', err);
+                });
+            }
+        });
+    });
+
+    // 뒤로가기 버튼 이벤트
+    const backBtn = document.getElementById('back-btn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.history.back();
         });
     }
 
+    // sendBtn, showChatUI, loadUnreadCounts 등 기존 기능 그대로
     const sendBtn = document.getElementById('sendChatButton');
     if (sendBtn) {
         sendBtn.addEventListener('click', function(e){
@@ -328,23 +448,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     enableChatInput(false);
- 	// [변경] 최초 진입시 채팅 UI 숨김
     showChatUI(false);
-    
-    // === 미읽음 메시지 뱃지: 로그인 & 채팅방 목록 페이지에서만 실행 ===
+
     const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
     const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
     if (isLoggedIn === "true" && isChatListPage) {
         loadUnreadCounts();
     }
-    
-    const backBtn = document.getElementById('back-btn');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.history.back();
-        });
-    }
-    
 });
 
 /* [추가] 채팅 UI show/hide 함수 */
@@ -836,19 +946,23 @@ function getCurrentChatTime() {
 
 //1. 채팅방 하이라이트 함수
 function highlightChatRoom(roomId) {
-	const chatLists = document.querySelectorAll('.chatList');
-	  chatLists.forEach(chatDiv => {
-	    if (String(chatDiv.dataset.roomId) === String(roomId)) {
-	      chatDiv.classList.add('highlight');
-	      // 2초 후 하이라이트 제거
-	      if (highlightTimers[roomId]) clearTimeout(highlightTimers[roomId]);
-	      highlightTimers[roomId] = setTimeout(() => {
-	        chatDiv.classList.remove('highlight');
-	        highlightTimers[roomId] = null;
-	      }, 2000);
-	    }
-	  });
-    
+	// 1. 모든 채팅방의 highlight 클래스 제거
+    document.querySelectorAll('.chatList').forEach(chatDiv => {
+        chatDiv.classList.remove('highlight');
+    });
+
+ // 2. 선택된 채팅방만 highlight 추가
+    document.querySelectorAll('.chatList').forEach(chatDiv => {
+        if (String(chatDiv.dataset.roomId) === String(roomId)) {
+            chatDiv.classList.add('highlight');
+            // 2초 후 하이라이트 제거 (선택된 방만)
+            if (highlightTimers[roomId]) clearTimeout(highlightTimers[roomId]);
+            highlightTimers[roomId] = setTimeout(() => {
+                chatDiv.classList.remove('highlight');
+                highlightTimers[roomId] = null;
+            }, 2000);
+        }
+    });       
 }
 
 //2. 하이라이트 제거 함수

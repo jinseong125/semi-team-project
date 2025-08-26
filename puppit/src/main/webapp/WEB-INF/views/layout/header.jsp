@@ -118,23 +118,28 @@ a{text-decoration:none;color:inherit;}
   <!-- 우측: 사용자/버튼 -->
   <div class="right">
     <div class="top-actions">
-      <c:choose>
-        <c:when test="${empty sessionScope.sessionMap.accountId}">
-          <a href="${contextPath}/user/login" class="btn">로그인</a>
-          <a href="${contextPath}/user/signup" class="btn">회원가입</a>
-        </c:when>
-        <c:otherwise>
-          <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
-          <a href="${contextPath}/user/mypage">마이페이지</a>
-          <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
-            <i class="fa-regular fa-bell"></i>
-          </button>
-          <a href="${contextPath}/user/logout">로그아웃</a>
-          <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" onclick="location.href='${contextPath}/chat/recentRoomList'" title="채팅방 목록으로 이동">
-            <i class="fa-regular fa-comment-dots"></i> 채팅
-          </button>
-        </c:otherwise>
-      </c:choose>
+
+    <c:choose>
+      <c:when test="${empty sessionScope.sessionMap.accountId}">
+        <a href="${contextPath}/user/login" class="btn">로그인</a>
+        <a href="${contextPath}/user/signup" class="btn">회원가입</a>
+      </c:when>
+      <c:otherwise>
+        <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
+        <a href="${contextPath}/user/mypage">마이페이지</a>
+         
+        <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
+	       <i class="fa-regular fa-bell"></i>
+	    </button>
+        <a href="${contextPath}/user/logout">로그아웃</a>
+        <!-- 채팅 버튼 -->
+      	<!-- 채팅 버튼 -->
+		<button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
+		  <i class="fa-regular fa-comment-dots"></i> 채팅
+		</button>
+      </c:otherwise>
+    </c:choose>
+
     </div>
     <div class="bottom-actions">
       <a href="${contextPath}/product/myproduct" class="btn dark">상품 관리</a>
@@ -152,6 +157,118 @@ a{text-decoration:none;color:inherit;}
 
 
 <script>
+
+	// JSP에서 세션 정보를 JS 변수로 전달
+	//var contextPath = "${contextPath}";
+	//const userId = "${sessionScope.sessionMap.userId}";
+	const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
+	const input = document.getElementById("search-input");
+
+	let stompClient = null;
+	//채팅방 접속 상태
+	let currentChatRoomId = null;
+	let alarmShownOnce = false;
+	let contextPath = "${contextPath}";
+	  let loginUserId = "${loginUserId}";
+	  let userId = "${userId}";
+	
+	
+  var btn = document.getElementById('do-search');
+  var results = document.getElementById('search-results');
+  var autoList = document.getElementById('autocompleteList');
+  
+
+  // 1. 페이지가 로딩될 때마다 알림 닫힘 상태를 항상 false로 초기화!
+
+
+
+let alarmClosed = false; // 팝업 닫힘 상태
+let alarmArea, alarmBell;
+
+document.addEventListener("DOMContentLoaded", function() {
+	  console.log("loginUserId:", loginUserId, "userId:", userId);
+	  alarmArea = document.getElementById("alarmArea");
+	  alarmBell = document.getElementById("alarmBell");
+	  const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
+	  var chatBtn = document.getElementById('chatBtn');
+	  loadTopKeywords();
+
+	  if (chatBtn) {
+	    chatBtn.addEventListener('click', function(e) {
+	      e.preventDefault();
+	      // 1. JSON 데이터 받기
+	      fetch(contextPath + '/api/chat/recentRoomList', {
+	        method: 'GET',
+	        headers: { 'Accept': 'application/json' }
+	      })
+	      .then(response => {
+	        if (!response.ok) throw new Error('서버 오류: ' + response.status);
+	        return response.json();
+	      })
+	      .then(data => {
+	        // 콘솔에 찍기!
+	        console.log('profileImage:', data.profileImage);
+	        console.log('chats:', data.chats);
+	        // 2. 화면 이동 (JSP 렌더링)
+	        window.location.href = contextPath + '/chat/recentRoomList';
+	        // 화면 이동 후 JSP에서 기존대로 chatList, profileImage 사용 가능
+	      })
+	      .catch(err => {
+	        console.error('[채팅 fetch] 에러:', err);
+	        window.location.href = contextPath + '/chat/recentRoomList';
+	      });
+	    });
+	  }
+
+	  if (isLoggedIn === "true" && isChatListPage) {
+	    loadUnreadCounts();
+	  }
+
+	  if (isLoggedIn === "true" && userId && !isNaN(userId)) {
+	    if (localStorage.getItem('puppitAlarmClosed') === null) {
+	      alarmClosed = false;
+	      localStorage.setItem('puppitAlarmClosed', 'false');
+	    } else {
+	      alarmClosed = localStorage.getItem('puppitAlarmClosed') === 'true';
+	    }
+
+	    if (!alarmClosed) {
+	      alarmArea.style.display = "block";
+	      alarmBell.style.display = "none";
+	      loadAlarms();
+	      setInterval(loadAlarms, 30000);
+	      connectSocket();
+	    } else {
+	      alarmArea.style.display = "none";
+	      alarmArea.innerHTML = "";
+	      alarmBell.style.display = "inline-block";
+	      connectSocket(); // 팝업이 닫혀있어도 소켓은 연결!
+	    }
+	  }
+
+	  if (alarmBell) {
+	    alarmBell.addEventListener("click", function() {
+	      alarmClosed = false;
+	      console.log("alarmBell button clicked");
+	      localStorage.setItem('puppitAlarmClosed', 'false');
+	      alarmArea.style.display = "block";
+	      alarmBell.style.display = "none";
+	      loadAlarms();
+	      window.alarmInterval = setInterval(loadAlarms, 30000);
+	      alarmBell.classList.remove('red');
+	    });
+	  }
+
+	  const categorySelect = document.getElementById("categorySelect");
+	  if (categorySelect) {
+	    categorySelect.addEventListener("change", function() {
+	      const selected = this.value;
+	      if (selected && selected !== "카테고리") {
+	        loadCategory(selected);
+	      }
+	    });
+	  }
+	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝 괄호!
 
 
 
