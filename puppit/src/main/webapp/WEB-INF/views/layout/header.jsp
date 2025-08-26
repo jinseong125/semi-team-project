@@ -201,14 +201,16 @@ a{text-decoration:none;color:inherit;}
         <a href="${contextPath}/user/mypage">마이페이지</a>
          
         <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
-	       <i class="fa-regular fa-bell"></i>
-	    </button>
+          <i class="fa-regular fa-bell"></i>
+       </button>
         <a href="${contextPath}/user/logout">로그아웃</a>
-        <!-- 채팅 버튼 -->
-      	<!-- 채팅 버튼 -->
-		<button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
-		  <i class="fa-regular fa-comment-dots"></i> 채팅
-		</button>
+   
+
+         <!-- 채팅 버튼 -->
+      <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
+        <i class="fa-regular fa-comment-dots"></i> 채팅
+      </button>
+
       </c:otherwise>
     </c:choose>
     </div>
@@ -224,6 +226,7 @@ a{text-decoration:none;color:inherit;}
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.2/stomp.min.js"></script>
+
 <script>
 	
 //===== 전역 컨텍스트 (한 번만 정의) =====
@@ -354,12 +357,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	      }
 	    });
 	  }
-	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝 괄호!
-
-
-
-
-
+	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝
 
 //1. 웹소켓 연결 및 구독 (알림+채팅 모두)
   function connectSocket() {
