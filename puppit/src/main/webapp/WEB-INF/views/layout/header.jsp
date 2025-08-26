@@ -24,38 +24,156 @@
 
 <style>
 /* ===== 헤더 기본 레이아웃 ===== */
-.header {display:flex;justify-content:space-between;align-items:flex-start;max-width:1200px;margin:0 auto;padding:16px 20px;}
-.left {display:flex;align-items:flex-start;gap:18px;}
-.left-col {display:flex;flex-direction:column;gap:14px;min-width:420px;}
-.searchBar {position:relative;width:100%;max-width:600px;}
-.searchBar .input {width:85%;height:44px;padding:0 44px 0 40px;border:1px solid #e5e7eb;border-radius:12px;background:#f5f7fa;outline:none;}
-.searchBar .fa-magnifying-glass {position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#666;cursor:pointer;}
-.meta-row{display:flex;align-items:center;gap:16px;}
-.right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
-a{text-decoration:none;color:inherit;}
-.top-actions{display:flex;gap:10px;}
-.btn{padding:6px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;cursor:pointer;}
-.btn.dark{background:#111;color:#fff;border-color:#111;}
+.header {
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+max-width:1200px;
+margin:0 auto;
+padding:16px 20px;
+}
+.left {
+display:flex;
+align-items:flex-start;
+gap:18px;
+}
+.left-col {
+display:flex;
+flex-direction:column;
+gap:14px;
+min-width:420px;
+}
+.searchBar {
+position:relative;
+width:100%;
+max-width:600px;
+}
+.searchBar .input {
+width:85%;
+height:44px;
+padding:0 44px 0 40px;
+border:1px solid #e5e7eb;
+border-radius:12px;
+background:#f5f7fa;
+outline:none;
+}
+.searchBar .fa-magnifying-glass {
+position:absolute;
+left:14px;
+top:50%;
+transform:translateY(-50%);
+color:#666;
+cursor:pointer;
+}
+.meta-row {
+display:flex;
+align-items:center;
+gap:16px;
+}
+.right {
+display:flex;
+flex-direction:column;
+align-items:flex-end;
+gap:12px;
+}
+a {
+text-decoration:none;
+color:inherit;
+}
+.top-actions {
+display:flex;
+gap:10px;
+}
+/* 공통 버튼 */
+.btn {
+  padding:6px 12px;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  background:#fff;
+  cursor:pointer;
+  transition: all 0.2s ease-in-out; /* 부드럽게 변화 */
+}
+
+/* 기본 버튼 hover (로그인/회원가입 등) */
+.btn:hover {
+  background:#f5f7fa;   /* 연한 회색 배경 */
+  border-color:#aaa;    /* 테두리 살짝 진하게 */
+  color:#111;           /* 글자 조금 더 진하게 */
+}
+
+/* 어두운 버튼 (상품 관리) */
+.btn.dark {
+  background:#111;
+  color:#fff;
+  border-color:#111;
+}
+
+/* dark 버튼 hover */
+.btn.dark:hover {
+  background:#333;   /* 더 밝은 회색 검정 */
+  border-color:#333;
+}
+
 
 /* 카테고리 셀렉트 */
-.category { position: relative; display: inline-flex; align-items: center; }
+.category { 
+  position: relative; 
+  display: inline-flex;
+  align-items: center; 
+ }
 .category select {
-  appearance: none; border: 1px solid #d1e3ff; border-radius: 12px; background: #f9fbff;
-  font: inherit; outline: none; padding: 10px 36px 10px 14px; cursor: pointer; color: #333;
+  appearance: none;
+  border: 1px solid #d1e3ff; 
+  border-radius: 12px; 
+  background: #f9fbff;
+  font: inherit; 
+  outline: none; 
+  padding: 10px 36px 10px 14px; 
+  cursor: pointer; 
+  color: #333;
   transition: all .2s;
 }
-.category select:hover { border-color: #4a90e2; box-shadow: 0 0 6px rgba(74,144,226,.3);}
-.category select:focus { border-color: #1c6dd0; box-shadow: 0 0 6px rgba(28,109,208,.4); }
-.category .chev { position:absolute; right:14px; pointer-events:none; color:#4a90e2; font-size:12px; }
+.category select:hover { 
+border-color: #4a90e2; 
+box-shadow: 0 0 6px rgba(74,144,226,.3);
+}
+.category select:focus { 
+border-color: #1c6dd0; 
+box-shadow: 0 0 6px rgba(28,109,208,.4); 
+}
+.category .chev { 
+position:absolute; 
+right:14px; 
+pointer-events:none; 
+color:#4a90e2; 
+font-size:12px; 
+}
 
 /* 자동완성 리스트 */
 #autocompleteList {
-  position:absolute; top:48px; left:0; width:85%;
-  background:#fff; border:1px solid #ddd; border-radius:8px;
-  display:none; z-index:1000; max-height:200px; overflow-y:auto; list-style:none; padding:0; margin:0;
+  position:absolute; 
+  top:48px; 
+  left:0;
+  width:85%;
+  background:#fff; 
+  border:1px solid #ddd; 
+  border-radius:8px;
+  display:none; 
+  z-index:1000; 
+  max-height:200px; 
+  overflow-y:auto; 
+  list-style:none;
+  padding:0; 
+  margin:0;
 }
-#autocompleteList li { padding:10px 14px; cursor:pointer; border-bottom:1px solid #f3f3f3; }
-#autocompleteList li:hover { background:#f9f9f9; }
+#autocompleteList li { 
+padding:10px 14px; 
+cursor:pointer; 
+border-bottom:1px solid #f3f3f3; 
+}
+#autocompleteList li:hover { 
+background:#f9f9f9; 
+}
 
 /* 인기검색어 */
 #top-keywords {margin-top:4px;font-size:14px;color:#444;}
