@@ -148,9 +148,15 @@ public class ChatWebSocketController {
 	        e.printStackTrace();
 	    }
 
-	    String destination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
-	    messagingTemplate.convertAndSend(destination, chatMessageDTO);
+//	    String destination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
+//	    messagingTemplate.convertAndSend(destination, chatMessageDTO);
 	    
+	    String roomDestination = "/topic/chat/" + chatMessageDTO.getChatRoomId();
+	    messagingTemplate.convertAndSend(roomDestination, chatMessageDTO);
+	    
+	    // 추가: 전체 chat 메시지 브로드캐스트 (채팅방 목록용)
+	    String globalChatDestination = "/topic/chat";
+	    messagingTemplate.convertAndSend(globalChatDestination, chatMessageDTO);
 	    
 	    productId = chatService.getProductIdByRoomId(chatRoomId);
 	    

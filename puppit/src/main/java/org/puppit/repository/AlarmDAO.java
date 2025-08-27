@@ -48,6 +48,9 @@ public class AlarmDAO {
             Integer count = ((Number) row.get("unread_count")).intValue();
             unreadCountMap.put(roomId, count);
         }
+        for (Map.Entry<Integer, Integer> entry : unreadCountMap.entrySet()) {
+            System.out.println("room_id: " + entry.getKey() + ", unread_count: " + entry.getValue());
+        }
         return unreadCountMap;
     }
 

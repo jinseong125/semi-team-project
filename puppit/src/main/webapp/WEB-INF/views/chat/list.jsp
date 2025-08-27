@@ -1102,16 +1102,23 @@ function sendMessage(currentRoomId) {
 }
 
 function updateChatListLastMessage(roomId, chatMessage) {
-	  // chatListRenderArea 안의 .chatList[data-room-id]에서 .chat-message를 찾아서 수정
-	  var chatRenderArea = document.getElementById('chatListRenderArea');
-	  if (!chatRenderArea) return;
-	  var chatDiv = chatRenderArea.querySelector('.chatList[data-room-id="' + roomId + '"]');
-	  if (chatDiv) {
-	    var msgDiv = chatDiv.querySelector('.chat-message');
-	    if (msgDiv) {
-	      msgDiv.textContent = chatMessage;
-	    }
+	 console.log('[updateChatListLastMessage] roomId:', roomId, 'chatMessage:', chatMessage);
+	 var chatRenderArea = document.getElementById('chatListRenderArea');
+	  if (!chatRenderArea) {
+	    console.warn('chatListRenderArea not found!');
+	    return;
 	  }
+	  var chatDiv = chatRenderArea.querySelector('.chatList[data-room-id="' + String(roomId) + '"]');
+	  if (!chatDiv) {
+	    console.warn('chatDiv for roomId', roomId, 'not found!');
+	    return;
+	  }
+	  var msgDiv = chatDiv.querySelector('.chat-message');
+	  if (!msgDiv) {
+	    console.warn('msgDiv (.chat-message) not found in chatDiv!');
+	    return;
+	  }
+	  msgDiv.textContent = chatMessage;
 	}
 
 

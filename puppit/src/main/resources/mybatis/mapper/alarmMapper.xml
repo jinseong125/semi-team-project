@@ -44,12 +44,12 @@ WHERE r.room_id = #{roomId}
 	</update>
 
 	<select id="getUnreadCountsForUser" parameterType="int" resultType="map">
-	    SELECT a.room_id, COUNT(*) AS unread_count
-		FROM alarm a
-		JOIN chat c ON a.message_id = c.message_id
-		WHERE a.is_read = 1
-		  AND c.chat_receiver = #{userId}
-		GROUP BY a.room_id;
+	     SELECT a.room_id, COUNT(*) AS unread_count
+    FROM alarm a
+    JOIN chat c ON a.message_id = c.message_id
+    WHERE a.is_read = 1
+      AND c.chat_receiver = #{userId}
+    GROUP BY a.room_id
 	</select>
 
 
