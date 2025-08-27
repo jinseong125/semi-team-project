@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class ProductAndImageDTO {
 
 
@@ -31,15 +33,6 @@ public class ProductAndImageDTO {
   private String imageKey;
   private boolean thumbnail;
   
-  @Override
-  public String toString() {
-    return "ProductAndImageDTO [productId=" + productId + ", locationId=" + locationId + ", categoryId=" + categoryId
-        + ", sellerId=" + sellerId + ", conditionId=" + conditionId + ", statusId=" + statusId + ", productName="
-        + productName + ", productPrice=" + productPrice + ", productDescription=" + productDescription
-        + ", productCreatedAt=" + productCreatedAt + ", productUpdatedAt=" + productUpdatedAt + ", totalCount="
-        + totalCount + ", imageId=" + imageId + ", imageUrl=" + imageUrl + ", imageKey=" + imageKey + ", thumbnail="
-        + thumbnail + "]";
-  }
   
   
   

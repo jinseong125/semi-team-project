@@ -16,22 +16,140 @@
  </script>
 
 <style>
-  html, body { height: 100%; margin: 0; padding: 0; background: #fff; }
-  body { min-height: 100vh; background: #fff; }
-  .container { max-width:1200px; margin:0 auto; padding:24px 20px 60px; background:#fff; min-height: 400px; }
-  .product-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
-  @media (max-width:1024px){ .product-grid { grid-template-columns:repeat(3,1fr) } }
-  @media (max-width:768px){ .product-grid { grid-template-columns:repeat(2,1fr) } }
-  .product-card { display:block; text-decoration:none; color:inherit; min-height:200px; }
-  .thumb { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:12px; border:1px solid #ececef; background:#fafafa; }
-  .title { margin-top:8px; font-size:14px; color:#111; font-weight:600; line-height:1.3 }
-  .desc { margin-top:2px; font-size:12px; color:#6b7280; line-height:1.35; max-height:3.6em; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
-  .price { margin-top:4px; font-size:14px; font-weight:700; }
-  .search-box { display:flex; gap:8px; margin-bottom:24px; align-items:center; }
-  .search-input { flex:1; padding:8px 14px; font-size:15px; border:1px solid #bbb; border-radius:6px; }
-  .search-btn { padding:8px 18px; font-size:15px; background:#111; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+  html, body { 
+    height: 100%; 
+    margin: 0; 
+    padding: 0; 
+    background: #fff; /* 살짝 회색톤 배경 */
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  }
+
+  body { 
+  min-height: 100vh; 
+  }
+
+  .container { 
+    max-width: 1200px;
+    margin: 0 auto; 
+    padding: 24px 20px 60px;
+    background: #fff; 
+    min-height: 400px; 
+  }
+
+  /* ===== 상품 그리드 ===== */
+  .product-grid { 
+    display: grid; 
+    grid-template-columns: repeat(5, 1fr); 
+    gap: 24px; 
+  }
+  @media (max-width:1024px){ .product-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width:768px){ .product-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ===== 상품 카드 ===== */
+  .product-card { 
+    display: block; 
+    text-decoration: none; 
+    color: inherit; 
+    background: #fff;
+    border-radius: 14px; 
+    border: 1px solid #ececef; 
+    overflow: hidden;
+    transition: all 0.25s ease-in-out;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .product-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+  }
+
+  /* ===== 썸네일 이미지 ===== */
+  .thumb { 
+    width: 100%; 
+    aspect-ratio: 1/1; 
+    object-fit: cover; 
+    border-bottom: 1px solid #f1f1f1; 
+    background: #f8f8f8; 
+    transition: transform 0.3s ease;
+  }
+  .product-card:hover .thumb {
+    transform: scale(1.05); /* 이미지 살짝 확대 */
+  }
+
+  /* ===== 상품명 ===== */
+  .title { 
+    margin: 10px 12px 4px;
+    font-size: 15px; 
+    color: #111; 
+    font-weight: 600; 
+    line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ===== 설명 ===== */
+  .desc { 
+    margin: 0 12px 6px;
+    font-size: 13px; 
+    color: #6b7280; 
+    line-height: 1.4; 
+    max-height: 2.8em; 
+    overflow: hidden; 
+    display: -webkit-box; 
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical; 
+  }
+
+  /* ===== 가격 ===== */
+  .price { 
+    margin: 0 12px 12px;
+    font-size: 15px; 
+    font-weight: 700; 
+    color: #e74c3c; /* 강조색 */
+  }
+
+  /* ===== 검색 박스 ===== */
+  .search-box { 
+    display: flex; 
+    gap: 8px; 
+    margin-bottom: 24px; 
+    align-items: center; 
+  }
+
+  .search-input { 
+    flex: 1; 
+    padding: 10px 14px; 
+    font-size: 15px; 
+    border: 1px solid #ddd; 
+    border-radius: 8px; 
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 4px rgba(74,144,226,0.4);
+  }
+
+  .search-btn { 
+    padding: 10px 18px; 
+    font-size: 15px; 
+    background: #111; 
+    color: #fff; 
+    border: none; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: background 0.2s;
+  }
+  .search-btn:hover {
+    background: #333;
+  }
+
+  /* ===== 검색 결과 ===== */
   #search-results { background: #fff; }
+  .empty { text-align: center; padding: 20px; color: #777; }
 </style>
+
 
 <div class="container">
 

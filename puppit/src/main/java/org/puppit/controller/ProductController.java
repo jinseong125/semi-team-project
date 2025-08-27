@@ -8,6 +8,7 @@ import org.puppit.model.dto.ProductSearchDTO;
 import org.puppit.repository.ProductDAO;
 import org.puppit.service.ProductService;
 import org.puppit.service.S3Service;
+import org.puppit.service.WishListService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final WishListService wishListService;
     private final S3Service s3Service;
     private final ProductDAO productDAO;
 
@@ -84,13 +86,21 @@ public class ProductController {
 
     /** 상품 상세 조회 */
     @GetMapping("/detail/{productId}")
-    public String getProductDetail(@PathVariable int productId, Model model) {
+    public String getProductDetail(@PathVariable int productId, @SessionAttribute(value="sessionMap", required=false) Map<String,Object> sessionMap, Model model) {
       ProductDTO product = productService.detailProducts(productId);
         if (product == null) {
             model.addAttribute("error", "해당 상품을 찾을 수 없습니다.");
             return "error/404";
         }
+        boolean wished = false;
+        if (sessionMap != null && sessionMap.get("userId") != null) {
+          Integer userId = (Integer) sessionMap.get("userId");
+          wished = wishListService.existsByUserAndProduct(userId, productId);
+      }
+        product.setWished(wished);
         model.addAttribute("product", product);
+
+        
         return "product/detail";
     }
 

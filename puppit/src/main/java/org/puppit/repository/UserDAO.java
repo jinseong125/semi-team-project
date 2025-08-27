@@ -1,9 +1,9 @@
 package org.puppit.repository;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
-import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.UserDTO;
 import org.puppit.model.dto.UserStatusDTO;
 import org.springframework.stereotype.Repository;
@@ -58,6 +58,22 @@ public class UserDAO {
   public Integer updateProfileImageKey(Map<String, Object> map) {
     return sqlSession.update("mybatis.mapper.userMapper.updateProfileImageKey", map);
   }
-  
-
+  public UserDTO findByProvider(String provider, Long providerId) {
+    Map<String,Object> map = new HashMap<>();
+    map.put("provider", provider);
+    map.put("providerId", providerId);
+    return sqlSession.selectOne("mybatis.mapper.userMapper.findByProvider", map);
+  }
+  public UserDTO findByEmail(String email) {
+      return sqlSession.selectOne("mybatis.mapper.userMapper.findByEmail", email);
+  }
+  public int insertSocialUser(UserDTO user) {
+      return sqlSession.insert("mybatis.mapper.userMapper.insertSocialUser", user);
+  }
+  public int linkProvider(UserDTO user) {
+      return sqlSession.update("mybatis.mapper.userMapper.linkProvider", user);
+  }
+  public int updateSocialProfile(UserDTO user) {
+      return sqlSession.update("mybatis.mapper.userMapper.updateSocialProfile", user);
+  }
 }

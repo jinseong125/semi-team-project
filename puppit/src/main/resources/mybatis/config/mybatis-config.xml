@@ -25,7 +25,6 @@
     <typeAlias type="org.puppit.model.dto.PointDTO" alias="PointDTO"/>
     <typeAlias type="org.puppit.model.dto.ProductDTO" alias="ProductDTO"/>
     <typeAlias type="org.puppit.model.dto.ProductStatusDTO" alias="ProductStatusDTO"/>
-
   </typeAliases>
 
   

@@ -237,7 +237,7 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
         <div class="chat-history" id="chat-history"></div>
         <div class="chat-input-group">
              <textarea id="chatMessageInput" placeholder="채팅메시지를 입력하세요" rows="5"></textarea>
-            <button type="submit"  id="sendChatButton">전송</button>
+            <button type="button"  id="sendChatButton">전송</button>
         </div>
     </div>
 </div>
@@ -366,7 +366,6 @@ Promise.all(chatCountPromises).then(() => {
             else if (!imgSrc && info.otherProfileImageKey) {
                 imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + info.otherProfileImageKey;
             }
-         
         }
         if (!imgSrc) imgSrc = defaultImg;
         const profileSpan = chatDiv.querySelector('.chat-profile-img');
@@ -443,7 +442,7 @@ Promise.all(chatCountPromises).then(() => {
     const sendBtn = document.getElementById('sendChatButton');
     if (sendBtn) {
         sendBtn.addEventListener('click', function(e){
-            e.preventDefault();
+            // e.preventDefault();
             sendMessage(currentRoomId);
         });
     }
@@ -680,11 +679,11 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
         if (isBuyer && totalChatCount >= 2) {
             html += `<button
                 id="pay-btn"
-                data-buyer-id="${userId}"
-                data-seller-id="${product.sellerId}"
-                data-seller-account-id="${product.chatSellerAccountId}"
-                data-product-name="${product.productName}"
-                data-product-id="${product.productId}"
+                data-buyer-id="\${userId}"
+                data-seller-id="\${product.sellerId}"
+                data-seller-account-id="\${product.chatSellerAccountId}"
+                data-product-name="\${product.productName}"
+                data-product-id="\${product.productId}"
             >결제하기</button>`;
         }
 
@@ -693,14 +692,13 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
 
     const payBtn = document.getElementById('pay-btn');
     if (payBtn) {
+    	const chatSellerAccountId = btn.dataset.sellerAccountId; // Fix: Access chatSellerAccountId from dataset
+        console.log('결제버튼 클릭 - chatSellerAccountId1:', chatSellerAccountId);
         payBtn.onclick = function(e) {
             const btn = e.currentTarget;
             console.log("btn.dataset: ", btn.dataset); // 버튼 데이터 확인
             const buyerId = btn.dataset.buyerId; // buyerId 가져오기
 
-            // 반드시 data-seller-account-id를 읽어서 콘솔에 찍음!
-            const chatSellerAccountId = btn.dataset.sellerAccountId; // Fix: Access chatSellerAccountId from dataset
-            console.log('결제버튼 클릭 - chatSellerAccountId:', chatSellerAccountId);
             const quantity = 1;
             const productId = product.productId;
             const payUrl = contextPath + '/order/pay'
@@ -801,7 +799,7 @@ function connectAndSubscribe(currentRoomId) {
             isConnected = true;
             subscribeRoom(currentRoomId);
             enableChatInput(true);
-            //subscribeNotifications(); // 알림 구독
+            subscribeNotifications(); // 알림 구독
             console.log("[DEBUG] enableChatInput(true) called");
              
         });
@@ -812,7 +810,7 @@ function connectAndSubscribe(currentRoomId) {
         }
         subscribeRoom(currentRoomId);
         enableChatInput(true);
-        //subscribeNotifications(); // 알림 구독
+        subscribeNotifications(); // 알림 구독
         console.log("[DEBUG] enableChatInput(isConnected) called", isConnected);
     }
 }
@@ -892,7 +890,7 @@ function subscribeRoom(currentRoomId) {
 function subscribeNotifications() {
 	 stompClient.subscribe('/topic/notification', function(notification) {
     const data = JSON.parse(notification.body);
-
+    if (notificationSubscription) return; // 이미 구독 중이면 재구독 방지
     // receiverAccountId가 로그인된 사용자와 같을 때만 표시
     if (String(data.receiverAccountId) !== String(loginUserId)) {
       return;
@@ -1000,11 +998,7 @@ function sendMessage(currentRoomId) {
     const message = input.value;
     if (!stompClient || !isConnected) return;
     if (!message.trim() || !currentRoomId) return;
-    if (!stompClient || !isConnected) return;
  
-    
-    if (!message.trim() || !currentRoomId) return;
-
     // 버튼에서 값 추출
     let productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
     let productSellerAccountId = document.querySelector('#pay-btn')?.dataset.sellerAccountId;

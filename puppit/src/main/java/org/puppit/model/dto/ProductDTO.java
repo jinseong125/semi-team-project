@@ -37,7 +37,8 @@ public class ProductDTO {
 
     private ProductImageDTO   thumbnail;  // 썸네일 1장
     
-  
+    private boolean wished;  // 현재 로그인 사용자가 찜했는지 여부
+
 
 
     

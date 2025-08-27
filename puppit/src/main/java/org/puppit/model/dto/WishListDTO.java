@@ -1,5 +1,7 @@
 package org.puppit.model.dto;
 
+import java.sql.Timestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,5 +20,6 @@ public class WishListDTO {
   private Integer wishListId;
   private Integer userId;
   private Integer productId;
+  private Timestamp createdAt;
 
 }
