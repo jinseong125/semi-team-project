@@ -437,19 +437,12 @@ document.addEventListener("DOMContentLoaded", function() {
 	  console.log("loginUserId:", window.loginUserId, "userId:", window.userId);
 
 	  // 웹소켓 커넥션 및 알림 구독: 항상 활성화!
-	  if (!window.stompClient || !window.stompClient.connected) {
-	    console.log("Connecting websocket...");
-	    const socket = new SockJS(window.contextPath + '/ws-chat');
-	    window.stompClient = Stomp.over(socket);
-	    window.stompClient.connect({}, function(frame) {
-	      window.isConnected = true;
-	      console.log("STOMP connected!", frame);
-	      subscribeNotifications();
-	    });
-	  } else {
-	    console.log("Websocket already connected, subscribing notifications...");
-	    subscribeNotifications();
-	  }
+	  
+  // 웹소켓 커넥션 및 알림 구독: 항상 활성화!
+  if (!window.stompClient || !window.stompClient.connected) {
+    console.log("Connecting websocket...");
+    connectSocket();
+  }
 	  
 	  
 	  //alarmArea = document.getElementById("alarmArea");
@@ -612,6 +605,10 @@ document.addEventListener("DOMContentLoaded", function() {
 	function subscribeNotifications() {
 		  console.log('subscribeNotifications 호출됨!');
 		  if (window.notificationSubscription) return;
+		  if (!window.stompClient || !window.stompClient.connected) {
+		    console.warn('STOMP 연결이 아직 안 됐습니다!');
+		    return;
+		  }
 		  window.notificationSubscription = window.stompClient.subscribe('/topic/notification', function(notification) {
 		    const data = JSON.parse(notification.body);
 		    console.log('알림 메시지 도착:', notification);
@@ -705,70 +702,73 @@ document.addEventListener("DOMContentLoaded", function() {
 
 //1. 웹소켓 연결 및 구독 (알림+채팅 모두)
 	function connectSocket() {
-	    console.log("connectSocket called");
+  console.log("connectSocket called");
 
-	    // SockJS + STOMP 연결
-	    var socket = new SockJS(contextPath + '/ws-chat');
-	    stompClient = Stomp.over(socket);
+  var socket = new SockJS(contextPath + '/ws-chat');
+  stompClient = Stomp.over(socket);
 
-	    stompClient.connect({}, function(frame) {
-	        console.log("STOMP connected:", frame);
+  stompClient.connect({}, function(frame) {
+    console.log("STOMP connected:", frame);
 
-	        // =========================
-	        // 1️⃣ 알림 메시지 구독
-	        // =========================
-	        stompClient.subscribe('/topic/notification', function(msg) {
-	            console.log('notification msg:', msg);
-	            let notification = JSON.parse(msg.body);
-	            console.log('notification parsed:', notification);
+    // 알림 메시지 구독
+    stompClient.subscribe('/topic/notification', function(msg) {
+      let notification = JSON.parse(msg.body);
+      console.log('notification parsed:', notification);
 
-	            // 수신자가 로그인 사용자와 다르면 무시
-	            if (String(notification.receiverAccountId) !== String(loginUserId)) {
-	                return;
-	            }
+      // 1. 수신자가 로그인 사용자일 때만!
+      if (String(notification.receiverAccountId) !== String(loginUserId)) {
+        return;
+      }
 
-	            // 채팅방에 접속 중이 아닐 때만 알림
-	            if (String(currentChatRoomId) !== String(notification.roomId)) {
-	                console.log('currentChatRoomId:', currentChatRoomId);
-	                showAlarmPopup([notification]);
+      // 2. 채팅방에 접속 중이 아닐 때만 unreadCount fetch!
+      if (String(currentChatRoomId) !== String(notification.roomId)) {
+        console.log('채팅방에 접속 중이 아니므로 unreadCount fetch 요청');
+        fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
+          .then(res => res.json())
+          .then(unreadCounts => {
+            console.log('unreadCounts: ', unreadCounts);
+            updateUnreadBadges(unreadCounts);
+          });
+        showAlarmPopup([notification]);
+        const alarmBell = document.getElementById("alarmBell");
+        if (alarmBell) {
+          alarmBell.classList.add('red');
+          alarmBell.style.display = "inline-block";
+        }
+      } else {
+        showAlarmPopup([notification]);
+      }
+    });
 
-	                const alarmBell = document.getElementById("alarmBell");
-	                if (alarmBell) {
-	                    alarmBell.classList.add('red');
-	                    alarmBell.style.display = "inline-block";
-	                }
-	            }
-	        });
+    // 채팅 메시지 구독
+    stompClient.subscribe('/topic/chat', function(msg) {
+      console.log("chat message received:", msg);
+      let chat = JSON.parse(msg.body);
+      console.log('chat parsed:', chat);
 
-	        // =========================
-	        // 2️⃣ 채팅 메시지 구독
-	        // =========================
-	        stompClient.subscribe('/topic/chat', function(msg) {
-	            console.log("chat message received:", msg);
-	            let chat = JSON.parse(msg.body);
-	            console.log('chat parsed:', chat);
+      if (String(chat.chatReceiverAccountId) !== String(loginUserId)) {
+        return;
+      }
 
-	            // 메시지 수신자가 로그인 사용자일 때만 처리
-	            if (String(chat.chatReceiverAccountId) !== String(loginUserId)) {
-	                return;
-	            }
+      // 2. 채팅방 목록(room list)도 항상 업데이트 (접속 여부와 상관없이)
+      // (이 함수는 채팅방 목록 UI의 해당 roomId의 마지막 메시지, 미리보기 등 업데이트)
+      window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage);
+      
+      
+      if (String(currentChatRoomId) !== String(chat.chatRoomId)) {
+        alarmClosed = false;
+        localStorage.setItem('puppitAlarmClosed', 'false');
+        showAlarmPopup([chat]);
+        const alarmBell = document.getElementById("alarmBell");
+        if (alarmBell) {
+          alarmBell.classList.add('red');
+          alarmBell.style.display = "inline-block";
+        }
+      }
+    });
+  });
+}
 
-	            // 채팅방에 접속 중이 아닐 때만 알림
-	            if (String(currentChatRoomId) !== String(chat.chatRoomId)) {
-	                alarmClosed = false; // 실시간 알림이 오면 false
-	                localStorage.setItem('puppitAlarmClosed', 'false');
-
-	                showAlarmPopup([chat]);
-
-	                const alarmBell = document.getElementById("alarmBell");
-	                if (alarmBell) {
-	                    alarmBell.classList.add('red');
-	                    alarmBell.style.display = "inline-block";
-	                }
-	            }
-	        });
-	    });
-	}
 //접속자 관리 함수 (채팅방 입장/퇴장시 호출)
 	function setUserInRoom(roomId, role) {
 		if (!activeRooms[roomId]) activeRooms[roomId] = { buyer: false, seller: false };
@@ -1105,6 +1105,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		  document.querySelectorAll('.chat-room-item').forEach(function(roomElem) {
 		    var roomId = roomElem.getAttribute('data-room-id');
 		    var count = unreadCounts[roomId] || 0;
+		    console.log('count: ', count);
 		    let badge = roomElem.querySelector('.unread-badge');
 		    if (!badge) {
 		      badge = document.createElement('span');
