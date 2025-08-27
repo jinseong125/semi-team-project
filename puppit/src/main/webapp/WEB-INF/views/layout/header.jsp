@@ -535,6 +535,8 @@ document.addEventListener("DOMContentLoaded", function() {
 	      const selected = this.value;
 	      if (selected && selected !== "카테고리") {
 	        loadCategory(selected);
+	        // 헤더 -> 메인에게 알림 보냄
+	        applyFilter({category: selected, q: ''});
 	      }
 	    });
 	  }
