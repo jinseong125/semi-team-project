@@ -89,12 +89,16 @@ public class UserController {
   
   // 로그인 폼 보여주기
   @GetMapping("/login")
-  public String loginForm() {
+  public String loginForm(Model model) {
+    String kakaoApiKey = "79176a8cb995f6cf89985b3657377b24";
+    String kakaoRedirectUri = "http://localhost:8080/puppit/auth/kakao/callback";
+    model.addAttribute("kakaoApiKey", kakaoApiKey);
+    model.addAttribute("redirectUri", kakaoRedirectUri);
     return "user/login";
   }
   // 로그인
   @PostMapping("/login")
-  public String login(UserDTO user, HttpSession session, RedirectAttributes redirectAttr, HttpServletRequest request) {
+  public String login( UserDTO user, HttpSession session, RedirectAttributes redirectAttr, HttpServletRequest request) {
     try {
       UserDTO loginResult = userService.login(user);
 

@@ -105,6 +105,18 @@
       <div>아이디/비밀번호를 잊으셨나요? <a href="${contextPath}/user/find">아이디/비밀번호 찾기</a></div>
       <div>Puppit이 처음이신가요? <a href="${contextPath}/user/signup">회원가입 하기</a></div>
     </div>
+    
+    <div>
+      <c:url var="kakaoAuth" value="https://kauth.kakao.com/oauth/authorize">
+          <c:param name="client_id" value="${kakaoApiKey}"/>
+          <c:param name="redirect_uri" value="${redirectUri}"/>
+          <c:param name="response_type" value="code"/>
+         <c:param name="scope" value="profile_nickname,profile_image"/>
+      </c:url>
+      <a href="${kakaoAuth}">
+        <img src="${contextPath}/resources/image/kakao-login-medium-wide.png" alt="카카오로그인" style="display: block; margin: 0 auto;"/>
+      </a>
+    </div>
   </section>
 </main>
 
@@ -115,7 +127,7 @@
   (function adjustMain(){
     var headerContainer = document.querySelector('.site-header .container');
     var main = document.getElementById('siteMain');
-    if (!main) return;
+    if (!main) return
     var headerHeight = headerContainer ? Math.ceil(headerContainer.getBoundingClientRect().height) : 0;
     main.style.minHeight = 'calc(100vh - ' + headerHeight + 'px)';
   })();
