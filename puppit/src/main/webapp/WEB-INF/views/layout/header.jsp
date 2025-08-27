@@ -781,16 +781,23 @@ document.addEventListener("DOMContentLoaded", function() {
       let chat = JSON.parse(msg.body);
       console.log('chat parsed:', chat);
 
-      if (String(chat.chatReceiverAccountId) !== String(loginUserId)) {
-        return;
+   // receiver 또는 sender 모두 자신의 채팅방 목록 업데이트!
+      if (
+        String(chat.chatReceiverAccountId) === String(loginUserId) ||
+        String(chat.chatSenderAccountId) === String(loginUserId)
+      ) {
+    	console.log("chatSenderAccountId: ", chat.chatSenderAccountId);
+        window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage, chat.chatCreatedAt);
       }
+
 
       // 2. 채팅방 목록(room list)도 항상 업데이트 (접속 여부와 상관없이)
       // (이 함수는 채팅방 목록 UI의 해당 roomId의 마지막 메시지, 미리보기 등 업데이트)
-      window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage);
+      //window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage);
       
       
-      if (String(currentChatRoomId) !== String(chat.chatRoomId)) {
+      if (String(currentChatRoomId) !== String(chat.chatRoomId)&&
+    		    String(chat.chatSenderAccountId) !== String(loginUserId)) {
         alarmClosed = false;
         localStorage.setItem('puppitAlarmClosed', 'false');
         showAlarmPopup([chat]);
