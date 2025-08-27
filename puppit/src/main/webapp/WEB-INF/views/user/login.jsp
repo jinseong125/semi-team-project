@@ -107,8 +107,14 @@
     </div>
     
     <div>
-      <a href="https://kauth.kakao.com/oauth/authorize?client_id=${kakaoApiKey}&redirect_uri=${redirectUri}">
-        <img src="${contextPath}/resources/image/kakao-login-medium-wide.png" alt="카카오로그인"/>
+      <c:url var="kakaoAuth" value="https://kauth.kakao.com/oauth/authorize">
+          <c:param name="client_id" value="${kakaoApiKey}"/>
+          <c:param name="redirect_uri" value="${redirectUri}"/>
+          <c:param name="response_type" value="code"/>
+         <c:param name="scope" value="profile_nickname,profile_image"/>
+      </c:url>
+      <a href="${kakaoAuth}">
+        <img src="${contextPath}/resources/image/kakao-login-medium-wide.png" alt="카카오로그인" style="display: block; margin: 0 auto;"/>
       </a>
     </div>
   </section>
