@@ -51,7 +51,7 @@ public class KakaoLoginAPIController {
       // 3) DB upsert -> 우리 서비스 UserDTO (비번 없음)
       UserDTO loginResult = kakaoLoginService.upsertAndGetUser(userInfo);
 
-      if (loginResult == null) {
+      if(loginResult == null) {
         redirectAttr.addFlashAttribute("error", "카카오 로그인에 실패했습니다.");
         return "redirect:/user/login";
       }
