@@ -13,7 +13,10 @@
   <delete id="deleteWishListByUserAndProduct">
     DELETE FROM wishlist
     WHERE user_id = #{userId}
-    AND product_id = #{productId}
+    AND product_id IN
+    <foreach collection="productIds" item="p" open="(" separator= "," close=")">
+      #{p}
+    </foreach>
   </delete>
   
   <delete id="deleteAllWishListByUser">
@@ -46,12 +49,16 @@
         p.product_id,      
         p.product_name,    
         p.product_price,           
-        img.image_url 
+        img.image_url,
+        p.product_created_at,
+        l.region
       FROM wishlist w
       JOIN product p ON p.product_id = w.product_id
       LEFT JOIN product_image img 
              ON img.product_id = p.product_id
             AND img.is_thumbnail = 1
+      LEFT JOIN location l 
+             ON l.location_id = p.location_id
       WHERE w.user_id = #{userId}
       ORDER BY w.created_at DESC
   </select>

@@ -32,6 +32,7 @@ public class ProductAndImageDTO {
   private String imageUrl;
   private String imageKey;
   private boolean thumbnail;
+  private String region;
   
   
   

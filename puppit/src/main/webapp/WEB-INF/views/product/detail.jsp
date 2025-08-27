@@ -143,7 +143,7 @@ if (sessionMap != null) {
 /* 찜 버튼 */
 .wish-btn { border:0; background:transparent; cursor:pointer; }
 .wish-btn .on { display:none; }
-.wish-btn.is-on .on { display:inline; }
+.wish-btn.is-on .on { display:inline; color: #d94164}
 .wish-btn.is-on .off { display:none; }
 .wish-btn {
   display:inline-flex;

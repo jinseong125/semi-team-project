@@ -74,10 +74,10 @@
   
   <!-- 유저 정보 수정 -->
   <update id="updateUser" parameterType="Map">
-    UPDATE user
+    UPDATE `user`
     SET user_name  = #{user.userName},
         user_email = #{user.userEmail},
-        nick_name  = #{user.nickName},
+        nick_name  = #{user.nickName}
     WHERE account_id = #{prevAccountId}
   </update>
 

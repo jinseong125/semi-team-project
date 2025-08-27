@@ -90,6 +90,16 @@ body {
   font-size: 12px;
 }
 
+.review {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-weight: 800;
+  font-size: 12px;
+}
+
 /* 선택: 상태 값에 따른 색상(원하는 값만 추가해서 사용) */
 .badge-status[data-status="PAID"],
 .badge-status[data-status="COMPLETED"],
@@ -140,6 +150,7 @@ body {
               <th>구매자</th>
               <th>판매자</th>
               <th>상태</th>
+              <th>후기</th>
             </tr>
           </thead>
           <tbody>
@@ -155,6 +166,11 @@ body {
                     <span class="badge-status" data-status="${tradeDTO.status}">
                       ${tradeDTO.status}
                     </span>
+                  </td>
+                  <td>
+                    <a href="${contextPath}/review/form?buyerId=${tradeDTO.buyerId}&sellerId=${tradeDTO.sellerId}&productId=${tradeDTO.productId}">
+                      <span class="review">후기 작성</span>
+                    </a>
                   </td>
                 </tr>
               </c:if>

@@ -105,77 +105,113 @@
 </form>
 </div>
 
-  
 <script type="text/javascript">
+  // 원래 값(서버에서 내려준 값 그대로)
+  const originalNick  = "${sessionScope.sessionMap.nickName}";
+  const originalEmail = "${sessionScope.sessionMap.userEmail}";
 
-  let nicknameChecked = false;
-  let emailChecked = false;
+  const $nick   = document.getElementById("nickName");
+  const $email  = document.getElementById("userEmail");
+  const $btnNick= document.getElementById("checkNickNameBtn");
+  const $btnMail= document.getElementById("checkEmailBtn");
+  const $submit = document.getElementById("btn-submit");
 
+  // 현재 값이 원래 값이면 이미 통과로 간주
+  let nicknameChecked = ($nick.value.trim()  === (originalNick  ?? "").trim());
+  let emailChecked    = ($email.value.trim() === (originalEmail ?? "").trim());
 
-  // 닉네임 중복 검사
-  document.getElementById("checkNickNameBtn").addEventListener("click", function(e) {
-  // 빈 문자 입력
-  const nickName = document.getElementById("nickName").value.trim();
-  if(!nickName) {
-    alert("닉네임을 입력 해주세요");
-    return;
-  }
-  // 닉네임 형식 (정규식 검사) 한글,영문,숫자 최소 4~8자리
-  const isRegex = /^[A-Za-z0-9\uAC00-\uD7A3]{4,8}$/;
-  if(!isRegex.test(nickName)) {
-    alert("닉네임 형식이 올바르지 않습니다");
-    return false;
-  }
-     fetch("${contextPath}/user/check?nickName=" + nickName)
-       .then(response => {
-          if(response.status === 200) {
-            alert('사용 가능한 닉네임 입니다.');
-            nicknameChecked = true;
-            return;
-        } else if(response.status === 409) {
-            alert('중복된 닉네임 입니다.');
-            return;
-        }
-     })
-  })
-  // 이메일 중복 검사
-  document.getElementById("checkEmailBtn").addEventListener("click", function(e) {
-    const userEmail = document.getElementById("userEmail").value.trim();
-    if(!userEmail) {
-      alert("이메일을 입력 해주세요");
+  // 유효성 정규식
+  const reNick  = /^[A-Za-z0-9\uAC00-\uD7A3]{4,8}$/;
+  const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // 입력이 변경되면 “검사 필요” 상태로 전환 (단, 원래 값으로 되돌리면 다시 통과)
+  $nick.addEventListener("input", () => {
+    const v = $nick.value.trim();
+    nicknameChecked = (v === (originalNick ?? "").trim());
+  });
+
+  $email.addEventListener("input", () => {
+    const v = $email.value.trim();
+    emailChecked = (v === (originalEmail ?? "").trim());
+  });
+
+  // 닉네임 중복검사
+  $btnNick.addEventListener("click", async () => {
+    const nick = $nick.value.trim();
+    if (!nick) { alert("닉네임을 입력 해주세요"); return; }
+
+    // 원래 값이면 검사 없이 통과
+    if (nick === (originalNick ?? "").trim()) {
+      nicknameChecked = true;
+      alert("현재 사용 중인 닉네임입니다. 사용 가능합니다.");
       return;
     }
-    // 이메일 정규식 검사
-    const isRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if(!isRegex.test(userEmail)) {
-      alert("이메일 형식이 올바르지 않습니다");
-      return;
-    }
-    
-    fetch("${contextPath}/user/check?userEmail=" + userEmail)
-    .then(response => {
-      if(response.status === 200) {
-        alert('사용 가능한 이메일 입니다');
-        emailChecked = true;
-        return;
-      } else if(response.status === 409) {
-        alert('중복된 이메일 입니다');
-        return;
+
+    if (!reNick.test(nick)) { alert("닉네임 형식이 올바르지 않습니다 (한글/영문/숫자 4~8자)"); return; }
+
+    try {
+      const res = await fetch(`${"${contextPath}"}/user/check?nickName=${encodeURIComponent(nick)}`);
+      if (res.status === 200) {
+        nicknameChecked = true;
+        alert("사용 가능한 닉네임입니다.");
+      } else if (res.status === 409) {
+        nicknameChecked = false;
+        alert("중복된 닉네임입니다.");
+      } else {
+        nicknameChecked = false;
+        alert("닉네임 확인 중 오류가 발생했습니다.");
       }
-     })
-  })
-  
-  document.getElementById("btn-submit").addEventListener("click", e => {
-	  if(!nicknameChecked || !emailChecked) {
-		  if(!nicknameChecked) {
-			  alert("닉네임 중복확인을 해주세요")
-		  }
-		  else if(!emailChecked) {
-			  alert("이메일 중복확인을 해주세요")
-		  }
-		  e.preventDefault();
-	  }
-  })
+    } catch(e) {
+      nicknameChecked = false;
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  });
+
+  // 이메일 중복검사
+  $btnMail.addEventListener("click", async () => {
+    const mail = $email.value.trim();
+    if (!mail) { alert("이메일을 입력 해주세요"); return; }
+
+    // 원래 값이면 검사 없이 통과
+    if (mail === (originalEmail ?? "").trim()) {
+      emailChecked = true;
+      alert("현재 사용 중인 이메일입니다. 사용 가능합니다.");
+      return;
+    }
+
+    if (!reEmail.test(mail)) { alert("이메일 형식이 올바르지 않습니다"); return; }
+
+    try {
+      const res = await fetch(`${"${contextPath}"}/user/check?userEmail=${encodeURIComponent(mail)}`);
+      if (res.status === 200) {
+        emailChecked = true;
+        alert("사용 가능한 이메일입니다.");
+      } else if (res.status === 409) {
+        emailChecked = false;
+        alert("중복된 이메일입니다.");
+      } else {
+        emailChecked = false;
+        alert("이메일 확인 중 오류가 발생했습니다.");
+      }
+    } catch(e) {
+      emailChecked = false;
+      alert("네트워크 오류가 발생했습니다.");
+    }
+  });
+
+  // 제출: “변경된 항목만” 검사 완료 요구
+  $submit.addEventListener("click", (e) => {
+    const nickChanged  = $nick.value.trim()  !== (originalNick  ?? "").trim();
+    const emailChanged = $email.value.trim() !== (originalEmail ?? "").trim();
+
+    if ((nickChanged && !nicknameChecked) || (emailChanged && !emailChecked)) {
+      e.preventDefault();
+      if (nickChanged && !nicknameChecked)  alert("닉네임 중복확인을 해주세요.");
+      else if (emailChanged && !emailChecked) alert("이메일 중복확인을 해주세요.");
+    }
+  });
 </script>
+  
+
 </body>
 </html>
