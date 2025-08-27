@@ -86,7 +86,7 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
         .chat-profile-img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 1.5px solid #eee; background: #fafafa; display: flex; justify-content: center; align-items: center; font-size: 28px; color: #bbb; }
         .chat-info-area { flex: 1 1 0; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
         .chat-nickname { font-size: 18px; font-weight: 700; color: #222; margin-bottom: 2px; letter-spacing: -0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .chat-message { font-size: 15px; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+        .chat-message { font-size: 15px; color: #444; white-space: normal; overflow: visible; text-overflow: initial; max-width: none; }
         .chat-meta { display: flex; flex-direction: column; align-items: flex-end; min-width: 90px; gap: 8px; }
         .chat-time { font-size: 14px; color: #757575; font-weight: 400; }
         .chat-unread-badge { display: inline-block; width: 22px; height: 22px; line-height: 20px; font-size: 15px; background: #fff; color: #e74c3c; border: 2px solid #e74c3c; border-radius: 50%; text-align: center; font-weight: 700; margin-top: 2px; margin-right: 5px; }
@@ -190,6 +190,15 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     transition: right 1s;
+}
+
+
+.chat-last-time {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+  max-width: none;
+  display: inline;         /* 시간 옆에 붙게 */
 }
     </style>
 </head>
@@ -1108,7 +1117,7 @@ function sendMessage(currentRoomId) {
 }
 
 function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
-	 console.log('[updateChatListLastMessage] roomId:', roomId, 'chatMessage:', chatMessage);
+	 console.log('[updateChatListLastMessage] roomId:', roomId, 'chatMessage:', chatMessage, 'chatCreatedAt:', chatCreatedAt);
 	 var chatRenderArea = document.getElementById('chatListRenderArea');
 	  if (!chatRenderArea) {
 	    console.warn('chatListRenderArea not found!');
@@ -1127,7 +1136,7 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	  
 	  // 시간 표시
 	  var timeText = chatCreatedAt ? formatTimestamp(chatCreatedAt) : "";
-	  console.log('timeText: ', timeText);
+	  console.log('updateChatListLastMessage() - timeText: ', timeText);
 	  
 	  // 시간 영역(span)이 이미 있으면 업데이트, 없으면 새로 생성
 	  var timeSpan = msgDiv.querySelector('.chat-last-time');
@@ -1148,6 +1157,8 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	}
 
 	function formatTimestamp(ts) {
+	  console.log('formatTimestamp() - ts: ', ts);
+		
 	  if (!ts) return '';
 	  // ts가 숫자면 그대로, 문자열이면 파싱
 	  let d = typeof ts === "number" ? new Date(ts) : new Date(Number(ts));
@@ -1164,9 +1175,21 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	  let hh = hours % 12;
 	  hh = hh === 0 ? 12 : hh;
 	  hh = String(hh).padStart(2, '0');
+	  
+	  console.log('formatTimestamp() - yyyy: ', yyyy);
+	  console.log('formatTimestamp() - mm: ', mm);
+	  console.log('formatTimestamp() - dd: ', dd);
+	  console.log('formatTimestamp() - hh: ', hh);
+	  console.log('formatTimestamp() - ampm: ', ampm);
+	  console.log('formatTimestamp() - minutes: ', minutes);
+	  console.log('formatTimestamp() - seconds: ', seconds);
+	  
+	  
+	  
+	  
 
-	  // "yyyy-MM-dd a hh:mm:ss"
-	  return `${yyyy}-${mm}-${dd} ${ampm} ${hh}:${minutes}:${seconds}`;
+	  // 문자열 연결로 반환
+	  return yyyy + '-' + mm + '-' + dd + ' ' + ampm + ' ' + hh + ':' + minutes + ':' + seconds;
 	}
 
 
