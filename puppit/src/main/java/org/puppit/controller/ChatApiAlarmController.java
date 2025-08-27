@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.puppit.model.dto.AlarmReadDTO;
 import org.puppit.model.dto.NotificationDTO;
 import org.puppit.model.dto.UserDTO;
+import org.puppit.repository.UserDAO;
 import org.puppit.service.ChatAlarmService;
 import org.puppit.service.ChatService;
 import org.puppit.service.UserService;
@@ -35,6 +36,7 @@ public class ChatApiAlarmController {
 	private final ChatService chatService;
 	private final ChatAlarmService alarmService;
 	private final UserService userService;
+	private final UserDAO userDAO;
 	
 	
 	@GetMapping(value = "/alarm",  produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,8 +51,9 @@ public class ChatApiAlarmController {
 	@ResponseBody
 	public ResponseEntity<?> readAlarm(@RequestBody AlarmReadDTO alarmReadDTO) {
 	    try {
+	    	System.out.println("AlarmReadDTO: "+ alarmReadDTO.toString());
 	        System.out.println("messageId: " + alarmReadDTO.getMessageId());
-	        UserDTO user = userService.getUserId(alarmReadDTO.getChatReceiver());
+	        UserDTO user = userDAO.getUserByUserId(alarmReadDTO.getChatReceiver());
 	        if (user == null) {
 	            Map<String, Object> result = new HashMap<>();
 	            result.put("result", "fail");

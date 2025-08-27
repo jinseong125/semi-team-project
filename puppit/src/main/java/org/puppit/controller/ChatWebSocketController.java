@@ -171,6 +171,8 @@ public class ChatWebSocketController {
         notification.setProductName(chatService.getProductNameById(productId));
         notification.setMessageId(Integer.parseInt(chatMessageDTO.getMessageId())); // 메시지 고유 ID 사용
         notification.setIsRead(1);
+        notification.setChatSender(chatMessageDTO.getChatSender());
+        notification.setChatReceiver(chatMessageDTO.getChatReceiver());
 
         Integer alarmInsertRowId = chatService.saveAlarmData(notification);
         System.out.println("메시지 알림 저장 성공: " + alarmInsertRowId);

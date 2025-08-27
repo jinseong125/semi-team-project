@@ -14,7 +14,7 @@ import lombok.ToString;
 public class AlarmReadDTO {
 	private Integer roomId;
 	private Integer userId;
-	private String chatReceiver;
+	private Integer chatReceiver;
 	private Integer chatReceiverUserId;
 	private Integer messageId;
 }

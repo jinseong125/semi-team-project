@@ -287,7 +287,7 @@ border-bottom:1px solid #f3f3f3;
         <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
         <a href="${contextPath}/user/mypage">마이페이지</a>
 
-        <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
+        <button id="alarmBell" style="background:none;border:none;display:inline-block;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
           <i class="fa-regular fa-bell"></i>
        </button>
 
@@ -623,12 +623,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
 		    // 1. /chat/recentRoomList가 아닌 경우 무조건 알림 팝업
 		       if (window.location.pathname.indexOf("/chat/recentRoomList") === -1) {
-		           displayNotification(data.senderAccountId,
+		           displayNotification(
+		        		   data.roomId,
+		        		   data.chatReceiver,
+		        		   data.chatSender,
+		        		   data.senderAccountId,
 		                   data.chatMessage,
 		                   data.senderRole,
 		                   data.chatCreatedAt,
 		                   data.productName,
-		                   data.receiverAccountId);
+		                   data.receiverAccountId,
+		                   data.messageId);
+		           
 		           
 		       }
 
@@ -637,12 +643,17 @@ document.addEventListener("DOMContentLoaded", function() {
 		           window.location.pathname !== "/chat/recentRoomList" ||
 		           String(currentRoomId) !== String(data.roomId)
 		       ) {
-		           displayNotification( data.senderAccountId,
+		           displayNotification( 
+		        		   data.roomId,
+		        		   data.chatReceiver,
+		        		   data.chatSender,
+		        		   data.senderAccountId,
 		                   data.chatMessage,
 		                   data.senderRole,
 		                   data.chatCreatedAt,
 		                   data.productName,
-		                   data.receiverAccountId);
+		                   data.receiverAccountId,
+		                   data.messageId);
 		       }
 
 		  });
@@ -650,41 +661,45 @@ document.addEventListener("DOMContentLoaded", function() {
 	
 	
 
-	function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName, receiverAccountId) {
+	function displayNotification(roomId, chatReceiver, chatSender, senderAccountId, chatMessage, senderRole, chatCreatedAt, productName, receiverAccountId, messageId) {
+	  console.log('header - roomId: ', roomId);
 	  console.log('header - senderAccountId: ', senderAccountId);
 	  console.log('header - chatMessage: ', chatMessage);
 	  console.log('header - senderRole: ', senderRole);
 	  console.log('header - chatCreatedAt: ', chatCreatedAt);
 	  console.log('header - productName: ', productName);
 	  console.log('header - receiverAccountId: ', receiverAccountId);
+	  console.log('header - chatSender: ', chatSender);
+	  console.log('header - chatReceiver: ', chatReceiver);
+	  console.log('header - messageId: ', messageId);
 
-	  const notification = document.createElement('div');
-	  notification.className = 'notification';
+	 
+	   // 알림 객체 생성 (showAlarmPopup에서 요구하는 구조와 유사하게)
+	  const alarm = {
+	    roomId: roomId, // roomId가 있으면 넣어주세요 (없으면 null로)
+	    messageId: messageId,
+	    chatMessage: chatMessage,
+	    productName: productName,
+	    chatSender: chatSender,
+	    chatReceiver: chatReceiver,
+	    chatCreatedAt: chatCreatedAt,
+	    senderAccountId: senderAccountId,
+	    receiverAccountId: receiverAccountId,
+	    messageCreatedAt: chatCreatedAt || new Date().toISOString(),
+	  };
+	
+	  // 팝업 알림 UI로 표시 (showAlarmPopup 함수 사용)
+	  showAlarmPopup([alarm]);
+	 
+	 
 
-	  notification.innerHTML =
-	      '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>' +
-	      '<ul>' +
-	          '<li>' +
-	              '<a href="javascript:void(0);" ' +
-	              'class="alarm-link" ' +
-	              'data-chat-message="' + (chatMessage || '').replace(/"/g, '&quot;') + '">' +
-	              '<b>새 메시지:</b> ' + (chatMessage || '') +
-	              ' <span style="color:#aaa;">(' + (productName || '') + ')</span>' +
-	              ' <span style="color:#888;">' + (chatCreatedAt || '') + '</span>' +
-	              '<br><span style="font-size:13px;">From: ' + (senderAccountId || '') + ' | To: ' + (receiverAccountId || '') + '</span>' +
-	              '</a>' +
-	          '</li>' +
-	      '</ul>';
+	 // setTimeout(() => {
+	  //    notification.style.right = '20px';
+	 // }, 100);
 
-	  document.body.appendChild(notification);
-
-	  setTimeout(() => {
-	      notification.style.right = '20px';
-	  }, 100);
-
-	  setTimeout(() => {
-	      notification.remove();
-	  }, 120000);
+	//  setTimeout(() => {
+	//      notification.remove();
+	//  }, 120000);
 	}
 	
 	
@@ -801,10 +816,15 @@ document.addEventListener("DOMContentLoaded", function() {
 	  // 중복 메시지 제거만 수행 (receiver 체크는 이미 filteredAlarm에서 처리)
 	  const msgIdSet = new Set();
 	  const deduped = alarms.filter((alarm) => {
-	    if (!alarm || !alarm.roomId || !alarm.messageId) return false;
-	    if (msgIdSet.has(alarm.messageId)) return false;
-	    msgIdSet.add(alarm.messageId);
-	    return true;
+	  if (!alarm || !alarm.roomId || !alarm.messageId) return false;
+	  if (msgIdSet.has(alarm.messageId)) return false;
+	  if (typeof alarm.chatReceiverUserId === 'undefined' || alarm.chatReceiverUserId === null) {
+		  if (typeof alarm.chatReceiver !== 'undefined' && alarm.chatReceiver !== null) {
+		      alarm.chatReceiverUserId = alarm.chatReceiver;
+		    }
+	  }
+	  msgIdSet.add(alarm.messageId);
+	   return true;
 	  });
 	  // deduped 결과도 찍기
 	  console.log('deduped:', deduped);
@@ -812,7 +832,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	  // === 팝업 UI용 roomId별로 그룹화 및 집계 ===
 	  // { roomId: { alarms: [], lastAlarm: {}, count: N } }
  	  const roomGroups = {};
-		deduped.forEach(alarm => {
+ 	 deduped.forEach(alarm => {
 		  const roomId = alarm.roomId;
 		  if (!roomGroups[roomId]) {
 		    roomGroups[roomId] = { alarms: [], lastAlarm: null };
@@ -846,16 +866,29 @@ document.addEventListener("DOMContentLoaded", function() {
 	  var html = '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button><ul>';
 	  Object.values(roomGroups).forEach(group => {
 	    const alarm = group.lastAlarm;
+	    console.log('안읽은 메시지: ', group.count);
+	    // 안전하게 문자열 변환
+	    let safeChatMessage = '';
+	    if (typeof alarm.chatMessage === 'string') {
+	      safeChatMessage = alarm.chatMessage;
+	    } else if (alarm.chatMessage == null) {
+	      safeChatMessage = '';
+	    } else {
+	      safeChatMessage = String(alarm.chatMessage);
+	    }
+	    
+	    
+	    
 	    html += '<li>'
 	      + '<a href="javascript:void(0);" '
 	      + 'class="alarm-link" '
 	      + 'data-room-id="' + alarm.roomId + '" '
 	      + 'data-message-id="' + (alarm.messageId || '') + '" '
-	      + 'data-chat-message="' + (alarm.chatMessage || '').replace(/"/g, '&quot;') + '" '
+	      + 'data-chat-message="' + safeChatMessage.replace(/"/g, '&quot;') + '" '
 	      + '>'
-	      + '<b>새 메시지:</b> ' + (alarm.chatMessage || '')
+	      + '<b>새 메시지:</b> ' + safeChatMessage
 	      + ' <span style="color:#aaa;">(' + (alarm.productName || '') + ')</span>'
-	      + ' <span style="color:#888;">' + (alarm.messageCreatedAt || '') + '</span>';
+	      + ' <span style="color:#888;">' + formatTimestamp(alarm.chatCreatedAt)  + '</span>';
 	      
 	      // 여기서 group.count가 2 이상이면 표시
 	      if (group.count && group.count > 1) {
@@ -875,10 +908,24 @@ document.addEventListener("DOMContentLoaded", function() {
 		      var roomId = alarmLink.getAttribute('data-room-id');
 		      var chatMessage = alarmLink.getAttribute('data-chat-message');
 		      var messageId = alarmLink.getAttribute('data-message-id'); // 메시지의 고유 ID
-
+				console.log('roomId: ', roomId , ' chatMessage: ', chatMessage ,' messageId: ', messageId);
+		      
 		      // deduped[idx]가 현재 alarm 객체!
 		      var alarm = deduped[idx];
 
+		      // 추가: chatReceiver, chatReceiverUserId 가져오기
+		      var chatReceiver = alarm.chatReceiver || alarm.receiverAccountId;
+		      var chatReceiverUserId = alarm.chatReceiverUserId || alarm.userId; // userId가 receiverUserId 역할이라면
+
+		      // 로그 출력
+		          // 로그 출력
+    console.log('로그 roomId:', roomId, 
+                '로그 chatMessage:', chatMessage, 
+                '로그 messageId:', messageId, 
+                '로그 chatReceiver:', chatReceiver, 
+                '로그 chatReceiverUserId:', chatReceiverUserId);
+		      
+		      
 		      // 1. li 제거
 		      var liElem = alarmLink.closest('li');
 		      if (liElem) liElem.remove();
@@ -886,14 +933,25 @@ document.addEventListener("DOMContentLoaded", function() {
 		      // 2. 현재 클릭한 roomId에 해당하는 group.count 찾기
 		      //var groupCount = 1; // 기본값
 	    	  var groupCount = roomGroups && roomGroups[roomId] && roomGroups[roomId].count ? roomGroups[roomId].count : 1;
-
+			  console.log('groupCount: ', groupCount);
+			  
+			  
+			  
+			  
 
 		      // 3. groupCount 값에 따라 분기
 		      if (groupCount === 1) {
+		    	    console.log('groupCount === 1 roomId:', roomId, 
+		                    'groupCount === 1 chatMessage:', chatMessage, 
+		                    'groupCount === 1 messageId:', messageId, 
+		                    'groupCount === 1 chatReceiver:', chatReceiver, 
+		                    'groupCount === 1 chatReceiverUserId:', chatReceiverUserId);
+		    		      
+		    		      
 		        fetch(contextPath + '/api/alarm/read', {
 		          method: 'POST',
 		          headers: { 'Content-Type': 'application/json' },
-		          body: JSON.stringify({ roomId: roomId, userId: userId, messageId: messageId })
+		          body: JSON.stringify({ roomId: roomId, userId: userId, messageId: messageId, chatReceiver: chatReceiver,chatReceiverUserId: chatReceiverUserId   })
 		        })
 		        .then(res => {
 		          if (!res.ok) throw new Error('알림 읽음 처리 실패');
@@ -949,6 +1007,35 @@ document.addEventListener("DOMContentLoaded", function() {
 	  
 	}
 
+	function formatTimestamp(ts) {
+		  if (!ts) return '';
+		  const d = new Date(Number(ts));
+		  if (isNaN(d.getTime())) return '';
+		  // 오전/오후 구분 (a)
+		  const hours = d.getHours();
+		  const ampm = hours < 12 ? '오전' : '오후';
+		  // 0-padding 함수
+		  const pad = n => n < 10 ? '0' + n : n;
+		  return [
+		    d.getFullYear(),
+		    '-',
+		    pad(d.getMonth() + 1),
+		    '-',
+		    pad(d.getDate()),
+		    ' ',
+		    ampm,
+		    ' ',
+		    pad(hours % 12 === 0 ? 12 : hours % 12),
+		    ':',
+		    pad(d.getMinutes()),
+		    ':',
+		    pad(d.getSeconds())
+		  ].join('');
+		}
+	
+	
+	
+	
 	  function closeAlarmPopup() {
 		    //var alarmArea = document.getElementById("alarmArea");
 		    alarmArea.style.display = "none";
@@ -1012,6 +1099,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		  fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
 		    .then(res => res.json())
 		    .then(unreadCounts => {
+		    	
 		      updateUnreadBadges(unreadCounts);
 		    });
 		}
