@@ -231,15 +231,21 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
                         </div>
                          
                         <div class="chat-message">
-                            <c:choose>
-                                <c:when test="${not empty chat.lastMessage}">
-                                    <c:out value="${chat.lastMessage}" />
-                                </c:when>
-                                <c:otherwise>
-                                    상품판매자와 채팅을 시작해보세요
-                                </c:otherwise>
-                            </c:choose>
-                        </div>
+						    <span class="chat-message-text">
+						        <c:choose>
+						            <c:when test="${not empty chat.lastMessage}">
+						                <c:out value="${chat.lastMessage}" />
+						            </c:when>
+						            <c:otherwise>
+						                상품판매자와 채팅을 시작해보세요
+						            </c:otherwise>
+						        </c:choose>
+						    </span>
+						    <span class="chat-last-time" style="margin-left:8px; color:#888;">
+						        <c:out value="${chat.chatCreatedAt}" />
+						    </span>
+						</div>
+                        
                     </div>
                 </div>
             </c:forEach>
@@ -1101,7 +1107,7 @@ function sendMessage(currentRoomId) {
     input.value = "";
 }
 
-function updateChatListLastMessage(roomId, chatMessage) {
+function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	 console.log('[updateChatListLastMessage] roomId:', roomId, 'chatMessage:', chatMessage);
 	 var chatRenderArea = document.getElementById('chatListRenderArea');
 	  if (!chatRenderArea) {
@@ -1118,9 +1124,50 @@ function updateChatListLastMessage(roomId, chatMessage) {
 	    console.warn('msgDiv (.chat-message) not found in chatDiv!');
 	    return;
 	  }
+	  
+	  // 시간 표시
+	  var timeText = chatCreatedAt ? formatTimestamp(chatCreatedAt) : "";
+	  console.log('timeText: ', timeText);
+	  
+	  // 시간 영역(span)이 이미 있으면 업데이트, 없으면 새로 생성
+	  var timeSpan = msgDiv.querySelector('.chat-last-time');
+	  if (!timeSpan) {
+	    timeSpan = document.createElement('span');
+	    timeSpan.className = 'chat-last-time';
+	    timeSpan.style.marginLeft = "8px";
+	    timeSpan.style.color = "#888";
+	    msgDiv.appendChild(timeSpan);
+	  }
+	  
+	  
+	  
+	  // 마지막 메시지 시간
 	  msgDiv.textContent = chatMessage;
+	  msgDiv.appendChild(timeSpan); // 다시 붙여주기(혹시 textContent로 날아갔으면)
+	  timeSpan.textContent = timeText;
 	}
 
+	function formatTimestamp(ts) {
+	  if (!ts) return '';
+	  // ts가 숫자면 그대로, 문자열이면 파싱
+	  let d = typeof ts === "number" ? new Date(ts) : new Date(Number(ts));
+	  if (isNaN(d.getTime())) d = new Date(ts); // 혹시 ISO 포맷이면 이렇게도 시도
+	  if (isNaN(d.getTime())) return ''; // 파싱 실패
+
+	  const yyyy = d.getFullYear();
+	  const mm = String(d.getMonth() + 1).padStart(2, '0');
+	  const dd = String(d.getDate()).padStart(2, '0');
+	  let hours = d.getHours();
+	  const minutes = String(d.getMinutes()).padStart(2, '0');
+	  const seconds = String(d.getSeconds()).padStart(2, '0');
+	  const ampm = hours < 12 ? '오전' : '오후';
+	  let hh = hours % 12;
+	  hh = hh === 0 ? 12 : hh;
+	  hh = String(hh).padStart(2, '0');
+
+	  // "yyyy-MM-dd a hh:mm:ss"
+	  return `${yyyy}-${mm}-${dd} ${ampm} ${hh}:${minutes}:${seconds}`;
+	}
 
 
 //뒤로가기 버튼 기능 추가
