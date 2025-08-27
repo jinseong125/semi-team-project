@@ -323,6 +323,8 @@ a {
   </div>
 </div>
 
+<div id="search-results"></div>
+
 
   <div id="alarmArea"></div>
 
@@ -371,30 +373,38 @@ function updateHighlight(currentIndex) {
 	});
 }
 
-// 키보드 이벤트 (검색창 input에 달기)
+//===================== 키보드 이벤트 =====================
 input.addEventListener("keydown", (e) => {
   const items = autoList.querySelectorAll("li");
 
   if (e.key === "ArrowDown") {
-    e.preventDefault();  // 기본동작 막기(하이라이트 에서만 동작)
+    e.preventDefault();
     if (items.length > 0) {
-      currentIndex = (currentIndex + 1) % items.length;	// 인덱스 증가 (끝까지 가면 다시 처음으로)
+      currentIndex = (currentIndex + 1) % items.length;
       updateHighlight(currentIndex);
     }
   } else if (e.key === "ArrowUp") {
     e.preventDefault();
     if (items.length > 0) {
-      currentIndex = (currentIndex - 1 + items.length) % items.length;	// 인덱스 감소 (맨 위에서 위로 가면 맨 아래로 순환)
+      currentIndex = (currentIndex - 1 + items.length) % items.length;
       updateHighlight(currentIndex);
     }
   } else if (e.key === "Enter") {
+    e.preventDefault();
+
     if (currentIndex >= 0 && currentIndex < items.length) {
-      e.preventDefault();
-      input.value = items[currentIndex].textContent; // 엔터 시에만 검색창에 값 반영
-      search(input.value);             // 검색 실행
-      autoList.style.display = "none"; // 자동완성 리스트 닫기
-      currentIndex = -1;               // 초기화
+      // 자동완성에서 선택한 항목
+      input.value = items[currentIndex].textContent;
+      search(input.value);
+    } else {
+      // 그냥 검색창에 입력한 값으로 검색
+      search(input.value);
     }
+
+    // 🚩 엔터 입력 후 자동완성 무조건 닫기
+    autoList.innerHTML = "";
+    autoList.style.display = "none";
+    currentIndex = -1;
   }
 });
 
@@ -1220,6 +1230,8 @@ document.addEventListener("DOMContentLoaded", function() {
       top.textContent = "인기검색어가 없습니다.";
       return;
     }
+    
+    
 
     // DOM으로 안전하게 렌더링
     top.innerHTML = '';
@@ -1333,61 +1345,50 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-//===================== 이벤트 =====================
-//검색창(input)에 "keyup" 이벤트 바인딩
-//(사용자가 키를 뗄 때마다 자동완성 요청 실행)
-input.addEventListener("keyup", async () => {
- const keyword = input.value.trim(); // 입력값 앞뒤 공백 제거
+//===================== 입력 이벤트 (자동완성) =====================
+  input.addEventListener("input", async (e) => {
+    const keyword = input.value.trim();
 
- // 입력값이 없으면 자동완성 리스트 숨김 처리
- if (keyword.length === 0) {
-   autoList.style.display = "none";
-   return;
- }
 
- try {
-   // 서버에 자동완성 API 요청 (비동기 통신)
-   const res = await fetch(
-     contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword)
-   );
-   const data = await res.json(); // JSON 응답 파싱
+    if (keyword.length === 0) {
+      autoList.style.display = "none";
+      return;
+    }
 
-   // 기존 자동완성 리스트 비우기
-   autoList.innerHTML = "";
+    try {
+      const res = await fetch(
+        contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword)
+      );
+      const data = await res.json();
 
-   if (data.length > 0) {
-     // 결과 데이터가 있으면 li 태그로 렌더링
-     data.forEach(item => {
-       const li = document.createElement("li"); // 새로운 li 생성
-       li.textContent = item; // 텍스트 삽입
+      autoList.innerHTML = "";
 
-       // 마우스로 클릭했을 때 동작 정의
-       li.addEventListener("click", () => {
-         input.value = item;        // 검색창에 값 반영
-         search(item);              // 검색 실행
-         autoList.style.display = "none"; // 자동완성 리스트 닫기
-       });
+      if (data.length > 0) {
+        data.forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = item;
 
-       // 리스트에 li 추가
-       autoList.appendChild(li);
-     });
+          li.addEventListener("click", () => {
+            input.value = item;
+            search(item);
+            autoList.style.display = "none";
+          });
 
-     // 자동완성 리스트 표시
-     autoList.style.display = "block";
+          autoList.appendChild(li);
+        });
 
-     // 리스트를 새로 그리면 highlight 클래스가 날아가기 때문에 현재 currentIndex가 있으면 다시 highlight 적용
-     if (currentIndex >= 0) {
-       updateHighlight(currentIndex);
-     }
-   } else {
-     // 결과 데이터가 없으면 자동완성 리스트 숨김
-     autoList.style.display = "none";
-   }
- } catch (err) {
-   // 에러 발생 시 콘솔에 로그 찍기
-   console.error("자동완성 에러:", err);
- }
-});
+        autoList.style.display = "block";
+
+        if (currentIndex >= 0) {
+          updateHighlight(currentIndex);
+        }
+      } else {
+        autoList.style.display = "none";
+      }
+    } catch (err) {
+      console.error("자동완성 에러:", err);
+    }
+  });
 
 
 
@@ -1395,9 +1396,6 @@ input.addEventListener("keyup", async () => {
     setTimeout(() => { autoList.style.display = "none"; }, 200);
   });
 
-  input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') search(input.value);
-  });
 
   btn.addEventListener('click', function () {
     search(input.value);
