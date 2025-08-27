@@ -33,17 +33,16 @@ public class WishListController {
   public String wishList(Integer userId, Model model) {
     List<ProductAndImageDTO> productAndImages = wishListService.selectWishListProducts(userId);
     
-    System.out.println("상품123123" + productAndImages);
     model.addAttribute("productAndImages", productAndImages);
     return "user/wishList";
   }
   
   @PostMapping("/delete")
-  public String deleteWish(@RequestParam("productId") Integer productId,
+  public String deleteWish(@RequestParam("productId") List<Integer> productIds,
                            @SessionAttribute("sessionMap") Map<String, Object> sessionMap,
                            RedirectAttributes rttr) {
     Integer userId = (Integer) sessionMap.get("userId"); 
-    boolean result = wishListService.deleteWishListByUserAndProduct(userId, productId);
+    boolean result = wishListService.deleteWishListByUserAndProduct(userId, productIds);
     rttr.addFlashAttribute("msg", result ? "삭제되었습니다." : "이미 삭제되었거나 존재하지 않습니다.");
     return "redirect:/wish/list?userId=" + userId;
   }

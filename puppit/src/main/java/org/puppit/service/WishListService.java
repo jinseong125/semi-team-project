@@ -1,5 +1,6 @@
 package org.puppit.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.puppit.model.dto.ProductAndImageDTO;
@@ -24,8 +25,8 @@ public class WishListService {
   public ProductDTO getProductById(Integer productId) {
     return wishListDAO.getProductById(productId);
   }
-  public boolean deleteWishListByUserAndProduct(Integer userId, Integer productId) {
-    return wishListDAO.deleteWishListByUserAndProduct(userId, productId) == 1;
+  public boolean deleteWishListByUserAndProduct(Integer userId, List<Integer> productIds) {
+    return wishListDAO.deleteWishListByUserAndProduct(userId, productIds) == 1;
   }
   public boolean deleteAllWishListByUser(Integer userId) {
     return wishListDAO.deleteAllWishListByUser(userId) == 1;
@@ -42,7 +43,9 @@ public class WishListService {
     return wishListDAO.selectWishListProducts(userId);
   }
   public boolean toggle(Integer userId, Integer productId) {
-    Integer deleted = wishListDAO.deleteWishListByUserAndProduct(userId, productId);
+    List<Integer> productIds = new ArrayList<Integer>();
+    productIds.add(productId);
+    Integer deleted = wishListDAO.deleteWishListByUserAndProduct(userId, productIds);
     if(deleted > 0) {
       return false;
     }

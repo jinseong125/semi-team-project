@@ -25,11 +25,11 @@ public class WishListDAO {
   public ProductDTO getProductById(Integer productId) {
     return sst.selectOne("mybatis.mapper.wishListMapper.getProductById", productId);
   }
-  public Integer deleteWishListByUserAndProduct(Integer userId, Integer productId) {
+  public Integer deleteWishListByUserAndProduct(Integer userId, List<Integer> productIds) {
     Map<String, Object> map = new HashMap<>();
     
     map.put("userId", userId);
-    map.put("productId", productId);
+    map.put("productIds", productIds);
     
     return sst.delete("mybatis.mapper.wishListMapper.deleteWishListByUserAndProduct", map);
   }

@@ -125,20 +125,25 @@ body {
 }
 
 .p-icon {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
+  position: relative;
+  display: inline-block;
+  font-size: 28px; 
 }
 
-.p-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.p-icon .fa-circle {
+  color: #FFD43B; 
+}
+
+.p-icon .letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%); 
+  font-size: 22px;   
+  font-weight: 700;
+  color: #fff;       
+  font-family: 'Arial', sans-serif;
+  font-style: italic;
 }
 
 .point-amount{
@@ -165,6 +170,7 @@ body {
 .charge:active {
   transform: translateY(1px);
 }
+.fa-heart {color: #d94164; font-size: 18px;}
 
 /* 아래 확장 공간 */
 .future-area {
@@ -292,7 +298,7 @@ body {
     </div>
     <div class="point-row">
       <div class="point-amount">
-        <div class="p-icon"><img src="${contextPath}/resources/image/point-icon.png" alt="포인트" /></div>
+        <div class="p-icon"><i class="fa-solid fa-circle"></i><span class="letter">p</span></div>
         <div class="p-amount">
           <c:choose>
             <c:when test="${not empty user.point}">
@@ -342,6 +348,30 @@ body {
     <button class="action-btn" type="button"
             onclick="location.href='${contextPath}/trade/history?userId=${user.userId}&type=buy'">
       내역 보기
+    </button>
+  </div>
+  
+  <!-- 나한테 달린 후기 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">다른 사람 후기</div>
+      <div class="action-desc">내 상품에 대한 다른 사람의 후기를 확인하세요</div>
+    </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/review/showOther'">
+      후기 보기
+    </button>
+  </div>
+  
+  <!-- 내가 쓴 후기 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">내 후기</div>
+      <div class="action-desc">내가 쓴 후기를 확인하세요</div>
+    </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/review/showMy'">
+      후기 보기
     </button>
   </div>
 </div>
