@@ -283,6 +283,7 @@
                  LEFT JOIN product_image t
                            ON t.product_id = p.product_id                     
         WHERE p.product_id = #{productId}
+        AND is_thumbnail = 1 
         ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
     </select>
 
