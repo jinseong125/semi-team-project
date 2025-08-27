@@ -168,9 +168,12 @@ padding:10px 14px;
 cursor:pointer; 
 border-bottom:1px solid #f3f3f3; 
 }
-#autocompleteList li:hover { 
-background:#f9f9f9; 
+#autocompleteList li:hover,
+#autocompleteList li.active {
+  background: #f9f9f9;
+  box-shadow: inset 0 0 0 2px #4a90e2; 
 }
+
 
 
 /* 인기검색어 */
@@ -318,6 +321,73 @@ const autoList  = document.getElementById("autocompleteList");
 const alarmArea = document.getElementById("alarmArea");
 let alarmBell = document.getElementById("alarmBell");
 const categorySelect = document.getElementById("categorySelect");
+
+
+// 자동완성 키보드 네비게이션
+let currentIndex = -1; // 현재 선택된 인덱스 (없으면 -1)
+
+// 🔹 하이라이트만 업데이트 (검색창 값은 건드리지 않음)
+function updateHighlight(currentIndex) {
+  const items = autoList.querySelectorAll("li");
+  items.forEach((item, i) => {
+	  console.log("i : ", i);
+    item.style.background = (i === currentIndex) ? "#e5e7eb" : "";
+  });
+}
+
+// 🔹 키보드 이벤트 (검색창 input에 달기)
+input.addEventListener("keydown", (e) => {
+  const items = autoList.querySelectorAll("li");
+
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    if (items.length > 0) {
+      currentIndex = (currentIndex + 1) % items.length;
+      console.log('currentIndex : ' , currentIndex);
+      updateHighlight(currentIndex);
+    }
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    if (items.length > 0) {
+      currentIndex = (currentIndex - 1 + items.length) % items.length;
+      updateHighlight(currentIndex);
+    }
+  } else if (e.key === "Enter") {
+    if (currentIndex >= 0 && currentIndex < items.length) {
+      e.preventDefault();
+      input.value = items[currentIndex].textContent; // 🔹 엔터 시에만 검색창에 값 반영
+      search(input.value); // 🔹 검색 실행
+      autoList.style.display = "none"; // 리스트 닫기
+      currentIndex = -1; // 초기화
+    }
+  }
+});
+
+// 🔹 자동완성 결과를 다시 그릴 때 currentIndex 리셋
+function renderAutocomplete(data) {
+  autoList.innerHTML = "";
+  currentIndex = -1; // 초기화
+
+  if (data.length > 0) {
+    data.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+
+      // 마우스로 클릭했을 때
+      li.addEventListener("click", () => {
+        input.value = item;
+        search(item);
+        autoList.style.display = "none";
+      });
+
+      autoList.appendChild(li);
+    });
+    autoList.style.display = "block";
+  } else {
+    autoList.style.display = "none";
+  }
+}
+
 
 // 헤더 → 메인에게 "이 필터로 다시 불러!" 알림
 function applyFilter(partial) {
