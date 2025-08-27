@@ -140,7 +140,7 @@ if (sessionMap != null) {
 </div>
 
 <style>
-
+/* 찜 버튼 */
 .wish-btn { border:0; background:transparent; cursor:pointer; }
 .wish-btn .on { display:none; }
 .wish-btn.is-on .on { display:inline; }
@@ -206,9 +206,6 @@ if (sessionMap != null) {
 .label { color:#6b7280; margin-right:6px; }
 .value { color:#111; }
 .buttons { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
-.btn {
-  padding:10px 18px; border-radius:8px; font-size:15px; cursor:pointer;
-}
 .btn.solid { background:#0073e6; color:#fff; border:none; flex:1; text-align:center; }
 .btn.outline { background:#fff; border:1px solid #d1d5db; color:#111; }
 .detail-desc {

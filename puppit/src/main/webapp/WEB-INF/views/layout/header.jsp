@@ -22,102 +22,121 @@
 /* ===== 헤더 기본 레이아웃 ===== */
 
 .header {
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-max-width:1200px;
-margin:0 auto;
-padding:16px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  max-width:1200px;
+  margin:0 auto;
+  padding:16px 20px;
 }
 .left {
-display:flex;
-align-items:flex-start;
-gap:18px;
+  display:flex;
+  align-items:flex-start;
+  gap:18px;
 }
 .left-col {
-display:flex;
-flex-direction:column;
-gap:14px;
-min-width:420px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  min-width:420px;
 }
 .searchBar {
-position:relative;
-width:100%;
-max-width:600px;
+  position:relative;
+  width:100%;
+  max-width:600px;
 }
 .searchBar .input {
-width:85%;
-height:44px;
-padding:0 44px 0 40px;
-border:1px solid #e5e7eb;
-border-radius:12px;
-background:#f5f7fa;
-outline:none;
+  width:85%;
+  height:44px;
+  padding:0 44px 0 40px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  background:#f5f7fa;
+  outline:none;
 }
 .searchBar .fa-magnifying-glass {
-position:absolute;
-left:14px;
-top:50%;
-transform:translateY(-50%);
-color:#666;
-cursor:pointer;
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#666;
+  cursor:pointer;
 }
 .meta-row {
-display:flex;
-align-items:center;
-gap:16px;
+  display:flex;
+  align-items:center;
+  gap:16px;
 }
 .right {
-display:flex;
-flex-direction:column;
-align-items:flex-end;
-gap:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:12px;
 }
 a {
-text-decoration:none;
-color:inherit;
+  text-decoration:none;
+  color:inherit;
 }
 .top-actions {
-display:flex;
-gap:10px;
+  display:flex;
+  gap:10px;
 }
-/* 공통 버튼 */
+
+/* ===== 버튼 공통 ===== */
 .btn {
-  padding:6px 12px;
-  border:1px solid #d1d5db;
-  border-radius:8px;
-  background:#fff;
-  cursor:pointer;
-  transition: all 0.2s ease-in-out; /* 부드럽게 변화 */
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff, #f9fafb);
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 
-/* 기본 버튼 hover (로그인/회원가입 등) */
 .btn:hover {
-  background:#f5f7fa;   /* 연한 회색 배경 */
-  border-color:#aaa;    /* 테두리 살짝 진하게 */
-  color:#111;           /* 글자 조금 더 진하게 */
+  background: linear-gradient(180deg, #f3f4f6, #e5e7eb);
+  border-color: #d1d5db;
+  color: #111;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
 }
 
-/* 어두운 버튼 (상품 관리) */
+/* ===== 어두운 버튼 (상품 관리) ===== */
 .btn.dark {
-  background:#111;
-  color:#fff;
-  border-color:#111;
+  background: linear-gradient(180deg, #111, #222);
+  color: #fff;
+  border: 1px solid #000;
+  font-weight: 600;
 }
-
-/* dark 버튼 hover */
 .btn.dark:hover {
-  background:#333;   /* 더 밝은 회색 검정 */
-  border-color:#333;
+  background: linear-gradient(180deg, #333, #111);
+  border-color: #111;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
 }
 
+/* ===== 채팅 버튼 (파란 포인트) ===== */
+#chatBtn {
+  background: linear-gradient(180deg, #4a90e2, #357ab8) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+}
+#chatBtn:hover {
+  background: linear-gradient(180deg, #5aa0f0, #357ab8) !important;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+}
 
-/* 카테고리 셀렉트 */
+/* ===== 카테고리 셀렉트 ===== */
 .category { 
   position: relative; 
   display: inline-flex;
   align-items: center; 
- }
+}
 .category select {
   appearance: none;
   border: 1px solid #d1e3ff; 
@@ -131,22 +150,18 @@ gap:10px;
   transition: all .2s;
 }
 .category select:hover { 
-border-color: #4a90e2; 
-box-shadow: 0 0 6px rgba(74,144,226,.3);
-}
-.category select:focus { 
-border-color: #1c6dd0; 
-box-shadow: 0 0 6px rgba(28,109,208,.4); 
+  border-color: #4a90e2; 
+  box-shadow: 0 0 6px rgba(74,144,226,.3);
 }
 .category .chev { 
-position:absolute; 
-right:14px; 
-pointer-events:none; 
-color:#4a90e2; 
-font-size:12px; 
+  position:absolute; 
+  right:14px; 
+  pointer-events:none; 
+  color:#4a90e2; 
+  font-size:12px; 
 }
 
-/* 자동완성 리스트 */
+/* ===== 자동완성 리스트 ===== */
 #autocompleteList {
   position:absolute; 
   top:48px; 
@@ -164,24 +179,23 @@ font-size:12px;
   margin:0;
 }
 #autocompleteList li { 
-padding:10px 14px; 
-cursor:pointer; 
-border-bottom:1px solid #f3f3f3; 
+  padding:10px 14px; 
+  cursor:pointer; 
+  border-bottom:1px solid #f3f3f3; 
 }
-#autocompleteList li:hover,
-#autocompleteList li.active {
+#autocompleteList li.highlight {
+  background: #e0e0e0 !important;
+}
+#autocompleteList li:hover {
   background: #f9f9f9;
-  box-shadow: inset 0 0 0 2px #4a90e2; 
 }
 
-
-
-/* 인기검색어 */
+/* ===== 인기검색어 ===== */
 #top-keywords {margin-top:4px;font-size:14px;color:#444;}
 #top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
 #top-keywords .keyword:hover {text-decoration:underline;}
 
-/* 알림 팝업 */
+/* ===== 알림 팝업 ===== */
 #alarmArea {
   background:#fffbe7;
   border:1px solid #ffe066;
@@ -224,18 +238,19 @@ border-bottom:1px solid #f3f3f3;
 }
 
 .notification {
-    position: fixed;
-    right: 20px;
-    top: 20px;    /* 항상 화면 위쪽에 */
-    z-index: 9999;  /* 다른 요소 위에 보이게 */
-    width: 300px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    transition: right 1s;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  z-index: 9999;
+  width: 300px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  transition: right 1s;
 }
+
 
 </style>
 </head>
@@ -285,13 +300,13 @@ border-bottom:1px solid #f3f3f3;
       </c:when>
       <c:otherwise>
         <div>${sessionScope.sessionMap.nickName}님 환영합니다!</div>
-        <a href="${contextPath}/user/mypage">마이페이지</a>
+        <a href="${contextPath}/user/mypage" class="btn">마이페이지</a>
 
         <button id="alarmBell" style="background:none;border:none;display:none;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
           <i class="fa-regular fa-bell"></i>
        </button>
 
-        <a href="${contextPath}/user/logout">로그아웃</a>
+        <a href="${contextPath}/user/logout" class="btn">로그아웃</a>
    
 
          <!-- 채팅 버튼 -->
@@ -307,6 +322,8 @@ border-bottom:1px solid #f3f3f3;
     </div>
   </div>
 </div>
+
+
   <div id="alarmArea"></div>
 
 <hr>
@@ -338,47 +355,53 @@ const categorySelect = document.getElementById("categorySelect");
 // 자동완성 키보드 네비게이션
 let currentIndex = -1; // 현재 선택된 인덱스 (없으면 -1)
 
-// 🔹 하이라이트만 업데이트 (검색창 값은 건드리지 않음)
+// 하이라이트만 업데이트 (검색창 값은 건드리지 않음)
 function updateHighlight(currentIndex) {
   const items = autoList.querySelectorAll("li");
   items.forEach((item, i) => {
-	  console.log("i : ", i);
-    item.style.background = (i === currentIndex) ? "#e5e7eb" : "";
-  });
+	if (i === currentIndex) {
+	  item.classList.add("highlight");	// 현재 인덱스 항목에 highlight 클래스 추가
+	  // 선택된 항목이 보이도록 스크롤 자동 이동
+	  item.scrollIntoView({block: "nearest", behavior: "smooth"});
+	  // scrillIntoView 옵션 설명
+	  // block: "nearest" : 리스트 안에서 최소한의 스크롤만 움직여서 해당 li가 보이게 함
+	} else {
+	  item.classList.remove("highlight");  // 다른 항목은 highlight 제거
+	}
+	});
 }
 
-// 🔹 키보드 이벤트 (검색창 input에 달기)
+// 키보드 이벤트 (검색창 input에 달기)
 input.addEventListener("keydown", (e) => {
   const items = autoList.querySelectorAll("li");
 
   if (e.key === "ArrowDown") {
-    e.preventDefault();
+    e.preventDefault();  // 기본동작 막기(하이라이트 에서만 동작)
     if (items.length > 0) {
-      currentIndex = (currentIndex + 1) % items.length;
-      console.log('currentIndex : ' , currentIndex);
+      currentIndex = (currentIndex + 1) % items.length;	// 인덱스 증가 (끝까지 가면 다시 처음으로)
       updateHighlight(currentIndex);
     }
   } else if (e.key === "ArrowUp") {
     e.preventDefault();
     if (items.length > 0) {
-      currentIndex = (currentIndex - 1 + items.length) % items.length;
+      currentIndex = (currentIndex - 1 + items.length) % items.length;	// 인덱스 감소 (맨 위에서 위로 가면 맨 아래로 순환)
       updateHighlight(currentIndex);
     }
   } else if (e.key === "Enter") {
     if (currentIndex >= 0 && currentIndex < items.length) {
       e.preventDefault();
-      input.value = items[currentIndex].textContent; // 🔹 엔터 시에만 검색창에 값 반영
-      search(input.value); // 🔹 검색 실행
-      autoList.style.display = "none"; // 리스트 닫기
-      currentIndex = -1; // 초기화
+      input.value = items[currentIndex].textContent; // 엔터 시에만 검색창에 값 반영
+      search(input.value);             // 검색 실행
+      autoList.style.display = "none"; // 자동완성 리스트 닫기
+      currentIndex = -1;               // 초기화
     }
   }
 });
 
-// 🔹 자동완성 결과를 다시 그릴 때 currentIndex 리셋
+// 자동완성 결과를 다시 그릴 때 currentIndex 리셋
 function renderAutocomplete(data) {
-  autoList.innerHTML = "";
-  currentIndex = -1; // 초기화
+  autoList.innerHTML = "";	// 기존 자동완성 리스트 싹 지움
+  currentIndex = -1; 		// 초기화
 
   if (data.length > 0) {
     data.forEach(item => {
@@ -392,11 +415,11 @@ function renderAutocomplete(data) {
         autoList.style.display = "none";
       });
 
-      autoList.appendChild(li);
+      autoList.appendChild(li);	// 리스트에 항목 추가
     });
-    autoList.style.display = "block";
+    autoList.style.display = "block";	// 자동완성 보이게 .
   } else {
-    autoList.style.display = "none";
+    autoList.style.display = "none";	// 결과 없으면 숨김
   }
 }
 
@@ -1221,40 +1244,63 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  // ===================== 이벤트 =====================
-  input.addEventListener("keyup", async () => {
-	  console.log('엔터이벤트');
-    const keyword = input.value.trim();
-    console.log('keyword: ', keyword);
-    if (keyword.length === 0) {
-      autoList.style.display = "none";
-      return;
-    }
-    try {
-      const res = await fetch(contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword));
-      const data = await res.json();
-	  console.log('data: ', data);
-      autoList.innerHTML = "";
-      if (data.length > 0) {
-        data.forEach(item => {
-          const li = document.createElement("li");
-          console.log('item: ', item);
-          li.textContent = item;
-          li.addEventListener("click", () => {
-            input.value = item;
-            search(item);
-            autoList.style.display = "none";
-          });
-          autoList.appendChild(li);
-        });
-        autoList.style.display = "block";
-      } else {
-        autoList.style.display = "none";
-      }
-    } catch (err) {
-      console.error("자동완성 에러:", err);
-    }
-  });
+//===================== 이벤트 =====================
+//검색창(input)에 "keyup" 이벤트 바인딩
+//(사용자가 키를 뗄 때마다 자동완성 요청 실행)
+input.addEventListener("keyup", async () => {
+ const keyword = input.value.trim(); // 입력값 앞뒤 공백 제거
+
+ // 입력값이 없으면 자동완성 리스트 숨김 처리
+ if (keyword.length === 0) {
+   autoList.style.display = "none";
+   return;
+ }
+
+ try {
+   // 서버에 자동완성 API 요청 (비동기 통신)
+   const res = await fetch(
+     contextPath + "/product/autocomplete?keyword=" + encodeURIComponent(keyword)
+   );
+   const data = await res.json(); // JSON 응답 파싱
+
+   // 기존 자동완성 리스트 비우기
+   autoList.innerHTML = "";
+
+   if (data.length > 0) {
+     // 결과 데이터가 있으면 li 태그로 렌더링
+     data.forEach(item => {
+       const li = document.createElement("li"); // 새로운 li 생성
+       li.textContent = item; // 텍스트 삽입
+
+       // 마우스로 클릭했을 때 동작 정의
+       li.addEventListener("click", () => {
+         input.value = item;        // 검색창에 값 반영
+         search(item);              // 검색 실행
+         autoList.style.display = "none"; // 자동완성 리스트 닫기
+       });
+
+       // 리스트에 li 추가
+       autoList.appendChild(li);
+     });
+
+     // 자동완성 리스트 표시
+     autoList.style.display = "block";
+
+     // 리스트를 새로 그리면 highlight 클래스가 날아가기 때문에 현재 currentIndex가 있으면 다시 highlight 적용
+     if (currentIndex >= 0) {
+       updateHighlight(currentIndex);
+     }
+   } else {
+     // 결과 데이터가 없으면 자동완성 리스트 숨김
+     autoList.style.display = "none";
+   }
+ } catch (err) {
+   // 에러 발생 시 콘솔에 로그 찍기
+   console.error("자동완성 에러:", err);
+ }
+});
+
+
 
   input.addEventListener("blur", () => {
     setTimeout(() => { autoList.style.display = "none"; }, 200);
