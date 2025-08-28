@@ -21,7 +21,7 @@ public class ProductDTO {
     private Integer locationId;
     private Integer categoryId;
     private Integer sellerId;
-    private String sellerAccountId;
+    private String sellerNickname;
     private Integer conditionId;
     private Integer statusId;
     private String productName;

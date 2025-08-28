@@ -26,33 +26,35 @@ if (sessionMap != null) {
 
 <div class="detail-wrap">
   <!-- 좌측: 이미지 -->
-  
   <div class="detail-left">
-    <!-- 대표 이미지 -->
-   
-<c:choose>
-  <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
-    <img id="mainImage" class="main-img"
-         src="${product.thumbnail.imageUrl}"
-         alt="${product.productName}" />
-  </c:when>
-  <c:otherwise>
-    <div class="thumb-placeholder">이미지 없음</div>
-  </c:otherwise>
-</c:choose>
-
-<!-- 서브 이미지 -->
-<div class="secondPictureContainer">
-  <c:forEach var="img" items="${subImages}">
-    <img class="secondPicture"
-         src="${img.imageUrl}"
-         alt="${product.productName}" />
-  </c:forEach>
-</div>
-
     
-    
+    <!-- 대표 이미지 + 좌우 버튼 -->
+    <div class="thumbnail-box">
+      <button class="slide-btn prev">&#10094;</button>
+      <c:choose>
+        <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
+          <img id="mainImage" class="main-img"
+               src="${product.thumbnail.imageUrl}"
+               alt="${product.productName}" />
+        </c:when>
+        <c:otherwise>
+          <div class="thumb-placeholder">이미지 없음</div>
+        </c:otherwise>
+      </c:choose>
+      <button class="slide-btn next">&#10095;</button>
+    </div>
+
+    <!-- 서브 이미지 (썸네일) -->
+    <div class="secondPictureContainer">
+      <c:forEach var="img" items="${subImages}">
+        <img class="secondPicture"
+             src="${img.imageUrl}"
+             alt="${product.productName}" />
+      </c:forEach>
+    </div>
+
   </div>
+  
   <!-- 우측: 상품 정보 -->
   <div class="detail-right">
     <!-- 카테고리 -->
@@ -94,13 +96,12 @@ if (sessionMap != null) {
       </li>
       <li>
         <span class="label">판매자 ID</span>
-        <span>${product.sellerAccountId}</span>
+        <span>${product.sellerNickname}</span>
       </li>
     </ul>
 
     <!-- 버튼 영역 -->
     <div class="buttons">
-      <!-- 내 상품일 때만 수정/삭제 -->
       <c:set var="sessionMap" value="${sessionScope.sessionMap}" />
       <c:if test="${sessionMap.userId eq product.sellerId}">
         <a href="${contextPath}/product/edit/${product.productId}" class="btn outline">상품 수정</a>
@@ -111,7 +112,6 @@ if (sessionMap != null) {
         </form>
       </c:if>
 
-      <!-- 공통 버튼 -->
       <button type="button" class="btn outline" onclick="history.back()">목록</button>
       <c:if test="${sessionMap.userId ne product.sellerId}">
         <button
@@ -180,7 +180,6 @@ if (sessionMap != null) {
 /* 대표 이미지 전용 박스 */
 .thumbnail-box {
   width: 100%;
-  aspect-ratio: 1 / 1;        /* 정사각형 박스 */
   border: 1px solid #eee;
   border-radius: 12px;
   display: flex;
@@ -188,30 +187,49 @@ if (sessionMap != null) {
   justify-content: center;
   background: #fafafa;
   overflow: hidden;
+  position: relative;
 }
 
 .main-img {
   width: 100%;
-  height: 60%;
-  /*  object-fit: contain;        이미지가 박스 안에서 꽉 차게 */
+  height: auto;
+  object-fit: contain;
+  max-height: 600px;
 }
 
-/* 서브 이미지 */
+/* 좌우 버튼 */
+.slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  border: none;
+  font-size: 24px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 50%;
+  z-index: 2;
+}
+.slide-btn.prev { left: 10px; }
+.slide-btn.next { right: 10px; }
+
+/* 썸네일 */
 .secondPictureContainer {
   display: flex;
   justify-content: center;
   gap: 10px;
+  margin-top: 12px;
 }
 
 .secondPicture {
-  width: 45%;                 /* 두 장 나란히 */
-  height: 150px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #ddd;
   cursor: pointer;
 }
-
 
 .detail-right { flex:1; display:flex; flex-direction:column; gap:14px; }
 .breadcrumb { font-size:14px; color:#6b7280; }
@@ -226,8 +244,12 @@ if (sessionMap != null) {
 .btn.outline { background:#fff; border:1px solid #d1d5db; color:#111; }
 
 .detail-desc {
-  max-width:1100px; margin:-100px auto; padding:20px;
-  border:1px solid #eee; border-radius:12px; background:#fafafa;
+  max-width:1100px;
+  margin:40px auto;
+  padding:20px;
+  border:1px solid #eee;
+  border-radius:12px;
+  background:#fafafa;
 }
 .detail-desc h2 { font-size:18px; font-weight:700; margin-bottom:12px; }
 .desc { white-space:pre-wrap; line-height:1.6; font-size:15px; }
@@ -237,25 +259,44 @@ if (sessionMap != null) {
 <script>
 const appContext = "${contextPath}";
 
-//서브 이미지 클릭하면 대표 이미지 교체
 document.addEventListener("DOMContentLoaded", () => {
-  const mainImage = document.getElementById("mainImage");
-  const thumbs = document.querySelectorAll(".secondPicture");
+	  const mainImage = document.getElementById("mainImage");
+	  const prevBtn = document.querySelector(".slide-btn.prev");
+	  const nextBtn = document.querySelector(".slide-btn.next");
+	  const thumbs = document.querySelectorAll(".secondPicture");
 
-  thumbs.forEach(thumb => {
-    thumb.addEventListener("click", () => {
-      if (mainImage) {
-        mainImage.src = thumb.src;
-      }
-    });
-  });
-});
+	  // 🔥 대표이미지를 배열 맨 앞에 추가
+	  const imageList = [];
+	  if (mainImage && mainImage.src) {
+	    imageList.push(mainImage.src); // 대표이미지 URL
+	  }
+	  thumbs.forEach(thumb => imageList.push(thumb.src));
+
+	  let currentIndex = 0;
+
+	  function showImage(index) {
+	    if (!mainImage) return;
+	    currentIndex = (index + imageList.length) % imageList.length;
+	    mainImage.src = imageList[currentIndex];
+	  }
+
+	  // 썸네일 클릭 → 해당 이미지 표시
+	  thumbs.forEach((thumb, i) => {
+	    thumb.addEventListener("click", () => {
+	      showImage(i + 1); // 대표이미지는 0번, 썸네일은 1부터
+	    });
+	  });
+
+	  // 버튼 클릭
+	  prevBtn?.addEventListener("click", () => showImage(currentIndex - 1));
+	  nextBtn?.addEventListener("click", () => showImage(currentIndex + 1));
+	});
 
 
+// 🔽 찜 버튼 로직 (기존 그대로 유지)
 (function() {
   const btn = document.getElementById('btnWish');
   if (!btn) return;
-
   let busy = false;
 
   btn.addEventListener('click', async () => {
@@ -305,12 +346,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 })();
 
+// 채팅 버튼 로직
 document.getElementById('btnPay')?.addEventListener('click', function() {
   const productId = "${product.productId}";
   const buyerId = "${userId}";
   const sellerId = "${product.sellerId}";
   const loginUserId = "${sessionScope.sessionMap.accountId}";
-  console.log("sellerId: ", sellerId);
 
   if (!loginUserId || buyerId === "0" || !buyerId) {
     alert("채팅을 하시려면 먼저 로그인해주세요.");
