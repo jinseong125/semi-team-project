@@ -31,8 +31,11 @@ public class KakaoLoginAPIController {
   private final UserService userService; 
   @GetMapping("/login")
   public String kakaoLoginForm(Model model) {
+    
+    // 하드코딩 (연습)
     String kakaoApiKey = "79176a8cb995f6cf89985b3657377b24";
     String kakaoRedirectUri = "http://localhost:8080/puppit/auth/kakao/callback";
+    
     model.addAttribute("kakaoApiKey", kakaoApiKey);
     model.addAttribute("redirectUri", kakaoRedirectUri);
     return "user/login";
@@ -51,8 +54,8 @@ public class KakaoLoginAPIController {
       // 3) DB upsert -> 우리 서비스 UserDTO (비번 없음)
       UserDTO loginResult = kakaoLoginService.upsertAndGetUser(userInfo);
 
-      if (loginResult == null) {
-        redirectAttr.addFlashAttribute("error", "카카오 로그인에 실패했습니다.");
+      if(loginResult == null) {
+        redirectAttr.addFlashAttribute("error", "Puppit에 오신것을 환영 합니다");
         return "redirect:/user/login";
       }
 
@@ -65,7 +68,6 @@ public class KakaoLoginAPIController {
       sessionMap.put("accountId", loginResult.getAccountId());
       sessionMap.put("userName",  loginResult.getUserName());
       sessionMap.put("nickName",  loginResult.getNickName());
-      sessionMap.put("userEmail", loginResult.getUserEmail());
       // 필요하면 provider도 참고용으로 넣기
       sessionMap.put("provider",  loginResult.getProvider()); // "kakao"
 

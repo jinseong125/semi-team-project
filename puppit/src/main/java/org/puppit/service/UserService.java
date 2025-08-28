@@ -9,7 +9,10 @@ import org.puppit.model.dto.UserStatusDTO;
 @Mapper
 public interface UserService {
   
+  // 회원 가입
   boolean signup(UserDTO user); 
+  // 회원 탈퇴
+  boolean deleteMyAccount(Integer userId);
   UserDTO login(UserDTO user);
   // 아이디 중복 체크
   Boolean isAccountIdAvailable(String accountId);
@@ -24,9 +27,9 @@ public interface UserService {
   // accountId 찾기
   String findAccountIdByUserNameUserEmail(UserDTO user);
   // 비밀번호 변경
-//  Boolean changeUserPasswordByuserId(UserDTO user);
+  // Boolean changeUserPasswordByuserId(UserDTO user);
   // 기존 비밀번호 확인
-  Boolean passwordCheck(int userId, String rawPassword);
+  Boolean passwordCheck(int userId, String userPassword);
 
   boolean updateUser(Map<String, Object> map);
   UserDTO getProfileImageKey(Integer userId);

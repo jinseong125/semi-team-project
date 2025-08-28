@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class KakaoLoginServiceImpl implements KakaoLoginService {
 
+  // 하드 코딩 (연습)
   private final String clientId = "79176a8cb995f6cf89985b3657377b24";
   private final String redirectUri = "http://localhost:8080/puppit/auth/kakao/callback";
   private final String tokenUrl = "https://kauth.kakao.com/oauth/token";
@@ -26,6 +27,7 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
 
   private final RestTemplate restTemplate = new RestTemplate();
 
+  @SuppressWarnings("unused")
   public String getAccessToken(String code) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -44,8 +46,7 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
       Map body = response.getBody();
       String accessToken = (String) body.get("access_token");
       String refreshToken = (String) body.get("refresh_token");
-      System.out.println("access_token = " + accessToken);
-      System.out.println("refresh_token = " + refreshToken);
+
       return accessToken;
     } else {
       throw new RuntimeException("토큰 요청 실패: " + response.getStatusCode());
@@ -61,8 +62,8 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
         userInfoUrl, HttpMethod.GET, request, Map.class);
 
     if (response.getStatusCode() == HttpStatus.OK) {
+      @SuppressWarnings("unchecked")
       Map<String, Object> userInfo = response.getBody();
-      System.out.println("카카오 사용자 정보 = " + userInfo);
       return userInfo;
     } else {
       throw new RuntimeException("사용자 정보 요청 실패: " + response.getStatusCode());
@@ -73,7 +74,7 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
     Long id;
     String email;
     String nickname;
-    String profileImage; // DB: profile_image, DTO: profileImage
+    String profileImage; // DB: profile_imageKey, DTO: profileImageKey
   }
 
   @SuppressWarnings("unchecked")
@@ -105,14 +106,14 @@ public class KakaoLoginServiceImpl implements KakaoLoginService {
     // 1) provider + provider_id 로 기존 사용자 조회
     UserDTO found = userDAO.findByProvider("kakao", p.id);
     if (found != null) {
-      // 프로필 최신화(선택)
+      // 프로필 최신화
       if (p.nickname != null) found.setNickName(p.nickname);
       found.setProfileImageKey(p.profileImage);     // DTO 필드명에 맞게
       userDAO.updateSocialProfile(found);
       return found;
     }
 
-    // 2) 이메일 기반 연동(선택)
+    // 2) 이메일 기반 연동
     if (p.email != null && !p.email.isEmpty()) {
       UserDTO byEmail = userDAO.findByEmail(p.email);
       if (byEmail != null) {
