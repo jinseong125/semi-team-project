@@ -20,238 +20,273 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 /* ===== 헤더 기본 레이아웃 ===== */
-
 .header {
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  max-width:1200px;
-  margin:0 auto;
-  padding:16px 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 16px 20px;
 }
+
 .left {
-  display:flex;
-  align-items:flex-start;
-  gap:18px;
+	display: flex;
+	align-items: flex-start;
+	gap: 18px;
 }
+
 .left-col {
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  min-width:420px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	min-width: 420px;
 }
+
 .searchBar {
-  position:relative;
-  width:100%;
-  max-width:600px;
+	position: relative;
+	width: 100%;
+	max-width: 600px;
 }
+
 .searchBar .input {
-  width:85%;
-  height:44px;
-  padding:0 44px 0 40px;
-  border:1px solid #e5e7eb;
-  border-radius:12px;
-  background:#f5f7fa;
-  outline:none;
+	width: 85%;
+	height: 44px;
+	padding: 0 44px 0 40px;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	background: #f5f7fa;
+	outline: none;
 }
+
 .searchBar .fa-magnifying-glass {
-  position:absolute;
-  left:14px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#666;
-  cursor:pointer;
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #666;
+	cursor: pointer;
 }
+
 .meta-row {
-  display:flex;
-  align-items:center;
-  gap:16px;
+	display: flex;
+	align-items: center;
+	gap: 16px;
 }
+
 .right {
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:12px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 12px;
 }
+
 a {
-  text-decoration:none;
-  color:inherit;
+	text-decoration: none;
+	color: inherit;
 }
+
 .top-actions {
-  display:flex;
-  gap:10px;
+	display: flex;
+	gap: 10px;
 }
 
 /* ===== 버튼 공통 ===== */
 .btn {
-  padding: 8px 16px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #fff, #f9fafb);
-  color: #333;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease-in-out;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+	padding: 8px 16px;
+	border: 1px solid #e5e7eb;
+	border-radius: 10px;
+	background: linear-gradient(180deg, #fff, #f9fafb);
+	color: #333;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.25s ease-in-out;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .btn:hover {
-  background: linear-gradient(180deg, #f3f4f6, #e5e7eb);
-  border-color: #d1d5db;
-  color: #111;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+	background: linear-gradient(180deg, #f3f4f6, #e5e7eb);
+	border-color: #d1d5db;
+	color: #111;
+	transform: translateY(-1px);
+	box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* ===== 어두운 버튼 (상품 관리) ===== */
 .btn.dark {
-  background: linear-gradient(180deg, #111, #222);
-  color: #fff;
-  border: 1px solid #000;
-  font-weight: 600;
+	background: linear-gradient(180deg, #111, #222);
+	color: #fff;
+	border: 1px solid #000;
+	font-weight: 600;
 }
+
 .btn.dark:hover {
-  background: linear-gradient(180deg, #333, #111);
-  border-color: #111;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+	background: linear-gradient(180deg, #333, #111);
+	border-color: #111;
+	transform: translateY(-1px);
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* ===== 채팅 버튼 (파란 포인트) ===== */
 #chatBtn {
-  background: linear-gradient(180deg, #4a90e2, #357ab8) !important;
-  color: #fff !important;
-  border: none !important;
-  font-weight: 600;
+	background: linear-gradient(180deg, #4a90e2, #357ab8) !important;
+	color: #fff !important;
+	border: none !important;
+	font-weight: 600;
 }
+
 #chatBtn:hover {
-  background: linear-gradient(180deg, #5aa0f0, #357ab8) !important;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  transform: translateY(-1px);
+	background: linear-gradient(180deg, #5aa0f0, #357ab8) !important;
+	box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+	transform: translateY(-1px);
 }
 
 /* ===== 카테고리 셀렉트 ===== */
-.category { 
-  position: relative; 
-  display: inline-flex;
-  align-items: center; 
+.category {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
 }
+
 .category select {
-  appearance: none;
-  border: 1px solid #d1e3ff; 
-  border-radius: 12px; 
-  background: #f9fbff;
-  font: inherit; 
-  outline: none; 
-  padding: 10px 36px 10px 14px; 
-  cursor: pointer; 
-  color: #333;
-  transition: all .2s;
+	appearance: none;
+	border: 1px solid #d1e3ff;
+	border-radius: 12px;
+	background: #f9fbff;
+	font: inherit;
+	outline: none;
+	padding: 10px 36px 10px 14px;
+	cursor: pointer;
+	color: #333;
+	transition: all .2s;
 }
-.category select:hover { 
-  border-color: #4a90e2; 
-  box-shadow: 0 0 6px rgba(74,144,226,.3);
+
+.category select:hover {
+	border-color: #4a90e2;
+	box-shadow: 0 0 6px rgba(74, 144, 226, .3);
 }
-.category .chev { 
-  position:absolute; 
-  right:320px; 
-  pointer-events:none; 
-  color:#4a90e2; 
-  font-size:12px; 
+
+.category .chev {
+	position: absolute;
+	right: 320px;
+	pointer-events: none;
+	color: #4a90e2;
+	font-size: 12px;
 }
 
 /* ===== 자동완성 리스트 ===== */
 #autocompleteList {
-  position:absolute; 
-  top:48px; 
-  left:0;
-  width:85%;
-  background:#fff; 
-  border:1px solid #ddd; 
-  border-radius:8px;
-  display:none; 
-  z-index:1000; 
-  max-height:200px; 
-  overflow-y:auto; 
-  list-style:none;
-  padding:0; 
-  margin:0;
+	position: absolute;
+	top: 48px;
+	left: 0;
+	width: 85%;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	display: none;
+	z-index: 1000;
+	max-height: 200px;
+	overflow-y: auto;
+	list-style: none;
+	padding: 0;
+	margin: 0;
 }
-#autocompleteList li { 
-  padding:10px 14px; 
-  cursor:pointer; 
-  border-bottom:1px solid #f3f3f3; 
+
+#autocompleteList li {
+	padding: 10px 14px;
+	cursor: pointer;
+	border-bottom: 1px solid #f3f3f3;
 }
+
 #autocompleteList li.highlight {
-  background: #e0e0e0 !important;
+	background: #e0e0e0 !important;
 }
+
 #autocompleteList li:hover {
-  background: #f9f9f9;
+	background: #f9f9f9;
 }
 
 /* ===== 인기검색어 ===== */
-#top-keywords {margin-top:4px;font-size:14px;color:#444;}
-#top-keywords .keyword {margin-right:8px;color:#0073e6;cursor:pointer;}
-#top-keywords .keyword:hover {text-decoration:underline;}
+#top-keywords {
+	margin-top: 4px;
+	font-size: 14px;
+	color: #444;
+}
+
+#top-keywords .keyword {
+	margin-right: 8px;
+	color: #0073e6;
+	cursor: pointer;
+}
+
+#top-keywords .keyword:hover {
+	text-decoration: underline;
+}
 
 /* ===== 알림 팝업 ===== */
 #alarmArea {
-  background:#fffbe7;
-  border:1px solid #ffe066;
-  border-radius:10px;
-  padding:10px 18px;
-  font-size:15px;
-  color:#8d6708;
-  max-width:340px;
-  min-width:200px;
-  box-sizing:border-box;
-  word-break:break-word;
-  z-index:5000;
-  position:fixed;
-  top:24px;
-  right:24px;
-  margin:0;
-  display:none;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+	background: #fffbe7;
+	border: 1px solid #ffe066;
+	border-radius: 10px;
+	padding: 10px 18px;
+	font-size: 15px;
+	color: #8d6708;
+	max-width: 340px;
+	min-width: 200px;
+	box-sizing: border-box;
+	word-break: break-word;
+	z-index: 5000;
+	position: fixed;
+	top: 24px;
+	right: 24px;
+	margin: 0;
+	display: none;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
-#alarmArea ul {margin:0; padding:0; list-style:none;}
-#alarmArea li {margin-bottom:6px;}
+
+#alarmArea ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+#alarmArea li {
+	margin-bottom: 6px;
+}
+
 #alarmArea .alarm-close {
-  position:absolute;
-  top:10px;
-  right:14px;
-  background:transparent;
-  border:none;
-  font-size:18px;
-  color:#c8a700;
-  cursor:pointer;
-  z-index:10;
-  padding:0;
-  line-height:1;
+	position: absolute;
+	top: 10px;
+	right: 14px;
+	background: transparent;
+	border: none;
+	font-size: 18px;
+	color: #c8a700;
+	cursor: pointer;
+	z-index: 10;
+	padding: 0;
+	line-height: 1;
 }
 
 #alarmBell.red {
-  color: #e74c3c !important;
-  transform: scale(1.2);
-  transition: color 0.2s, transform 0.2s;
+	color: #e74c3c !important;
+	transform: scale(1.2);
+	transition: color 0.2s, transform 0.2s;
 }
 
 .notification {
-  position: fixed;
-  right: 20px;
-  top: 20px;
-  z-index: 9999;
-  width: 300px;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  transition: right 1s;
+	position: fixed;
+	right: 20px;
+	top: 20px;
+	z-index: 9999;
+	width: 300px;
+	background-color: #f9f9f9;
+	border: 1px solid #ccc;
+	padding: 10px;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	transition: right 1s;
 }
-
-
 </style>
 </head>
 
@@ -324,7 +359,7 @@ a {
 
 
 
-  <!-- 검색 결과가 여기에 들어감 -->
+ 
 </div>
 </body>
 <hr>
