@@ -22,6 +22,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductDAO productDAO;
     private final S3Service s3Service;
     private final PageUtil pageUtil;
+    
 
     /** 상품 등록 */
     @Transactional
@@ -247,5 +248,10 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductSearchDTO> searchByCategory(String categoryName) {
       System.out.println("productSearchDTO: " + productDAO.searchByCategory(categoryName));
       return productDAO.searchByCategory(categoryName);
+    }
+
+    @Override
+    public List<ProductImageDTO> getSubImages(Integer productId) {
+      return productDAO.getsubImages(productId);
     }
 }

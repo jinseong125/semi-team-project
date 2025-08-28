@@ -137,8 +137,10 @@ public class ProductDAO {
     public List<ProductDTO> selectPagedProductsFiltered(Map<String,Object> params) {
       return sqlSession.selectList("product.selectPagedProductsFiltered", params);
     }
-    
-    
+      
+    public List<ProductImageDTO> getsubImages(Integer productId) {
+      return sqlSession.selectList("product.getSubImages", productId);
+    }
     
 
 }

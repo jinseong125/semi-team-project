@@ -175,6 +175,23 @@
 
 <script>
 (() => {
+	
+	document.addEventListener('DOMContentLoaded', () => {
+		  const params = new URLSearchParams(window.location.search);
+		  const q = params.get("q");
+		  const category = params.get("category");
+
+		  if (q) {
+		    document.getElementById("search-input").value = q;
+		    search(q);
+		  } else if (category) {
+		    loadCategory(category);
+		  } else {
+		    fillIfShort();  // ✅ 여기서 진짜 함수 호출
+		  }
+		});
+
+	
   const input   = document.getElementById('search-input');
   const btn     = document.getElementById('do-search');
   const results = document.getElementById('search-results');
@@ -365,8 +382,8 @@
       await fetchProducts();
     }
   };
-  document.addEventListener('DOMContentLoaded', fillIfShort);
-  window.search = search;
+ 
+  
 
   //메인에서 현재 필터(카테고리/검색어) 상태를 가지고 있다고 가정
   const filter = { category: '', q: '', sort: 'DESC' }; // 예시

@@ -323,7 +323,6 @@ a {
   </div>
 </div>
 
-<div id="search-results"></div>
 
 
   <div id="alarmArea"></div>
@@ -391,7 +390,7 @@ input.addEventListener("keydown", (e) => {
     }
   } else if (e.key === "Enter") {
     e.preventDefault();
-
+   
     if (currentIndex >= 0 && currentIndex < items.length) {
       // 자동완성에서 선택한 항목
       input.value = items[currentIndex].textContent;
@@ -400,7 +399,8 @@ input.addEventListener("keydown", (e) => {
       // 그냥 검색창에 입력한 값으로 검색
       search(input.value);
     }
-
+    const q = input.value.trim();
+    if (q) window.location.href = contextPath + "/?q=" + encodeURIComponent(q);
     // 🚩 엔터 입력 후 자동완성 무조건 닫기
     autoList.innerHTML = "";
     autoList.style.display = "none";
@@ -555,17 +555,15 @@ document.addEventListener("DOMContentLoaded", function() {
 	    });
 	  }
 
-	  const categorySelect = document.getElementById("categorySelect");
-	  if (categorySelect) {
-	    categorySelect.addEventListener("change", function() {
-	      const selected = this.value;
-	      if (selected && selected !== "카테고리") {
-	        loadCategory(selected);
-	        // 헤더 -> 메인에게 알림 보냄
-	        applyFilter({category: selected, q: ''});
-	      }
-	    });
-	  }
+	  categorySelect.addEventListener("change", function () {
+		  const selected = this.value;
+		  if (selected) {
+		    window.location.href = contextPath + "/?category=" + encodeURIComponent(selected);
+		  }
+		});
+
+	  
+	  
 	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝
 	
 	function subscribeRoom(currentRoomId) {
@@ -1249,9 +1247,8 @@ document.addEventListener("DOMContentLoaded", function() {
       span.textContent = '#' + kw;
       span.style.marginRight = '8px';
       span.addEventListener('click', () => {
-        const input = document.getElementById('search-input');
-        if (input) input.value = kw;
-        applyFilter({ q: kw, category: '' });
+    	  window.location.href = contextPath + "/?q=" + encodeURIComponent(kw);
+     
       });
       top.appendChild(span);
     });
@@ -1405,7 +1402,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   btn.addEventListener('click', function () {
-    search(input.value);
+	  const q = input.value.trim();
+	  if (q) window.location.href = contextPath + "/?q=" + encodeURIComponent(q);
   });
 
 
