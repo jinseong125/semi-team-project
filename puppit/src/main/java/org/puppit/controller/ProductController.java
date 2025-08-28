@@ -98,9 +98,12 @@ public class ProductController {
           wished = wishListService.existsByUserAndProduct(userId, productId);
       }
         product.setWished(wished);
-        model.addAttribute("product", product);
+        List<ProductImageDTO> subImages = productService.getSubImages(productId);
 
-        
+        // JSP로 전달
+        model.addAttribute("product", product);
+        model.addAttribute("subImages", subImages);
+
         return "product/detail";
     }
 

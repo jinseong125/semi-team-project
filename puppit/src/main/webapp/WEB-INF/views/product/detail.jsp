@@ -3,6 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
 <%
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
 String accountId = "";
@@ -25,24 +26,26 @@ if (sessionMap != null) {
 
 <div class="detail-wrap">
   <!-- 좌측: 이미지 -->
-  
+  <div class="detail-left">
+    <!-- 대표 이미지 -->
+    <c:choose>
+      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
+        <img class="productsPicture main-img"
+             src="${product.thumbnail.imageUrl}"
+             alt="${product.productName}" />
+      </c:when>
+      <c:otherwise>
+        <div class="thumb-placeholder">이미지 없음</div>
+      </c:otherwise>
+    </c:choose>
 
-<div class="detail-left">
-  	
-  	
-	    <c:choose>
-	      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
-	        <img class="productsPicture" src="${product.thumbnail.imageUrl}" alt="${product.productName}" class="main-img"/>
-	      </c:when>
-	     
-	      <c:otherwise>
-	        <div class="thumb-placeholder">이미지 없음</div>
-	      </c:otherwise>
-	    </c:choose>
- 
+    <!-- 추가 이미지 (줄줄이 나열) -->
+    <c:forEach var="img" items="${subImages}">
+      <img class="productsPicture"
+           src="${img.imageUrl}"
+           alt="${product.productName}" />
+    </c:forEach>
   </div>
-
-
 
   <!-- 우측: 상품 정보 -->
   <div class="detail-right">
@@ -86,12 +89,8 @@ if (sessionMap != null) {
       <li>
         <span class="label">판매자 ID</span>
         <span>${product.sellerId}</span>
-		  </li>
+      </li>
     </ul>
-
-
-
-	
 
     <!-- 버튼 영역 -->
     <div class="buttons">
@@ -105,7 +104,6 @@ if (sessionMap != null) {
                   onclick="return confirm('정말 삭제하시겠습니까?');">상품 삭제</button>
         </form>
       </c:if>
-	
 
       <!-- 공통 버튼 -->
       <button type="button" class="btn outline" onclick="history.back()">목록</button>
@@ -153,13 +151,7 @@ if (sessionMap != null) {
   padding:10px 14px;
   line-height:1;
 }
-
 .wish-btn .icon { font-size:16px; }
-.wish-btn .on { display:none; }        /* 기본: 빈 하트 */
-.wish-btn.is-on .on { display:inline; }/* 찜 상태: 꽉 찬 하트 */
-.wish-btn.is-on .off { display:none; }
-
-/* 찜 상태일 때 살짝 강조 */
 .wish-btn.is-on {
   border-color:#ff7b8a;
   background:#fff7f8;
@@ -173,30 +165,24 @@ if (sessionMap != null) {
 .detail-left {
   flex: 1;
   width: 100%;
-  max-width: 500px;   /* 원하는 가로 크기 */
-  height: 500px;      /* 원하는 세로 크기 */
+  max-width: 500px;
   border: 1px solid #eee;
   border-radius: 12px;
-  overflow: hidden;   /* 이미지 넘치면 잘리게 */
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* 대표 + 추가 이미지를 세로로 줄줄이 */
+  gap: 12px;
   align-items: center;
-  background: #fafafa; /* 빈공간 배경 */
+  background: #fafafa;
+  padding: 10px;
 }
-
 .detail-left img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;   /* 박스에 꽉 채우되 잘릴 수 있음 */
-  /* object-fit: contain;  잘리지 않고 다 보이지만 여백 생김 */
+  max-width: 100%;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid #eee;
 }
 
-
-.main-img {
-  width:100%; max-height: 500px;
-  border-radius:12px; border:1px solid #eee;
-  object-fit:contain;
-}
 .detail-right { flex:1; display:flex; flex-direction:column; gap:14px; }
 .breadcrumb { font-size:14px; color:#6b7280; }
 .title { font-size:24px; font-weight:700; margin:4px 0; }
@@ -208,6 +194,7 @@ if (sessionMap != null) {
 .buttons { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
 .btn.solid { background:#0073e6; color:#fff; border:none; flex:1; text-align:center; }
 .btn.outline { background:#fff; border:1px solid #d1d5db; color:#111; }
+
 .detail-desc {
   max-width:1100px; margin:30px auto; padding:20px;
   border:1px solid #eee; border-radius:12px; background:#fafafa;
@@ -215,9 +202,6 @@ if (sessionMap != null) {
 .detail-desc h2 { font-size:18px; font-weight:700; margin-bottom:12px; }
 .desc { white-space:pre-wrap; line-height:1.6; font-size:15px; }
 .empty { color:#6b7280; font-size:14px; }
-.productsPicture {width:200px; height:250px;}
-
-
 </style>
 
 <script>
@@ -236,7 +220,6 @@ const appContext = "${contextPath}";
     const productId = btn.dataset.productId;
     const wasOn = btn.classList.contains('is-on');
 
-    // 1) 낙관적 UI
     btn.classList.toggle('is-on', !wasOn);
     btn.setAttribute('aria-pressed', String(!wasOn));
 
@@ -253,26 +236,21 @@ const appContext = "${contextPath}";
       const data = await res.json();
 
       if (!data.ok) {
-    	  btn.classList.toggle('is-on', wasOn);
-    	  btn.setAttribute('aria-pressed', String(wasOn));
-    	  if (data.reason === 'UNAUTH') {
-    	    alert('로그인이 필요합니다.');
-    	    location.href = appContext + '/user/login';
-    	  } else {
-    	    alert('처리 중 오류: ' + (data.message || ''));
-    	  }
-    	  return;
-    	}
+        btn.classList.toggle('is-on', wasOn);
+        btn.setAttribute('aria-pressed', String(wasOn));
+        if (data.reason === 'UNAUTH') {
+          alert('로그인이 필요합니다.');
+          location.href = appContext + '/user/login';
+        } else {
+          alert('처리 중 오류: ' + (data.message || ''));
+        }
+        return;
+      }
 
-      // 3) 서버 판단에 맞춰 최종 확정(혹시 불일치 시 교정)
       btn.classList.toggle('is-on', !!data.added);
       btn.setAttribute('aria-pressed', String(!!data.added));
 
-      // 필요하면 data.count로 카운트 배지 업데이트
-      // document.querySelector('#wishCount')?.textContent = data.count;
-
     } catch (e) {
-      // 네트워크 오류: 롤백
       btn.classList.toggle('is-on', wasOn);
       btn.setAttribute('aria-pressed', String(wasOn));
       alert('네트워크 오류가 발생했습니다.');
@@ -282,26 +260,19 @@ const appContext = "${contextPath}";
   });
 })();
 
-document.addEventListener("DOMContentLoaded", () => {
-  const productId = "${product.productId}";
-  getProductFetch(productId);
-});
-
 document.getElementById('btnPay')?.addEventListener('click', function() {
   const productId = "${product.productId}";
   const buyerId = "${userId}";
   const sellerId = "${product.sellerId}";
-  const loginUserId = "${sessionScope.sessionMap.accountId}"; // JSP에서 세션 값을 직접 가져옴
+  const loginUserId = "${sessionScope.sessionMap.accountId}";
   console.log("sellerId: ", sellerId);
 
-  // 🚩 로그인 체크
   if (!loginUserId || buyerId === "0" || !buyerId) {
     alert("채팅을 하시려면 먼저 로그인해주세요.");
     window.location.href = appContext + "/user/login";
     return;
   }
 
-  // 판매자와 구매자가 같을 때
   if (buyerId === sellerId) {
     alert("상품에 등록된 판매자와 구매자가 같아서 채팅할 수 없습니다");
     return;
@@ -309,26 +280,4 @@ document.getElementById('btnPay')?.addEventListener('click', function() {
     window.location.href = appContext + "/chat/createRoom?productId=" + productId + "&buyerId=" + buyerId + "&sellerId=" + sellerId;
   }
 });
-
-async function getProductFetch(productId) {
-  try {
-    const res = await fetch(appContext + "/api/product/detail/" + productId, {
-      method: "GET",
-      headers: {
-        "Accept": "application/json"
-      }
-    });
-    if (!res.ok) {
-      throw new Error("HTTP 오류 " + res.status);
-    }
-
-    const data = await res.json();
-    console.log("[getProductFetch] 응답:", data);
-
-    // 필요하다면 DOM 업데이트 처리 가능
-  } catch (err) {
-    console.error("상품 조회 실패:", err);
-  }
-}
 </script>
-
