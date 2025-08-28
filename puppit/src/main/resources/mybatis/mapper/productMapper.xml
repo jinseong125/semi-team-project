@@ -211,7 +211,7 @@
         <result property="statusId"         column="status_id"/>
         <result property="sellerId"			column="seller_id" />
         <result property="productDescription" column="product_description" />
-        <result property="sellerAccountId" column="seller_account_id" />
+        <result property="sellerNickname" column="seller_nickname" />
         
 
         <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
@@ -295,7 +295,7 @@
 	           t.image_id     AS thumb_image_id,
 	           t.image_url    AS thumb_image_url,
 	           t.is_thumbnail AS thumb_is_thumbnail,
-	           u.account_id   AS seller_account_id   <!-- ✅ 추가 -->
+	           u.nick_name     AS seller_nickname
 	    FROM product p
 	             JOIN product_category c ON p.category_id = c.category_id
 	             JOIN product_status   s ON p.status_id   = s.status_id
