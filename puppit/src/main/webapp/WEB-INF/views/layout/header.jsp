@@ -351,7 +351,10 @@ const alarmArea = document.getElementById("alarmArea");
 let alarmBell = document.getElementById("alarmBell");
 const categorySelect = document.getElementById("categorySelect");
 
-
+const size    = 40;
+const mainGrid = document.getElementById('productGrid'); 
+//초기 로드된 카드 개수 기준 오프셋
+let offset = mainGrid ? mainGrid.querySelectorAll('.product-card').length : 0;
 
 // 자동완성 키보드 네비게이션
 let currentIndex = -1; // 현재 선택된 인덱스 (없으면 -1)
@@ -447,18 +450,9 @@ function applyFilter(partial) {
 
 	
 	let alarmShownOnce = false;
-	//let contextPath = "${contextPath}";
-	//  let loginUserId = "${loginUserId}";
-	//  let userId = "${userId}";
 	
 	
- 
- 
-
-
-
-
-
+	
   var results = document.getElementById('search-results');
 let alarmClosed = false; // 팝업 닫힘 상태
 
@@ -558,11 +552,9 @@ document.addEventListener("DOMContentLoaded", function() {
 	  categorySelect.addEventListener("change", function () {
 		  const selected = this.value;
 		  if (selected) {
-		    window.location.href = contextPath + "/?category=" + encodeURIComponent(selected);
+		    window.location.href = contextPath + "/?category=" + encodeURIComponent(selected) + "&offset=" + offset + "&size=" + size;
 		  }
 		});
-
-	  
 	  
 	}); // <-- 문법 오류 방지: 이벤트 핸들러 끝
 	
