@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
   @Override
   public boolean deleteMyAccount(Integer userId) {
     try {
-      // 유저 조회
+      // 유저  조회
       UserDTO auth = userDAO.getUserByUserId(userId);
       if(auth == null) return false;  // 없는 유저 or 이미 탈퇴 처리된 케이스
       
