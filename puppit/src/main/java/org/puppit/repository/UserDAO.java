@@ -45,6 +45,11 @@ public class UserDAO {
     return sqlSession.insert("mybatis.mapper.userMapper.insertLogStatus", log);
   }
   
+  // user 정보 조회 (nickName)
+  public UserDTO getUserByNickName(String nickName) {
+	return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByNickName", nickName);
+  }
+  
   // user 정보 조회 (accountId)
   public UserDTO getUserByAccountId(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByAccountId", accountId);
