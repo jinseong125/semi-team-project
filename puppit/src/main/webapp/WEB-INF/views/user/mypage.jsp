@@ -291,7 +291,7 @@ body {
   </div>
   
 
-  <!-- 포인트 카드 (컴팩트) -->
+  <!-- 포인트 충전 -->
   <div class="point-card">
     <div class="point-head">
       <div class="point-title">포인트</div>

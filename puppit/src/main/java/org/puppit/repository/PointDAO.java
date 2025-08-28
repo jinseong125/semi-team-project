@@ -36,12 +36,21 @@ public class PointDAO {
     return template.update("mybatis.mapper.pointMapper.decreaseIfEnough", paraMap);
   }
   
-  // 포인트 충전 내역 기록 
-  public int insertPointRecord(int uid, int amount) {
+  // 충전 내역 상태 업데이트
+  public int updatePointRecord(String merchantUid, String status) {
+    Map<String, Object> paraMap = new HashMap<>();
+    paraMap.put("status", status);
+    paraMap.put("merchantUid", merchantUid);
+    
+    return template.update("mybatis.mapper.pointMapper.updatePointRecord", paraMap);
+  }
+  
+  //포인트 충전 내역 기록 
+  public Integer insertChargeRecord(Integer uid, Integer amount, String uuid) {
     Map<String, Object> paraMap = new HashMap<>();
     paraMap.put("uid", uid);
     paraMap.put("amount", amount);
-    paraMap.put("uuid", UUID.randomUUID().toString());
+    paraMap.put("uuid", uuid);
     
     return template.insert("mybatis.mapper.pointMapper.insertPointRecord", paraMap);
   }
