@@ -9,6 +9,7 @@
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
 String accountId = "";
 Integer userId = 0;
+String nickName = "";
 if (sessionMap != null) {
     Object accountIdObj = sessionMap.get("accountId");
     if (accountIdObj != null) {
@@ -17,6 +18,10 @@ if (sessionMap != null) {
     Object userIdObj = sessionMap.get("userId");
     if (userIdObj != null) {
         userId = Integer.parseInt(userIdObj.toString());
+    }
+    Object nickNameObj = sessionMap.get("nickName");
+    if (nickNameObj != null) {
+    	nickName = nickNameObj.toString();
     }
 }
 
@@ -31,6 +36,7 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
 
 <c:set var="loginUserId" value="<%= accountId %>" />
 <c:set var="userId" value="<%=userId %>"/>
+<c:set var="nickName" value="<%=nickName %>"/>
 <c:set var="highlightRoomIdStr" value="${highlightRoomIdStr}"/>
 <jsp:include page="/WEB-INF/views/layout/header.jsp?dt=<%=System.currentTimeMillis()%>"/>
 <!DOCTYPE html>
@@ -785,48 +791,37 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
 }
 
 function addChatMessageToHistory(chat) {
-    const productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId; // 판매자 ID 가져오기
-    const currentUserRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER"; // 현재 사용자 역할 결정
-
- 	// 이미 렌더링된 메시지는 건너뜀
-    if (chat.messageId && renderedMessageIds.has(chat.messageId)) {
-        return;
-    }
+    // 이미 렌더링된 메시지는 건너뜀
+    if (chat.messageId && renderedMessageIds.has(chat.messageId)) return;
     if (chat.messageId) renderedMessageIds.add(chat.messageId);
 
-    
-    // 메시지를 보낸 사람과 현재 사용자를 비교하여 영역 결정
-    if (String(chat.chatSenderAccountId) === String(loginUserId)) {
-        // 현재 사용자가 메시지를 보낸 경우
-        let alignClass = "right"; // 오른쪽 정렬
-        let msg = chat.message || chat.chatMessage || "";
+    // 내 닉네임은 로그인 시 window.nickName에 저장되어 있다고 가정
+    const myNickName = window.nickName; // 예: "캡틴미영짱짱" 또는 "소금파전"
 
-        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
-        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
+    // 내가 sender인지 receiver인지 판별
+    const isMeSender = String(chat.chatSenderAccountId) === String(myNickName);
+    const isMeReceiver = String(chat.chatReceiverAccountId) === String(myNickName);
 
-        let html =
-            '<div class="chat-message ' + alignClass + '">' +
-                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-                '<div class="chat-text">' + msg + '</div>' +
-                '<div class="chat-time">' + formattedTime + '</div>' +
-            '</div>';
-        chatHistory.innerHTML += html;
-    } else {
-        // 상대방이 메시지를 보낸 경우
-        let alignClass = "left"; // 왼쪽 정렬
-        let msg = chat.message || chat.chatMessage || "";
+    let alignClass = "left"; // 기본 왼쪽
 
-        // 시간을 yyyy-MM-dd a hh:mm:ss 형식으로 변환
-        let formattedTime = formatChatTime(chat.chatCreatedAt || "");
-
-        let html =
-            '<div class="chat-message ' + alignClass + '">' +
-                '<div class="chat-userid">' + (chat.chatSenderAccountId || "") + '</div>' +
-                '<div class="chat-text">' + msg + '</div>' +
-                '<div class="chat-time">' + formattedTime + '</div>' +
-            '</div>';
-        chatHistory.innerHTML += html;
+    if (isMeSender && chat.senderRole) {
+        // 내가 보낸 메시지: 기존대로
+        alignClass = (chat.senderRole === "SELLER") ? "right" : "left";
+    } else if (isMeReceiver && chat.receiverRole) {
+        // 내가 받은 메시지: 요구사항 반영
+        alignClass = (chat.receiverRole === "SELLER") ? "left" : "right";
     }
+
+    let msg = chat.message || chat.chatMessage || "";
+    let formattedTime = formatChatTime(chat.chatCreatedAt || "");
+
+    let html =
+        '<div class="chat-message ' + alignClass + '">' +
+            '<div class="chat-userid">' + (chat.chatSenderAccountId || chat.chatSenderUserName || "") + '</div>' +
+            '<div class="chat-text">' + msg + '</div>' +
+            '<div class="chat-time">' + formattedTime + '</div>' +
+        '</div>';
+    chatHistory.innerHTML += html;
 
     // 스크롤을 최신 메시지로 이동
     chatHistory.scrollTop = chatHistory.scrollHeight;
@@ -1125,7 +1120,7 @@ function sendMessage(currentRoomId) {
     const chatMessage = {
         chatRoomId: currentRoomId,
         chatMessage: message,
-        chatSenderAccountId: loginUserId,
+        chatSenderAccountId: nickName,
         chatReceiverAccountId: chatReceiverAccountId,
         productId: productId,
         buyerId: buyerId,
@@ -1135,6 +1130,7 @@ function sendMessage(currentRoomId) {
         chatCreatedAt: chatCreatedAt // ★ 추가!
     };
 
+    console.log('chatMessage: ', chatMessage);
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
     input.value = "";
 }

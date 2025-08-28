@@ -15,6 +15,7 @@ import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
 import org.puppit.model.dto.NotificationDTO;
 import org.puppit.model.dto.UserDTO;
+import org.puppit.repository.UserDAO;
 import org.puppit.service.ChatService;
 import org.puppit.service.UserService;
 
@@ -34,6 +35,7 @@ public class ChatWebSocketController {
 	private final SimpMessagingTemplate messagingTemplate;
 	private final UserService userService;
 	private final ChatService chatService;
+	private final UserDAO userDAO;
 
 	// 클라이언트가 /app/chat.send로 메시지 전송
 	@MessageMapping("/chat.send")
@@ -44,7 +46,8 @@ public class ChatWebSocketController {
 	    Integer productId = 0;
 
 	    // Sender 정보 조회
-	    UserDTO sender = userService.getUserId(chatMessageDTO.getChatSenderAccountId());
+	    System.out.println("chatMessageDTO.getChatSenderAccountId(): " + chatMessageDTO.getChatSenderAccountId());
+	    UserDTO sender = userDAO.getUserByNickName(chatMessageDTO.getChatSenderAccountId());
 	    if (sender == null) {
 	        System.out.println("Sender 정보를 찾을 수 없습니다. 메시지 처리 중단.");
 	        return;
@@ -115,12 +118,12 @@ public class ChatWebSocketController {
 	        }
 
 	        chatMessageDTO.setChatSender(sender.getUserId());
-	        chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
+	        chatMessageDTO.setChatSenderAccountId(sender.getNickName());
 	        chatMessageDTO.setChatSenderUserName(sender.getUserName());
 	        chatMessageDTO.setSenderRole("BUYER");
 
 	        chatMessageDTO.setChatReceiver(receiver.getUserId());
-	        chatMessageDTO.setChatReceiverAccountId(receiver.getAccountId());
+	        chatMessageDTO.setChatReceiverAccountId(receiver.getNickName());
 	        chatMessageDTO.setChatReceiverUserName(receiver.getUserName());
 	        chatMessageDTO.setReceiverRole("SELLER");
 	        chatMessageDTO.setProductId(productId.toString());
@@ -138,12 +141,12 @@ public class ChatWebSocketController {
 
 	        if (!chatMessageDTO.getChatSenderAccountId().equals(chatMessageDTO.getChatReceiverAccountId())) {
 	            chatMessageDTO.setChatSender(sender.getUserId());
-	            chatMessageDTO.setChatSenderAccountId(sender.getAccountId());
+	            chatMessageDTO.setChatSenderAccountId(sender.getNickName());
 	            chatMessageDTO.setChatSenderUserName(sender.getUserName());
 	            chatMessageDTO.setSenderRole(latest.getSenderRole());
 
 	            chatMessageDTO.setChatReceiver(chatMessageDTO.getChatReceiver());
-	            chatMessageDTO.setChatReceiverAccountId(chatReceiver.getAccountId());
+	            chatMessageDTO.setChatReceiverAccountId(chatReceiver.getNickName());
 	            chatMessageDTO.setChatReceiverUserName(chatReceiver.getUserName());
 	            chatMessageDTO.setReceiverRole(chatMessageDTO.getReceiverRole());
 	            chatMessageDTO.setProductId(productId.toString());
@@ -191,7 +194,7 @@ public class ChatWebSocketController {
 	    NotificationDTO notification = new NotificationDTO();
 	    notification.setRoomId(chatRoomId);
 	    notification.setUserId(sender.getUserId());
-        notification.setSenderAccountId(chatMessageDTO.getChatSenderAccountId());
+        notification.setSenderAccountId(sender.getNickName());
         notification.setReceiverAccountId(chatMessageDTO.getChatReceiverAccountId());
         notification.setChatMessage(chatMessageDTO.getChatMessage());
         notification.setSenderRole(chatMessageDTO.getSenderRole());
@@ -205,21 +208,6 @@ public class ChatWebSocketController {
         Integer alarmInsertRowId = chatService.saveAlarmData(notification);
         System.out.println("메시지 알림 저장 성공: " + alarmInsertRowId);
         System.out.println("메시지 알림 내용: " + notification.toString());
-                
-        // ======= [중복 알림 방지] =======
-       // if (chatService.isAlarmDuplicate(notification) == 0) {
-        //    try {
-        //        Integer alarmCount = chatService.saveAlarmData(notification);
-        //        System.out.println("메시지 알림 저장 성공: " + alarmCount);
-        //    } catch (Exception e) {
-        //        System.out.println("알림 저장 중 오류 발생: " + e.getMessage());
-        //        e.printStackTrace();
-         //   }
-       // } else {
-       //     System.out.println("중복 알림이라 저장하지 않음: " + notification);
-        //}
-        
-        
         
         // 알림을 브로드캐스트
         messagingTemplate.convertAndSend("/topic/notification", notification);

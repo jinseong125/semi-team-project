@@ -11,6 +11,9 @@
 <c:if test="${empty userId}">
   <c:set var="userId" value="${sessionScope.sessionMap.userId}" />
 </c:if>
+<c:if test="${not empty sessionScope.sessionMap.nickName}">
+ <c:set var="nickName" value="${sessionScope.sessionMap.nickName}" />
+</c:if>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -338,6 +341,7 @@ a {
 window.contextPath = "${contextPath}";
 window.loginUserId = "${loginUserId}";
 window.userId      = "${userId}";
+window.nickName      = "${nickName}";
 window.myAccountId = "${loginUserId}";
 window.notificationSubscription = null;
 let stompClient = null;
@@ -741,7 +745,7 @@ document.addEventListener("DOMContentLoaded", function() {
       console.log('notification parsed:', notification);
 
       // 1. 수신자가 로그인 사용자일 때만!
-      if (String(notification.receiverAccountId) !== String(loginUserId)) {
+      if (String(notification.receiverAccountId) !== String(nickName)) {
         return;
       }
 
@@ -773,8 +777,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
    // receiver 또는 sender 모두 자신의 채팅방 목록 업데이트!
       if (
-        String(chat.chatReceiverAccountId) === String(loginUserId) ||
-        String(chat.chatSenderAccountId) === String(loginUserId)
+        String(chat.chatReceiverAccountId) === String(window.nickName) ||
+        String(chat.chatSenderAccountId) === String(window.nickName)
       ) {
     	console.log("chatSenderAccountId: ", chat.chatSenderAccountId);
         window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage, chat.chatCreatedAt);
@@ -787,7 +791,7 @@ document.addEventListener("DOMContentLoaded", function() {
       
       
       if (String(currentChatRoomId) !== String(chat.chatRoomId)&&
-    		    String(chat.chatSenderAccountId) !== String(loginUserId)) {
+    		    String(chat.chatSenderAccountId) !== String(window.nickName)) {
         alarmClosed = false;
         localStorage.setItem('puppitAlarmClosed', 'false');
         showAlarmPopup([chat]);

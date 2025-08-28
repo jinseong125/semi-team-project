@@ -31,13 +31,6 @@
      WHERE account_id = #{accountId}
   </select>
   
-  <!-- 닉네임 중복 검사 -->
-  <select id="countByNickName" parameterType="String" resultType="java.lang.Integer">
-    SELECT COUNT(*)
-      FROM user
-     WHERE nick_name = #{nickName}
-  </select>
-  
   <!-- 이메일 중복 검사 -->
   <select id="countByEmail" parameterType="String" resultType="java.lang.Integer">
     SELECT COUNT(*)
@@ -50,6 +43,13 @@
     SELECT account_id
       FROM user
      WHERE user_name = #{userName} AND user_email = #{userEmail}
+  </select>
+  
+  <!-- nickName 사용해서 user 정보 조회 -->
+  <select id="getUserByNickName" parameterType="String" resultType="UserDTO">
+  	SELECT user_id, account_id, user_name, nick_name, user_email, user_phone, created_at, updated_at, point, profile_image_key, user_password
+      FROM user
+    WHERE nick_name = #{nickName}
   </select>
   
   <!-- account 사용해서 user 정보 조회 -->

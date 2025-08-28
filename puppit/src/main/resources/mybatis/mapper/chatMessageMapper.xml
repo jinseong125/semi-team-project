@@ -17,11 +17,11 @@ SELECT
     r.product_id,
 
     c.chat_sender,
-    sender.account_id   AS sender_account_id,
+    sender.nick_name   AS sender_account_id,
     sender.user_name    AS sender_user_name,
 
     c.chat_receiver,
-    receiver.account_id AS receiver_account_id,
+    receiver.nick_name AS receiver_account_id,
     receiver.user_name  AS receiver_user_name,
 
     c.chat_message,
@@ -46,7 +46,7 @@ SELECT
     CASE WHEN c.chat_receiver = p.seller_id THEN p.seller_id ELSE NULL END AS receiver_seller_id,
 
    
-    seller.account_id AS chat_seller_account_id
+    seller.nick_name AS chat_seller_nick_name
 
 FROM chat c
 JOIN room    r ON c.chat_room_id = r.room_id
@@ -87,11 +87,11 @@ SELECT
     r.product_id,
 
     c.chat_sender,
-    sender.account_id   AS sender_account_id,
+    sender.nick_name   AS sender_account_id,
     sender.user_name    AS sender_user_name,
 
     c.chat_receiver,
-    receiver.account_id AS receiver_account_id,
+    receiver.nick_name AS receiver_account_id,
     receiver.user_name  AS receiver_user_name,
 
     c.chat_message,
@@ -183,16 +183,16 @@ ORDER BY c.chat_created_at ASC;
             p.product_name             AS productName,
             p.product_price            AS productPrice,
             p.seller_id                AS sellerId,
-            s.account_id               AS sellerAccountId,
+            s.nick_name               AS sellerAccountId,
             u.user_name                AS buyerName,
             s.user_name                AS sellerName,
             last_msg.chat_message      AS lastMessage,
             last_msg.chat_created_at   AS lastMessageAt,
             last_msg.chat_sender       AS lastMessageSenderId,
-            sender.account_id          AS lastMessageSenderAccountId,
+            sender.nick_name          AS lastMessageSenderAccountId,
             sender.user_name           AS lastMessageSenderName,
             last_msg.chat_receiver     AS lastMessageReceiverId,
-            receiver.account_id        AS lastMessageReceiverAccountId,
+            receiver.nick_name        AS lastMessageReceiverAccountId,
             receiver.user_name         AS lastMessageReceiverName,
             COALESCE(last_msg.chat_created_at, r.room_created_at) AS sortTime
         FROM room r
@@ -340,10 +340,10 @@ WHERE p.product_id = #{productId};
     c.chat_message,
     c.chat_created_at,
     c.chat_sender,
-    sender.account_id AS senderAccountId,          -- 발신자 accountId
+    sender.nick_name AS senderAccountId,          -- 발신자 accountId
     c.chat_room_id AS roomId,
     c.chat_receiver,
-    receiver.account_id AS receiverAccountId,      -- 수신자 accountId
+    receiver.nick_name AS receiverAccountId,      -- 수신자 accountId
     p.product_name                                -- 상품명
 FROM alarm a
 JOIN chat c ON a.message_id = c.message_id
