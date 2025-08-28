@@ -11,7 +11,7 @@
     3. resultType : 쿼리문이 메소드로 반환하는 값의 타입이다. <select> 태그만 작성 한다.
    -->
 
- <!-- 회원가입 -->
+ <!-- 회원 가입 -->
   <insert id="userSignUp" parameterType="UserDTO">
      INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at, salt)
      VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW(), #{salt})
@@ -61,9 +61,9 @@
   
   <!-- userId를 이용해 user 정보 조회 -->
   <select id="getUserByUserId" parameterType="java.lang.Integer" resultType="UserDTO">
-    SELECT user_password, salt, profile_image_key, account_id
+    SELECT user_id, account_id,user_password, salt, profile_image_key, provider
       FROM user
-     WHERE user_id = #{userId}
+     WHERE user_id = #{userId} AND is_deleted = 0
   </select>
   
   <!-- 로그인 로그 저장 -->
@@ -134,6 +134,18 @@
          profile_image_key = #{profileImageKey},
          updated_at = NOW()
    WHERE user_id = #{userId}
+</update>
+
+<!-- 소프트 딜리트 (계정 아이디 뒤에 #ID, 이메일 NULL -->
+<update id="softDeleteUser" parameterType="int">
+   UPDATE user
+      SET is_deleted = 1,
+          deleted_at = NOW(),
+          account_id = CONCAT(account_id, '#', user_id),
+          user_email = NULL,
+          nick_name = CONCAT('탈퇴한회원', user_id)
+    WHERE user_id = #{userId}
+      AND is_deleted = 0
 </update>
   
   

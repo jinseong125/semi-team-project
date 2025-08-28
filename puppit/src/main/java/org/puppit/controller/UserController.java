@@ -73,6 +73,34 @@ public class UserController {
     return "redirect:/";
   }
   
+  // 회원 탈퇴
+  @PostMapping("/delete")
+  public String deleteAccount(HttpSession session,
+                             @RequestParam("agreement") String agreement,
+                             @SessionAttribute(name = "sessionMap", required = false) Map<String, Object> sessionMap,
+                             RedirectAttributes redirectAttr) {
+    
+    Integer userId = (Integer)sessionMap.get("userId");
+
+    if(sessionMap == null || userId == null) {
+      redirectAttr.addFlashAttribute("error", "로그인이 필요 합니다");
+      return "redirect:/user/login";
+    }
+    if(!"회원 탈퇴 하겠습니다 이에 동의 합니다".equals(agreement)) {
+      redirectAttr.addFlashAttribute("error", "동의 문구가 일치하지 않습니다");
+      return "rediredct:/userprofile";
+    }
+    boolean ok = userService.deleteMyAccount(userId);
+    if(!ok) {
+      redirectAttr.addFlashAttribute("error", "비밀번호가 일치하지 않거나 삭제에 실패 했습니다");
+      return "redirect:/user/profile";
+    }
+    // 세션 초기화
+    session.invalidate();
+    redirectAttr.addFlashAttribute("msg", "Puppit 탈퇴가 완료 되었습니다. 감사합니다");
+    return "redirect:/";
+  }
+  
   // 중복 검사
   @GetMapping("/check")
   public ResponseEntity<Void> check(UserDTO userDTO) {

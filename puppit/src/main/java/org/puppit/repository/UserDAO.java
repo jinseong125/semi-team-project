@@ -20,6 +20,10 @@ public class UserDAO {
   public Integer userSignUp(UserDTO user) {
     return sqlSession.insert("mybatis.mapper.userMapper.userSignUp", user);
   }
+  // 회원탈퇴
+  public int softDeleteUser(Integer userId) {
+    return sqlSession.update("mybatis.mapper.userMapper.softDeleteUser", userId);
+  }
   // 로그인
   public UserDTO selectLogin(String accountId) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.selectLogin", accountId);

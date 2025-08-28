@@ -46,6 +46,21 @@ public class UserServiceImpl implements UserService {
     }
   }
   @Override
+  public boolean deleteMyAccount(Integer userId) {
+    try {
+      // 유저 조회
+      UserDTO auth = userDAO.getUserByUserId(userId);
+      if(auth == null) return false;  // 없는 유저 or 이미 탈퇴 처리된 케이스
+      
+      // 회원 탈퇴
+      int rows = userDAO.softDeleteUser(userId);
+      return rows == 1;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+  @Override
   public UserDTO login(UserDTO user) {
     try {
       // 빈값 체크
@@ -54,12 +69,12 @@ public class UserServiceImpl implements UserService {
       }
       
       // 1) DB에서 accountId로 사용자 정보(솔트, 저장된 해시) 가져오기
-      UserDTO dbUser = userDAO.selectLogin(user.getAccountId());
-      if (dbUser == null) {
+      UserDTO auth = userDAO.selectLogin(user.getAccountId());
+      if (auth == null) {
         return null; // 계정 없음
       }
       // 2) 솔트 꺼내기 (DB에 VARBINARY로 저장되어 있으면 byte[]로 매핑됨)
-      byte[] salt = dbUser.getSalt();
+      byte[] salt = auth.getSalt();
       if (salt == null) {
         return null; // 안전장치
       }
@@ -71,10 +86,10 @@ public class UserServiceImpl implements UserService {
       String encryptedPassword = secureUtil.hashPBKDF2(Password, salt); // returns hex string
       
       // 4) DB에 저장된 해시와 안전비교
-      String storedHash = dbUser.getUserPassword(); // DB에 저장된 해시 (hex)
+      String storedHash = auth.getUserPassword(); // DB에 저장된 해시 (hex)
       if (storedHash == null) return null;
       
-      return encryptedPassword.equals(dbUser.getUserPassword()) ? dbUser : null;
+      return encryptedPassword.equals(auth.getUserPassword()) ? auth : null;
       
     } catch (Exception e) {
       e.printStackTrace();
@@ -87,13 +102,13 @@ public class UserServiceImpl implements UserService {
     return userDAO.findAccountIdByNameAndEmail(user);
   }
   // 비밀번호를 이용한 본인 확인
-  public Boolean passwordCheck(int userId, String rawPassword) {
+  public Boolean passwordCheck(int userId, String userPassword) {
     UserDTO auth = userDAO.getUserByUserId(userId);
     if (auth == null || auth.getSalt() == null || auth.getUserPassword() == null) {
       return false;
     }
-    String encrypted = secureUtil.hashPBKDF2(rawPassword, auth.getSalt());
-    return encrypted.equals(auth.getUserPassword());
+    String encryptedPassword = secureUtil.hashPBKDF2(userPassword, auth.getSalt());
+    return encryptedPassword.equals(auth.getUserPassword());
   }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
