@@ -109,10 +109,20 @@ public class ChatController {
 	        @RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId,
 	        @RequestParam(value = "highlightMessageId", required = false) Integer highlightMessageId,
 	        Model model, HttpSession session) {
-	    Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
+	    System.out.println("/recentRoomList");
+		Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
 	    int userId = Integer.parseInt(map.get("userId").toString());
 	    Map<String, Object> chatMap = chatService.getChatRoomsByCreatedDesc(userId);
+	   
+	   
+	 // chatMap이 {"roomId": ..., "lastMessage": ..., "lastMessageAt": ...} 와 같은 구조라고 가정
+	    Object lastMessageAtObj = chatMap.get("lastMessageAt");
 
+	    // null 체크 후 String으로 변환
+	    String lastMessageAt = (lastMessageAtObj != null) ? lastMessageAtObj.toString() : null;
+
+	    // 사용 예시
+	    System.out.println("lastMessageAt = " + lastMessageAt);
 	    model.addAttribute("chatList", chatMap.get("chats"));
 	    model.addAttribute("profileImage", chatMap.get("profileImage"));
 	    model.addAttribute("highlightRoomId", highlightRoomId);
