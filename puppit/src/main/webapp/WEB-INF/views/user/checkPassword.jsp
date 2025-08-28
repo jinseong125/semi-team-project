@@ -6,6 +6,12 @@
   <jsp:param value="Home" name="title" />
 </jsp:include>
 
+
+<!-- ✅ 소셜 로그인은 JSP에서도 바로 리다이렉트 -->
+<c:if test="${not empty sessionScope.sessionMap.provider}">
+  <c:redirect url="${contextPath}/user/profile"/>
+</c:if>
+
 <title>비밀번호 재확인</title>
 
 <style>
