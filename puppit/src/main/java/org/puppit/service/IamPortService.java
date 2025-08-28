@@ -20,7 +20,6 @@ public class IamPortService {
       this.API_SECRET = API_SECRET;
     }
     // 1. 아임포트 access_token 발급
-    @SuppressWarnings("unchecked")
     private String getAccessToken() {
         String url = "https://api.iamport.kr/users/getToken";
 
@@ -42,32 +41,42 @@ public class IamPortService {
     }
 
     // 2. 결제정보 조회 (imp_uid로)
-    @SuppressWarnings("unchecked")
-    public int getAmountByImpUid(String impUid) {
+    public Map<String, Object> getPaymentInfoByImpUid(String impUid) {
       String accessToken = getAccessToken();
 
       HttpHeaders headers = new HttpHeaders();
       headers.set("Authorization", accessToken);
 
       HttpEntity<Void> entity = new HttpEntity<>(headers);
-
       String url = "https://api.iamport.kr/payments/" + impUid;
 
       ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
-      Map responseBody = response.getBody();
+      Map body = response.getBody();
 
-      if (responseBody.get("response") == null) {
-          return -1;
+      // PortOne 표준: code == 0 이면 정상
+      Object code = (body != null) ? body.get("code") : null;
+      if (!(code instanceof Number) || ((Number) code).intValue() != 0) {
+          return Map.of("success", false, "message", "iamport api error");
       }
 
-      Map<String, Object> responseData = (Map<String, Object>) responseBody.get("response");
-
-      Object amountObj = responseData.get("amount");
-      if (amountObj instanceof Number) {
-          return ((Number) amountObj).intValue();  
-      } else {
-          return -1;
+      Map<String, Object> resp = (Map<String, Object>) body.get("response");
+      if (resp == null) {
+          return Map.of("success", false, "message", "no response field");
       }
+
+      Number amountNum = (Number) resp.get("amount");
+      String merchantUid = (String) resp.get("merchant_uid");
+      String status = (String) resp.get("status"); // paid|ready|failed|cancelled...
+
+      Integer amount = (amountNum != null) ? amountNum.intValue() : null;
+
+      Map<String, Object> result = new HashMap<>();
+      result.put("success", amount != null && merchantUid != null);
+      result.put("amount", amount);
+      result.put("merchantUid", merchantUid);
+      result.put("status", status);
+      return result;
   }
+
 
 }

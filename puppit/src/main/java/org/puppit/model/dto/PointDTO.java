@@ -18,4 +18,5 @@ public class PointDTO {
   private String pointChargeImpUid;
   private String pointChargeOrderNumber;
   private Timestamp pointChargeChargedAt; 
+  private String chargeStatus;
 }

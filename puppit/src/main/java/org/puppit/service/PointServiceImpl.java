@@ -20,13 +20,16 @@ public class PointServiceImpl implements PointService {
   private final PointDAO pointDAO;
 
   @Override
-  public boolean verifyAndCharge(int uid, int amount) {
+  public boolean verifyAndCharge(Integer uid, String merchantUid, Integer amount) {
     try {
       boolean resultPointUpdate = pointDAO.updatePoint(uid, amount) == 1;
-      boolean resultRecordUpdate = pointDAO.insertPointRecord(uid, amount) == 1;
+      boolean resultRecordUpdate = pointDAO.updatePointRecord(merchantUid, "PAID") == 1;
       
-      if(!resultPointUpdate || !resultRecordUpdate) {
+      if(!resultPointUpdate) {
         throw new RuntimeException("포인트 잔액 충전 실패");
+      }
+      if(!resultRecordUpdate) {
+        throw new RuntimeException("포인트 충전내역 업데이트 실패");
       }
       
     } catch (Exception e) {
@@ -43,4 +46,12 @@ public class PointServiceImpl implements PointService {
     List<PointDTO> result = pointDAO.selectPointRecordById(userId);
     return result;
   }
+
+  @Override
+  public boolean insertChargeRecord(Integer uid, Integer amount, String uuid) {
+    Integer result = pointDAO.insertChargeRecord(uid, amount, uuid);
+    return result == 1;
+  }
+  
+  
 }

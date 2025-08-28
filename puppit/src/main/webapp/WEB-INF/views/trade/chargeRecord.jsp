@@ -16,37 +16,31 @@
   --line: #dfe3ea;
   --shadow: 0 8px 24px rgba(0, 0, 0, .08);
 }
-
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
 }
-
 .wrap {
   max-width: 1200px;
   margin: 24px auto;
   padding: 0 20px 24px;
 }
-
 .header-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   margin-bottom: 14px;
 }
-
 .title {
   font-size: 22px;
   font-weight: 800;
 }
-
 .count {
   color: var(--muted);
   font-size: 14px;
 }
-
 .card {
   background: var(--card);
   border: 1px solid var(--line);
@@ -54,12 +48,10 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
 }
-
 .table {
   width: 100%;
   border-collapse: collapse;
 }
-
 .table thead th {
   text-align: left;
   padding: 14px 16px;
@@ -69,17 +61,14 @@ body {
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
-
 .table tbody td {
   padding: 14px 16px;
   border-bottom: 1px solid var(--line);
   font-size: 14px;
 }
-
 .table tbody tr:hover {
   background: #fcfdff;
 }
-
 .badge-amount {
   display: inline-block;
   padding: 6px 10px;
@@ -88,17 +77,45 @@ body {
   border: 1px solid rgba(79, 134, 255, .25);
   font-weight: 800;
 }
-
 .mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   letter-spacing: .2px;
 }
-
 .empty {
   padding: 28px 20px;
   text-align: center;
   color: var(--muted);
 }
+.badge-status{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:12px;
+  border:1px solid transparent;
+  background:#f6f7f9;
+}
+.badge-status.pending{
+  color:#6b7280;              
+  background:rgba(107,114,128,.08);
+  border-color:rgba(107,114,128,.25);
+}
+.badge-status.paid{
+  color:#0f766e;              
+  background:rgba(15,118,110,.08);
+  border-color:rgba(15,118,110,.25);
+}
+.badge-status.failed{
+  color:#b91c1c;              
+  background:rgba(185,28,28,.08);
+  border-color:rgba(185,28,28,.25);
+}
+.badge-status.canceled{
+  color:#7c2d12;              
+  background:rgba(124,45,18,.08);
+  border-color:rgba(124,45,18,.25);
+}
+
 </style>
 
 <div class="wrap">
@@ -118,6 +135,7 @@ body {
               <th>충전 시간</th>
               <th>주문번호</th>
               <th>충전 금액</th>
+              <th>결제 상태</th>
             </tr>
           </thead>
           <tbody>
@@ -137,6 +155,19 @@ body {
                     <fmt:formatNumber value="${pointDTO.pointChargeAmount}" type="number" /> P
                   </span>
                 </td>
+                <!-- 상태 -->
+                <td>
+                  <span class="badge-status ${fn:toLowerCase(pointDTO.chargeStatus)}">
+                    <c:choose>
+                      <c:when test="${pointDTO.chargeStatus == 'PAID'}">결제 완료</c:when>
+                      <c:when test="${pointDTO.chargeStatus == 'PENDING'}">대기</c:when>
+                      <c:when test="${pointDTO.chargeStatus == 'FAILED'}">실패</c:when>
+                      <c:when test="${pointDTO.chargeStatus == 'CANCELED'}">취소</c:when>
+                      <c:otherwise>알수없음</c:otherwise>
+                    </c:choose>
+                  </span>
+                </td>
+
               </tr>
             </c:forEach>
           </tbody>
