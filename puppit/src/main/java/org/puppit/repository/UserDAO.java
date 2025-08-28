@@ -80,4 +80,7 @@ public class UserDAO {
   public int updateSocialProfile(UserDTO user) {
       return sqlSession.update("mybatis.mapper.userMapper.updateSocialProfile", user);
   }
+  public UserDTO getUserByNickName(String nickName) {
+    return sqlSession.selectOne("mybatis.mapper.userMapper.getUserByNickName", nickName);
+   }
 }

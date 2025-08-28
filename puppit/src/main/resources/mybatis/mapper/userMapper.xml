@@ -147,6 +147,14 @@
     WHERE user_id = #{userId}
       AND is_deleted = 0
 </update>
+
+  <!-- nickName을 이용해 user 정보 조회 -->
+  <select id="getUserByNickName" parameterType="String" resultType="UserDTO">
+     SELECT user_id, account_id, user_name, nick_name
+      FROM user
+    WHERE nick_name = #{nickName}
+  </select>
+
   
   
 </mapper>
