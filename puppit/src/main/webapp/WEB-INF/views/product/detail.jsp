@@ -26,27 +26,33 @@ if (sessionMap != null) {
 
 <div class="detail-wrap">
   <!-- 좌측: 이미지 -->
+  
   <div class="detail-left">
     <!-- 대표 이미지 -->
-    <c:choose>
-      <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
-        <img class="productsPicture main-img"
-             src="${product.thumbnail.imageUrl}"
-             alt="${product.productName}" />
-      </c:when>
-      <c:otherwise>
-        <div class="thumb-placeholder">이미지 없음</div>
-      </c:otherwise>
-    </c:choose>
+   
+<c:choose>
+  <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
+    <img id="mainImage" class="main-img"
+         src="${product.thumbnail.imageUrl}"
+         alt="${product.productName}" />
+  </c:when>
+  <c:otherwise>
+    <div class="thumb-placeholder">이미지 없음</div>
+  </c:otherwise>
+</c:choose>
 
-    <!-- 추가 이미지 (줄줄이 나열) -->
-    <c:forEach var="img" items="${subImages}">
-      <img class="productsPicture"
-           src="${img.imageUrl}"
-           alt="${product.productName}" />
-    </c:forEach>
+<!-- 서브 이미지 -->
+<div class="secondPictureContainer">
+  <c:forEach var="img" items="${subImages}">
+    <img class="secondPicture"
+         src="${img.imageUrl}"
+         alt="${product.productName}" />
+  </c:forEach>
+</div>
+
+    
+    
   </div>
-
   <!-- 우측: 상품 정보 -->
   <div class="detail-right">
     <!-- 카테고리 -->
@@ -88,7 +94,7 @@ if (sessionMap != null) {
       </li>
       <li>
         <span class="label">판매자 ID</span>
-        <span>${product.sellerId}</span>
+        <span>${product.sellerAccountId}</span>
       </li>
     </ul>
 
@@ -166,22 +172,46 @@ if (sessionMap != null) {
   flex: 1;
   width: 100%;
   max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 대표 이미지 전용 박스 */
+.thumbnail-box {
+  width: 100%;
+  aspect-ratio: 1 / 1;        /* 정사각형 박스 */
   border: 1px solid #eee;
   border-radius: 12px;
   display: flex;
-  flex-direction: column; /* 대표 + 추가 이미지를 세로로 줄줄이 */
-  gap: 12px;
   align-items: center;
+  justify-content: center;
   background: #fafafa;
-  padding: 10px;
+  overflow: hidden;
 }
-.detail-left img {
-  max-width: 100%;
-  max-height: 500px;
-  object-fit: contain;
-  border-radius: 12px;
-  border: 1px solid #eee;
+
+.main-img {
+  width: 100%;
+  height: 60%;
+  /*  object-fit: contain;        이미지가 박스 안에서 꽉 차게 */
 }
+
+/* 서브 이미지 */
+.secondPictureContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.secondPicture {
+  width: 45%;                 /* 두 장 나란히 */
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
 
 .detail-right { flex:1; display:flex; flex-direction:column; gap:14px; }
 .breadcrumb { font-size:14px; color:#6b7280; }
@@ -196,7 +226,7 @@ if (sessionMap != null) {
 .btn.outline { background:#fff; border:1px solid #d1d5db; color:#111; }
 
 .detail-desc {
-  max-width:1100px; margin:30px auto; padding:20px;
+  max-width:1100px; margin:-100px auto; padding:20px;
   border:1px solid #eee; border-radius:12px; background:#fafafa;
 }
 .detail-desc h2 { font-size:18px; font-weight:700; margin-bottom:12px; }
@@ -206,6 +236,21 @@ if (sessionMap != null) {
 
 <script>
 const appContext = "${contextPath}";
+
+//서브 이미지 클릭하면 대표 이미지 교체
+document.addEventListener("DOMContentLoaded", () => {
+  const mainImage = document.getElementById("mainImage");
+  const thumbs = document.querySelectorAll(".secondPicture");
+
+  thumbs.forEach(thumb => {
+    thumb.addEventListener("click", () => {
+      if (mainImage) {
+        mainImage.src = thumb.src;
+      }
+    });
+  });
+});
+
 
 (function() {
   const btn = document.getElementById('btnWish');

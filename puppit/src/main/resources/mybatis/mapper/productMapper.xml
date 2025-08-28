@@ -89,6 +89,7 @@
            is_thumbnail AS thumbnail
        FROM product_image
       WHERE product_id = #{productId}
+       AND is_thumbnail = false
    	  ORDER BY image_id ASC
       LIMIT 2
 	</select>
@@ -210,6 +211,8 @@
         <result property="statusId"         column="status_id"/>
         <result property="sellerId"			column="seller_id" />
         <result property="productDescription" column="product_description" />
+        <result property="sellerAccountId" column="seller_account_id" />
+        
 
         <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
             <id     property="categoryId"   column="category_id"/>
@@ -276,31 +279,34 @@
         LIMIT 40
     </select>
     
-    <!-- 썸네일 -->
-    <select id="detailProducts" parameterType="int" resultMap="MyProducts">
-        SELECT p.product_id,
-               p.product_name,
-               p.product_price,
-               p.product_created_at,
-               p.product_updated_at,
-               p.category_id,
-               p.status_id,
-               p.seller_id,
-               p.product_description,
-               c.category_name,
-               s.status_name,
-               t.image_id     AS thumb_image_id,
-               t.image_url    AS thumb_image_url,
-               t.is_thumbnail AS thumb_is_thumbnail
-        FROM product p
-                 JOIN product_category c ON p.category_id = c.category_id
-                 JOIN product_status   s ON p.status_id   = s.status_id
-                 LEFT JOIN product_image t
-                           ON t.product_id = p.product_id                     
-        WHERE p.product_id = #{productId}
-        AND is_thumbnail = 1
-        ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
-    </select>
+    <!-- 상품 상세조회 -->
+	<select id="detailProducts" parameterType="int" resultMap="MyProducts">
+	    SELECT p.product_id,
+	           p.product_name,
+	           p.product_price,
+	           p.product_created_at,
+	           p.product_updated_at,
+	           p.category_id,
+	           p.status_id,
+	           p.seller_id,
+	           p.product_description,
+	           c.category_name,
+	           s.status_name,
+	           t.image_id     AS thumb_image_id,
+	           t.image_url    AS thumb_image_url,
+	           t.is_thumbnail AS thumb_is_thumbnail,
+	           u.account_id   AS seller_account_id   <!-- ✅ 추가 -->
+	    FROM product p
+	             JOIN product_category c ON p.category_id = c.category_id
+	             JOIN product_status   s ON p.status_id   = s.status_id
+	             LEFT JOIN product_image t
+	                       ON t.product_id = p.product_id 
+	                      AND t.is_thumbnail = 1            <!-- ✅ 썸네일 조건은 여기로 -->
+	             LEFT JOIN user u
+	                       ON p.seller_id = u.user_id       <!-- ✅ seller_id -> user 조인 -->
+	    WHERE p.product_id = #{productId}
+	    ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC
+	</select>
 
     <!-- 커서 기반 스크롤 -->
     <select id="findProductsAfter" parameterType="map" resultType="org.puppit.model.dto.ProductDTO">

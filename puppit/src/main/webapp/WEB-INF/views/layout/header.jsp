@@ -155,7 +155,7 @@ a {
 }
 .category .chev { 
   position:absolute; 
-  right:14px; 
+  right:320px; 
   pointer-events:none; 
   color:#4a90e2; 
   font-size:12px; 
@@ -275,20 +275,18 @@ a {
       <div id="top-keywords">로딩 중...</div>
 
       <!-- 카테고리 -->
-      <div class="meta-row">
-        <label class="category">
-          <select id="categorySelect">
-            <option value="" disabled selected hidden>카테고리</option>
-            <option value="사료">사료</option>
-            <option value="간식">간식</option>
-            <option value="외출용품">외출용품</option>
-            <option value="기타용품">기타용품</option>
-          </select>
-          <i class="fa-solid fa-chevron-down chev"></i>
-        </label>
-      </div>
-    </div>
-  </div>
+      <label class="category">
+        <select id="categorySelect">
+          <option value="" disabled hidden ${empty param.category ? "selected" : ""}>카테고리</option>
+          <option value="사료" ${param.category eq '사료' ? "selected" : ""}>사료</option>
+          <option value="간식" ${param.category eq '간식' ? "selected" : ""}>간식</option>
+          <option value="외출용품" ${param.category eq '외출용품' ? "selected" : ""}>외출용품</option>
+          <option value="기타용품" ${param.category eq '기타용품' ? "selected" : ""}>기타용품</option>
+        </select>
+        <i class="fa-solid fa-chevron-down chev"></i>
+      </label>
+    </div><!-- left-col 끝 -->
+  </div><!-- left 끝 -->
 
   <!-- 오른쪽 -->
   <div class="right">
@@ -304,29 +302,31 @@ a {
 
         <button id="alarmBell" style="background:none;border:none;display:inline-block;cursor:pointer;font-size:22px;margin-left:8px;" title="알림창 열기">
           <i class="fa-regular fa-bell"></i>
-       </button>
+        </button>
 
         <a href="${contextPath}/user/logout" class="btn">로그아웃</a>
-   
 
-         <!-- 채팅 버튼 -->
-      <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
-        <i class="fa-regular fa-comment-dots"></i> 채팅
-      </button>
-
+        <!-- 채팅 버튼 -->
+        <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
+          <i class="fa-regular fa-comment-dots"></i> 채팅
+        </button>
       </c:otherwise>
     </c:choose>
     </div>
     <div class="bottom-actions">
       <a href="${contextPath}/product/myproduct" class="btn dark">상품 관리</a>
     </div>
-  </div>
+  </div><!-- right 끝 -->
+</div><!-- header 끝 -->
+
+<!-- ✅ header 바깥 -->
+<div id="alarmArea"></div>
+
+
+
+  <!-- 검색 결과가 여기에 들어감 -->
 </div>
-
-
-
-  <div id="alarmArea"></div>
-
+</body>
 <hr>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
