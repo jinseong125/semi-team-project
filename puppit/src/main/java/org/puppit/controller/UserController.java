@@ -194,7 +194,13 @@ public class UserController {
   }
   // mypage에서 profile 가기전 password 검사 페이지
   @GetMapping("/checkPassword")
-  public String checkPwd() {
+  public String checkPwd(@SessionAttribute(name = "sessionMap", required = false) Map<String, Object> sessionMap) {
+    // 카카오 로그인시 비밀번호 재확인 필요 x
+    String provider = (String)sessionMap.get("provider");
+    
+    if(provider != null && !provider.isEmpty()) {
+      return "user/profile";
+    }
     return "user/checkPassword";
   }
   //mypage에서 profile 가기전 password 검사
@@ -206,6 +212,13 @@ public class UserController {
       if(sessionMap == null || sessionMap.get("userId") == null) {
         redirectAttr.addFlashAttribute("msg", "로그인이 필요합니다");
         return "redirect:/user/login";
+      }
+      
+      // 카카오 로그인시 비밀번호 재확인 필요 x
+      String provider = (String)sessionMap.get("provider");
+      
+      if(provider != null && !provider.isEmpty()) {
+        return "redirect:/user/profile";
       }
 
       Integer userId = (Integer) sessionMap.get("userId"); // <-- 키는 "userId"
