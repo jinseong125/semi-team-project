@@ -334,6 +334,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // 콘솔에서 JS로 넘어온 값을 바로 확인
     console.log("chatList =", chatList);
     console.log("profileImages =", profileImages);
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightRoomId = urlParams.get('highlightRoomId');
+    if (highlightRoomId) {
+        setTimeout(() => {
+            // highlightChatRoom 함수가 전역에 등록되어 있으면 활용
+            if (typeof window.highlightChatRoom === 'function') {
+                window.highlightChatRoom(highlightRoomId);
+            } else {
+                // 직접 구현: 해당 채팅방 div에 highlight 클래스 추가
+                document.querySelectorAll('.chatList').forEach(chatDiv => {
+                    if (String(chatDiv.dataset.roomId) === String(highlightRoomId)) {
+                        chatDiv.classList.add('highlight');
+                        // 2초 후 하이라이트 자동 제거
+                        setTimeout(() => {
+                            chatDiv.classList.remove('highlight');
+                        }, 2000);
+                    }
+                });
+            }
+        }, 150); // DOM 렌더 완료 후 실행 (fetch 등 비동기 작업 후라면 150ms~300ms로 늘려도 됨)
+    }
+    
+    
     
     chatList.forEach(chat => {
         // chat.roomId, chat.buyerId (혹은 현재 로그인자), chat.sellerId 필요
