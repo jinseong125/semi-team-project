@@ -428,10 +428,8 @@
       )
     </if>
     <if test="q != null and q != ''">
-      AND (
-        p.product_name        LIKE CONCAT('%', #{q}, '%')
-        OR p.product_description LIKE CONCAT('%', #{q}, '%')
-      )
+      AND p.product_name        LIKE CONCAT('%', #{q}, '%')
+      
     </if>
   </where>
 </select>
@@ -461,10 +459,7 @@
       )
     </if>
     <if test="q != null and q != ''">
-      AND (
-        p.product_name        LIKE CONCAT('%', #{q}, '%')
-        OR p.product_description LIKE CONCAT('%', #{q}, '%')
-      )
+      AND p.product_name        LIKE CONCAT('%', #{q}, '%')
     </if>
   </where>
   ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC, p.product_id DESC
