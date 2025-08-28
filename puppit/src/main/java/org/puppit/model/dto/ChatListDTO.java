@@ -25,7 +25,6 @@ public class ChatListDTO {
 	private String otherAccountId;
 	private String otherUserName;
 	private String lastMessage;
-	private Timestamp lastMessageAT;
 	private Integer lastMessageSenderId;
 	private String lastMessageSenderAccountId;
 	private String lastMessageSenderName;
@@ -33,8 +32,9 @@ public class ChatListDTO {
 	private String lastMessageReceiverAccountId;
 	private String lastMessageReceiverName;
 	private Timestamp sortTime;
-	private Timestamp chatCreatedAt; // 마지막 메시지 생성 시간 추가
+	private Timestamp lastMessageAt; // 마지막 메시지 생성 시간 추가
 	private String otherProfileImageKey;
+	private String chatLastMessageAt;
 
 	
 }

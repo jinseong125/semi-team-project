@@ -251,7 +251,7 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
 						        </c:choose>
 						    </span>
 						    <span class="chat-last-time" style="margin-left:8px; color:#888;">
-						        <c:out value="${chat.chatCreatedAt}" />
+						        <c:out value="${chat.chatLastMessageAt}" />
 						    </span>
 						</div>
                         
@@ -1134,20 +1134,21 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	    return;
 	  }
 	  
-	  // 시간 표시
-	  var timeText = chatCreatedAt ? formatTimestamp(chatCreatedAt) : "";
-	  console.log('updateChatListLastMessage() - timeText: ', timeText);
-	  
-	  // 시간 영역(span)이 이미 있으면 업데이트, 없으면 새로 생성
-	  var timeSpan = msgDiv.querySelector('.chat-last-time');
-	  if (!timeSpan) {
-	    timeSpan = document.createElement('span');
-	    timeSpan.className = 'chat-last-time';
-	    timeSpan.style.marginLeft = "8px";
-	    timeSpan.style.color = "#888";
-	    msgDiv.appendChild(timeSpan);
-	  }
-	  
+	// 시간 영역
+	    var timeSpan = msgDiv.querySelector('.chat-last-time');
+	    // chatCreatedAt이 숫자(timestamp)이면 사람이 읽을 수 있게 변환
+	    var timeText = formatTimestamp(chatCreatedAt);
+	    if (timeSpan) {
+	        timeSpan.textContent = timeText;
+	    } else {
+	        // 없으면 새로 만들어서 붙임
+	        timeSpan = document.createElement('span');
+	        timeSpan.className = 'chat-last-time';
+	        timeSpan.style.marginLeft = "8px";
+	        timeSpan.style.color = "#888";
+	        timeSpan.textContent = timeText;
+	        msgDiv.appendChild(timeSpan);
+	    }
 	  
 	  
 	  // 마지막 메시지 시간
@@ -1156,42 +1157,32 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	  timeSpan.textContent = timeText;
 	}
 
-	function formatTimestamp(ts) {
-	  console.log('formatTimestamp() - ts: ', ts);
-		
-	  if (!ts) return '';
-	  // ts가 숫자면 그대로, 문자열이면 파싱
-	  let d = typeof ts === "number" ? new Date(ts) : new Date(Number(ts));
-	  if (isNaN(d.getTime())) d = new Date(ts); // 혹시 ISO 포맷이면 이렇게도 시도
-	  if (isNaN(d.getTime())) return ''; // 파싱 실패
+//ISO 포맷/타임스탬프 모두 지원
+function formatTimestamp(ts) {
+    if (!ts) return '';
+    let date;
+    // 숫자면 밀리초 단위로 Date 생성
+    if (typeof ts === 'number' || /^\d+$/.test(ts)) {
+        date = new Date(Number(ts));
+    } else if (typeof ts === 'string') {
+         // ISO 포맷/타임존 처리
+        date = new Date(ts);
+        if (isNaN(date.getTime()) && ts.includes('+09:00')) {
+            date = new Date(ts.replace('+09:00', 'Z'));
+        }
+    } else {
+        return '';
+    }
+    if (isNaN(date.getTime())) return '';
 
-	  const yyyy = d.getFullYear();
-	  const mm = String(d.getMonth() + 1).padStart(2, '0');
-	  const dd = String(d.getDate()).padStart(2, '0');
-	  let hours = d.getHours();
-	  const minutes = String(d.getMinutes()).padStart(2, '0');
-	  const seconds = String(d.getSeconds()).padStart(2, '0');
-	  const ampm = hours < 12 ? '오전' : '오후';
-	  let hh = hours % 12;
-	  hh = hh === 0 ? 12 : hh;
-	  hh = String(hh).padStart(2, '0');
-	  
-	  console.log('formatTimestamp() - yyyy: ', yyyy);
-	  console.log('formatTimestamp() - mm: ', mm);
-	  console.log('formatTimestamp() - dd: ', dd);
-	  console.log('formatTimestamp() - hh: ', hh);
-	  console.log('formatTimestamp() - ampm: ', ampm);
-	  console.log('formatTimestamp() - minutes: ', minutes);
-	  console.log('formatTimestamp() - seconds: ', seconds);
-	  
-	  
-	  
-	  
-
-	  // 문자열 연결로 반환
-	  return yyyy + '-' + mm + '-' + dd + ' ' + ampm + ' ' + hh + ':' + minutes + ':' + seconds;
-	}
-
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
+}
 
 //뒤로가기 버튼 기능 추가
 //document.addEventListener('DOMContentLoaded', function() {

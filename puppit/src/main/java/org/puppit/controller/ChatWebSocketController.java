@@ -1,5 +1,6 @@
 package org.puppit.controller;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -74,6 +75,27 @@ public class ChatWebSocketController {
 
 	    System.out.println("isFirstChat: " + chatService.isFirstChat(chatRoomId));
 
+	    // createdAt
+	    String createdAtStr = chatMessageDTO.getChatCreatedAt().toString();
+	    Timestamp createdAtTimestamp;
+	    
+	    try {
+	    	// ISO 문자열일 때
+	    	if (createdAtStr.contains("T")) {
+	    		createdAtStr = createdAtStr.replace("T", " ");
+	    	}
+	    	createdAtTimestamp = Timestamp.valueOf(createdAtStr);
+	    	chatMessageDTO.setChatCreatedAt(createdAtTimestamp);
+	    } catch (Exception e) {
+	    	// 값이 업거나 잘못된 경우 현재 시각으로 대체
+	    	chatMessageDTO.setChatCreatedAt(new Timestamp(System.currentTimeMillis()));
+	    }
+	    System.out.println("createdAt: " + chatMessageDTO.getChatCreatedAt());
+	    
+	    
+	    
+	    
+	    
 	    // 메시지 중복 확인
 	    chatMessageDTO.setChatSender(sender.getUserId());
 	    if (chatService.isMessageDuplicate(chatMessageDTO)) {

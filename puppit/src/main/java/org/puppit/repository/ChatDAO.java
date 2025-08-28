@@ -2,7 +2,8 @@ package org.puppit.repository;
 
 
 import java.math.BigInteger;
-
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,9 +95,27 @@ public class ChatDAO {
          List<ChaListProfileImageDTO> chatProfileImages = selectChatRoomListWithProfile(paramMap);
          resultMap.put("profileImage", chatProfileImages);
          List<ChatListDTO> chatList = sqlSession.selectList("mybatis.mapper.chatMessageMapper.getChatRoomsByCreatedDesc", paramMap);
+
+         // Mapper/Service에서 변환
+         for (int i = 0; i < chatList.size(); i++) {
+        	 Timestamp t = chatList.get(i).getLastMessageAt();
+        	 String formatted = formatTimestamp(t); // "2025-08-28 09:34:10" 
+        	 chatList.get(i).setChatLastMessageAt(formatted);
+         }
+         
+               
          resultMap.put("chats", chatList);
          return resultMap;
    } 
+   
+   
+   public String formatTimestamp(Timestamp ts) {
+	    if (ts == null) return "";
+	    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	    return sdf.format(ts);
+	}
+
+   
    
    public List<ChaListProfileImageDTO> selectChatRoomListWithProfile(Map<String, Object> map) {
 	   System.out.println("userId: " + map.get("userId"));
