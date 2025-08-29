@@ -23,13 +23,6 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  color: var(--text);
-}
-
 .wrap {
   max-width: 1200px;
   margin: 0 auto;

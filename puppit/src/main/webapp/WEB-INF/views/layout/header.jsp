@@ -22,6 +22,33 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
+
+html {
+	overflow-y: auto;
+	scrollbar-gutter: stable;
+}
+
+body {
+	min-height: 100vh; /* vh - ViewPoint Height (브라우저 화면 높이) */
+	margin: 0;
+	padding: 0;
+	background: #fff;
+	font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+}
+
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 24px 20px 60px;
+	background: #fff;
+	min-height: 400px;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+
 /* ===== 헤더 기본 레이아웃 ===== */
 .header {
 	display: flex;
@@ -39,27 +66,31 @@
 }
 
 .left-col {
-	display: flex;
-	flex-direction: column;
-	gap: 14px;
-	min-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* min-width: 420px;  ← 이거 빼야 flex 영향 없음 */
 }
 
 .searchBar {
-	position: relative;
-	width: 100%;
-	max-width: 600px;
+  position: relative;
+  width: 420px;       /* 검색바 길이 딱 고정 */
+  max-width: 420px;   /* 강제로 고정 */
+  flex-shrink: 0;     /* flex 줄어들지 않게 */
 }
 
 .searchBar .input {
-	width: 85%;
-	height: 44px;
-	padding: 0 44px 0 40px;
-	border: 1px solid #e5e7eb;
-	border-radius: 12px;
-	background: #f5f7fa;
-	outline: none;
+  width: 100% !important;        /* 부모(.searchBar)에 맞게 꽉 채움 */
+    max-width: 420px !important;/* 절대 안 넘치게 */
+  box-sizing: border-box;     /* padding 포함해서 width 계산 */
+  height: 44px;
+  padding: 0 44px 0 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f5f7fa;
+  outline: none;
 }
+
 
 .searchBar .fa-magnifying-glass {
 	position: absolute;
@@ -81,11 +112,6 @@
 	flex-direction: column;
 	align-items: flex-end;
 	gap: 12px;
-}
-
-a {
-	text-decoration: none;
-	color: inherit;
 }
 
 .top-actions {
@@ -305,7 +331,10 @@ a {
       <!-- 검색창 -->
       <div class="searchBar">
         <i class="fa-solid fa-magnifying-glass" id="do-search"></i>
-        <input type="text" class="input" id="search-input" placeholder="검색어를 입력하세요" autocomplete="off">
+<input type="text" class="input" id="search-input" 
+       placeholder="검색어를 입력하세요" 
+       autocomplete="off"
+       value="${param.q != null ? param.q : ''}">
         <ul id="autocompleteList"></ul>
       </div>
 
@@ -331,7 +360,9 @@ a {
     <div class="top-actions">
     <c:choose>
       <c:when test="${empty sessionScope.sessionMap.accountId}">
-        <a href="${contextPath}/user/login" class="btn">로그인</a>
+        <a href="${contextPath}/user/login" class="btn">로그인
+        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </a>
         <a href="${contextPath}/user/signup" class="btn">회원가입</a>
       </c:when>
       <c:otherwise>
@@ -342,7 +373,9 @@ a {
           <i class="fa-regular fa-bell"></i>
         </button>
 
-        <a href="${contextPath}/user/logout" class="btn">로그아웃</a>
+        <a href="${contextPath}/user/logout" class="btn">로그아웃
+        	<i class="fa-solid fa-arrow-right-from-bracket"></i>
+        </a>
 
         <!-- 채팅 버튼 -->
         <button id="chatBtn" class="btn" style="background:black;color:#6c757d;" title="채팅방 목록으로 이동">
