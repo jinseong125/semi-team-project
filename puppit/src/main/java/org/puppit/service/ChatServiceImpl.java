@@ -49,8 +49,11 @@ public class ChatServiceImpl implements ChatService{
 	        dto.setChatReceiverUserName(String.valueOf(message.get("receiver_user_name")));
 	        dto.setChatMessage(String.valueOf(message.get("chat_message")));
 	        dto.setBuyerId(String.valueOf(message.get("buyer_id")));
-	        dto.setChatSellerAccountId(String.valueOf(message.get("chat_seller_account_id")));
-
+	        dto.setChatSellerNickName(String.valueOf(message.get("chat_seller_nick_name")));
+	        //dto.setChatSellerNickName();
+	        System.out.println("chat_seller_nick_name: " + String.valueOf(message.get("chat_seller_nick_name")));
+	        System.out.println("chatSellerNickName: " + dto.getChatSellerNickName());
+	        
 	        // chat_created_at은 Timestamp로 캐스팅 필요	        
 	        Object createdAt = message.get("chat_created_at");
 	        if (createdAt instanceof Timestamp) {

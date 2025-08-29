@@ -516,7 +516,7 @@ Promise.all(chatCountPromises).then(() => {
     if (sendBtn) {
         sendBtn.addEventListener('click', function(e){
             // e.preventDefault();
-            sendMessage(currentRoomId);
+            sendMessage(currentRoomId, chatMessages);
         });
     }
     enableChatInput(false);
@@ -669,6 +669,14 @@ function loadChatHistory(roomId) {
             const sellerAccountId = data.product.chatSellerAccountId || ""; // 판매자의 accountId
             //let buyerAccountId = ""; // 구매자의 accountId 초기화
 
+            // 전역 저장
+            window.chatMessages = Array.isArray(data.chatMessages) ? data.chatMessages : [];
+            
+
+            // 판매자 닉네임/ID도 전역 저장
+            window.chatSellerNickName = window.chatMessages.length > 0 ? window.chatMessages[0].chatSellerNickName || "" : "";
+            window.sellerId = data.product.sellerId || null;
+            
            // === buyerId와 buyerAccountId 추출 ===
             if (Array.isArray(data.chatMessages) && data.chatMessages.length > 0) {
                 // BUYER가 보낸 메시지 중 첫 번째에서 buyer 정보 추출
@@ -694,10 +702,19 @@ function loadChatHistory(roomId) {
             // ★ 여기에 추가!
             window.lastProductInfo = data.product;
             
+            // ★ 판매자 닉네임 전역 저장 (chatMessages에서 첫 메시지의 chatSellerNickName 사용)
+            if (Array.isArray(data.chatMessages) && data.chatMessages.length > 0) {
+                window.chatSellerNickName = data.chatMessages[0].chatSellerNickName || "";
+            } else {
+                window.chatSellerNickName = "";
+            }
             
             // 디버깅 출력
             console.log("buyerId: ", buyerId, " sellerId: ", sellerId, " sellerAccountId: ", sellerAccountId, " buyerAccountId: ", buyerAccountId);
 
+            
+            
+            
             renderProductInfo(data.product, data.chatMessages || []);
 
             const messages = Array.isArray(data.chatMessages) ? data.chatMessages : [];
@@ -736,6 +753,7 @@ function fetchChatCount(roomId, buyerId, sellerId) {
 function renderProductInfo(product, chatMessages, totalChatCount) {
 	  console.log('Rendering Product Info:', product); // 서버에서 전달된 product 확인
     const price = Number(product.productPrice);
+	  console.log('product sellerId: ', product.sellerId);
     let html =
         '<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:12px;">'
         + '<strong>상품명:</strong> ' + product.productName + '<br>'
@@ -755,6 +773,7 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
                 data-buyer-id="\${userId}"
                 data-seller-id="\${product.sellerId}"
                 data-seller-account-id="\${product.chatSellerAccountId}"
+                data-seller-nick-name="\${product.chatSellerNickName}"
                 data-product-name="\${product.productName}"
                 data-product-id="\${product.productId}"
             >결제하기</button>`;
@@ -791,27 +810,29 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
 }
 
 function addChatMessageToHistory(chat) {
-    // 이미 렌더링된 메시지는 건너뜀
+	// 이미 렌더링된 메시지는 건너뜀
     if (chat.messageId && renderedMessageIds.has(chat.messageId)) return;
     if (chat.messageId) renderedMessageIds.add(chat.messageId);
 
     // 내 닉네임은 로그인 시 window.nickName에 저장되어 있다고 가정
     const myNickName = window.nickName; // 예: "캡틴미영짱짱" 또는 "소금파전"
-
+    // 내 계정ID는 로그인 시 window.userId에 저장되어 있다고 가정
+    const myId = String(window.userId); // 계정ID로 비교 (더 정확함)
+    const senderId = String(chat.chatSender);
+    const receiverId = String(chat.chatReceiver);
     // 내가 sender인지 receiver인지 판별
     const isMeSender = String(chat.chatSenderAccountId) === String(myNickName);
     const isMeReceiver = String(chat.chatReceiverAccountId) === String(myNickName);
 
     let alignClass = "left"; // 기본 왼쪽
 
-    if (isMeSender && chat.senderRole) {
-        // 내가 보낸 메시지: 기존대로
-        alignClass = (chat.senderRole === "SELLER") ? "right" : "left";
-    } else if (isMeReceiver && chat.receiverRole) {
-        // 내가 받은 메시지: 요구사항 반영
-        alignClass = (chat.receiverRole === "SELLER") ? "left" : "right";
+    if (senderId === myId) {
+        // 내가 보낸 메시지
+        alignClass = "right";
+    } else {
+        // 내가 받은 메시지
+        alignClass = "left";
     }
-
     let msg = chat.message || chat.chatMessage || "";
     let formattedTime = formatChatTime(chat.chatCreatedAt || "");
 
@@ -968,45 +989,6 @@ function subscribeRoom(currentRoomId) {
     });
 }
 
-
-//function displayNotification(senderAccountId, chatMessage, senderRole, chatCreatedAt, productName, receiverAccountId) {
- //   console.log('displayNotification - senderAccountId: ', senderAccountId);
- //   console.log('displayNotification - chatMessage: ', chatMessage);
- //   console.log('displayNotification - senderRole: ', senderRole);
- //   console.log('displayNotification - chatCreatedAt: ', chatCreatedAt);
- //   console.log('displayNotification - productName: ', productName);
- //   console.log('displayNotification - receiverAccountId: ', receiverAccountId);
-
-//    const notification = document.createElement('div');
-//    notification.className = 'notification';
-
-    // 문자열로 한 번에 바인딩!
-//    notification.innerHTML =
- //       '<button class="alarm-close" onclick="closeAlarmPopup()" title="닫기">&times;</button>' +
-  //      '<ul>' +
-   //         '<li>' +
-   //             '<a href="javascript:void(0);" ' +
-   //             'class="alarm-link" ' +
-   //             'data-chat-message="' + (chatMessage || '').replace(/"/g, '&quot;') + '">' +
-   //             '<b>새 메시지:</b> ' + (chatMessage || '') +
-   //             ' <span style="color:#aaa;">(' + (productName || '') + ')</span>' +
-   //             ' <span style="color:#888;">' + (chatCreatedAt || '') + '</span>' +
-    //            '<br><span style="font-size:13px;">From: ' + (senderAccountId || '') + ' | To: ' + (receiverAccountId || '') + '</span>' +
-      //          '</a>' +
-       //     '</li>' +
-        //'</ul>';
-
-    //document.body.appendChild(notification);
-
-//    setTimeout(() => {
-  //      notification.style.right = '20px';
-   // }, 100);
-
-//    setTimeout(() => {
-  //      notification.remove();
- //   }, 120000);
-//}
-
 function enableChatInput(enable) {
     const input = document.querySelector('input[placeholder="채팅메시지를 입력하세요"]');
     const button = document.querySelector('button[type="submit"]');
@@ -1061,60 +1043,72 @@ function setUserInRoom(roomId, role) {
 
 
 
-function sendMessage(currentRoomId) {
-	 console.log("sendMessage called", {
-	      stompClient,
-	      isConnected,
-	      currentRoomId,
-	      input: document.querySelector('input[placeholder="채팅메시지를 입력하세요"]'),
-	      message: document.getElementById('chatMessageInput') ? document.getElementById('chatMessageInput').value : ''
-	    });
-	 const input = document.getElementById('chatMessageInput');
-	 if (!input) {
+
+function sendMessage(currentRoomId, chatMessages = []) {
+    // chatMessages가 undefined/null이면 window.chatMessages(전역)를 사용
+    if (!Array.isArray(chatMessages) || chatMessages.length === 0) {
+        chatMessages = window.chatMessages || [];
+    }
+    const input = document.getElementById('chatMessageInput');
+    if (!input) {
         alert("채팅 입력창을 찾을 수 없습니다.");
         return;
     }
     const message = input.value;
     if (!stompClient || !isConnected) return;
     if (!message.trim() || !currentRoomId) return;
- 
-    // 버튼에서 값 추출
-    let productSellerId = document.querySelector('#pay-btn')?.dataset.sellerId;
-    let productSellerAccountId = document.querySelector('#pay-btn')?.dataset.sellerAccountId;
-    console.log('productSellerId: ', productSellerId);
 
-    // 버튼이 없으면, productInfoArea에서 직접 값 추출
-    if (!productSellerId || !productSellerAccountId) {
-        // productInfoArea에서 product 정보가 있다면 가져오기
-        // 예시: loadChatHistory에서 sellerId, sellerAccountId를 전역변수로 보관
-        if (window.lastProductInfo) {
-            productSellerId = window.lastProductInfo.sellerId || productSellerId;
-            productSellerAccountId = window.lastProductInfo.chatSellerAccountId || productSellerAccountId;
+    // 1. productSellerId는 상품영역에서만 추출 (window.lastProductInfo를 반드시 사용)
+    let productSellerId = window.lastProductInfo?.sellerId || null;
+    let productSellerAccountId = window.lastProductInfo?.chatSellerAccountId || null;
+    let productId = window.lastProductInfo?.productId || null;
+
+    // 2. buyerId/buyerAccountId는 chatMessages에서만 추출
+    let buyerId = null, buyerAccountId = null;
+    if (Array.isArray(chatMessages)) {
+        // BUYER가 보낸 첫번째 메시지에서 추출 (없으면 null)
+        const buyerMessage = chatMessages.find(msg => msg.senderRole === "BUYER");
+        if (buyerMessage) {
+            buyerId = buyerMessage.buyerId || buyerMessage.chatSender || null;
+            buyerAccountId = buyerMessage.chatSenderAccountId || null;
         }
     }
 
-    // senderRole을 동적으로 설정
-    const senderRole = (String(userId) === String(productSellerId)) ? "SELLER" : "BUYER";
-    const chatSender = userId;
-    console.log("send: chatSender: ", chatSender);
+    // senderRole/receiverRole 계산
+    let senderRole = null, receiverRole = null;
+    if (String(userId) === String(productSellerId)) {
+        senderRole = "SELLER";
+        receiverRole = "BUYER";
+    } else if (String(userId) === String(buyerId)) {
+        senderRole = "BUYER";
+        receiverRole = "SELLER";
+    } else {
+        alert("로그인 사용자가 buyer/seller가 아닙니다. 채팅을 보낼 수 없습니다.");
+        return;
+    }
 
-    // ★ productSellerId, buyerId 값이 undefined일 때 전역 값을 반드시 보완할 것
+    // chatSender/chatReceiver 값 결정
+    const chatSender = userId;
     const chatReceiver = (senderRole === "SELLER") ? buyerId : productSellerId;
     const chatReceiverAccountId = (senderRole === "SELLER") ? buyerAccountId : productSellerAccountId;
 
-    console.log('send: chatReceiver: ', chatReceiver);
+    // 방어 코드: id 누락 시 안내
+    if (!productSellerId || !buyerId) {
+        alert("buyer/seller 정보가 없어 메시지 전송이 불가능합니다.");
+        return;
+    }
 
-    // 방어 코드
-    if (senderRole === "SELLER" && (!buyerId || !buyerAccountId)) {
-        alert("구매자 정보가 없어 메시지 전송이 불가능합니다.");
+    // 방어 코드: 구매자/판매자 계정정보 누락 시 안내
+    if (senderRole === "SELLER" && !buyerAccountId) {
+        alert("구매자 계정정보가 없어 메시지 전송이 불가능합니다.");
         return;
     }
-    if (senderRole === "BUYER" && !productSellerId) {
-        alert("판매자 정보가 없어 메시지 전송이 불가능합니다.");
+    if (senderRole === "BUYER" && !productSellerAccountId) {
+        alert("판매자 계정정보가 없어 메시지 전송이 불가능합니다.");
         return;
     }
-    
-    // ★ 여기! 현재 시간 넣기
+
+    // ★ 현재 시간 넣기
     const chatCreatedAt = getCurrentChatTime();
 
     const chatMessage = {
@@ -1125,12 +1119,13 @@ function sendMessage(currentRoomId) {
         productId: productId,
         buyerId: buyerId,
         senderRole: senderRole,
+        receiverRole: receiverRole,
         chatSender: chatSender,
         chatReceiver: chatReceiver,
-        chatCreatedAt: chatCreatedAt // ★ 추가!
+        chatCreatedAt: chatCreatedAt
     };
 
-    console.log('chatMessage: ', chatMessage);
+    console.log('[sendMessage] chatMessage:', chatMessage);
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
     input.value = "";
 }
@@ -1203,15 +1198,7 @@ function formatTimestamp(ts) {
     return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
 }
 
-//뒤로가기 버튼 기능 추가
-//document.addEventListener('DOMContentLoaded', function() {
-  //  const backBtn = document.getElementById('back-btn');
-  //  if (backBtn) {
-  //      backBtn.addEventListener('click', function() {
-  //          window.history.back();
-  //      });
-  //  }
-//});
+
 
 
 //window에 등록
