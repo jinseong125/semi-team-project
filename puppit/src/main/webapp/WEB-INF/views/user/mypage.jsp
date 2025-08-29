@@ -315,7 +315,7 @@
       <div class="action-desc">최근 충전 기록을 확인하세요</div>
     </div>
     <button class="action-btn" type="button"
-            onclick="location.href='${contextPath}/payment/history?userId=${user.userId}'">
+            onclick="location.href='${contextPath}/payment/history'">
       내역 보기
     </button>
   </div>

@@ -110,11 +110,16 @@ body {
   background:rgba(185,28,28,.08);
   border-color:rgba(185,28,28,.25);
 }
-.badge-status.canceled{
+.badge-status.cancelled{
   color:#7c2d12;              
   background:rgba(124,45,18,.08);
   border-color:rgba(124,45,18,.25);
 }
+.btn-refund{
+  padding:8px 12px;border-radius:8px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;font-weight:700;font-size:13px;
+}
+.btn-refund:disabled{opacity:.6;cursor:not-allowed;}
 
 </style>
 
@@ -133,9 +138,10 @@ body {
           <thead>
             <tr>
               <th>충전 시간</th>
-              <th>주문번호</th>
+              <th>결제번호</th>
               <th>충전 금액</th>
               <th>결제 상태</th>
+              <th>환불</th>
             </tr>
           </thead>
           <tbody>
@@ -160,14 +166,23 @@ body {
                   <span class="badge-status ${fn:toLowerCase(pointDTO.chargeStatus)}">
                     <c:choose>
                       <c:when test="${pointDTO.chargeStatus == 'PAID'}">결제 완료</c:when>
-                      <c:when test="${pointDTO.chargeStatus == 'PENDING'}">대기</c:when>
-                      <c:when test="${pointDTO.chargeStatus == 'FAILED'}">실패</c:when>
-                      <c:when test="${pointDTO.chargeStatus == 'CANCELED'}">취소</c:when>
+                      <c:when test="${pointDTO.chargeStatus == 'PENDING'}">결제 대기</c:when>
+                      <c:when test="${pointDTO.chargeStatus == 'FAILED'}">결제 실패</c:when>
+                      <c:when test="${pointDTO.chargeStatus == 'CANCELLED'}">결제 취소</c:when>
                       <c:otherwise>알수없음</c:otherwise>
                     </c:choose>
                   </span>
                 </td>
-
+                <!-- 작업 버튼 영역 -->
+                <td>
+                  <c:if test="${pointDTO.chargeStatus == 'PAID'}">
+                    <button type="button"
+                            class="btn-refund"
+                            data-merchant="${pointDTO.pointChargeOrderNumber}">
+                      환불하기
+                    </button>
+                  </c:if>
+                </td>
               </tr>
             </c:forEach>
           </tbody>
@@ -179,6 +194,48 @@ body {
     </c:choose>
   </div>
 </div>
+
+<script>
+  document.addEventListener("click", async e => {
+	  const btn = e.target.closest(".btn-refund");
+	  if(!btn) return;
+	  
+	  const merchantUid = btn.dataset.merchant;
+	  if(!merchantUid) return;
+	  
+	  // UI 잠금
+	  btn.disable = true;
+	  const originalText = btn.textContent;
+	  btn.textContent = "취소 중...";
+	  
+	  try {
+		  const res = await fetch(`${contextPath}/payment/refund`, {
+			  method: "POST",
+			  headers: {"Content-Type" : "application/json"},
+			  body: JSON.stringify({
+				  merchantUid: merchantUid,
+				  reason: "사용자 요청"
+			  })
+		  });
+		  // 파싱이 실패(예: 빈 바디, 잘못된 JSON)하면 에러가 나고 빈 객체 {}를 반환
+		  const data = await res.json().catch(() => ({}));
+		  if(!res.ok || data.success === false) {
+			  const msg = (data && data.message) ? data.message : "취소 요청 실패";
+			  alert(msg);
+			  btn.disabled = false;
+			  btn.textContent = originalText;
+			  return;
+		  }
+		  alert("취소(환불) 처리되었습니다.");
+		  location.reload();
+  	} catch (err) {
+  		console.error(err);
+  		alert("취소 처리 중 오류가 발생했습니다.");
+  		btn.disabled = false;
+  		btn.textContent = originalText;
+  	}
+  });
+</script>
 
 </body>
 </html>
