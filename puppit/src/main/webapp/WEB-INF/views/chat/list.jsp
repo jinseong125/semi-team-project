@@ -206,6 +206,37 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
   max-width: none;
   display: inline;         /* 시간 옆에 붙게 */
 }
+
+/* 쩜세개 옵션 팝업 */
+#chat-options-popup {
+    min-width:120px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    background:#f6f6f6;
+    border-radius:8px;
+    border:1px solid #bbb;
+    position:absolute;
+    right:0;
+    top:38px;
+    z-index:999;
+}
+
+.chat-option-item:hover {
+    background:#ececec;
+}
+#chat-options-btn {
+    transition:background 0.15s;
+}
+#chat-options-btn:hover {
+    background:#eee;
+}
+#exit-chatroom-modal {
+    background:rgba(0,0,0,0.2);
+    align-items:center;
+    justify-content:center;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -519,6 +550,24 @@ Promise.all(chatCountPromises).then(() => {
             sendMessage(currentRoomId, chatMessages);
         });
     }
+    
+    // 엔터 입력 시 메시지 전송 (shift + Enter는 줄바꿈)
+    const chatInput = document.getElementById('chatMessageInput');
+    if (chatInput) {
+    	chatInput.addEventListener('keydown', function(e) {
+    		if (e.key === 'Enter') {
+    			if (e.shiftKey) {
+    				// 줄바꿈
+    				return;
+    			} else {
+    				//Enter만 메시지 전송
+    				e.preventDefault();// 줄바꿈방지
+    				sendMessage(currentRoomId, chatMessages);
+    			}
+    		}
+    	})
+    }    
+    
     enableChatInput(false);
     showChatUI(false);
 
@@ -752,17 +801,53 @@ function fetchChatCount(roomId, buyerId, sellerId) {
 
 function renderProductInfo(product, chatMessages, totalChatCount) {
 	  console.log('Rendering Product Info:', product); // 서버에서 전달된 product 확인
-    const price = Number(product.productPrice);
+      const price = Number(product.productPrice);
 	  console.log('product sellerId: ', product.sellerId);
-    let html =
-        '<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:12px;">'
-        + '<strong>상품명:</strong> ' + product.productName + '<br>'
-        + '<strong>가격:</strong> ' + (isNaN(price) ? product.productPrice : price.toLocaleString()) + '원 <br>';
+
+	  // 구매자인지 판단 (userId와 product.buyerId 비교)
+	  let isBuyer = String(userId) === String(product.buyerId);
+
+	  // 결제버튼 노출 조건: 구매자이면서 총 채팅횟수 2회 이상
+	  const showPayButton = isBuyer && totalChatCount >= 2;
+	 
+	  let html = '<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">'
+		  // 왼쪽: 상품명/가격/결제버튼
+		  + '<div style="display:flex; flex-direction:column;">'
+		    + '<div>'
+		      + '<strong>상품명:</strong> ' + product.productName
+		    + '</div>'
+		    + '<div style="display:flex; align-items:center;">'
+		      + '<strong>가격:</strong> ' + product.productPrice + '원';
+		
+	  if (String(userId) === String(product.buyerId) && totalChatCount >= 2) {
+		    html += '<button'
+		      + ' id="pay-btn"'
+		      + ' style="margin-left:12px;"'
+		      + ' data-buyer-id="' + userId + '"'
+		      + ' data-seller-id="' + product.sellerId + '"'
+		      + ' data-seller-account-id="' + product.chatSellerAccountId + '"'
+		      + ' data-seller-nick-name="' + product.chatSellerNickName + '"'
+		      + ' data-product-name="' + product.productName + '"'
+		      + ' data-product-id="' + product.productId + '"'
+		      + '>결제하기</button>';
+	  }
+		
+	  html += '</div>' // 가격/결제버튼 라인 끝
+		  + '</div>' // 왼쪽 컬럼 끝
+		  // 오른쪽: 쩜세개 버튼
+		  + '<div style="position:relative;">'
+		    + '<button id="chat-options-btn" style="background:none; border:none; font-size:32px; cursor:pointer;" title="옵션">&#x22EE;</button>'
+		    + '<div id="chat-options-popup" style="display:none; position:absolute; right:0; top:38px; background:#f6f6f6; border:1px solid #bbb; border-radius:8px; min-width:120px; z-index:999;">'
+		      + '<div class="chat-option-item" id="view-product-info" style="padding:12px; cursor:pointer; font-size:15px; border-bottom:1px solid #eee;">상품정보 보기</div>'
+		      + '<div class="chat-option-item" id="exit-chatroom" style="padding:12px; cursor:pointer; font-size:15px;">대화방 나가기</div>'
+		    + '</div>'
+		  + '</div>' // 오른쪽 끝
+		+ '</div>'; // 전체 flex 행 끝
 
 
         // 1. 구매자/판매자 구분
         // 현재 로그인한 사용자가 구매자인 경우에만 결제 버튼 노출
-        const isBuyer = String(userId) === String(product.buyerId || window.buyerId);
+        isBuyer = String(userId) === String(product.buyerId || window.buyerId);
         
         
      // 2. DB에서 받아온 구매자-판매자간 총 채팅 횟수(totalChatCount) 활용
@@ -779,7 +864,9 @@ function renderProductInfo(product, chatMessages, totalChatCount) {
             >결제하기</button>`;
         }
 
-    html += '</div>';
+
+    
+    
     productInfoArea.innerHTML = html;
 
     const payBtn = document.getElementById('pay-btn');
@@ -969,9 +1056,12 @@ function subscribeRoom(currentRoomId) {
                 // 기존 채팅방 메시지 배열이 있으면 거기에 push
                 if (!window.currentChatMessages) window.currentChatMessages = [];
                 window.currentChatMessages.push(chat);
-
+                // 여기가 핵심!
+                fetchChatCount(chat.chatRoomId, window.buyerId, window.sellerId).then(totalChatCount => {
+                    renderProductInfo(window.lastProductInfo, window.currentChatMessages, totalChatCount);
+                });
                 // productInfoArea 재렌더링
-                renderProductInfo(window.lastProductInfo, window.currentChatMessages);
+                //renderProductInfo(window.lastProductInfo, window.currentChatMessages);
             }
             
             
