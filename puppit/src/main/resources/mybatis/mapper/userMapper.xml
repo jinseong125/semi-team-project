@@ -31,6 +31,13 @@
      WHERE account_id = #{accountId}
   </select>
   
+  <!-- 닉네임 중복 검사 -->
+  <select id="countByNickName" parameterType="String" resultType="java.lang.Integer">
+    SELECT COUNT(*)
+      FROM user
+     WHERE nick_name = #{userNickname}
+  </select>
+  
   <!-- 이메일 중복 검사 -->
   <select id="countByEmail" parameterType="String" resultType="java.lang.Integer">
     SELECT COUNT(*)
@@ -54,7 +61,7 @@
   
   <!-- userId를 이용해 user 정보 조회 -->
   <select id="getUserByUserId" parameterType="java.lang.Integer" resultType="UserDTO">
-    SELECT user_id, account_id,user_password, salt, profile_image_key, provider
+    SELECT user_id, account_id, user_password, salt, profile_image_key, provider
       FROM user
      WHERE user_id = #{userId} AND is_deleted = 0
   </select>
@@ -129,7 +136,7 @@
    WHERE user_id = #{userId}
 </update>
 
-<!-- 소프트 딜리트 (계정 아이디 뒤에 #ID, 이메일 NULL -->
+<!-- 소프트 딜리트 (계정 아이디 뒤에 #ID, 이메일 NULL) -->
 <update id="softDeleteUser" parameterType="int">
    UPDATE user
       SET is_deleted = 1,

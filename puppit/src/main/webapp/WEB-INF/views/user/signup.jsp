@@ -149,6 +149,7 @@ body{background:var(--page-bg);color:#0f172a}
 <script>
   const CTX = '${contextPath}';
 
+	  
   // 상태 관리
   const validity = {
     accountId:false, accountIdDup:false,

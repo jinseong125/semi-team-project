@@ -21,6 +21,9 @@
   html, body {
     height: 100%;
     margin: 0;
+    padding: 0;
+    background: #fff;
+    font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
   }
 
   /* <-- 중요한 변경: body를 flex로 사용하지 않음 */
@@ -104,6 +107,7 @@
     <div class="links" aria-live="polite">
       <div>아이디/비밀번호를 잊으셨나요? <a href="${contextPath}/user/find">아이디/비밀번호 찾기</a></div>
       <div>Puppit이 처음이신가요? <a href="${contextPath}/user/signup">회원가입 하기</a></div>
+      <div>카카오톡으로 로그인 하기</div>
     </div>
     
     <div>
@@ -111,7 +115,7 @@
           <c:param name="client_id" value="${kakaoApiKey}"/>
           <c:param name="redirect_uri" value="${redirectUri}"/>
           <c:param name="response_type" value="code"/>
-         <c:param name="scope" value="profile_nickname,profile_image"/>
+          <c:param name="scope" value="profile_nickname,profile_image"/>
       </c:url>
       <a href="${kakaoAuth}">
         <img src="${contextPath}/resources/image/kakao-login-medium-wide.png" alt="카카오로그인" style="display: block; margin: 0 auto;"/>
