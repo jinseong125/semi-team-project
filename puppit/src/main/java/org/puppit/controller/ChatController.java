@@ -42,6 +42,7 @@ public class ChatController {
 
 	    // 채팅 메시지 리스트 가져오기
 	    List<ChatMessageDTO> chatMessages = chatService.getChatMessageList(chatMessageSelectDTO);
+	    
 	    System.out.println("messages: " + (chatMessages != null ? chatMessages.toString() : "null"));
 	    System.out.println("chatMessages.size: " + (chatMessages != null ? chatMessages.size() : "null"));
 
@@ -80,6 +81,7 @@ public class ChatController {
 
 	    // 상품 정보 map에 추가
 	    map.put("product", product);
+	    
 
 	    return map;
 	}

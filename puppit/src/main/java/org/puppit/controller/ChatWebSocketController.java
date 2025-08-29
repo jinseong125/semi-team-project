@@ -144,7 +144,7 @@ public class ChatWebSocketController {
 	            chatMessageDTO.setChatSenderAccountId(sender.getNickName());
 	            chatMessageDTO.setChatSenderUserName(sender.getUserName());
 	            chatMessageDTO.setSenderRole(latest.getSenderRole());
-
+	            chatMessageDTO.setReceiverRole(chatMessageDTO.getReceiverRole());
 	            chatMessageDTO.setChatReceiver(chatMessageDTO.getChatReceiver());
 	            chatMessageDTO.setChatReceiverAccountId(chatReceiver.getNickName());
 	            chatMessageDTO.setChatReceiverUserName(chatReceiver.getUserName());
@@ -198,6 +198,7 @@ public class ChatWebSocketController {
         notification.setReceiverAccountId(chatMessageDTO.getChatReceiverAccountId());
         notification.setChatMessage(chatMessageDTO.getChatMessage());
         notification.setSenderRole(chatMessageDTO.getSenderRole());
+        notification.setReceiverRole(chatMessageDTO.getReceiverRole());
         notification.setChatCreatedAt(chatMessageDTO.getChatCreatedAt());
         notification.setProductName(chatService.getProductNameById(productId));
         notification.setMessageId(Integer.parseInt(chatMessageDTO.getMessageId())); // 메시지 고유 ID 사용

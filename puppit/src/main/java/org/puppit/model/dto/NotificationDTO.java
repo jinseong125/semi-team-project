@@ -19,6 +19,7 @@ public class NotificationDTO {
 	private String receiverAccountId;
 	private String chatMessage;
 	private String senderRole;
+	private String receiverRole;
 	private Timestamp chatCreatedAt;
 	private String productName;
 	private Integer alarmReadMessageId;
@@ -32,10 +33,13 @@ public class NotificationDTO {
 	public String toString() {
 		return "NotificationDTO [roomId=" + roomId + ", userId=" + userId + ", senderAccountId=" + senderAccountId
 				+ ", receiverAccountId=" + receiverAccountId + ", chatMessage=" + chatMessage + ", senderRole="
-				+ senderRole + ", chatCreatedAt=" + chatCreatedAt + ", productName=" + productName
-				+ ", alarmReadMessageId=" + alarmReadMessageId + ", alarmId=" + alarmId + ", messageId=" + messageId
-				+ ", isRead=" + isRead + "]";
+				+ senderRole + ", receiverRole=" + receiverRole + ", chatCreatedAt=" + chatCreatedAt + ", productName="
+				+ productName + ", alarmReadMessageId=" + alarmReadMessageId + ", alarmId=" + alarmId + ", messageId="
+				+ messageId + ", isRead=" + isRead + ", chatSender=" + chatSender + ", chatReceiver=" + chatReceiver
+				+ "]";
 	}
+	
+	
 	
 	
 	
