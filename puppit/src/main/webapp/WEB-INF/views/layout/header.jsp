@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<!-- contextPath 변수 선언 (조건부!) -->
+<!-- contextPath 변수 선언 (조건부) -->
 <c:if test="${empty contextPath}">
   <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 </c:if>
