@@ -3,6 +3,9 @@ package org.puppit.service;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.puppit.model.dto.IamportCancelRequest;
+import org.puppit.model.dto.IamportCancelResponse;
+import org.puppit.model.dto.PaymentInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -41,7 +44,7 @@ public class IamPortService {
     }
 
     // 2. 결제정보 조회 (imp_uid로)
-    public Map<String, Object> getPaymentInfoByImpUid(String impUid) {
+    public PaymentInfo getPaymentInfoByImpUid(String impUid) {
       String accessToken = getAccessToken();
 
       HttpHeaders headers = new HttpHeaders();
@@ -56,27 +59,50 @@ public class IamPortService {
       // PortOne 표준: code == 0 이면 정상
       Object code = (body != null) ? body.get("code") : null;
       if (!(code instanceof Number) || ((Number) code).intValue() != 0) {
-          return Map.of("success", false, "message", "iamport api error");
+          return null;
       }
 
       Map<String, Object> resp = (Map<String, Object>) body.get("response");
       if (resp == null) {
-          return Map.of("success", false, "message", "no response field");
+          return null;
       }
 
       Number amountNum = (Number) resp.get("amount");
       String merchantUid = (String) resp.get("merchant_uid");
       String status = (String) resp.get("status"); // paid|ready|failed|cancelled...
-
       Integer amount = (amountNum != null) ? amountNum.intValue() : null;
 
-      Map<String, Object> result = new HashMap<>();
-      result.put("success", amount != null && merchantUid != null);
-      result.put("amount", amount);
-      result.put("merchantUid", merchantUid);
-      result.put("status", status);
-      return result;
-  }
+      return new PaymentInfo(status, merchantUid, amount);
+    }
+    
+    // 결제 취소
+    public IamportCancelResponse cancelPayment(IamportCancelRequest req) {
+      String token = getAccessToken();
+      
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(token);
+      
+      Map<String, Object> payload = new HashMap<>();
+      if(req.getMerchantUid() != null) payload.put("merchant_uid", req.getMerchantUid());
+      if (req.getAmount() != null) payload.put("amount", req.getAmount()); 
+      if (req.getReason() != null) payload.put("reason", req.getReason());
+      if (req.getChecksum() != null) payload.put("checksum", req.getChecksum()); 
+      
+      HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+      ResponseEntity<Map> res = restTemplate.postForEntity(
+          "https://api.iamport.kr/payments/cancel", entity, Map.class);
+      
+      if (!"0".equals(String.valueOf(res.getBody().get("code")))) {
+        throw new IllegalStateException("IAMPORT_CANCEL_FAIL: " + res.getBody().get("message"));
+      }
+      Map response = (Map) res.getBody().get("response");
 
+      // 필요한 필드만 매핑
+      IamportCancelResponse out = new IamportCancelResponse();
+      out.setCancelledAt((Integer) response.get("cancelled_at"));
+      out.setReceiptUrl((String) response.get("receipt_url"));
+      return out;
 
+    }
 }
