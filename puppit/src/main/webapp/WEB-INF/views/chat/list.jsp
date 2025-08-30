@@ -3,7 +3,7 @@
 <%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
 
 <%
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
@@ -218,6 +218,7 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
     right:0;
     top:38px;
     z-index:999;
+    display: none;
 }
 
 .chat-option-item:hover {
@@ -235,11 +236,113 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
     justify-content:center;
 }
 
+// 1. CSS 추가 (팝업/모달/버튼/배경 등)
+const style = document.createElement('style');
+style.innerHTML = `
+/* 쩜세개 옵션 활성화시 채팅방 배경 회색 */
+.chatList.option-active {
+  background: #eee !important;
+}
+
+/* 옵션 팝업 */
+#chat-options-popup.active {
+  display: block !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* 모달 배경 */
+#exit-chatroom-modal-bg {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.18);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 모달창 */
+#exit-chatroom-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 28px 24px 28px;
+  min-width: 360px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.11);
+  position: relative;
+  animation: fadein 0.25s;
+}
+@keyframes fadein { from{opacity:0;} to{opacity:1;} }
+/* X버튼 */
+#exit-chatroom-modal .close-btn,
+#exit-chatroom-done .close-btn {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  font-size: 22px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: color 0.18s;
+  z-index: 1;
+}
+#exit-chatroom-modal .close-btn:hover,
+#exit-chatroom-done .close-btn:hover { color: #e74c3c; }
+/* 안내문구 */
+#exit-chatroom-modal .exit-text {
+  margin-bottom: 28px;
+  color:#222;
+  font-size:17px;
+  text-align:center;
+}
+/* 확인 버튼 */
+#exit-chatroom-modal .confirm-btn {
+  background: #e74c3c;
+  color: #fff;
+  font-weight:700;
+  font-size:18px;
+  border:none;
+  border-radius:8px;
+  padding: 10px 28px;
+  cursor: pointer;
+  display:block;
+  margin: 0 auto;
+  transition: background 0.18s;
+}
+#exit-chatroom-modal .confirm-btn:hover { background: #c0392b; }
+/* 삭제 완료 팝업 */
+#exit-chatroom-done {
+  position: fixed;
+  top: 50px;
+  right: 50px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
+  padding: 24px 38px 20px 22px;
+  min-width: 290px;
+  z-index: 99999;
+  font-size:18px;
+  color:#222;
+  animation: fadein 0.2s;
+}
+#exit-chatroom-done .close-btn {
+  top: 12px;
+  right: 12px;
+}
+#chat-options-popup .chat-option-item#exit-chatroom {
+  color: #e74c3c;
+  font-weight:700;
+}
 
 
     </style>
 </head>
 <body>
+<!-- 알림 팝업 영역 추가 -->
+<div id="unreadNotificationArea" style="position:fixed; right:20px; top:80px; z-index:99999; display:none;">
+    <!-- 읽지 않은 메시지 알림 목록이 동적으로 삽입됨 -->
+</div>
 <div class="container">
    
     
@@ -287,9 +390,9 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
 						            </c:otherwise>
 						        </c:choose>
 						    </span>
-						    <span class="chat-last-time" style="margin-left:8px; color:#888;">
-						        <c:out value="${chat.chatLastMessageAt}" />
-						    </span>
+						     <span class="chat-last-time" style="margin-left:8px; color:#888;">
+					            <c:out value="${chat.chatLastMessageAt}" />
+					        </span>
 						</div>
                         
                     </div>
@@ -339,6 +442,30 @@ const profileImages = window.profileImage;
 window.myAccountId = "<%= accountId %>";
 
 document.addEventListener('DOMContentLoaded', function() {
+	 // JSP EL 값을 JS 변수에 할당
+    var userId = "${userId}";
+	  let isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
+	  const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
+	  if (isLoggedIn === "true" && isChatListPage) {
+	        loadUnreadCounts();
+	  }
+	  	// 1. 로그인 성공시 내가 안읽은 메시지 전부 알림팝업에 띄우기
+      // (sessionScope.sessionMap.accountId 방식의 로그인 체크)
+     
+   if (isLoggedIn === "true") {
+       fetch(contextPath + '/api/alarm?userId=' + userId)
+           .then(res => res.json())
+           .then(unreadMessages => {
+               if (Array.isArray(unreadMessages) && unreadMessages.length > 0) {
+            	   console.log('unreadMessages: ', unreadMessages);
+                   //showUnreadNotificationsPopup(unreadMessages);
+                   //showAlarmPopup([unreadMessages]);
+            	   window.showAlarmPopup(unreadMessages);
+               }
+           })
+           .catch(err => console.error('안읽은 메시지 알림 fetch 에러:', err));
+   }
+	
 	if (!window.stompClient || !window.stompClient.connected) {
         const socket = new SockJS(contextPath + '/ws-chat');
         console.log("Connecting websocket...");
@@ -571,11 +698,46 @@ Promise.all(chatCountPromises).then(() => {
     enableChatInput(false);
     showChatUI(false);
 
-    const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
-    const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
-    if (isLoggedIn === "true" && isChatListPage) {
-        loadUnreadCounts();
+  
+    
+   
+    
+  //안내 모달 생성 함수
+    function showExitChatroomModal() {
+      // 이미 있으면 제거
+      const oldModal = document.getElementById('exit-chatroom-modal-bg');
+      if (oldModal) oldModal.remove();
+      const modalBg = document.createElement('div');
+      modalBg.id = 'exit-chatroom-modal-bg';
+      modalBg.innerHTML = `
+        <div id="exit-chatroom-modal">
+          <button class="close-btn" title="닫기">&times;</button>
+          <div class="exit-text">채팅방을 나가면 복구할 수 없습니다.<br>정말 나가시겠습니까?</div>
+          <button class="confirm-btn">확인</button>
+        </div>
+      `;
+      document.body.appendChild(modalBg);
     }
+
+    // 삭제 완료 팝업 생성 함수
+    function showExitDonePopup() {
+      // 이미 있으면 제거
+      const oldPopup = document.getElementById('exit-chatroom-done');
+      if (oldPopup) oldPopup.remove();
+      const donePopup = document.createElement('div');
+      donePopup.id = 'exit-chatroom-done';
+      donePopup.innerHTML = `
+        <button class="close-btn" title="닫기">&times;</button>
+        <div>채팅방이 삭제되었습니다.</div>
+      `;
+      document.body.appendChild(donePopup);
+      // 2초 후 자동 close
+      setTimeout(() => {
+        const popup = document.getElementById('exit-chatroom-done');
+        if (popup) popup.remove();
+      }, 2000);
+    }
+    
 });
 
 /* [추가] 채팅 UI show/hide 함수 */
@@ -1167,15 +1329,17 @@ function sendMessage(currentRoomId, chatMessages = []) {
     // senderRole/receiverRole 계산
     let senderRole = null, receiverRole = null;
     if (String(userId) === String(productSellerId)) {
-        senderRole = "SELLER";
-        receiverRole = "BUYER";
-    } else if (String(userId) === String(buyerId)) {
-        senderRole = "BUYER";
-        receiverRole = "SELLER";
-    } else {
-        alert("로그인 사용자가 buyer/seller가 아닙니다. 채팅을 보낼 수 없습니다.");
-        return;
-    }
+    	  senderRole = "SELLER";
+    	  receiverRole = "BUYER";
+   	} else {
+   	  // 판매자가 아닌 모든 사용자는 buyer로 간주
+   	  senderRole = "BUYER";
+   	  receiverRole = "SELLER";
+   	  // buyerId를 현재 로그인한 사용자로 지정(기존 buyer가 없으면)
+   	  if (!buyerId) {
+   	    buyerId = userId;
+   	  }
+   	}
 
     // chatSender/chatReceiver 값 결정
     const chatSender = userId;
@@ -1262,31 +1426,31 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	}
 
 //ISO 포맷/타임스탬프 모두 지원
-function formatTimestamp(ts) {
-    if (!ts) return '';
-    let date;
-    // 숫자면 밀리초 단위로 Date 생성
-    if (typeof ts === 'number' || /^\d+$/.test(ts)) {
-        date = new Date(Number(ts));
-    } else if (typeof ts === 'string') {
-         // ISO 포맷/타임존 처리
-        date = new Date(ts);
-        if (isNaN(date.getTime()) && ts.includes('+09:00')) {
-            date = new Date(ts.replace('+09:00', 'Z'));
+    // 시간 포맷 함수 JS에서 구현 (JSP에서는 EL/함수 호출 X)
+    function formatTimestamp(ts) {
+        if (!ts) return '';
+        let date;
+        if (typeof ts === 'number' || /^\d+$/.test(ts)) {
+            date = new Date(Number(ts));
+        } else if (typeof ts === 'string') {
+            date = new Date(ts);
+            if (isNaN(date.getTime()) && ts.includes('+09:00')) {
+                date = new Date(ts.replace('+09:00', 'Z'));
+            }
+        } else {
+            return '';
         }
-    } else {
-        return '';
+        if (isNaN(date.getTime())) return '';
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        const ss = String(date.getSeconds()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
     }
-    if (isNaN(date.getTime())) return '';
 
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const ss = String(date.getSeconds()).padStart(2, '0');
-    return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
-}
+
 
 
 
