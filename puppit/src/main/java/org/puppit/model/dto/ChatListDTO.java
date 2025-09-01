@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @ToString
@@ -21,6 +20,8 @@ public class ChatListDTO {
 	private Integer sellerId;
 	private String sellerName;
 	private String sellerAccountId;
+	private String sellerNickName;
+	private String buyerNickName;
 	private Integer otherUserId;
 	private String otherAccountId;
 	private String otherUserName;
@@ -35,6 +36,8 @@ public class ChatListDTO {
 	private Timestamp lastMessageAt; // 마지막 메시지 생성 시간 추가
 	private String otherProfileImageKey;
 	private String chatLastMessageAt;
+	
+	
 
 	
 }

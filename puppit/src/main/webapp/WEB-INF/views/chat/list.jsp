@@ -335,6 +335,69 @@ style.innerHTML = `
   font-weight:700;
 }
 
+#chatListRenderArea {
+    margin: 0;
+    padding: 0;
+}
+.chatList {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    cursor: pointer;
+}
+.chat-profile-img {
+    width: 48px;
+    height: 48px;
+    margin-right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chat-profile-img img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+}
+.chat-info-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.chat-user-row {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+.chat-user-row .chat-role {
+    font-size: 14px;
+    font-weight: normal;
+    margin-left: 3px;
+    color: #666;
+}
+.chat-message-row {
+    font-size: 16px;
+    margin-bottom: 2px;
+    color: #222;
+    word-break: break-all;
+}
+.chat-meta-row {
+    font-size: 13px;
+    color: #888;
+}
+.unread-badge {
+    background: #e74c3c;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 3px 7px;
+    margin-left: 8px;
+    vertical-align: middle;
+    display: none;
+}
+
 
     </style>
 </head>
@@ -369,14 +432,16 @@ style.innerHTML = `
                     </span>
                     <div class="chat-info-area" style="cursor:pointer;">
                         <div class="chat-nickname">
-                             <c:choose>
-                                <c:when test="${not empty chat.productName}">
-                                    <c:out value="${chat.productName}" />  (<c:out value="${chat.sellerAccountId}" />)
-                                </c:when>
-                                <c:otherwise>
-                                    상품판매자와 채팅을 시작해보세요
-                                </c:otherwise>
-                            </c:choose>
+                        	<div class="chat-nickname">
+							    		<c:out value="${chat.productName}"/> /	
+							            <c:out value="${chat.sellerAccountId}" /> (판매자) /
+							            <c:out value="${chat.buyerNickName}" /> (구매자)
+							       
+							</div>
+                        
+                        
+                            
+                               
                         </div>
                          
                         <div class="chat-message">
@@ -449,6 +514,15 @@ document.addEventListener('DOMContentLoaded', function() {
 	  if (isLoggedIn === "true" && isChatListPage) {
 	        loadUnreadCounts();
 	  }
+	  
+	  document.body.addEventListener('click', function(e) {
+	        if (e.target && e.target.id === 'chat-options-btn') {
+	            showOptionsPopup(e.target);
+	        }
+	    });
+	  
+	  
+	  
 	  	// 1. 로그인 성공시 내가 안읽은 메시지 전부 알림팝업에 띄우기
       // (sessionScope.sessionMap.accountId 방식의 로그인 체크)
      
@@ -702,43 +776,253 @@ Promise.all(chatCountPromises).then(() => {
     
    
     
-  //안내 모달 생성 함수
-    function showExitChatroomModal() {
-      // 이미 있으면 제거
-      const oldModal = document.getElementById('exit-chatroom-modal-bg');
-      if (oldModal) oldModal.remove();
-      const modalBg = document.createElement('div');
-      modalBg.id = 'exit-chatroom-modal-bg';
-      modalBg.innerHTML = `
-        <div id="exit-chatroom-modal">
-          <button class="close-btn" title="닫기">&times;</button>
-          <div class="exit-text">채팅방을 나가면 복구할 수 없습니다.<br>정말 나가시겠습니까?</div>
-          <button class="confirm-btn">확인</button>
-        </div>
-      `;
-      document.body.appendChild(modalBg);
-    }
 
-    // 삭제 완료 팝업 생성 함수
-    function showExitDonePopup() {
-      // 이미 있으면 제거
-      const oldPopup = document.getElementById('exit-chatroom-done');
-      if (oldPopup) oldPopup.remove();
-      const donePopup = document.createElement('div');
-      donePopup.id = 'exit-chatroom-done';
-      donePopup.innerHTML = `
-        <button class="close-btn" title="닫기">&times;</button>
-        <div>채팅방이 삭제되었습니다.</div>
-      `;
-      document.body.appendChild(donePopup);
-      // 2초 후 자동 close
-      setTimeout(() => {
-        const popup = document.getElementById('exit-chatroom-done');
-        if (popup) popup.remove();
-      }, 2000);
-    }
+
+   
     
-});
+}); //DOM끝
+
+
+//팝업 생성/삭제 함수
+function showOptionsPopup(anchorElem) {
+    // 이미 있으면 제거
+    const old = document.getElementById('chat-options-popup');
+    if (old) old.remove();
+    // 팝업 생성
+    const popup = document.createElement('div');
+    popup.id = 'chat-options-popup';
+    popup.style.display = 'block';
+    popup.style.position = 'absolute';
+    popup.style.right = '0';
+    popup.style.top = '38px';
+    popup.style.background = '#fff';
+    popup.style.border = '1px solid #bbb';
+    popup.style.borderRadius = '8px';
+    popup.style.minWidth = '220px';
+    popup.style.minHeight = '50px';
+    popup.style.zIndex = '99999';
+    popup.innerHTML = `
+        <div class="chat-option-item" id="exit-chatroom-btn" style="background:#e74c3c;color:#fff;border-radius:8px;font-size:15px;font-weight:700;margin-bottom:2px;cursor:pointer;">채팅방 나가기</div>
+    `;
+    anchorElem.parentNode.appendChild(popup);
+
+    // 나가기 버튼 클릭 이벤트
+    popup.querySelector('#exit-chatroom-btn').onclick = function(e) {
+        popup.remove();
+        showExitChatroomModal();
+    };
+
+    // 외부 클릭시 닫기
+    setTimeout(() => {
+        document.addEventListener('mousedown', function handler(ev) {
+            if (!popup.contains(ev.target) && ev.target !== anchorElem) {
+                popup.remove();
+                document.removeEventListener('mousedown', handler);
+            }
+        });
+    }, 30);
+}
+
+//첫번째 팝업(정말 나가시겠습니까?)
+function showExitChatroomModal() {
+    removeModalById('exit-chatroom-modal-bg');
+    const modalBg = document.createElement('div');
+    modalBg.className = 'custom-modal-bg';
+    modalBg.id = 'exit-chatroom-modal-bg';
+    modalBg.innerHTML = `
+        <div class="custom-modal">
+            <button class="close-btn" title="닫기">&times;</button>
+            <div class="exit-text">정말 채팅방을 나가시겠습니까?<br>대화내용을 복구할 수 없습니다.</div>
+            <button class="confirm-btn">확인</button>
+        </div>
+    `;
+    document.body.appendChild(modalBg);
+
+    modalBg.querySelector('.close-btn').onclick = () => modalBg.remove();
+    modalBg.querySelector('.confirm-btn').onclick = function() {
+        modalBg.remove();
+        // --- 실제 삭제 요청 ---
+        fetch(contextPath + '/chat/removeroom?roomId=' + currentRoomId, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('삭제 결과:', data);
+            if (data.success) {
+                showExitDonePopup().then(() => {
+                    // 팝업이 사라진 후에 리스트 리로드!!
+                    reloadRecentRoomList();
+                });
+            } else {
+                alert('삭제 실패: ' + (data.message || ''));
+            }
+        })
+        .catch(err => {
+            alert('삭제 중 오류 발생: ' + err);
+        });
+    };
+}
+
+//두번째 팝업(나가기 완료)
+function showExitDonePopup() {
+    return new Promise((resolve) => {
+        removeModalById('exit-chatroom-done-bg');
+        const doneBg = document.createElement('div');
+        doneBg.className = 'custom-modal-bg';
+        doneBg.id = 'exit-chatroom-done-bg';
+        doneBg.style.position = 'fixed';   // ← 반드시 fixed
+        doneBg.style.top = '50%';
+        doneBg.style.left = '50%';
+        doneBg.style.transform = 'translate(-50%, -50%)';
+        doneBg.style.zIndex = '999999';    // ← z-index 높게!
+        doneBg.innerHTML = `
+            <div class="custom-modal">
+                <button class="close-btn" title="닫기">&times;</button>
+                <div class="exit-text">채팅방 나가기 되었습니다.</div>
+            </div>
+        `;
+        document.body.appendChild(doneBg);
+
+        setTimeout(() => {
+            doneBg.remove();
+            resolve();
+        }, 2000);
+
+        doneBg.querySelector('.close-btn').onclick = () => {
+            doneBg.remove();
+            resolve();
+        };
+    });
+}
+
+function reloadRecentRoomList() {
+    const defaultImg = contextPath + '/resources/image/profile-default.png';
+    fetch(contextPath + '/api/chat/recentRoomList')
+        .then(res => res.json())
+        .then(data => {
+            const chatListRenderArea = document.getElementById('chatListRenderArea');
+            if (!chatListRenderArea) return;
+            chatListRenderArea.innerHTML = '';
+
+            const chats = Array.isArray(data.chats) ? data.chats : [];
+            const profileImages = Array.isArray(data.profileImage) ? data.profileImage : [];
+
+            chats.forEach(chat => {
+                // profileImage 배열에서 해당 roomId에 맞는 이미지 정보 찾기
+                let imgSrc = defaultImg;
+                const profileInfo = profileImages.find(pi => String(pi.chatRoomId) === String(chat.roomId));
+                if (profileInfo && profileInfo.sellerProfileImageKey) {
+                    imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + profileInfo.sellerProfileImageKey;
+                }
+
+                // 닉네임/계정ID (예시: 슈퍼감찬)
+                const sellerName = chat.sellerAccountId || chat.sellerName || '';
+                const sellerRole = '(판매자)';
+
+                // 마지막 메시지
+                const lastMsg = chat.lastMessage || '';
+                // 마지막 메시지 시간
+                const lastMsgTime = chat.chatLastMessageAt || '';
+                const buyerName = chat.buyerNickName || chat.buyerName || ''; // 구매자 닉네임
+                const buyerRole = '(구매자)';
+               
+              
+                
+                
+                const html =
+                	'<div class="chatList">' +
+                    '<span class="chat-profile-img">' +
+                        '<img src="' + imgSrc + '" alt="프로필 이미지" onerror="this.src=\'' + defaultImg + '\'"/>' +
+                    '</span>' +
+                    '<div class="chat-info-wrap">' +
+                        '<div class="chat-user-row">' +
+                            '<span class="chat-user-seller">' + sellerName + ' <span class="chat-role">' + sellerRole + '</span></span> / ' +
+                            '<span class="chat-user-buyer">' + buyerName + ' <span class="chat-role">' + buyerRole + '</span></span>' +
+                        '</div>' +
+                        '<div class="chat-message-row">' +
+                            lastMsg +
+                        '</div>' +
+                        '<div class="chat-meta-row">' +
+                            lastMsgTime +
+                        '</div>' +
+                    '</div>' +
+                    '<span class="unread-badge"></span>' +
+                '</div>';
+
+                chatListRenderArea.insertAdjacentHTML('beforeend', html);
+            });
+
+            // 이벤트 바인딩 (각 .chatList)
+            chatListRenderArea.querySelectorAll('.chatList').forEach(function(chatDiv, idx) {
+                chatDiv.dataset.roomId = chats[idx].roomId;
+                chatDiv.addEventListener('click', function(e) {
+                    const roomId = chatDiv.dataset.roomId;
+                    selectedRoomId = roomId;
+                    currentRoomId = roomId;
+                    document.querySelectorAll('.chatList').forEach(el => el.classList.remove('highlight', 'selected'));
+                    chatDiv.classList.add('highlight', 'selected');
+                    if (highlightTimers[roomId]) clearTimeout(highlightTimers[roomId]);
+                    highlightTimers[roomId] = setTimeout(() => {
+                        chatDiv.classList.remove('highlight');
+                        highlightTimers[roomId] = null;
+                    }, 2000);
+
+                    showChatUI();
+                    chatHistory.innerHTML = "";
+                    renderedMessageIds.clear();
+                    loadChatHistory(roomId).then(() => {
+                        connectAndSubscribe(roomId);
+                    });
+
+                    // 읽음 처리 + 뱃지 제거
+                    const badge = chatDiv.querySelector('.unread-badge');
+                    const unreadCount = badge && badge.style.display !== 'none' ? parseInt(badge.textContent) || 0 : 0;
+                    if (unreadCount > 0) {
+                        fetch(contextPath + '/api/alarm/readAll', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                roomId: roomId,
+                                userId: userId,
+                                count: unreadCount
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            badge.style.display = 'none';
+                            badge.textContent = '';
+                            if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
+                        })
+                        .catch(err => {
+                            console.error('안읽은 메시지 읽음 처리 에러:', err);
+                        });
+                    }
+                });
+            });
+
+            // 뱃지 업데이트
+            if (typeof updateUnreadBadges === 'function') {
+                fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
+                    .then(res => res.json())
+                    .then(unreadCounts => {
+                        updateUnreadBadges(unreadCounts);
+                    });
+            }
+        })
+        .catch(err => {
+            console.error('채팅방 목록 재요청 에러:', err);
+        });
+}
+
+
+
+//중복 제거 함수
+function removeModalById(id) {
+    const elem = document.getElementById(id);
+    if (elem) elem.remove();
+    console.log('id: ', id);
+}
+
 
 /* [추가] 채팅 UI show/hide 함수 */
 function showChatUI(isRoomSelected=true) {
@@ -1456,6 +1740,8 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 
 
 //window에 등록
+window.showExitDonePopup = showExitDonePopup;
+window.showExitChatroomModal = showExitChatroomModal; // window에 등록
 window.highlightChatRoom = highlightChatRoom;
 window.updateChatListLastMessage = updateChatListLastMessage;
 window.displayNotification = displayNotification;
