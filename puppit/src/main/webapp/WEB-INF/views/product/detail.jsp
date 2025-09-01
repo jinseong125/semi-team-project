@@ -209,10 +209,13 @@ if (sessionMap != null) {
         <c:when test="${product.thumbnail ne null and not empty product.thumbnail.imageUrl}">
           <img id="mainImage" class="main-img"
                src="${product.thumbnail.imageUrl}"
-               alt="${product.productName}" />
+               alt="${product.productName}"
+               onerror="this.onerror=null; this.src='${contextPath}/resources/image/no-image.png';" />
         </c:when>
         <c:otherwise>
-          <div class="thumb-placeholder">이미지 없음</div>
+          <img id="mainImage" class="main-img"
+               src="${contextPath}/resources/image/no-image.png"
+               alt="이미지 없음" />
         </c:otherwise>
       </c:choose>
       <button class="slide-btn next">&#10095;</button>
@@ -223,7 +226,8 @@ if (sessionMap != null) {
       <c:forEach var="img" items="${subImages}">
         <img class="secondPicture"
              src="${img.imageUrl}"
-             alt="${product.productName}" />
+             alt="${product.productName}"
+             onerror="this.style.display='none';" />
       </c:forEach>
     </div>
   </div>
@@ -314,6 +318,7 @@ if (sessionMap != null) {
     </c:otherwise>
   </c:choose>
 </div>
+
 
 <script>
 const appContext = "${contextPath}";

@@ -3,7 +3,6 @@ package org.puppit.service;
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.*;
 import org.puppit.repository.ProductDAO;
-import org.puppit.util.PageUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +20,6 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductDAO productDAO;
     private final S3Service s3Service;
-    private final PageUtil pageUtil;
     
 
     /** 상품 등록 */
