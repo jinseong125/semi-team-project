@@ -30,7 +30,7 @@ public class ProductDTO {
     private Timestamp productCreatedAt;
     private Timestamp productUpdatedAt;
     private int totalCount;
-
+    private String statusName;
 
 
     private CategoryDTO      category;

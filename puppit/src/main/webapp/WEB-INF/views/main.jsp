@@ -74,9 +74,9 @@
   color: #111;
   font-weight: 600;
   line-height: 1.4;
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
-  text-overflow: ellipsis;
+  
 }
 
 /* ===== 설명 ===== */
@@ -108,29 +108,53 @@
   padding: 20px;
   color: #777;
 }
+
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 6px;
+  color: #fff;
+}
+.badge-sale { background-color: #28a745; }   /* 판매중 - 초록 */
+.badge-reserve { background-color: #ffc107; }/* 예약중 - 노랑 */
+.badge-soldout { background-color: #dc3545; }/* 판매완료 - 빨강 */
 </style>
 
 
 <div class="container">
-  <!-- 상품 리스트 -->
-  <c:if test="${not empty products}">
-    <div class="product-grid" id="productGrid">
-      <c:forEach items="${products}" var="p">
-        <a class="product-card" href="${contextPath}/product/detail/${p.productId}">
-<img class="thumb"
-     src="${p.thumbnail.imageUrl}"
-     alt="${p.productName}"
-     onerror="this.onerror=null; this.src='${contextPath}/resources/image/no-image.png';">
-          <div class="product-title">${p.productName}</div>
-          <div class="product-desc">${p.productDescription}</div>
-          <div class="product-price">
-            <fmt:formatNumber value="${p.productPrice}" type="number" groupingUsed="true"/>원
-          </div>
-        </a>
-      </c:forEach>
-    </div>
-  </c:if>
+	<!-- 상품 리스트 -->
+	<c:if test="${not empty products}">
+		<div class="product-grid" id="productGrid">
+			<c:forEach items="${products}" var="p">
+				<a class="product-card"
+					href="${contextPath}/product/detail/${p.productId}"> <img
+					class="thumb" src="${p.thumbnail.imageUrl}" alt="${p.productName}"
+					onerror="this.onerror=null; this.src='${contextPath}/resources/image/no-image.png';">
+					<div class="product-title">${p.productName}
+						<c:if test="${p.statusId == 1}">
+							<span class="badge badge-sale">판매중</span>
+						</c:if>
+						<c:if test="${p.statusId == 2}">
+							<span class="badge badge-reserve">예약중</span>
+						</c:if>
+						<c:if test="${p.statusId == 3}">
+							<span class="badge badge-soldout">판매완료</span>
+						</c:if>
+					</div>
+					<div class="product-desc">${p.productDescription}</div>
+					<div class="product-price">
+						<fmt:formatNumber value="${p.productPrice}" type="number"
+							groupingUsed="true" />
+						원
+					</div>
+				</a>
+			</c:forEach>
+		</div>
+	</c:if>
 </div>
+
 
 
 <script>
@@ -191,11 +215,26 @@
         (p.thumbnail && p.thumbnail.imageUrl) ? p.thumbnail.imageUrl :
         (p.thumbImageUrl ? p.thumbImageUrl : (contextPath + '/resources/image/no-image.png'));
 
+   // ✅ 상태 뱃지 처리
+      let statusBadge = '';
+      if (p.statusId == 1) {
+        statusBadge = '<span class="badge badge-sale">판매중</span>';
+      } else if (p.statusId == 2) {
+        statusBadge = '<span class="badge badge-reserve">예약중</span>';
+      } else if (p.statusId == 3) {
+        statusBadge = '<span class="badge badge-soldout">판매완료</span>';
+      }
+
+      
+      
+      
       html +=
         '<a class="product-card" href="' + contextPath + '/product/detail/' + id + '">' +
-          '<img class="thumb" src="' + imgUrl + '" alt="상품이미지 없음">' +
-          '<div class="product-title">' + name + '</div>' +
+         
+        '<img class="thumb" src="' + imgUrl + '" alt="상품이미지 없음">' +
+          '<div class="product-title">' + name +  '&nbsp' + statusBadge +  '</div>' +
           '<div class="product-price">' + price + '</div>' +
+          
         '</a>';
 
       added++;
@@ -227,6 +266,7 @@
       if (!res.ok) throw new Error("HTTP " + res.status);
 
       const data  = await res.json();
+      console.log('data: ' , data);
       const list  = Array.isArray(data.products) ? data.products : [];
       const total = Number.isFinite(data.itemCount) ? data.itemCount : null;
       const more  = (typeof data.hasMore === 'boolean') ? data.hasMore : null;
