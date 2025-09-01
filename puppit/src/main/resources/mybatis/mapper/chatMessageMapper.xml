@@ -172,16 +172,17 @@ ORDER BY c.chat_created_at ASC;
   
   
 <select id="getChatRoomsByCreatedDesc" resultType="org.puppit.model.dto.ChatListDTO" parameterType="map">
- SELECT 
+    SELECT 
         r.room_id                  AS roomId,
         r.product_id               AS productId,
         p.product_name             AS productName,
         p.product_price            AS productPrice,
         p.seller_id                AS sellerId,
-        s.nick_name                AS sellerAccountId,
+        s.account_id               AS sellerAccountId,
         s.nick_name                AS sellerNickName,
         u.user_name                AS buyerName,
         u.nick_name                AS buyerNickName,
+        u.account_id               AS buyerAccountId,
         s.user_name                AS sellerName,
         last_msg.chat_message      AS lastMessage,
         last_msg.chat_created_at   AS lastMessageAt,
