@@ -926,13 +926,10 @@ function reloadRecentRoomList() {
                 // 1. 상대방 닉네임 결정
                 let opponentNickName = '';
                 if (chat.sellerAccountId === myAccountId) {
-                    // 내가 판매자라면 → 구매자 닉네임
                     opponentNickName = chat.buyerNickName || chat.buyerName || '';
                 } else if (chat.buyerAccountId === myAccountId) {
-                    // 내가 구매자라면 → 판매자 닉네임
                     opponentNickName = chat.sellerNickName || chat.sellerAccountId || chat.sellerName || '';
                 } else {
-                    // 운영자 등 제3자: 구매자/판매자 아무나
                     opponentNickName = chat.buyerNickName || chat.sellerNickName || '';
                 }
 
@@ -940,7 +937,7 @@ function reloadRecentRoomList() {
                 const lastMsg = chat.lastMessage || '';
                 const lastMsgTime = chat.chatLastMessageAt || '';
 
-             // 채팅방 아이템 HTML
+                // 채팅방 아이템 HTML
                 const html =
                     '<div class="chatList" data-room-id="'+chat.roomId + '">' +
                         '<span class="chat-profile-img">' +
@@ -948,9 +945,7 @@ function reloadRecentRoomList() {
                         '</span>' +
                         '<div class="chat-info-wrap">' +
                             '<div class="chat-user-row">' +
-                                chat.productName + // [추가] 상품명 먼저 표시
-                                ' / ' +            // 구분자(원하면 빼도 됨)
-                                opponentNickName + // 기존 닉네임 그대로
+                                chat.productName + ' / ' + opponentNickName +
                             '</div>' +
                             '<div class="chat-message-row">' +
                                 lastMsg +
@@ -965,7 +960,7 @@ function reloadRecentRoomList() {
                 chatListRenderArea.insertAdjacentHTML('beforeend', html);
             });
             
-            // [여기 추가!] 채팅방 클릭 이벤트 바인딩
+            // 채팅방 클릭 이벤트 바인딩
             chatListRenderArea.querySelectorAll('.chatList').forEach(function(chatDiv) {
                 chatDiv.addEventListener('click', function() {
                     // 하이라이트 처리
@@ -975,6 +970,8 @@ function reloadRecentRoomList() {
                     chatDiv.classList.add('highlight', 'selected');
                     const roomId = chatDiv.getAttribute('data-room-id');
                     if (roomId) {
+                        selectedRoomId = roomId;
+                        currentRoomId = roomId; // ★ currentRoomId를 반드시 설정
                         // 메시지 영역 초기화
                         chatHistory.innerHTML = "";
                         renderedMessageIds.clear();
@@ -987,12 +984,7 @@ function reloadRecentRoomList() {
                     }
                 });
             });
-            
-            
-
-            // 이하 기존 이벤트 바인딩 로직은 그대로
-            // ...
-        })
+        }) // ← forEach 바깥에 닫는 괄호!
         .catch(err => {
             console.error('채팅방 목록 재요청 에러:', err);
         });
