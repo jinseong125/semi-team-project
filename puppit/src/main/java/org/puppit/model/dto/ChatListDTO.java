@@ -22,6 +22,7 @@ public class ChatListDTO {
 	private String sellerAccountId;
 	private String sellerNickName;
 	private String buyerNickName;
+	private String buyerAccountId;
 	private Integer otherUserId;
 	private String otherAccountId;
 	private String otherUserName;
