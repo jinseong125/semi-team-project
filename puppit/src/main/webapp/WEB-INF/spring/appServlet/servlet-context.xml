@@ -23,13 +23,17 @@
   <mvc:interceptors>
       <mvc:interceptor>
           <mvc:mapping path="/user/**"/>
-          <!-- chat 관련 경로 추가! -->
           <mvc:mapping path="/chat/**"/>
           <mvc:mapping path="/payment/**"/>
+          <mvc:mapping path="/trade/**"/>
+          
           <mvc:exclude-mapping path="/user/login"/>
           <mvc:exclude-mapping path="/user/login/**"/>
           <mvc:exclude-mapping path="/user/signup"/>
+          <mvc:exclude-mapping path="/user/find"/>
           <mvc:exclude-mapping path="/user/check"/>
+          
+          <!-- 정적 리소스 -->
           <mvc:exclude-mapping path="/css/**"/>
           <mvc:exclude-mapping path="/js/**"/>
           <mvc:exclude-mapping path="/images/**"/>

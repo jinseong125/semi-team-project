@@ -27,177 +27,214 @@ if (sessionMap != null) {
 <style>
 /* 찜 버튼 */
 .wish-btn {
-  border: 0;
-  background: transparent;
-  cursor: pointer;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
 }
 
-.wish-btn .on { display: none; }
-.wish-btn.is-on .on { display: inline; color: #d94164 }
-.wish-btn.is-on .off { display: none; }
+.wish-btn .on {
+	display: none;
+}
+
+.wish-btn.is-on .on {
+	display: inline;
+	color: #d94164
+}
+
+.wish-btn.is-on .off {
+	display: none;
+}
 
 .wish-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 8px;
-  padding: 10px 14px;
-  line-height: 1;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 8px;
+	padding: 10px 14px;
+	line-height: 1;
 }
 
-.wish-btn .icon { font-size: 16px; }
+.wish-btn .icon {
+	font-size: 16px;
+}
+
 .wish-btn.is-on {
-  border-color: #ff7b8a;
-  background: #fff7f8;
-  color: #d94164;
+	border-color: #ff7b8a;
+	background: #fff7f8;
+	color: #d94164;
 }
 
 /* 레이아웃 */
 .detail-wrap {
-  max-width: 1100px;
-  margin: 40px auto;
-  padding: 0 20px;
-  display: flex;
-  gap: 32px;
+	max-width: 1100px;
+	margin: 40px auto;
+	padding: 0 20px;
+	display: flex;
+	gap: 32px;
 }
+
 .detail-left {
-  flex: 1;
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+	flex: 1;
+	width: 100%;
+	max-width: 500px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
 /* 대표 이미지 박스 */
 .thumbnail-box {
-  width: 100%;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-  overflow: hidden;
-  position: relative;
+	width: 100%;
+	border: 1px solid #eee;
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #fafafa;
+	overflow: hidden;
+	position: relative;
 }
+
 .main-img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  max-height: 600px;
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+	max-height: 600px;
 }
 
 /* 좌우 버튼 */
 .slide-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.4);
-  color: #fff;
-  border: none;
-  font-size: 24px;
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 50%;
-  z-index: 2;
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	background: rgba(0, 0, 0, 0.4);
+	color: #fff;
+	border: none;
+	font-size: 24px;
+	padding: 8px 12px;
+	cursor: pointer;
+	border-radius: 50%;
+	z-index: 2;
 }
-.slide-btn.prev { left: 10px; }
-.slide-btn.next { right: 10px; }
+
+.slide-btn.prev {
+	left: 10px;
+}
+
+.slide-btn.next {
+	right: 10px;
+}
 
 /* 썸네일 */
 .secondPictureContainer {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 12px;
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 12px;
 }
+
 .secondPicture {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  cursor: pointer;
+	width: 80px;
+	height: 80px;
+	object-fit: cover;
+	border-radius: 8px;
+	border: 1px solid #ddd;
+	cursor: pointer;
 }
 
 .detail-right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
 }
 
 .breadcrumb {
-  font-size: 14px;
-  color: #6b7280;
+	font-size: 14px;
+	color: #6b7280;
 }
 
 /* 상품명 */
 .detail-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 4px 0;
+	font-size: 24px;
+	font-weight: 700;
+	margin: 4px 0;
 }
 
 /* 가격 */
 .detail-price {
-  font-size: 22px;
-  font-weight: 600;
-  color: #111;
+	font-size: 22px;
+	font-weight: 600;
+	color: #111;
 }
 
 .meta-list {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0;
+	list-style: none;
+	padding: 0;
+	margin: 8px 0;
 }
+
 .meta-list li {
-  font-size: 14px;
-  margin: 6px 0;
+	font-size: 14px;
+	margin: 6px 0;
 }
-.label { color: #6b7280; margin-right: 6px; }
-.value { color: #111; }
+
+.label {
+	color: #6b7280;
+	margin-right: 6px;
+}
+
+.value {
+	color: #111;
+}
 
 .buttons {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 10px;
+	margin-top: 16px;
+	flex-wrap: wrap;
 }
+
 .btn.solid {
-  background: #0073e6;
-  color: #fff;
-  border: none;
-  flex: 1;
-  text-align: center;
+	background: #0073e6;
+	color: #fff;
+	border: none;
+	flex: 1;
+	text-align: center;
 }
+
 .btn.outline {
-  background: #fff;
-  border: 1px solid #d1d5db;
-  color: #111;
+	background: #fff;
+	border: 1px solid #d1d5db;
+	color: #111;
 }
 
 /* 상세 설명 */
 .detail-desc {
-  max-width: 1100px;
-  margin: 40px auto;
-  padding: 20px;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  background: #fafafa;
+	max-width: 1100px;
+	margin: 40px auto;
+	padding: 20px;
+	border: 1px solid #eee;
+	border-radius: 12px;
+	background: #fafafa;
 }
+
 .detail-desc h2 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 12px;
+	font-size: 18px;
+	font-weight: 700;
+	margin-bottom: 12px;
 }
+
 .detail-desc-text {
-  white-space: pre-wrap;
-  line-height: 1.6;
-  font-size: 15px;
+	white-space: pre-wrap;
+	line-height: 1.6;
+	font-size: 15px;
 }
-.empty { color: #6b7280; font-size: 14px; }
+
+.empty {
+	color: #6b7280;
+	font-size: 14px;
+}
 </style>
 
 <div class="detail-wrap">
@@ -290,18 +327,29 @@ if (sessionMap != null) {
 
       <button type="button" class="btn outline" onclick="history.back()">목록</button>
       <c:if test="${sessionMap.userId ne product.sellerId}">
-        <button
-          id="btnWish"
-          class="btn outline wish-btn ${product.wished ? 'is-on' : ''}"
-          data-product-id="${product.productId}"
-          aria-pressed="${product.wished ? 'true' : 'false'}"
-          title="찜">
-          <i class="fa-regular fa-heart icon off"></i>
-          <i class="fa-solid fa-heart icon on"></i>
-          <span class="text">찜</span>
-        </button>
-        <button type="button" class="btn solid" id="btnPay">채팅하기</button>
-      </c:if>
+  <button
+    id="btnWish"
+    class="btn outline wish-btn ${product.wished ? 'is-on' : ''}"
+    data-product-id="${product.productId}"
+    aria-pressed="${product.wished ? 'true' : 'false'}"
+    title="찜">
+    <i class="fa-regular fa-heart icon off"></i>
+    <i class="fa-solid fa-heart icon on"></i>
+    <span class="text">찜</span>
+  </button>
+
+  <c:choose>
+    <c:when test="${product.status.statusName eq '판매완료'}">
+      <span style="display:inline-block; padding:10px 14px; color:#d94164; font-weight:600;">
+        판매가 완료되었습니다.
+      </span>
+    </c:when>
+    <c:otherwise>
+      <button type="button" class="btn solid" id="btnPay">채팅하기</button>
+    </c:otherwise>
+  </c:choose>
+</c:if>
+
     </div>
   </div>
 </div>

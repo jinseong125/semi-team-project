@@ -116,8 +116,8 @@ body {
   border-color:rgba(124,45,18,.25);
 }
 .btn-refund{
-  padding:8px 12px;border-radius:8px;border:1px solid var(--line);
-  background:#fff;cursor:pointer;font-weight:700;font-size:13px;
+  padding:8px 16px;border-radius:999px;border:1px solid var(--line);
+  color:#374151;background:#e5e7eb;cursor:pointer;font-weight:700;font-size:13px;
 }
 .btn-refund:disabled{opacity:.6;cursor:not-allowed;}
 
@@ -175,13 +175,13 @@ body {
                 </td>
                 <!-- 작업 버튼 영역 -->
                 <td>
-                  <c:if test="${pointDTO.chargeStatus == 'PAID'}">
-                    <button type="button"
-                            class="btn-refund"
-                            data-merchant="${pointDTO.pointChargeOrderNumber}">
-                      환불하기
-                    </button>
-                  </c:if>
+                  <button type="button"
+                          class="btn-refund"
+                          data-merchant="${pointDTO.pointChargeOrderNumber}"
+                          data-status="${pointDTO.chargeStatus}"
+                          <c:if test="${pointDTO.chargeStatus != 'PAID'}">disabled title="결제 완료 상태에서만 환불 가능합니다." aria-disabled="true"</c:if>>
+                    환불하기
+                  </button>
                 </td>
               </tr>
             </c:forEach>
@@ -196,15 +196,22 @@ body {
 </div>
 
 <script>
+  const contextPath = '${contextPath}';
+
   document.addEventListener("click", async e => {
 	  const btn = e.target.closest(".btn-refund");
 	  if(!btn) return;
 	  
+	  const status = btn.dataset.status;
+	  if(btn.disabled || status !== 'PAID') return;
+	  
 	  const merchantUid = btn.dataset.merchant;
 	  if(!merchantUid) return;
 	  
+	  if(!confirm("정말 환불하시겠습니까?")) return;
+	  
 	  // UI 잠금
-	  btn.disable = true;
+	  btn.disabled = true;
 	  const originalText = btn.textContent;
 	  btn.textContent = "취소 중...";
 	  

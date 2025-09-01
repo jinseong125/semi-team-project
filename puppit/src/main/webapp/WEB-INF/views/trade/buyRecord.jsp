@@ -95,15 +95,13 @@ body {
   padding: 6px 10px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: #fef6d2;
   font-weight: 800;
   font-size: 12px;
 }
 
 /* 선택: 상태 값에 따른 색상(원하는 값만 추가해서 사용) */
-.badge-status[data-status="PAID"],
-.badge-status[data-status="COMPLETED"],
-.badge-status[data-status="DONE"] {
+.badge-status[data-status="거래완료"] {
   background: rgba(20, 180, 70, .08);
   border-color: rgba(20, 180, 70, .25);
 }

@@ -166,6 +166,7 @@
 
     <!-- 상품 전체목록 조회 -->
     <select id="getProductList" resultType="org.puppit.model.dto.ProductDTO">
+
         SELECT 
 		    p.product_id AS productId,
 		    p.product_name AS productName,
@@ -450,10 +451,14 @@
     p.product_description,
     p.product_created_at,
     p.product_updated_at,
+    p.status_id,                  
+    s.status_name AS statusName,  
     t.image_id     AS thumb_image_id,
     t.image_url    AS thumb_image_url,
     t.is_thumbnail AS thumb_is_thumbnail
   FROM product p
+  JOIN product_status s           
+    ON p.status_id = s.status_id
   LEFT JOIN product_image t
     ON t.product_id = p.product_id
    AND t.is_thumbnail = 1
@@ -466,12 +471,13 @@
       )
     </if>
     <if test="q != null and q != ''">
-      AND p.product_name        LIKE CONCAT('%', #{q}, '%')
+      AND p.product_name LIKE CONCAT('%', #{q}, '%')
     </if>
   </where>
   ORDER BY COALESCE(p.product_updated_at, p.product_created_at) DESC, p.product_id DESC
   LIMIT #{size} OFFSET #{offset}
 </select>
+
 
 
 

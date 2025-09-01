@@ -4,7 +4,7 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <jsp:include page="../layout/header.jsp">
-  <jsp:param value="다른 사람의 리뷰" name="title" />
+  <jsp:param value="다른 사람의 후기" name="title" />
 </jsp:include>
 
 <style>
@@ -38,64 +38,76 @@
     color:#facc15; /* 노란색 */
   }
   .row-editing .rating-stars i { cursor:pointer; }
-  
+  .not-exists {text-align:center; color:#6b7280; padding: 20px 0;}
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    padding: 0 16px;
+  }
 </style>
 
-<h1>다른 사람의 리뷰</h1>
+<div class="title">다른 사람의 후기</div>
 
 <c:if test="${not empty msg}">
   <div class="msgbar">${msg}</div>
 </c:if>
-
-<table class="table" id="reviewTable">
-  <thead>
-    <tr>
-      <th>판매자</th>
-      <th>구매자</th>
-      <th>상품명</th>
-      <th style="width:40%;">내용</th>
-      <th>평점</th>
-      <th>작성</th>
-      <th>수정</th>
-    </tr>
-  </thead>
-  <tbody>
-    <c:forEach var="r" items="${reviewDTOs}">
-      <tr data-review-id="${r.reviewId}">
-        <td>${r.sellerNickname}</td>
-        <td>${r.buyerNickname}</td>
-        <td>${r.productName}</td>
-
-        <!-- 내용: 보기/수정 겸용 -->
-        <td>
-          <input class="content-input" type="text" name="content"
-                 value="${r.content}" disabled />
-        </td>
-
-        <!-- 평점: 보기/수정 겸용 -->
-        <td>
-          <div class="rating-stars" data-rating="${r.rating}" data-editable="false">
-            <c:forEach begin="1" end="5" var="i">
-              <i class="${i <= r.rating ? 'fa-solid' : 'fa-regular'} fa-star"
-                 data-value="${i}"></i>
-            </c:forEach>
-            <input type="hidden" class="rating-value" name="rating" value="${r.rating}" />
-          </div>
-        </td>
-
-        <td class="muted"><fmt:formatDate value="${r.createdAt}" pattern="yyyy.MM.dd HH:mm"/></td>
-        <td class="muted">
-          <c:choose>
-            <c:when test="${not empty r.updatedAt}">
-              <fmt:formatDate value="${r.updatedAt}" pattern="yyyy.MM.dd HH:mm"/>
-            </c:when>
-            <c:otherwise>-</c:otherwise>
-          </c:choose>
-        </td>
-
-      </tr>
-    </c:forEach>
-  </tbody>
-</table>
+<c:choose>
+  <c:when test="${not empty reviewDTOs}">
+    <table class="table" id="reviewTable">
+      <thead>
+        <tr>
+          <th>판매자</th>
+          <th>구매자</th>
+          <th>상품명</th>
+          <th style="width:40%;">내용</th>
+          <th>평점</th>
+          <th>작성</th>
+          <th>수정</th>
+        </tr>
+      </thead>
+      <tbody>
+        <c:forEach var="r" items="${reviewDTOs}">
+          <tr data-review-id="${r.reviewId}">
+            <td>${r.sellerNickname}</td>
+            <td>${r.buyerNickname}</td>
+            <td>${r.productName}</td>
+    
+            <!-- 내용: 보기/수정 겸용 -->
+            <td>
+              <input class="content-input" type="text" name="content"
+                     value="${r.content}" disabled />
+            </td>
+    
+            <!-- 평점: 보기/수정 겸용 -->
+            <td>
+              <div class="rating-stars" data-rating="${r.rating}" data-editable="false">
+                <c:forEach begin="1" end="5" var="i">
+                  <i class="${i <= r.rating ? 'fa-solid' : 'fa-regular'} fa-star"
+                     data-value="${i}"></i>
+                </c:forEach>
+                <input type="hidden" class="rating-value" name="rating" value="${r.rating}" />
+              </div>
+            </td>
+    
+            <td class="muted"><fmt:formatDate value="${r.createdAt}" pattern="yyyy.MM.dd HH:mm"/></td>
+            <td class="muted">
+              <c:choose>
+                <c:when test="${not empty r.updatedAt}">
+                  <fmt:formatDate value="${r.updatedAt}" pattern="yyyy.MM.dd HH:mm"/>
+                </c:when>
+                <c:otherwise>-</c:otherwise>
+              </c:choose>
+            </td>
+          </tr>
+        </c:forEach>
+      </tbody>
+    </table>
+  </c:when>
+  <c:otherwise>
+    <div class="not-exists">
+      <span>후기가 존재하지 않습니다.</span>
+    </div>
+  </c:otherwise>
+</c:choose>
 
 
