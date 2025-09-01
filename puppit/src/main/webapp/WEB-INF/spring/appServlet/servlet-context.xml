@@ -23,6 +23,9 @@
   <mvc:interceptors>
       <mvc:interceptor>
           <mvc:mapping path="/user/**"/>
+          <!-- chat 관련 경로 추가! -->
+          <mvc:mapping path="/chat/**"/>
+          <mvc:mapping path="/payment/**"/>
           <mvc:exclude-mapping path="/user/login"/>
           <mvc:exclude-mapping path="/user/login/**"/>
           <mvc:exclude-mapping path="/user/signup"/>
