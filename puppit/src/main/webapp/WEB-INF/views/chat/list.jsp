@@ -432,7 +432,7 @@ style.innerHTML = `
                     </span>
                     <div class="chat-info-area" style="cursor:pointer;">
                         <div class="chat-nickname">
-                        	<div class="chat-nickname">
+                         
                         		<c:choose>
 								   <c:when test="${chat.sellerAccountId eq loginUserId}">
 								        <c:out value="${chat.productName}"/>/ 
@@ -446,7 +446,7 @@ style.innerHTML = `
 								        <c:out value="알 수 없음" />
 								    </c:otherwise>	                        		
                         	      </c:choose> 
-							</div>
+						
                         
                         
                             
@@ -660,28 +660,16 @@ Promise.all(chatCountPromises).then(() => {
             // API에서 받아온 값 사용
             const totalChatCount = noChatRooms[roomId]?.totalChatCount || 0;
 
-         // 기존분기: 내가 판매자인데 채팅횟수 0이면 판매자 프로필
-            // 신규분기: 로그인된 사용자 accountId와 sellerAccountId가 같고 채팅횟수가 0이면 판매자 프로필
-            // 둘 다 만족시 무조건 sellerProfileImageKey 사용
-            if (
-                (myAccountId === sellerAccountId && totalChatCount === 0)
-                // 추가: buyer/seller accountId가 같고, 채팅횟수 0이면(자기 자신과의 채팅)
-                || (buyerAccountId === sellerAccountId && totalChatCount === 0)
-            ) {
-                if (sellerProfileImageKey) {
-                    imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + sellerProfileImageKey;
-                }
+            // 내가 구매자면 판매자 프로필
+            if (myAccountId === buyerAccountId && info.sellerProfileImageKey) {
+                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + info.sellerProfileImageKey;
             }
-            // 내가 구매자인 경우 → 판매자 프로필 이미지
-            else if (myAccountId === buyerAccountId && sellerProfileImageKey) {
-                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + sellerProfileImageKey;
+            // 내가 판매자면 구매자 프로필
+            else if (myAccountId === sellerAccountId && info.receiverProfileImageKey) {
+                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + info.receiverProfileImageKey;
             }
-            // 내가 판매자인데 대화가 1회 이상이면 → 상대방(receiver) 프로필 이미지
-            else if (myAccountId === sellerAccountId && totalChatCount > 0 && receiverProfileImageKey) {
-                imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + receiverProfileImageKey;
-            }
-            // 기본 (otherProfileImageKey)
-            else if (!imgSrc && info.otherProfileImageKey) {
+            // 그 외: otherProfileImageKey (예: 운영자, 자기 자신과의 채팅 등)
+            else if (info.otherProfileImageKey) {
                 imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + info.otherProfileImageKey;
             }
         }
@@ -952,7 +940,7 @@ function reloadRecentRoomList() {
                 const lastMsg = chat.lastMessage || '';
                 const lastMsgTime = chat.chatLastMessageAt || '';
 
-                // 채팅방 아이템 HTML
+             // 채팅방 아이템 HTML
                 const html =
                     '<div class="chatList">' +
                         '<span class="chat-profile-img">' +
@@ -960,7 +948,9 @@ function reloadRecentRoomList() {
                         '</span>' +
                         '<div class="chat-info-wrap">' +
                             '<div class="chat-user-row">' +
-                                opponentNickName +
+                                chat.productName + // [추가] 상품명 먼저 표시
+                                ' / ' +            // 구분자(원하면 빼도 됨)
+                                opponentNickName + // 기존 닉네임 그대로
                             '</div>' +
                             '<div class="chat-message-row">' +
                                 lastMsg +
