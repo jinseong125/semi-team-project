@@ -25,6 +25,7 @@
           <mvc:mapping path="/user/**"/>
           <mvc:mapping path="/chat/**"/>
           <mvc:mapping path="/payment/**"/>
+          <mvc:mapping path="/trade/**"/>
           
           <mvc:exclude-mapping path="/user/login"/>
           <mvc:exclude-mapping path="/user/login/**"/>
