@@ -849,7 +849,7 @@ document.addEventListener("DOMContentLoaded", function() {
         String(chat.chatSenderAccountId) === String(window.nickName)
       ) {
     	console.log("chatSenderAccountId: ", chat.chatSenderAccountId);
-        window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage, chat.chatCreatedAt);
+        //window.updateChatListLastMessage(chat.chatRoomId, chat.chatMessage, chat.chatCreatedAt);
       }
 
 

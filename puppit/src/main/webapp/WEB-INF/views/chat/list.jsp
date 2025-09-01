@@ -784,19 +784,7 @@ Promise.all(chatCountPromises).then(() => {
 }); //DOM끝
 
 
-function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
-    var chatLists = document.getElementsByClassName('chatList');
-    for (var i = 0; i < chatLists.length; i++) {
-        var chatDiv = chatLists[i];
-        if (String(chatDiv.getAttribute('data-room-id')) === String(roomId)) {
-            var msgRow = chatDiv.querySelector('.chat-message-row');
-            var timeRow = chatDiv.querySelector('.chat-meta-row');
-            if (msgRow) msgRow.textContent = chatMessage;
-            if (timeRow) timeRow.textContent = formatTimestamp(chatCreatedAt);
-            break;
-        }
-    }
-}
+
 
 
 
@@ -912,26 +900,7 @@ function showExitDonePopup() {
     });
 }
 
-function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
-	 var chatDiv = document.querySelector('.chatList[data-room-id="' + roomId + '"]');
-	    if (!chatDiv) {
-	        console.warn('chatDiv for roomId', roomId, 'not found!');
-	        return;
-	    }
-	 // 올바른 선택자 사용!
-	    var msgRow = chatDiv.querySelector('.chat-message-row');
-	    var timeRow = chatDiv.querySelector('.chat-meta-row');
-	    if (!msgRow) {
-	        console.warn('msgRow (.chat-message-row) not found in chatDiv!');
-	    } else {
-	        msgRow.textContent = chatMessage;
-	    }
-	    if (!timeRow) {
-	        console.warn('timeRow (.chat-meta-row) not found in chatDiv!');
-	    } else {
-	        timeRow.textContent = formatTimestamp(chatCreatedAt);
-	    }
-}
+
 
 
 
@@ -959,14 +928,35 @@ function reloadRecentRoomList() {
                 // 현재 로그인한 계정 ID (판매자/구매자 판별)
                 const myAccountId = window.myAccountId;
 
-                // 1. 상대방 닉네임 결정
+                imgSrc = defaultImg;
                 let opponentNickName = '';
+                // 상대방 닉네임/ID 결정
                 if (chat.sellerAccountId === myAccountId) {
-                    opponentNickName = chat.buyerNickName || chat.buyerName || '';
+                    // 내가 판매자 → 상대방은 구매자
+                    opponentNickName = chat.buyerNickName || chat.buyerName || chat.buyerAccountId || '';
+                    opponentAccountId = chat.buyerAccountId || '';
                 } else if (chat.buyerAccountId === myAccountId) {
-                    opponentNickName = chat.sellerNickName || chat.sellerAccountId || chat.sellerName || '';
+                    // 내가 구매자 → 상대방은 판매자
+                    opponentNickName = chat.sellerNickName || chat.sellerName || chat.sellerAccountId || '';
+                    opponentAccountId = chat.sellerAccountId || '';
                 } else {
+                    // 예외(운영자, 자기 자신 등)
                     opponentNickName = chat.buyerNickName || chat.sellerNickName || '';
+                    opponentAccountId = '';
+                }
+
+                // 상대방 ID 기준으로 프로필이미지 결정
+                if (profileInfo) {
+                    if (opponentAccountId === profileInfo.productSellerAccountId && profileInfo.sellerProfileImageKey) {
+                        // 상대방이 판매자일 때
+                        imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + profileInfo.sellerProfileImageKey;
+                    } else if (opponentAccountId === profileInfo.chatReceiverAccountId && profileInfo.receiverProfileImageKey) {
+                        // 상대방이 구매자일 때
+                        imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + profileInfo.receiverProfileImageKey;
+                    } else if (profileInfo.otherProfileImageKey) {
+                        // 기타 예외케이스
+                        imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + profileInfo.otherProfileImageKey;
+                    }
                 }
 
                 // 메시지/시간 기존대로
@@ -1535,6 +1525,9 @@ function subscribeRoom(currentRoomId) {
                 chat.productName
             );
         }
+    // 채팅방 목록의 마지막 메시지/시간도 항상 업데이트!
+       
+       reloadRecentRoomList();
     });
 }
 
@@ -1680,8 +1673,8 @@ function sendMessage(currentRoomId, chatMessages = []) {
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
     
  
-    updateChatListLastMessage(currentRoomId, message, chatCreatedAt);
     
+    reloadRecentRoomList();
     input.value = "";
     
 }
