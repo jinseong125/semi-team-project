@@ -172,7 +172,7 @@ ORDER BY c.chat_created_at ASC;
   
   
 <select id="getChatRoomsByCreatedDesc" resultType="org.puppit.model.dto.ChatListDTO" parameterType="map">
-    SELECT 
+      SELECT 
         r.room_id                  AS roomId,
         r.product_id               AS productId,
         p.product_name             AS productName,
@@ -210,14 +210,20 @@ ORDER BY c.chat_created_at ASC;
     LEFT JOIN user sender ON last_msg.chat_sender = sender.user_id
     LEFT JOIN user receiver ON last_msg.chat_receiver = receiver.user_id
     WHERE
-          r.user_id = #{userId}
-       OR p.seller_id = #{userId}
-       OR EXISTS (
-            SELECT 1
-            FROM chat c2
-            WHERE c2.chat_room_id = r.room_id
-              AND (c2.chat_sender = #{userId} OR c2.chat_receiver = #{userId})
-       )
+          (r.user_id = #{userId}
+           OR p.seller_id = #{userId}
+           OR EXISTS (
+                SELECT 1
+                FROM chat c2
+                WHERE c2.chat_room_id = r.room_id
+                  AND (c2.chat_sender = #{userId} OR c2.chat_receiver = #{userId})
+           ))
+        AND NOT (
+            u.nick_name LIKE '탈퇴한회원%'
+            OR s.nick_name LIKE '탈퇴한회원%'
+            OR sender.nick_name LIKE '탈퇴한회원%'
+            OR receiver.nick_name LIKE '탈퇴한회원%'
+        )
     ORDER BY sortTime DESC
 </select>  
 

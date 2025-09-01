@@ -784,7 +784,19 @@ Promise.all(chatCountPromises).then(() => {
 }); //DOM끝
 
 
-
+function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
+    var chatLists = document.getElementsByClassName('chatList');
+    for (var i = 0; i < chatLists.length; i++) {
+        var chatDiv = chatLists[i];
+        if (String(chatDiv.getAttribute('data-room-id')) === String(roomId)) {
+            var msgRow = chatDiv.querySelector('.chat-message-row');
+            var timeRow = chatDiv.querySelector('.chat-meta-row');
+            if (msgRow) msgRow.textContent = chatMessage;
+            if (timeRow) timeRow.textContent = formatTimestamp(chatCreatedAt);
+            break;
+        }
+    }
+}
 
 
 
@@ -1674,22 +1686,7 @@ function sendMessage(currentRoomId, chatMessages = []) {
     
 }
 
-function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
-	// 여러 채팅방 아이템을 모두 돌면서 일치하는 roomId 찾기 (더 안전!)
-    var chatLists = document.getElementsByClassName('chatList');
-    for (var i = 0; i < chatLists.length; i++) {
-        var chatDiv = chatLists[i];
-        if (String(chatDiv.getAttribute('data-room-id')) === String(roomId)) {
-            // 메시지 row와 시간 row 탐색
-            var msgRow = chatDiv.querySelector('.chat-message-row');
-            var timeRow = chatDiv.querySelector('.chat-meta-row');
-            if (msgRow) msgRow.textContent = chatMessage;
-            if (timeRow) timeRow.textContent = formatTimestamp(chatCreatedAt);
-            // 여러 개일 수 있으나, 일반적으로 한 개만 있으니 여기서 종료
-            break;
-        }
-    }
-	}
+
 
 //ISO 포맷/타임스탬프 모두 지원
     // 시간 포맷 함수 JS에서 구현 (JSP에서는 EL/함수 호출 X)
