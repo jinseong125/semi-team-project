@@ -213,11 +213,16 @@ public class UserController {
   // mypage에서 profile 가기전 password 검사 페이지
   @GetMapping("/checkPassword")
   public String checkPwd(@SessionAttribute(name = "sessionMap", required = false) Map<String, Object> sessionMap) {
+    
+    // 로그인 가드
+    if(sessionMap == null || sessionMap.get("userId") == null) {
+      return "redirect:/user/login";
+    }
     // 카카오 로그인시 비밀번호 재확인 필요 x
     String provider = (String)sessionMap.get("provider");
     
     if(provider != null && !provider.isEmpty()) {
-      return "user/profile";
+      return "redirect:/user/profile";
     }
     return "user/checkPassword";
   }

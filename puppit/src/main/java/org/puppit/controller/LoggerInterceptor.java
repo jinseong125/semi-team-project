@@ -17,9 +17,12 @@ public class LoggerInterceptor implements HandlerInterceptor {
     String uri = request.getRequestURI();
     String path = uri.substring(ctx.length());
     
-    if(path.startsWith("/user/login") || path.startsWith("/user/signup") || path.startsWith("/user/check")) {
-      return true;
-    }
+    boolean isPublic = path.equals("/user/login")
+    || path.equals("/user/signup")
+    || path.equals("/user/find")
+    || path.equals("/user/check");
+    
+    if(isPublic) return true;
     // 세션에서 사용자 정보 조회
     HttpSession session = request.getSession(false);
     @SuppressWarnings("unchecked")
