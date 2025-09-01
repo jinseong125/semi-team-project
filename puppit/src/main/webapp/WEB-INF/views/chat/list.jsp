@@ -942,7 +942,7 @@ function reloadRecentRoomList() {
 
              // 채팅방 아이템 HTML
                 const html =
-                    '<div class="chatList">' +
+                    '<div class="chatList" data-room-id="'+chat.roomId + '">' +
                         '<span class="chat-profile-img">' +
                             '<img src="' + imgSrc + '" alt="프로필 이미지" onerror="this.src=\'' + defaultImg + '\'"/>' +
                         '</span>' +
@@ -964,6 +964,31 @@ function reloadRecentRoomList() {
 
                 chatListRenderArea.insertAdjacentHTML('beforeend', html);
             });
+            
+            // [여기 추가!] 채팅방 클릭 이벤트 바인딩
+            chatListRenderArea.querySelectorAll('.chatList').forEach(function(chatDiv) {
+                chatDiv.addEventListener('click', function() {
+                    // 하이라이트 처리
+                    chatListRenderArea.querySelectorAll('.chatList').forEach(el => {
+                        el.classList.remove('highlight', 'selected');
+                    });
+                    chatDiv.classList.add('highlight', 'selected');
+                    const roomId = chatDiv.getAttribute('data-room-id');
+                    if (roomId) {
+                        // 메시지 영역 초기화
+                        chatHistory.innerHTML = "";
+                        renderedMessageIds.clear();
+                        showChatUI(true); // 채팅 UI 활성화
+                        loadChatHistory(roomId).then(() => {
+                            if (typeof connectAndSubscribe === 'function') {
+                                connectAndSubscribe(roomId);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            
 
             // 이하 기존 이벤트 바인딩 로직은 그대로
             // ...
@@ -1110,6 +1135,7 @@ function loadChatHeader(product, buyerId, sellerId, sellerAccountId, buyerAccoun
 }
 
 function loadChatHistory(roomId) {
+	console.log('loadChatHistory() 실행');
     return fetch(contextPath + '/chat/message?roomId=' + roomId)
         .then(response => response.json())
         .then(data => {
