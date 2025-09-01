@@ -4,7 +4,7 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 
 <jsp:include page="../layout/header.jsp">
-  <jsp:param value="내 리뷰" name="title" />
+  <jsp:param value="내 후기" name="title" />
 </jsp:include>
 
 <style>
@@ -38,10 +38,15 @@
     color:#facc15; /* 노란색 */
   }
   .row-editing .rating-stars i { cursor:pointer; }
-  
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    padding: 0 16px;
+  }
 </style>
 
-<h1>내가 쓴 리뷰</h1>
+<div class="title">내가 쓴 후기</div>
+<br>
 
 <c:if test="${not empty msg}">
   <div class="msgbar">${msg}</div>
@@ -72,7 +77,6 @@
           <input class="content-input" type="text" name="content"
                  value="${r.content}" disabled />
         </td>
-
         <!-- 평점: 보기/수정 겸용 -->
         <td>
           <div class="rating-stars" data-rating="${r.rating}" data-editable="false">
