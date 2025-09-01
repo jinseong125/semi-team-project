@@ -900,6 +900,30 @@ function showExitDonePopup() {
     });
 }
 
+function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
+	 var chatDiv = document.querySelector('.chatList[data-room-id="' + roomId + '"]');
+	    if (!chatDiv) {
+	        console.warn('chatDiv for roomId', roomId, 'not found!');
+	        return;
+	    }
+	 // 올바른 선택자 사용!
+	    var msgRow = chatDiv.querySelector('.chat-message-row');
+	    var timeRow = chatDiv.querySelector('.chat-meta-row');
+	    if (!msgRow) {
+	        console.warn('msgRow (.chat-message-row) not found in chatDiv!');
+	    } else {
+	        msgRow.textContent = chatMessage;
+	    }
+	    if (!timeRow) {
+	        console.warn('timeRow (.chat-meta-row) not found in chatDiv!');
+	    } else {
+	        timeRow.textContent = formatTimestamp(chatCreatedAt);
+	    }
+}
+
+
+
+
 function reloadRecentRoomList() {
     const defaultImg = contextPath + '/resources/image/profile-default.png';
     fetch(contextPath + '/api/chat/recentRoomList')
@@ -1642,48 +1666,29 @@ function sendMessage(currentRoomId, chatMessages = []) {
 
     console.log('[sendMessage] chatMessage:', chatMessage);
     stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+    
+ 
+    updateChatListLastMessage(currentRoomId, message, chatCreatedAt);
+    
     input.value = "";
+    
 }
 
 function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
-	 console.log('[updateChatListLastMessage] roomId:', roomId, 'chatMessage:', chatMessage, 'chatCreatedAt:', chatCreatedAt);
-	 var chatRenderArea = document.getElementById('chatListRenderArea');
-	  if (!chatRenderArea) {
-	    console.warn('chatListRenderArea not found!');
-	    return;
-	  }
-	  var chatDiv = chatRenderArea.querySelector('.chatList[data-room-id="' + String(roomId) + '"]');
-	  if (!chatDiv) {
-	    console.warn('chatDiv for roomId', roomId, 'not found!');
-	    return;
-	  }
-	  var msgDiv = chatDiv.querySelector('.chat-message');
-	  if (!msgDiv) {
-	    console.warn('msgDiv (.chat-message) not found in chatDiv!');
-	    return;
-	  }
-	  
-	// 시간 영역
-	    var timeSpan = msgDiv.querySelector('.chat-last-time');
-	    // chatCreatedAt이 숫자(timestamp)이면 사람이 읽을 수 있게 변환
-	    var timeText = formatTimestamp(chatCreatedAt);
-	    if (timeSpan) {
-	        timeSpan.textContent = timeText;
-	    } else {
-	        // 없으면 새로 만들어서 붙임
-	        timeSpan = document.createElement('span');
-	        timeSpan.className = 'chat-last-time';
-	        timeSpan.style.marginLeft = "8px";
-	        timeSpan.style.color = "#888";
-	        timeSpan.textContent = timeText;
-	        msgDiv.appendChild(timeSpan);
-	    }
-	  
-	  
-	  // 마지막 메시지 시간
-	  msgDiv.textContent = chatMessage;
-	  msgDiv.appendChild(timeSpan); // 다시 붙여주기(혹시 textContent로 날아갔으면)
-	  timeSpan.textContent = timeText;
+	// 여러 채팅방 아이템을 모두 돌면서 일치하는 roomId 찾기 (더 안전!)
+    var chatLists = document.getElementsByClassName('chatList');
+    for (var i = 0; i < chatLists.length; i++) {
+        var chatDiv = chatLists[i];
+        if (String(chatDiv.getAttribute('data-room-id')) === String(roomId)) {
+            // 메시지 row와 시간 row 탐색
+            var msgRow = chatDiv.querySelector('.chat-message-row');
+            var timeRow = chatDiv.querySelector('.chat-meta-row');
+            if (msgRow) msgRow.textContent = chatMessage;
+            if (timeRow) timeRow.textContent = formatTimestamp(chatCreatedAt);
+            // 여러 개일 수 있으나, 일반적으로 한 개만 있으니 여기서 종료
+            break;
+        }
+    }
 	}
 
 //ISO 포맷/타임스탬프 모두 지원
