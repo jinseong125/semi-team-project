@@ -13,7 +13,7 @@
 
  <!-- 회원 가입 -->
   <insert id="userSignUp" parameterType="UserDTO">
-     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at, salt, deleted)
+     INSERT INTO user (account_id, user_name, nick_name, user_password, user_email, user_phone, created_at, salt, is_deleted)
      VALUES (#{accountId}, #{userName}, #{nickName}, #{userPassword}, #{userEmail}, #{userPhone}, NOW(), #{salt}, 0)
   </insert>
   
