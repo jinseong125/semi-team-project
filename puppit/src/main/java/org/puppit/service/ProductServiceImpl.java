@@ -2,6 +2,7 @@ package org.puppit.service;
 
 import lombok.RequiredArgsConstructor;
 import org.puppit.model.dto.*;
+import org.puppit.repository.ChatDAO;
 import org.puppit.repository.ProductDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.Objects;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductDAO productDAO;
+    private final ChatDAO chatDAO;
     private final S3Service s3Service;
     
 
@@ -186,6 +188,27 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
+        
+        // 2) 해당 product_id로 만들어진 room_id 리스트 조회
+        List<Integer> roomIdList = chatDAO.findRoomIdsByProductId(productId); // 예: SELECT room_id FROM room WHERE product_id = #{productId}
+
+        if (roomIdList != null && !roomIdList.isEmpty()) {
+            // 3) 각 room_id별로 alarm, chat 삭제
+            for (Integer roomId : roomIdList) {
+            	chatDAO.deleteAlarmsByRoomId(roomId); // 예: DELETE FROM alarm WHERE room_id = #{roomId}
+            	chatDAO.deleteChatsByRoomId(roomId); // 예: DELETE FROM chat WHERE chat_room_id = #{roomId}
+            }
+
+            // 4) room 삭제
+            chatDAO.deleteRoomsByProductId(productId); // 예: DELETE FROM room WHERE product_id = #{productId}
+        }
+
+        
+        
+        
+        
+        
+        
         // 4) 상품 삭제
         return productDAO.deleteProduct(productId);
     }

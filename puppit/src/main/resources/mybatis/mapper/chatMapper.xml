@@ -134,18 +134,26 @@ ORDER BY c.chat_created_at DESC
   
   </select>
   
-     <!-- chat 테이블의 해당 roomId 대화 모두 삭제 -->
-    <delete id="deleteChatsByRoomId" parameterType="int">
-        DELETE FROM chat WHERE chat_room_id = #{roomId}
-    </delete>
+   
     <!-- room 테이블에서 방 삭제 -->
     <delete id="deleteRoom" parameterType="int">
         DELETE FROM room WHERE room_id = #{roomId}
     </delete>
-  <!-- roomId에 해당하는 alarm 전체 삭제 -->
-<delete id="deleteAlarmsByRoomId" parameterType="int">
+  
+  <select id="findRoomIdsByProductId" resultType="int">
+    SELECT room_id FROM room WHERE product_id = #{productId}
+</select>
+
+<delete id="deleteAlarmsByRoomId">
     DELETE FROM alarm WHERE room_id = #{roomId}
 </delete>
-  
+
+<delete id="deleteChatsByRoomId">
+    DELETE FROM chat WHERE chat_room_id = #{roomId}
+</delete>
+
+<delete id="deleteRoomsByProductId">
+    DELETE FROM room WHERE product_id = #{productId}
+</delete>
   
 </mapper>

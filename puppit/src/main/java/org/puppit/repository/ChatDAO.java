@@ -227,6 +227,28 @@ public void deleteAlarmsByRoomId(int roomId) {
 	sqlSession.delete("mybatis.mapper.chatMapper.deleteAlarmsByRoomId", roomId);
 }
 
+
+
+
+public List<Integer> findRoomIdsByProductId(Integer productId) {
+    return sqlSession.selectList("mybatis.mapper.chatMapper.findRoomIdsByProductId", productId);
+}
+
+
+public void deleteAlarmsByRoomId(Integer roomId) {
+    sqlSession.delete("mybatis.mapper.chatMapper.deleteAlarmsByRoomId", roomId);
+}
+
+
+public void deleteChatsByRoomId(Integer roomId) {
+    sqlSession.delete("mybatis.mapper.chatMapper.deleteChatsByRoomId", roomId);
+}
+
+
+public void deleteRoomsByProductId(Integer productId) {
+    sqlSession.delete("mybatis.mapper.chatMapper.deleteRoomsByProductId", productId);
+}
+
    
    
    
