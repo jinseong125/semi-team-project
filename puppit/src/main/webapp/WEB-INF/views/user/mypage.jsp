@@ -165,16 +165,6 @@
 }
 .fa-heart {color: #d94164; font-size: 18px;}
 
-/* 아래 확장 공간 */
-.future-area {
-  margin-top: 18px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: var(--shadow);
-}
-
 /* 반응형 */
 @media (min-width: 768px) {
   .avatar {
@@ -183,7 +173,7 @@
   }
   .p-amount {
     font-size: 32px;
-    font-weight:800;
+    font-weight:600;
   }
 }
 
@@ -347,7 +337,7 @@
   <!-- 나한테 달린 후기 -->
   <div class="action-card" style="margin-top: 18px;">
     <div>
-      <div class="action-title">다른 사람 후기</div>
+      <div class="action-title">다른 사람의 후기</div>
       <div class="action-desc">내 상품에 대한 다른 사람의 후기를 확인하세요</div>
     </div>
     <button class="action-btn" type="button"
