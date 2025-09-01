@@ -212,6 +212,20 @@ public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId) {
     return count != null ? count : 0;
 }
 
+public void deleteChatsByRoomId(int roomId) {
+	sqlSession.delete( "mybatis.mapper.chatMapper.deleteChatsByRoomId", roomId);
+    
+}
+
+
+public void deleteRoom(int roomId) {
+	 sqlSession.delete("mybatis.mapper.chatMapper.deleteRoom", roomId);
+   
+}
+
+public void deleteAlarmsByRoomId(int roomId) {
+	sqlSession.delete("mybatis.mapper.chatMapper.deleteAlarmsByRoomId", roomId);
+}
 
    
    

@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<!-- contextPath 변수 선언 (조건부!) -->
+<!-- contextPath 변수 선언 (조건부) -->
 <c:if test="${empty contextPath}">
   <c:set var="contextPath" value="${pageContext.request.contextPath}" />
 </c:if>
@@ -1018,6 +1018,14 @@ document.addEventListener("DOMContentLoaded", function() {
 		      // 추가: chatReceiver, chatReceiverUserId 가져오기
 		      var chatReceiver = alarm.chatReceiver || alarm.receiverAccountId;
 		      var chatReceiverUserId = alarm.chatReceiverUserId || alarm.userId; // userId가 receiverUserId 역할이라면
+		      var chatDiv = document.querySelector('.chatList[data-room-id="' + roomId + '"]');
+		        if (chatDiv) {
+		            chatDiv.click();
+		            highlightChatRoom(roomId);
+		            removeUnreadBadge(roomId);
+		            alarmArea.style.display = 'none';
+		          }
+
 
 		      // 로그 출력
 		          // 로그 출력

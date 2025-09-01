@@ -125,6 +125,7 @@ public class ChatController {
 
 	    // 사용 예시
 	    System.out.println("lastMessageAt = " + lastMessageAt);
+	    System.out.println("chats: " + chatMap.get("chats"));
 	    model.addAttribute("chatList", chatMap.get("chats"));
 	    model.addAttribute("profileImage", chatMap.get("profileImage"));
 	    model.addAttribute("highlightRoomId", highlightRoomId);
@@ -138,6 +139,20 @@ public class ChatController {
 	public Integer readAlarm(@RequestParam("messageId") Integer messageId) {
 		// 변경된 행 수를 리턴
         return chatAlarmService.readAlarm(messageId);
+	}
+	
+	@PostMapping(value = "/removeroom",  produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> removeRoom(@RequestParam("roomId") int roomId) {
+	   Map<String, Object> result = new HashMap<>();
+	   try {
+	        chatService.removeRoomCascade(roomId);
+	        result.put("success", true);
+	    } catch (Exception e) {
+	        result.put("success", false);
+	        result.put("message", e.getMessage());
+	    }
+	    return result;
 	}
 	
 	

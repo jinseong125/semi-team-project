@@ -196,8 +196,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: amount,
-          uid: uid
+          amount: amount
         })
       });
       if (!res.ok) throw new Error("주문 생성 실패");
@@ -220,6 +219,16 @@
       }, async function (rsp) {
         if (!rsp.success) {
           alert("결제 실패: " + rsp.error_msg);
+          // 서버에 실패 상태 업데이트 요청
+          try {
+        	  await fetch(`${contextPath}/payment/fail`, {
+        		  method: "POST",
+        		  headers: {"Content-Type" : "application/json"},
+        		  body: JSON.stringify({merchantUid: merchant_uid})
+        	  });
+      		} catch (err) {
+      			console.error("실패 상태 업데이트 실패", err);
+      		}
           $payBtn.disabled = false;
           return;
         }

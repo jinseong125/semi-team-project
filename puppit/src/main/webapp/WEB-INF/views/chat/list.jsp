@@ -3,7 +3,7 @@
 <%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
 
 <%
 Map<String, Object> sessionMap = (Map<String, Object>) session.getAttribute("sessionMap");
@@ -218,6 +218,7 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
     right:0;
     top:38px;
     z-index:999;
+    display: none;
 }
 
 .chat-option-item:hover {
@@ -235,11 +236,176 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
     justify-content:center;
 }
 
+// 1. CSS 추가 (팝업/모달/버튼/배경 등)
+const style = document.createElement('style');
+style.innerHTML = `
+/* 쩜세개 옵션 활성화시 채팅방 배경 회색 */
+.chatList.option-active {
+  background: #eee !important;
+}
+
+/* 옵션 팝업 */
+#chat-options-popup.active {
+  display: block !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* 모달 배경 */
+#exit-chatroom-modal-bg {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.18);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 모달창 */
+#exit-chatroom-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 28px 24px 28px;
+  min-width: 360px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.11);
+  position: relative;
+  animation: fadein 0.25s;
+}
+@keyframes fadein { from{opacity:0;} to{opacity:1;} }
+/* X버튼 */
+#exit-chatroom-modal .close-btn,
+#exit-chatroom-done .close-btn {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  font-size: 22px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: color 0.18s;
+  z-index: 1;
+}
+#exit-chatroom-modal .close-btn:hover,
+#exit-chatroom-done .close-btn:hover { color: #e74c3c; }
+/* 안내문구 */
+#exit-chatroom-modal .exit-text {
+  margin-bottom: 28px;
+  color:#222;
+  font-size:17px;
+  text-align:center;
+}
+/* 확인 버튼 */
+#exit-chatroom-modal .confirm-btn {
+  background: #e74c3c;
+  color: #fff;
+  font-weight:700;
+  font-size:18px;
+  border:none;
+  border-radius:8px;
+  padding: 10px 28px;
+  cursor: pointer;
+  display:block;
+  margin: 0 auto;
+  transition: background 0.18s;
+}
+#exit-chatroom-modal .confirm-btn:hover { background: #c0392b; }
+/* 삭제 완료 팝업 */
+#exit-chatroom-done {
+  position: fixed;
+  top: 50px;
+  right: 50px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.13);
+  padding: 24px 38px 20px 22px;
+  min-width: 290px;
+  z-index: 99999;
+  font-size:18px;
+  color:#222;
+  animation: fadein 0.2s;
+}
+#exit-chatroom-done .close-btn {
+  top: 12px;
+  right: 12px;
+}
+#chat-options-popup .chat-option-item#exit-chatroom {
+  color: #e74c3c;
+  font-weight:700;
+}
+
+#chatListRenderArea {
+    margin: 0;
+    padding: 0;
+}
+.chatList {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    cursor: pointer;
+}
+.chat-profile-img {
+    width: 48px;
+    height: 48px;
+    margin-right: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.chat-profile-img img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ccc;
+}
+.chat-info-wrap {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.chat-user-row {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 2px;
+}
+.chat-user-row .chat-role {
+    font-size: 14px;
+    font-weight: normal;
+    margin-left: 3px;
+    color: #666;
+}
+.chat-message-row {
+    font-size: 16px;
+    margin-bottom: 2px;
+    color: #222;
+    word-break: break-all;
+}
+.chat-meta-row {
+    font-size: 13px;
+    color: #888;
+}
+.unread-badge {
+    background: #e74c3c;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 3px 7px;
+    margin-left: 8px;
+    vertical-align: middle;
+    display: none;
+}
 
 
     </style>
 </head>
 <body>
+<!-- 알림 팝업 영역 추가 -->
+<div id="unreadNotificationArea" style="position:fixed; right:20px; top:80px; z-index:99999; display:none;">
+    <!-- 읽지 않은 메시지 알림 목록이 동적으로 삽입됨 -->
+</div>
 <div class="container">
    
     
@@ -266,14 +432,25 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
                     </span>
                     <div class="chat-info-area" style="cursor:pointer;">
                         <div class="chat-nickname">
-                             <c:choose>
-                                <c:when test="${not empty chat.productName}">
-                                    <c:out value="${chat.productName}" />  (<c:out value="${chat.sellerAccountId}" />)
-                                </c:when>
-                                <c:otherwise>
-                                    상품판매자와 채팅을 시작해보세요
-                                </c:otherwise>
-                            </c:choose>
+                        	<div class="chat-nickname">
+                        		<c:choose>
+								   <c:when test="${chat.sellerAccountId eq loginUserId}">
+								        <c:out value="${chat.productName}"/>/ 
+								        <c:out value="${chat.buyerNickName}" />
+								    </c:when>
+								    <c:when test="${chat.buyerAccountId eq loginUserId}">
+								    	<c:out value="${chat.productName}"/>/ 
+								        <c:out value="${chat.sellerNickName}" />
+								    </c:when>
+								    <c:otherwise>
+								        <c:out value="알 수 없음" />
+								    </c:otherwise>	                        		
+                        	      </c:choose> 
+							</div>
+                        
+                        
+                            
+                               
                         </div>
                          
                         <div class="chat-message">
@@ -287,9 +464,9 @@ String profileImageJson = mapper.writeValueAsString(request.getAttribute("profil
 						            </c:otherwise>
 						        </c:choose>
 						    </span>
-						    <span class="chat-last-time" style="margin-left:8px; color:#888;">
-						        <c:out value="${chat.chatLastMessageAt}" />
-						    </span>
+						     <span class="chat-last-time" style="margin-left:8px; color:#888;">
+					            <c:out value="${chat.chatLastMessageAt}" />
+					        </span>
 						</div>
                         
                     </div>
@@ -339,6 +516,43 @@ const profileImages = window.profileImage;
 window.myAccountId = "<%= accountId %>";
 
 document.addEventListener('DOMContentLoaded', function() {
+	 // JSP EL 값을 JS 변수에 할당
+    var userId = "${userId}";
+	  let isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
+	  const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
+	  if (isLoggedIn === "true" && isChatListPage) {
+	        loadUnreadCounts();
+	  }
+	  
+	  document.body.addEventListener('click', function(e) {
+	        if (e.target && e.target.id === 'chat-options-btn') {
+	            showOptionsPopup(e.target);
+	        }
+	    });
+	  
+	  
+	  
+	  	// 1. 로그인 성공시 내가 안읽은 메시지 전부 알림팝업에 띄우기
+      // (sessionScope.sessionMap.accountId 방식의 로그인 체크)
+     
+   if (isLoggedIn === "true") {
+       fetch(contextPath + '/api/alarm?userId=' + userId)
+           .then(res => res.json())
+           .then(unreadMessages => {
+               if (Array.isArray(unreadMessages) && unreadMessages.length > 0) {
+            	   console.log('unreadMessages: ', unreadMessages);
+                   //showUnreadNotificationsPopup(unreadMessages);
+                   //showAlarmPopup([unreadMessages]);
+            	   window.showAlarmPopup(unreadMessages);
+               }
+           })
+           .catch(err => console.error('안읽은 메시지 알림 fetch 에러:', err));
+   }
+	
+
+	  	
+	  	
+	  	
 	if (!window.stompClient || !window.stompClient.connected) {
         const socket = new SockJS(contextPath + '/ws-chat');
         console.log("Connecting websocket...");
@@ -571,12 +785,213 @@ Promise.all(chatCountPromises).then(() => {
     enableChatInput(false);
     showChatUI(false);
 
-    const isLoggedIn = "${not empty sessionScope.sessionMap.accountId}";
-    const isChatListPage = window.location.pathname.indexOf("/chat/recentRoomList") !== -1;
-    if (isLoggedIn === "true" && isChatListPage) {
-        loadUnreadCounts();
-    }
-});
+  
+    
+   
+    
+
+
+   
+    
+}); //DOM끝
+
+
+
+
+
+
+//팝업 생성/삭제 함수
+function showOptionsPopup(anchorElem) {
+    // 이미 있으면 제거
+    const old = document.getElementById('chat-options-popup');
+    if (old) old.remove();
+    // 팝업 생성
+    const popup = document.createElement('div');
+    popup.id = 'chat-options-popup';
+    popup.style.display = 'block';
+    popup.style.position = 'absolute';
+    popup.style.right = '0';
+    popup.style.top = '38px';
+    popup.style.background = '#fff';
+    popup.style.border = '1px solid #bbb';
+    popup.style.borderRadius = '8px';
+    popup.style.minWidth = '220px';
+    popup.style.minHeight = '50px';
+    popup.style.zIndex = '99999';
+    popup.innerHTML = `
+        <div class="chat-option-item" id="exit-chatroom-btn" style="background:#e74c3c;color:#fff;border-radius:8px;font-size:15px;font-weight:700;margin-bottom:2px;cursor:pointer;">채팅방 나가기</div>
+    `;
+    anchorElem.parentNode.appendChild(popup);
+
+    // 나가기 버튼 클릭 이벤트
+    popup.querySelector('#exit-chatroom-btn').onclick = function(e) {
+        popup.remove();
+        showExitChatroomModal();
+    };
+
+    // 외부 클릭시 닫기
+    setTimeout(() => {
+        document.addEventListener('mousedown', function handler(ev) {
+            if (!popup.contains(ev.target) && ev.target !== anchorElem) {
+                popup.remove();
+                document.removeEventListener('mousedown', handler);
+            }
+        });
+    }, 30);
+}
+
+//첫번째 팝업(정말 나가시겠습니까?)
+function showExitChatroomModal() {
+    removeModalById('exit-chatroom-modal-bg');
+    const modalBg = document.createElement('div');
+    modalBg.className = 'custom-modal-bg';
+    modalBg.id = 'exit-chatroom-modal-bg';
+    modalBg.innerHTML = `
+        <div class="custom-modal">
+            <button class="close-btn" title="닫기">&times;</button>
+            <div class="exit-text">정말 채팅방을 나가시겠습니까?<br>대화내용을 복구할 수 없습니다.</div>
+            <button class="confirm-btn">확인</button>
+        </div>
+    `;
+    document.body.appendChild(modalBg);
+
+    modalBg.querySelector('.close-btn').onclick = () => modalBg.remove();
+    modalBg.querySelector('.confirm-btn').onclick = function() {
+        modalBg.remove();
+        // --- 실제 삭제 요청 ---
+        fetch(contextPath + '/chat/removeroom?roomId=' + currentRoomId, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('삭제 결과:', data);
+            if (data.success) {
+                showExitDonePopup().then(() => {
+                    // 팝업이 사라진 후에 리스트 리로드!!
+                    reloadRecentRoomList();
+                });
+            } else {
+                alert('삭제 실패: ' + (data.message || ''));
+            }
+        })
+        .catch(err => {
+            alert('삭제 중 오류 발생: ' + err);
+        });
+    };
+}
+
+//두번째 팝업(나가기 완료)
+function showExitDonePopup() {
+    return new Promise((resolve) => {
+        removeModalById('exit-chatroom-done-bg');
+        const doneBg = document.createElement('div');
+        doneBg.className = 'custom-modal-bg';
+        doneBg.id = 'exit-chatroom-done-bg';
+        doneBg.style.position = 'fixed';   // ← 반드시 fixed
+        doneBg.style.top = '50%';
+        doneBg.style.left = '50%';
+        doneBg.style.transform = 'translate(-50%, -50%)';
+        doneBg.style.zIndex = '999999';    // ← z-index 높게!
+        doneBg.innerHTML = `
+            <div class="custom-modal">
+                <button class="close-btn" title="닫기">&times;</button>
+                <div class="exit-text">채팅방 나가기 되었습니다.</div>
+            </div>
+        `;
+        document.body.appendChild(doneBg);
+
+        setTimeout(() => {
+            doneBg.remove();
+            resolve();
+        }, 2000);
+
+        doneBg.querySelector('.close-btn').onclick = () => {
+            doneBg.remove();
+            resolve();
+        };
+    });
+}
+
+function reloadRecentRoomList() {
+    const defaultImg = contextPath + '/resources/image/profile-default.png';
+    fetch(contextPath + '/api/chat/recentRoomList')
+        .then(res => res.json())
+        .then(data => {
+            const chatListRenderArea = document.getElementById('chatListRenderArea');
+            if (!chatListRenderArea) return;
+            chatListRenderArea.innerHTML = '';
+
+            const chats = Array.isArray(data.chats) ? data.chats : [];
+            const profileImages = Array.isArray(data.profileImage) ? data.profileImage : [];
+
+            chats.forEach(chat => {
+                // 프로필 이미지 계산 기존대로
+                let imgSrc = defaultImg;
+                const profileInfo = profileImages.find(pi => String(pi.chatRoomId) === String(chat.roomId));
+                if (profileInfo && profileInfo.sellerProfileImageKey) {
+                    imgSrc = 'https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/' + profileInfo.sellerProfileImageKey;
+                }
+
+                // 현재 로그인한 계정 ID (판매자/구매자 판별)
+                const myAccountId = window.myAccountId;
+
+                // 1. 상대방 닉네임 결정
+                let opponentNickName = '';
+                if (chat.sellerAccountId === myAccountId) {
+                    // 내가 판매자라면 → 구매자 닉네임
+                    opponentNickName = chat.buyerNickName || chat.buyerName || '';
+                } else if (chat.buyerAccountId === myAccountId) {
+                    // 내가 구매자라면 → 판매자 닉네임
+                    opponentNickName = chat.sellerNickName || chat.sellerAccountId || chat.sellerName || '';
+                } else {
+                    // 운영자 등 제3자: 구매자/판매자 아무나
+                    opponentNickName = chat.buyerNickName || chat.sellerNickName || '';
+                }
+
+                // 메시지/시간 기존대로
+                const lastMsg = chat.lastMessage || '';
+                const lastMsgTime = chat.chatLastMessageAt || '';
+
+                // 채팅방 아이템 HTML
+                const html =
+                    '<div class="chatList">' +
+                        '<span class="chat-profile-img">' +
+                            '<img src="' + imgSrc + '" alt="프로필 이미지" onerror="this.src=\'' + defaultImg + '\'"/>' +
+                        '</span>' +
+                        '<div class="chat-info-wrap">' +
+                            '<div class="chat-user-row">' +
+                                opponentNickName +
+                            '</div>' +
+                            '<div class="chat-message-row">' +
+                                lastMsg +
+                            '</div>' +
+                            '<div class="chat-meta-row">' +
+                                lastMsgTime +
+                            '</div>' +
+                        '</div>' +
+                        '<span class="unread-badge"></span>' +
+                    '</div>';
+
+                chatListRenderArea.insertAdjacentHTML('beforeend', html);
+            });
+
+            // 이하 기존 이벤트 바인딩 로직은 그대로
+            // ...
+        })
+        .catch(err => {
+            console.error('채팅방 목록 재요청 에러:', err);
+        });
+}
+
+
+
+//중복 제거 함수
+function removeModalById(id) {
+    const elem = document.getElementById(id);
+    if (elem) elem.remove();
+    console.log('id: ', id);
+}
+
 
 /* [추가] 채팅 UI show/hide 함수 */
 function showChatUI(isRoomSelected=true) {
@@ -1167,15 +1582,17 @@ function sendMessage(currentRoomId, chatMessages = []) {
     // senderRole/receiverRole 계산
     let senderRole = null, receiverRole = null;
     if (String(userId) === String(productSellerId)) {
-        senderRole = "SELLER";
-        receiverRole = "BUYER";
-    } else if (String(userId) === String(buyerId)) {
-        senderRole = "BUYER";
-        receiverRole = "SELLER";
-    } else {
-        alert("로그인 사용자가 buyer/seller가 아닙니다. 채팅을 보낼 수 없습니다.");
-        return;
-    }
+    	  senderRole = "SELLER";
+    	  receiverRole = "BUYER";
+   	} else {
+   	  // 판매자가 아닌 모든 사용자는 buyer로 간주
+   	  senderRole = "BUYER";
+   	  receiverRole = "SELLER";
+   	  // buyerId를 현재 로그인한 사용자로 지정(기존 buyer가 없으면)
+   	  if (!buyerId) {
+   	    buyerId = userId;
+   	  }
+   	}
 
     // chatSender/chatReceiver 값 결정
     const chatSender = userId;
@@ -1262,36 +1679,38 @@ function updateChatListLastMessage(roomId, chatMessage, chatCreatedAt) {
 	}
 
 //ISO 포맷/타임스탬프 모두 지원
-function formatTimestamp(ts) {
-    if (!ts) return '';
-    let date;
-    // 숫자면 밀리초 단위로 Date 생성
-    if (typeof ts === 'number' || /^\d+$/.test(ts)) {
-        date = new Date(Number(ts));
-    } else if (typeof ts === 'string') {
-         // ISO 포맷/타임존 처리
-        date = new Date(ts);
-        if (isNaN(date.getTime()) && ts.includes('+09:00')) {
-            date = new Date(ts.replace('+09:00', 'Z'));
+    // 시간 포맷 함수 JS에서 구현 (JSP에서는 EL/함수 호출 X)
+    function formatTimestamp(ts) {
+        if (!ts) return '';
+        let date;
+        if (typeof ts === 'number' || /^\d+$/.test(ts)) {
+            date = new Date(Number(ts));
+        } else if (typeof ts === 'string') {
+            date = new Date(ts);
+            if (isNaN(date.getTime()) && ts.includes('+09:00')) {
+                date = new Date(ts.replace('+09:00', 'Z'));
+            }
+        } else {
+            return '';
         }
-    } else {
-        return '';
+        if (isNaN(date.getTime())) return '';
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const hh = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        const ss = String(date.getSeconds()).padStart(2, '0');
+        return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
     }
-    if (isNaN(date.getTime())) return '';
 
-    const yyyy = date.getFullYear();
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const hh = String(date.getHours()).padStart(2, '0');
-    const min = String(date.getMinutes()).padStart(2, '0');
-    const ss = String(date.getSeconds()).padStart(2, '0');
-    return yyyy + '-' + mm + '-' + dd + ' ' + hh + ':' + min + ':' + ss;
-}
+
 
 
 
 
 //window에 등록
+window.showExitDonePopup = showExitDonePopup;
+window.showExitChatroomModal = showExitChatroomModal; // window에 등록
 window.highlightChatRoom = highlightChatRoom;
 window.updateChatListLastMessage = updateChatListLastMessage;
 window.displayNotification = displayNotification;

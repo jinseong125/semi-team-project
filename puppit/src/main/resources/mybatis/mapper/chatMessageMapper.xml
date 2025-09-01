@@ -172,50 +172,53 @@ ORDER BY c.chat_created_at ASC;
   
   
 <select id="getChatRoomsByCreatedDesc" resultType="org.puppit.model.dto.ChatListDTO" parameterType="map">
- SELECT 
-            r.room_id                  AS roomId,
-            r.product_id               AS productId,
-            p.product_name             AS productName,
-            p.product_price            AS productPrice,
-            p.seller_id                AS sellerId,
-            s.nick_name               AS sellerAccountId,
-            u.user_name                AS buyerName,
-            s.user_name                AS sellerName,
-            last_msg.chat_message      AS lastMessage,
-            last_msg.chat_created_at   AS lastMessageAt,
-            last_msg.chat_sender       AS lastMessageSenderId,
-            sender.nick_name          AS lastMessageSenderAccountId,
-            sender.user_name           AS lastMessageSenderName,
-            last_msg.chat_receiver     AS lastMessageReceiverId,
-            receiver.nick_name        AS lastMessageReceiverAccountId,
-            receiver.user_name         AS lastMessageReceiverName,
-            COALESCE(last_msg.chat_created_at, r.room_created_at) AS sortTime
-        FROM room r
-        JOIN product p ON r.product_id = p.product_id
-        JOIN user u ON r.user_id = u.user_id
-        JOIN user s ON p.seller_id = s.user_id
-        LEFT JOIN (
-            SELECT c1.*
-            FROM chat c1
-            INNER JOIN (
-                SELECT chat_room_id, MAX(chat_created_at) AS max_created_at
-                FROM chat
-                GROUP BY chat_room_id
-            ) c2
-            ON c1.chat_room_id = c2.chat_room_id AND c1.chat_created_at = c2.max_created_at
-        ) last_msg ON r.room_id = last_msg.chat_room_id
-        LEFT JOIN user sender ON last_msg.chat_sender = sender.user_id
-        LEFT JOIN user receiver ON last_msg.chat_receiver = receiver.user_id
-        WHERE
-              r.user_id = #{userId}
-           OR p.seller_id = #{userId}
-           OR EXISTS (
-                SELECT 1
-                FROM chat c2
-                WHERE c2.chat_room_id = r.room_id
-                  AND (c2.chat_sender = #{userId} OR c2.chat_receiver = #{userId})
-           )
-        ORDER BY sortTime DESC
+    SELECT 
+        r.room_id                  AS roomId,
+        r.product_id               AS productId,
+        p.product_name             AS productName,
+        p.product_price            AS productPrice,
+        p.seller_id                AS sellerId,
+        s.account_id               AS sellerAccountId,
+        s.nick_name                AS sellerNickName,
+        u.user_name                AS buyerName,
+        u.nick_name                AS buyerNickName,
+        u.account_id               AS buyerAccountId,
+        s.user_name                AS sellerName,
+        last_msg.chat_message      AS lastMessage,
+        last_msg.chat_created_at   AS lastMessageAt,
+        last_msg.chat_sender       AS lastMessageSenderId,
+        sender.nick_name           AS lastMessageSenderAccountId,
+        sender.user_name           AS lastMessageSenderName,
+        last_msg.chat_receiver     AS lastMessageReceiverId,
+        receiver.nick_name         AS lastMessageReceiverAccountId,
+        receiver.user_name         AS lastMessageReceiverName,
+        COALESCE(last_msg.chat_created_at, r.room_created_at) AS sortTime
+    FROM room r
+    JOIN product p ON r.product_id = p.product_id
+    JOIN user u ON r.user_id = u.user_id
+    JOIN user s ON p.seller_id = s.user_id
+    LEFT JOIN (
+        SELECT c1.*
+        FROM chat c1
+        INNER JOIN (
+            SELECT chat_room_id, MAX(chat_created_at) AS max_created_at
+            FROM chat
+            GROUP BY chat_room_id
+        ) c2
+        ON c1.chat_room_id = c2.chat_room_id AND c1.chat_created_at = c2.max_created_at
+    ) last_msg ON r.room_id = last_msg.chat_room_id
+    LEFT JOIN user sender ON last_msg.chat_sender = sender.user_id
+    LEFT JOIN user receiver ON last_msg.chat_receiver = receiver.user_id
+    WHERE
+          r.user_id = #{userId}
+       OR p.seller_id = #{userId}
+       OR EXISTS (
+            SELECT 1
+            FROM chat c2
+            WHERE c2.chat_room_id = r.room_id
+              AND (c2.chat_sender = #{userId} OR c2.chat_receiver = #{userId})
+       )
+    ORDER BY sortTime DESC
 </select>  
 
  <!-- roomId를 기반으로 productId만 조회 -->

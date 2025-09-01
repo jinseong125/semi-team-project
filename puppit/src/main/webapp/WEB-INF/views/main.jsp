@@ -117,7 +117,10 @@
     <div class="product-grid" id="productGrid">
       <c:forEach items="${products}" var="p">
         <a class="product-card" href="${contextPath}/product/detail/${p.productId}">
-          <img class="thumb" src="${p.thumbnail.imageUrl}" alt="상품이미지 없음">
+<img class="thumb"
+     src="${p.thumbnail.imageUrl}"
+     alt="${p.productName}"
+     onerror="this.onerror=null; this.src='${contextPath}/resources/image/no-image.png';">
           <div class="product-title">${p.productName}</div>
           <div class="product-desc">${p.productDescription}</div>
           <div class="product-price">
