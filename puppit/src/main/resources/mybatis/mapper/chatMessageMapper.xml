@@ -224,6 +224,11 @@ ORDER BY c.chat_created_at ASC;
             OR sender.nick_name LIKE '탈퇴한회원%'
             OR receiver.nick_name LIKE '탈퇴한회원%'
         )
+        -- 탈퇴 회원(is_deleted = 1) 관련 채팅방 제외
+        AND COALESCE(u.is_deleted, 0) != 1
+        AND COALESCE(s.is_deleted, 0) != 1
+        AND (sender.is_deleted IS NULL OR sender.is_deleted != 1)
+        AND (receiver.is_deleted IS NULL OR receiver.is_deleted != 1)
     ORDER BY sortTime DESC
 </select>  
 
