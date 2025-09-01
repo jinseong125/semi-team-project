@@ -61,18 +61,29 @@ public class UserController {
   // 회원가입
   @PostMapping("/signup")
   public String signUp(UserDTO user, RedirectAttributes redirectAttr) {
-    // 회원가입
-    boolean signupResult = userService.signup(user);
-    // 회원가입 실패
-    if(!signupResult) {
-      redirectAttr.addFlashAttribute("error", "아이디를 입력 해주세요");
+    String userEmail = user.getUserEmail() == null ? null : user.getUserEmail().trim().toLowerCase();
+    String accountId = user.getAccountId() == null ? null : user.getAccountId().trim();
+    String nickName = user.getNickName() == null ? null : user.getNickName().trim();
+    
+    if(!userService.isAccountIdAvailable(accountId)
+        || !userService.isNickNameAvailable(nickName)
+        || !userService.isUserEmailAvailable(userEmail)) {
+      redirectAttr.addFlashAttribute("error", "올바른 정보를 입력 해주세요");
       return "redirect:/user/signup";
     }
-    // 회원가입 성공
-    redirectAttr.addFlashAttribute("msg", "Puppit에 오신것을 환영 합니다");
-    return "redirect:/";
-  }
-  
+    try {
+      boolean signupResult = userService.signup(user);
+      if(!signupResult) throw new IllegalStateException();
+        // 회원가입 성공
+        redirectAttr.addFlashAttribute("msg", "Puppit에 오신것을 환영 합니다");
+        return "redirect:/";
+
+      } catch (Exception e) {
+        // 회원가입 실패
+        redirectAttr.addFlashAttribute("error", "올바른 정보를 입력 해주세요");
+        return "redirect:/user/signup";
+      }
+    }  
   // 회원 탈퇴
   @PostMapping("/delete")
   public String deleteAccount(HttpSession session,
@@ -104,15 +115,19 @@ public class UserController {
   // 중복 검사
   @GetMapping("/check")
   public ResponseEntity<Void> check(UserDTO userDTO) {
-    if(userDTO.getNickName() != null && userService.isNickNameAvailable(userDTO.getNickName())) {
-      return ResponseEntity.ok().build();
-    } else if(userDTO.getAccountId() != null && userService.isAccountIdAvailable(userDTO.getAccountId())) {
-      return ResponseEntity.ok().build();
-    } else if(userDTO.getUserEmail() != null && userService.isUserEmailAvailable(userDTO.getUserEmail())) {
-      return ResponseEntity.ok().build();
-    } else {
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    if (userDTO.getUserEmail() != null) {
+      boolean ok = userService.isUserEmailAvailable(userDTO.getUserEmail().trim().toLowerCase());
+      return ok ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
+    if (userDTO.getAccountId() != null) {
+      boolean ok = userService.isAccountIdAvailable(userDTO.getAccountId().trim());
+      return ok ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+    if (userDTO.getNickName() != null) {
+      boolean ok = userService.isNickNameAvailable(userDTO.getNickName().trim());
+      return ok ? ResponseEntity.ok().build() : ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+    return ResponseEntity.badRequest().build(); // 파라미터 없음
   }
   
   // 로그인 폼 보여주기
@@ -160,8 +175,11 @@ public class UserController {
 
       UserStatusDTO userLog = new UserStatusDTO(loginResult.getAccountId(), loginResult.getUserId(), timestamp);
       userService.insertLogStatus(userLog);
-
-      redirectAttr.addFlashAttribute("msg", "로그인 성공!");
+      String returnTo = (String) session.getAttribute("redirectAfterLogin");
+      if(returnTo != null) {
+        session.removeAttribute("redirectAfterLogin");
+        return "redirect:" + returnTo;
+      }
       return "redirect:/";
   } catch (Exception e) {
      e.printStackTrace();
