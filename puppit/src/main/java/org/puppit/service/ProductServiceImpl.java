@@ -158,7 +158,7 @@ public class ProductServiceImpl implements ProductService {
 
                     productDAO.insertProductImage(imageDTO);
                 }
-            }
+            } 
         }
 
         List<ProductImageDTO> remainImages = productDAO.getProductImages(productDTO.getProductId());
