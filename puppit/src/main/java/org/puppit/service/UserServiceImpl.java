@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     }
     return false; 
   }
-
+  
   public boolean signup(UserDTO user) {
     try {
       // salt 생성
@@ -112,14 +112,17 @@ public class UserServiceImpl implements UserService {
   }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
+    if(accountId == null || accountId.isBlank()) return false;
     return userDAO.countByAccountId(accountId.trim().toLowerCase()) == 0; 
   } 
   @Override
   public Boolean isNickNameAvailable(String nickName) {
+    if(nickName == null || nickName.isBlank()) return false;
     return userDAO.countByNickName(nickName.trim()) == 0;
   }
   @Override
   public Boolean isUserEmailAvailable(String userEmail) {
+    if(userEmail == null || userEmail.isBlank()) return false;
     return userDAO.countByEmail(userEmail.trim().toLowerCase()) == 0;
   }
   @Override
