@@ -6,7 +6,7 @@ import org.puppit.model.dto.SearchLogDTO;
 
 public interface SearchLogService {
 
-  
+  // 인기 검색어
   List<SearchLogDTO> getTopKeywords();
   
 }
