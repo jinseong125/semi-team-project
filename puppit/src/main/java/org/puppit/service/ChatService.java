@@ -43,4 +43,5 @@ public interface ChatService {
     int isAlarmDuplicate(NotificationDTO notification);
 	public int getTotalChatCount(int roomId, int buyerId, int sellerId);
 	public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId);
+	public void removeRoomCascade(int roomId) throws Exception;
 }

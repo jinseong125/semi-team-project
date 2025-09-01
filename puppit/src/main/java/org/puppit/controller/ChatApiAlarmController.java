@@ -115,16 +115,7 @@ public class ChatApiAlarmController {
 	    return result;
 	}
 	
-//	@GetMapping(value = "/chat/countBuyerToSeller", produces = MediaType.APPLICATION_JSON_VALUE)
-//	@ResponseBody
-//	public Map<String, Integer> getBuyerToSellerCount(@RequestParam("roomId") int roomId,
-//	                                                 @RequestParam("buyerId") int buyerId,
-//	                                                 @RequestParam("sellerId") int sellerId) {
-//	    int count = chatService.getBuyerToSellerCount(roomId, buyerId, sellerId);
-//	    Map<String, Integer> result = new HashMap<>();
-//	    result.put("buyerToSellerCount", count);
-//	    return result;
-//	}
+
 	
 	
 	
