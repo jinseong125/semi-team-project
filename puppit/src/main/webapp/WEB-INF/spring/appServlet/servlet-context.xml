@@ -32,6 +32,7 @@
           <mvc:exclude-mapping path="/user/signup"/>
           <mvc:exclude-mapping path="/user/find"/>
           <mvc:exclude-mapping path="/user/check"/>
+          <mvc:exclude-mapping path="/user/reset-password"/>
           
           <!-- 정적 리소스 -->
           <mvc:exclude-mapping path="/css/**"/>
