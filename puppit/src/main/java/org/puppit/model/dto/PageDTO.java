@@ -11,7 +11,7 @@ public class PageDTO {
   private int size = 16;
   private int offset;
   
-  private int itemCount;  //----- ÀüÃ¼ Ç×¸ñÀÇ °³¼ö (DB¿¡¼­ COUNT() ÇÔ¼ö·Î °á°ú °è»ê
+  private int itemCount;  //----- ì „ì²´ í•­ëª©ì˜ ê°œìˆ˜ (DBì—ì„œ COUNT() í•¨ìˆ˜ë¡œ ê²°ê³¼ ê³„ì‚°
   private int pageCount;
   private int beginPage;
   private int endPage;

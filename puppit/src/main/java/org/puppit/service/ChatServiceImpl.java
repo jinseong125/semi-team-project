@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.puppit.model.dto.AlarmDuplicationDTO;
 import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
@@ -13,11 +14,11 @@ import org.puppit.model.dto.ChatMessageSearchDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
 import org.puppit.model.dto.ChatRoomPeopleDTO;
 import org.puppit.model.dto.ChatUserDTO;
+import org.puppit.model.dto.NotificationDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
-
-
+import org.puppit.repository.AlarmDAO;
 import org.puppit.repository.ChatDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatServiceImpl implements ChatService{
 
 	private final ChatDAO chatDAO;
+	private final AlarmDAO alarmDAO;
 	
 	@Override
 	public List<ChatMessageDTO> getChatMessageList(ChatMessageSelectDTO  chatMessageSelectDTO) {
@@ -47,8 +49,11 @@ public class ChatServiceImpl implements ChatService{
 	        dto.setChatReceiverUserName(String.valueOf(message.get("receiver_user_name")));
 	        dto.setChatMessage(String.valueOf(message.get("chat_message")));
 	        dto.setBuyerId(String.valueOf(message.get("buyer_id")));
-	        dto.setChatSellerAccountId(String.valueOf(message.get("chat_seller_account_id")));
-
+	        dto.setChatSellerNickName(String.valueOf(message.get("chat_seller_nick_name")));
+	        //dto.setChatSellerNickName();
+	        System.out.println("chat_seller_nick_name: " + String.valueOf(message.get("chat_seller_nick_name")));
+	        System.out.println("chatSellerNickName: " + dto.getChatSellerNickName());
+	        
 	        // chat_created_at은 Timestamp로 캐스팅 필요	        
 	        Object createdAt = message.get("chat_created_at");
 	        if (createdAt instanceof Timestamp) {
@@ -94,7 +99,7 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public List<ChatListDTO> getChatRoomsByCreatedDesc(int userId) {
+	public Map<String, Object> getChatRoomsByCreatedDesc(int userId) {
 	    return chatDAO.getChatListByCreatedDesc(userId);
 	}
 
@@ -132,18 +137,62 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	public Integer saveAlarmData(Map<String, Object> messageAlarm) {
+	public Integer saveAlarmData(NotificationDTO messageAlarm) {
 		return chatDAO.saveAlarmData(messageAlarm);
 	}
-	
-	  // 페이징된 채팅방 목록 조회
 
-	//public List<ChatListDTO> getChatRoomsByCreatedDescPaged(int userId, int offset, int size) {
-	//    Map<String, Object> param = new HashMap<>();
-	//    param.put("userId", userId);
-	//    param.put("offset", offset); // int 값
-	//    param.put("size", size);     // int 값
-	//    return chatDAO.getChatRoomsByCreatedDescPaged(param);
-	//}
+	@Override
+	public ChatUserDTO getReceiverInfoByUserId(Integer chatReceiverAccountId) {
+		
+		return chatDAO.getReceiverInfoByUserId(chatReceiverAccountId);
+	}
+
+	@Override
+	public String getProductNameById(int parseInt) {
+		
+		return chatDAO.getProductNameById(parseInt);
+	}
+
+	@Override
+	public List<NotificationDTO> getUnreadAlarms(Integer userId) {
+		
+		return chatDAO.getUnreadAlarms(userId);
+	}
+	
+    @Override
+    public int isAlarmDuplicate(NotificationDTO notification) {
+        // 예시: DB에 동일한 messageId, roomId, senderAccountId, receiverAccountId, chatMessage가 있으면 중복
+        // 실제 DB 쿼리로 변경 필요 (아래는 Pseudo 코드)
+    	AlarmDuplicationDTO alarmDuplicationDTO = new AlarmDuplicationDTO();
+    	alarmDuplicationDTO.setChatMessage(notification.getChatMessage());
+    	alarmDuplicationDTO.setRoomId(notification.getRoomId());
+    	alarmDuplicationDTO.setUserId(notification.getUserId());
+    	
+    	
+        return alarmDAO.countDuplicateAlarm(alarmDuplicationDTO);
+        // 또는 아래처럼 여러 필드를 조합하여 체크 가능
+        // return alarmMapper.existsAlarm(notification.getMessageId(), notification.getRoomId(), notification.getSenderAccountId(), notification.getReceiverAccountId(), notification.getChatMessage());
+    }
+
+	@Override
+	public int getTotalChatCount(int roomId, int buyerId, int sellerId) {
+		return chatDAO.getTotalChatCount(roomId, buyerId, sellerId);
+	}
+
+	@Override
+	public int getBuyerToSellerCount(int roomId, int buyerId, int sellerId) {
+	    return chatDAO.getBuyerToSellerCount(roomId, buyerId, sellerId);
+	}
+
+	@Override
+	@Transactional
+	public void removeRoomCascade(int roomId) throws Exception {
+		// 1. 자식(alarm) 먼저 삭제
+		chatDAO.deleteAlarmsByRoomId(roomId);
+	    // 2. 자식(chat) 먼저 삭제
+	    chatDAO.deleteChatsByRoomId(roomId);
+	    // 3. 부모(room) 삭제
+	    chatDAO.deleteRoom(roomId);
+	}
 
 }

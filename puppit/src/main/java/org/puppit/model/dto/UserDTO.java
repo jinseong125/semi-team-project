@@ -29,5 +29,9 @@ public class UserDTO {
   private Timestamp updatedAt;
   private Integer point;
   private byte[] salt;
+  private String profileImageKey;
+  private String provider;  // "kakao"
+  private Long providerId;  // 카카오 userId
+
   
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.sql.Timestamp;
 
@@ -12,6 +13,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Getter
 @Setter
+@ToString
 public class ProductDTO {
 
 
@@ -19,6 +21,7 @@ public class ProductDTO {
     private Integer locationId;
     private Integer categoryId;
     private Integer sellerId;
+    private String sellerNickname;
     private Integer conditionId;
     private Integer statusId;
     private String productName;
@@ -27,21 +30,18 @@ public class ProductDTO {
     private Timestamp productCreatedAt;
     private Timestamp productUpdatedAt;
     private int totalCount;
-
+    private String statusName;
 
 
     private CategoryDTO      category;
     private ProductStatusDTO  status;
+
     private ProductImageDTO   thumbnail;  // 썸네일 1장
-	@Override
-	public String toString() {
-		return "ProductDTO [productId=" + productId + ", locationId=" + locationId + ", categoryId=" + categoryId
-				+ ", sellerId=" + sellerId + ", conditionId=" + conditionId + ", statusId=" + statusId
-				+ ", productName=" + productName + ", productPrice=" + productPrice + ", productDescription="
-				+ productDescription + ", productCreatedAt=" + productCreatedAt + ", productUpdatedAt="
-				+ productUpdatedAt + ", totalCount=" + totalCount + ", category=" + category + ", status=" + status
-				+ ", thumbnail=" + thumbnail + "]";
-	}
+    
+    private boolean wished;  // 현재 로그인 사용자가 찜했는지 여부
+
+
+
     
     
 

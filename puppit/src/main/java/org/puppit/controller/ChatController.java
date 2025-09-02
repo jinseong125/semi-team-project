@@ -11,11 +11,13 @@ import org.puppit.model.dto.ChatListDTO;
 import org.puppit.model.dto.ChatMessageDTO;
 import org.puppit.model.dto.ChatMessageProductDTO;
 import org.puppit.model.dto.ChatMessageSelectDTO;
+import org.puppit.service.ChatAlarmService;
 import org.puppit.service.ChatService;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatController {
 	
 	private final ChatService chatService;
+	private final ChatAlarmService chatAlarmService;
 	
 	@GetMapping(value = "/message", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -39,6 +42,7 @@ public class ChatController {
 
 	    // 채팅 메시지 리스트 가져오기
 	    List<ChatMessageDTO> chatMessages = chatService.getChatMessageList(chatMessageSelectDTO);
+	    
 	    System.out.println("messages: " + (chatMessages != null ? chatMessages.toString() : "null"));
 	    System.out.println("chatMessages.size: " + (chatMessages != null ? chatMessages.size() : "null"));
 
@@ -77,6 +81,7 @@ public class ChatController {
 
 	    // 상품 정보 map에 추가
 	    map.put("product", product);
+	    
 
 	    return map;
 	}
@@ -100,31 +105,57 @@ public class ChatController {
 	}
 	
 	
-	// 2. 채팅방 목록 조회(생성일 기준 내림차순) - 상품상세에서 채팅하기 클릭 등
+	
 	@GetMapping("/recentRoomList")
-	public String recentRoomList(@RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId, Model model, HttpSession session) {
-	    Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
-	    if (map == null || map.get("userId") == null) {
-	        throw new IllegalStateException("세션 정보가 없습니다. 로그인이 필요합니다.");
-	    }
-
-	    Object userIdObj = map.get("userId");
-	    int userId;
-	    try {
-	        userId = Integer.parseInt(userIdObj.toString());
-	    } catch (NumberFormatException e) {
-	        throw new IllegalArgumentException("사용자 ID 변환 중 오류가 발생했습니다.", e);
-	    }
-
-	    List<ChatListDTO> chatList = chatService.getChatRoomsByCreatedDesc(userId);
-	   System.out.println("chatList: " + chatList);
+	public String roomList(
+	        @RequestParam(value = "highlightRoomId", required = false) Integer highlightRoomId,
+	        @RequestParam(value = "highlightMessageId", required = false) Integer highlightMessageId,
+	        Model model, HttpSession session) {
+	    System.out.println("/recentRoomList");
+		Map<String, Object> map = (Map<String, Object>) session.getAttribute("sessionMap");
+	    int userId = Integer.parseInt(map.get("userId").toString());
+	    Map<String, Object> chatMap = chatService.getChatRoomsByCreatedDesc(userId);
 	   
+	   
+	 // chatMap이 {"roomId": ..., "lastMessage": ..., "lastMessageAt": ...} 와 같은 구조라고 가정
+	    Object lastMessageAtObj = chatMap.get("lastMessageAt");
 
+	    // null 체크 후 String으로 변환
+	    String lastMessageAt = (lastMessageAtObj != null) ? lastMessageAtObj.toString() : null;
 
-	    model.addAttribute("chatList", chatList);
+	    // 사용 예시
+	    System.out.println("lastMessageAt = " + lastMessageAt);
+	    System.out.println("chats: " + chatMap.get("chats"));
+	    model.addAttribute("chatList", chatMap.get("chats"));
+	    model.addAttribute("profileImage", chatMap.get("profileImage"));
 	    model.addAttribute("highlightRoomId", highlightRoomId);
-	    return "chat/list";
+	    model.addAttribute("highlightMessageId", highlightMessageId);
+	    return "chat/list"; // JSP 렌더링
 	}
+	
+	
+	@GetMapping( value = "/readAlarm", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Integer readAlarm(@RequestParam("messageId") Integer messageId) {
+		// 변경된 행 수를 리턴
+        return chatAlarmService.readAlarm(messageId);
+	}
+	
+	@PostMapping(value = "/removeroom",  produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> removeRoom(@RequestParam("roomId") int roomId) {
+	   Map<String, Object> result = new HashMap<>();
+	   try {
+	        chatService.removeRoomCascade(roomId);
+	        result.put("success", true);
+	    } catch (Exception e) {
+	        result.put("success", false);
+	        result.put("message", e.getMessage());
+	    }
+	    return result;
+	}
+	
+	
 	
 	
 	

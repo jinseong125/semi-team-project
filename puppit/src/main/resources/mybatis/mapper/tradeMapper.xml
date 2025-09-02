@@ -43,5 +43,11 @@
      WHERE t.buyer_id = #{userId} OR t.seller_id = #{userId}
      ORDER BY t.created_at DESC
   </select>
+  
+  <update id="updateProductStatus">
+    UPDATE product
+    SET status_id = 3 
+    WHERE product_id = #{productId}
+  </update>
 
 </mapper>

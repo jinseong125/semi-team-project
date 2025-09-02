@@ -17,12 +17,12 @@ SELECT
     r.product_id,
 
     c.chat_sender,
-    sender.account_id   AS sender_account_id,
-    sender.user_name    AS sender_user_name,
+    sender.nick_name   AS sender_account_id,
+    sender.user_name   AS sender_user_name,
 
     c.chat_receiver,
-    receiver.account_id AS receiver_account_id,
-    receiver.user_name  AS receiver_user_name,
+    receiver.nick_name AS receiver_account_id,
+    receiver.user_name AS receiver_user_name,
 
     c.chat_message,
     c.chat_created_at,
@@ -35,28 +35,23 @@ SELECT
     CASE WHEN c.chat_sender   = p.seller_id THEN 'SELLER' ELSE 'BUYER' END AS sender_role,
     CASE WHEN c.chat_receiver = p.seller_id THEN 'SELLER' ELSE 'BUYER' END AS receiver_role,
 
-   
     p.seller_id AS product_seller_id,
-
-   
     r.user_id AS buyer_id,
 
-    
     CASE WHEN c.chat_sender   = p.seller_id THEN p.seller_id ELSE NULL END AS sender_seller_id,
     CASE WHEN c.chat_receiver = p.seller_id THEN p.seller_id ELSE NULL END AS receiver_seller_id,
 
-   
-    seller.account_id AS chat_seller_account_id
+    seller.nick_name AS chat_seller_nick_name      -- ★ 상품 판매자 닉네임 추가
 
 FROM chat c
-JOIN room    r ON c.chat_room_id = r.room_id
-JOIN product p ON r.product_id   = p.product_id
-JOIN user sender   ON c.chat_sender   = sender.user_id
-JOIN user receiver ON c.chat_receiver = receiver.user_id
-JOIN user seller   ON p.seller_id     = seller.user_id -- ★ 판매자 accountId 조회용 추가
+JOIN room    r       ON c.chat_room_id = r.room_id
+JOIN product p       ON r.product_id   = p.product_id
+JOIN user sender     ON c.chat_sender   = sender.user_id
+JOIN user receiver   ON c.chat_receiver = receiver.user_id
+JOIN user seller     ON p.seller_id     = seller.user_id   -- ★ 판매자 닉네임용 추가
 
 WHERE c.chat_room_id = #{roomId}
-ORDER BY c.chat_created_at ASC;
+ORDER BY c.chat_created_at ASC
 </select>
   
   
@@ -87,11 +82,11 @@ SELECT
     r.product_id,
 
     c.chat_sender,
-    sender.account_id   AS sender_account_id,
+    sender.nick_name   AS sender_account_id,
     sender.user_name    AS sender_user_name,
 
     c.chat_receiver,
-    receiver.account_id AS receiver_account_id,
+    receiver.nick_name AS receiver_account_id,
     receiver.user_name  AS receiver_user_name,
 
     c.chat_message,
@@ -177,50 +172,63 @@ ORDER BY c.chat_created_at ASC;
   
   
 <select id="getChatRoomsByCreatedDesc" resultType="org.puppit.model.dto.ChatListDTO" parameterType="map">
- SELECT 
-            r.room_id                  AS roomId,
-            r.product_id               AS productId,
-            p.product_name             AS productName,
-            p.product_price            AS productPrice,
-            p.seller_id                AS sellerId,
-            s.account_id               AS sellerAccountId,
-            u.user_name                AS buyerName,
-            s.user_name                AS sellerName,
-            last_msg.chat_message      AS lastMessage,
-            last_msg.chat_created_at   AS lastMessageAt,
-            last_msg.chat_sender       AS lastMessageSenderId,
-            sender.account_id          AS lastMessageSenderAccountId,
-            sender.user_name           AS lastMessageSenderName,
-            last_msg.chat_receiver     AS lastMessageReceiverId,
-            receiver.account_id        AS lastMessageReceiverAccountId,
-            receiver.user_name         AS lastMessageReceiverName,
-            COALESCE(last_msg.chat_created_at, r.room_created_at) AS sortTime
-        FROM room r
-        JOIN product p ON r.product_id = p.product_id
-        JOIN user u ON r.user_id = u.user_id
-        JOIN user s ON p.seller_id = s.user_id
-        LEFT JOIN (
-            SELECT c1.*
-            FROM chat c1
-            INNER JOIN (
-                SELECT chat_room_id, MAX(chat_created_at) AS max_created_at
-                FROM chat
-                GROUP BY chat_room_id
-            ) c2
-            ON c1.chat_room_id = c2.chat_room_id AND c1.chat_created_at = c2.max_created_at
-        ) last_msg ON r.room_id = last_msg.chat_room_id
-        LEFT JOIN user sender ON last_msg.chat_sender = sender.user_id
-        LEFT JOIN user receiver ON last_msg.chat_receiver = receiver.user_id
-        WHERE
-              r.user_id = #{userId}
-           OR p.seller_id = #{userId}
-           OR EXISTS (
+      SELECT
+        r.room_id,
+        r.product_id,
+        p.product_name,
+        p.product_price,
+        p.seller_id,
+        buyer.account_id AS buyer_account_id,
+        p.product_name,
+        p.product_price,
+        seller.nick_name AS seller_nick_name,
+        buyer.user_name AS buyer_name,
+        buyer.nick_name AS buyer_nick_name,
+        seller.account_id AS seller_account_id,
+        seller.user_name AS seller_name,
+        last_msg.chat_message AS last_message,
+        last_msg.chat_created_at AS last_message_at,
+        last_msg.chat_sender AS last_message_sender_id,
+        sender.nick_name AS last_message_sender_account_id,
+        sender.user_name AS last_message_sender_name,
+        last_msg.chat_receiver AS last_message_receiver_id,
+        receiver.nick_name AS last_message_receiver_account_id,
+        receiver.user_name AS last_message_receiver_name
+    FROM room r
+    JOIN product p ON r.product_id = p.product_id
+    JOIN user buyer ON r.user_id = buyer.user_id
+    JOIN user seller ON p.seller_id = seller.user_id
+    LEFT JOIN (
+        SELECT c1.*
+        FROM chat c1
+        INNER JOIN (
+            SELECT chat_room_id, MAX(chat_created_at) AS max_created_at
+            FROM chat
+            GROUP BY chat_room_id
+        ) c2
+        ON c1.chat_room_id = c2.chat_room_id AND c1.chat_created_at = c2.max_created_at
+    ) last_msg ON r.room_id = last_msg.chat_room_id
+    LEFT JOIN user sender ON last_msg.chat_sender = sender.user_id
+    LEFT JOIN user receiver ON last_msg.chat_receiver = receiver.user_id
+    WHERE
+        (
+            r.user_id = #{userId}
+            OR p.seller_id = #{userId}
+            OR EXISTS (
                 SELECT 1
                 FROM chat c2
                 WHERE c2.chat_room_id = r.room_id
-                  AND (c2.chat_sender = #{userId} OR c2.chat_receiver = #{userId})
-           )
-        ORDER BY sortTime DESC
+                  AND (#{userId} IN (c2.chat_sender, c2.chat_receiver))
+            )
+        )
+        AND COALESCE(buyer.is_deleted, 0) = 0
+        AND COALESCE(seller.is_deleted, 0) = 0
+        AND (sender.is_deleted IS NULL OR sender.is_deleted = 0)
+        AND (receiver.is_deleted IS NULL OR receiver.is_deleted = 0)
+    ORDER BY
+        (last_msg.chat_created_at IS NULL) DESC,
+        last_msg.chat_created_at DESC,
+        r.room_created_at ASC
 </select>  
 
  <!-- roomId를 기반으로 productId만 조회 -->
@@ -313,16 +321,50 @@ WHERE p.product_id = #{productId};
   	
   	</select>
   	
-  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarm_id">
-  		  INSERT INTO alarm (room_id, user_id, alarm_read_message_id)
-    VALUES (#{roomId}, #{userId}, ${alarmReadMessageId})
+  	<insert id="saveAlarmData" parameterType="map" useGeneratedKeys="true" keyProperty="alarmId">
+    INSERT INTO alarm (room_id, message_id, user_id, is_read)
+    VALUES (#{roomId}, #{messageId}, #{userId}, #{isRead})
+</insert>
+  	
+  	<select id="getReceiverInfoByUserId" parameterType="Integer" resultType="ChatUserDTO">
+  	    SELECT user_id, account_id, user_name, nick_name
+  		FROM user
+  		WHERE user_id = #{userId}
   	
   	
+  	</select>
   	
-  	</insert>
+  	<select id="getProductNameById" parameterType="Integer" resultType="String">
+  		SELECT product_name
+  		FROM product
+  		WHERE product_id = #{parseInt}
   	
   	
+  	</select>
   	
-  	
+  	<select id="mybatis.mapper.chatMessageMapper.getUnreadAlarms" parameterType="Integer" resultType="NotificationDTO">
+  	SELECT
+    a.*,
+    c.chat_message,
+    c.chat_created_at,
+    c.chat_sender,
+    sender.nick_name AS senderAccountId,          -- 발신자 accountId
+    c.chat_room_id AS roomId,
+    c.chat_receiver,
+    receiver.nick_name AS receiverAccountId,      -- 수신자 accountId
+    p.product_name                                -- 상품명
+FROM alarm a
+JOIN chat c ON a.message_id = c.message_id
+JOIN user sender ON c.chat_sender = sender.user_id         -- 발신자 정보 JOIN
+JOIN user receiver ON c.chat_receiver = receiver.user_id   -- 수신자 정보 JOIN
+JOIN room r ON a.room_id = r.room_id
+JOIN product p ON r.product_id = p.product_id
+WHERE c.chat_receiver = #{userId}   -- 로그인 사용자가 receiver
+  AND a.is_read = 1                 -- 읽지 않은 알림
+ORDER BY a.created_at DESC
+  	</select>
+  
+   
+  
   
 </mapper>

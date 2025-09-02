@@ -11,6 +11,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,31 +24,51 @@ public class MainController {
   private final ProductService productService;
   
 
-  // ÃÖÃÊ ÁøÀÔ ½Ã JSP¿¡¼­ Ã¹ 8°³ »óÇ° ·»´õ¸µ
+//ìµœì´ˆ ì§„ì… ì‹œ JSPì—ì„œ ì²« 8ê°œ ìƒí’ˆ ë Œë”ë§
   @RequestMapping(value = "/")
   public String main(PageDTO dto
           , HttpServletRequest request
           , Model model) {
-	  dto.setSize(16);
+
+	  dto.setSize(40);
 	  dto.setPage(1);
-	  dto.setOffset(0); // <---- ¹İµå½Ã Á÷Á¢ ³Ö¾îÁÖ°Å³ª, ¼­ºñ½º¿¡¼­ °è»ê
-	  Map<String, Object> map  = productService.getProducts(dto, request);
-      System.out.println("map: " + map.get("products"));
-	  
-	  model.addAttribute("products", map.get("products"));
+	  dto.setOffset(0); // <---- ë°˜ë“œì‹œ ì§ì ‘ ë„£ì–´ì£¼ê±°ë‚˜, ì„œë¹„ìŠ¤ì—ì„œ ê³„ì‚°
+	 
+	  List<ProductDTO> productsImage = productService.mainProducts();
+
+    model.addAttribute("products",productsImage);
       return "main";
   }
 
-  // ¹«ÇÑ½ºÅ©·Ñ API: offset°ú size¸¦ ¹Ş¾Æ¼­ »óÇ° ¸®½ºÆ®¸¦ ¹İÈ¯
-  @GetMapping(value = "/product/list", produces = "application/json" )
-  public ResponseEntity<Map<String, Object>> getProducts(
-		  @RequestParam(value="offset", defaultValue="0") int offset,
-		    @RequestParam(value="size", defaultValue="16") int size, HttpServletRequest request) {
-	  PageDTO dto = new PageDTO();
-	    dto.setOffset(offset);
-	    dto.setSize(size);
 
-	    Map<String, Object> map = productService.getProducts(dto, request);
-	    return ResponseEntity.ok(map); // Ç×»ó 200 ¹İÈ¯
+  //ë¬´í•œìŠ¤í¬ë¡¤ API: offsetê³¼ sizeë¥¼ ë°›ì•„ì„œ ìƒí’ˆ ë¦¬ìŠ¤íŠ¸ë¥¼ ë°˜í™˜
+  @GetMapping(value = "/product/list", produces = "application/json")
+  public ResponseEntity<Map<String, Object>> getProducts( @RequestParam(value="offset", defaultValue="0") int offset, 
+                                                          @RequestParam(value="size", defaultValue="40") int size, HttpServletRequest request,
+                                                          @RequestParam(value="category", required=false) String category,
+                                                          @RequestParam(value="q", required=false) String q,
+                                                          @RequestParam(value="sort", defaultValue="DESC") String sort
+                                                       ) {
+      try {
+        PageDTO dto = new PageDTO();
+        dto.setOffset(offset);
+        dto.setSize(size);
+        
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("category", category);
+        filters.put("q", q);
+        filters.put("sort", sort);
+        
+        Map<String, Object> map = productService.getProducts(dto, filters);
+        return ResponseEntity.ok(map); 
+        
+      } catch (Exception e) {
+        e.printStackTrace(); // ì„œë²„ ë¡œê·¸
+        Map<String,Object> err = new HashMap<>();
+        err.put("ì—ëŸ¬", e.getClass().getSimpleName());
+        err.put("ë©”ì‹œì§€", e.getMessage());
+        return ResponseEntity.status(500).body(err); // í”„ëŸ°íŠ¸ì—ì„œ ë‚´ìš©ì„ ë³¼ ìˆ˜ ìˆê²Œ
+      }
+
   }
 }

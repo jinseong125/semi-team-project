@@ -42,7 +42,19 @@
   .remove{position:absolute;top:6px;right:6px;background:#000000b0;color:#fff;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
   .badge{position:absolute;bottom:6px;left:6px;background:#000000b0;color:#fff;font-size:11px;padding:3px 6px;border-radius:8px;}
 </style>
+<c:if test="${not empty success}">
+  <script>
+    alert("<c:out value='${success}'/>");
+    location.href = "${contextPath}/product/myproduct";
+  </script>
+</c:if>
 
+<c:if test="${not empty error}">
+  <script>
+    alert("<c:out value='${error}'/>");
+    location.href = "${contextPath}/product/new"; <!-- 실패 시 다시 등록 페이지 -->
+  </script>
+</c:if>
 <div class="wrap">
   <form method="post" action="${contextPath}/product/new" enctype="multipart/form-data">
     <h2>상품 등록</h2>
@@ -203,3 +215,5 @@
     createAddTile();
   })();
 </script>
+</body>
+</html>

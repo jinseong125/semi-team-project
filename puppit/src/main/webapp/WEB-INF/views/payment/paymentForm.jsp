@@ -8,21 +8,21 @@
 
 <style>
   :root{
-    --bg:#f7f8fa; --card:#fff; --text:#111; --muted:#8a8f98; --line:#e6e9ef; --primary:#4f86ff;
+    --bg:#fff; --card:#fff; --text:#111; --muted:#8a8f98; --line:#e6e9ef; --primary:#4f86ff;
   }
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;color:var(--text);}
-  .wrap{max-width:720px;margin:0 auto;padding:20px;}
-
+  .wrap{max-width:1200px;margin:0 auto;padding:20px;}
+  
   /* 헤더 */
   .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
   .left{display:flex;align-items:center;gap:10px;}
   .back-btn{
-    border:none;background-color:#f7f8fa;color:#333;cursor:pointer;font-size:20px;line-height:1;
+    border:none;background-color:#fff;color:#333;cursor:pointer;font-size:20px;line-height:1;
     width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
   }
   .title{font-weight:800;font-size:22px;}
-
+  
   /* 섹션 타이틀 행 */
   .row-head{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 10px;}
   .row-head .label{font-weight:700;}
@@ -48,20 +48,21 @@
 
   /* 구분선(아래 공간 남김) */
   .space{height:240px;}
-  
+  .charge-btn-wrap {
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+  }
   .charge-btn{
-  width:100%;
+  width:600px;
   height:50px;
   font-size:18px;
   font-weight:700;
   border:none;
   border-radius:10px;
-  background:#4f86ff;
+  background:#333333;
   color:#fff;
   cursor:pointer;
-  }
-  .charge-btn:active{
-    background:#3d6cd1;
   }
 </style>
 
@@ -74,7 +75,6 @@
       <div class="title">포인트 충전</div>
     </div>
   </div>
-
   <div class="row-head">
     <div class="label">충전금액</div>
     <div class="limit">
@@ -98,11 +98,11 @@
     <button class="chip" type="button" data-add="30000">+ 3만P</button>
     <button class="chip" type="button" data-add="50000">+ 5만P</button>
   </div>
-
+  <!-- 서버로 전송할 hidden 값 -->
   <div class="space">
-    <input type="hidden" id="uid" value="${sessionScope.userId}">
-    <input type="hidden" id="name" value="${sessionScope.userName}">
-    <input type="hidden" id="email" value="${sessionScope.userEmail}">
+    <input type="hidden" id="uid" value="${sessionScope.sessionMap.userId}">
+    <input type="hidden" id="name" value="${sessionScope.sessionMap.userName}">
+    <input type="hidden" id="email" value="${sessionScope.sessionMap.userEmail}">
   </div>
   
   <div class="charge-btn-wrap">
@@ -113,11 +113,12 @@
 <script>
   const limit = Number("${chargeLimit}");
   const $amount = document.getElementById('amount');
-
-  // str이 null, undefined 이면 .replace() 호출시 에러가 나기 때문에 str || ''를 사용합니다.
-  function onlyDigits(str){ return (str||'').replace(/[^\d]/g,''); } // 문자열 전체에서 숫자가 아닌 문자를 찾는 정규식
-  function format(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); } // 천 단위 콤마(,)를 넣어주는 정규식 포맷 함수 
-  function snap1000(n){
+  // 숫자가 아니면 제거
+  function onlyDigits(str) {return (str||'').replace(/[^\d]/g,'');}  
+  // 천 단위로 콤마
+  function format(n) {return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');}
+  // 천 단위로만 입력 
+  function snap1000(n) {
     if (isNaN(n)) return 0;
     n = Math.min(n, limit);
     return Math.floor(n / 1000) * 1000;
@@ -131,7 +132,7 @@
   });
 
   // 포커스 아웃: 1,000 단위 스냅 + 상한
-  function finalize(){
+  function finalize() {
     const raw = Number(onlyDigits($amount.value));
     if (!raw) { $amount.value = ''; return; }
     const snapped = snap1000(raw);
@@ -140,7 +141,7 @@
   $amount.addEventListener('blur', finalize);
 
   // Enter로도 확정
-  $amount.addEventListener('keydown', (e) => {
+  $amount.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       e.preventDefault();
       finalize();
@@ -149,68 +150,124 @@
   });
 
   // 퀵 버튼(+1만/+3만/+5만/최대)
-  document.querySelectorAll('.chip[data-add]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
+  document.querySelectorAll('.chip[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
       const add = Number(btn.dataset.add);
       const current = Number(onlyDigits($amount.value)) || 0;
       const next = Math.min(current + add, limit);
       $amount.value = format(next);
-      finalize(); // 눌렀을 때는 스냅 적용
+      finalize(); 
     });
   });
-  document.getElementById('btnMax')?.addEventListener('click', ()=>{
+  document.getElementById('btnMax')?.addEventListener('click', () => {
     $amount.value = format(snap1000(limit));
   });
 </script>
 <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
 <script>
-  const IMP = window.IMP;
-  IMP.init("imp85811517"); 
+  const $payBtn = document.querySelector(".charge-btn");
 
-  function requestPay() {
-    const uid = document.getElementById("uid").value;
-    const name = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const amount = document.getElementById("amount").value.replace(/,/g, ''); // 모든 콤마 제거 
+  async function requestPay() {
+    try {
+      // 중복 클릭 방지
+      $payBtn.disabled = true;
 
-    if (!uid || !amount) {
-      alert("유저 ID와 금액을 입력하세요.");
-      return;
-    }
+      // 입력 확정 및 값 읽기
+      finalize();
+      const uid   = document.getElementById("uid").value?.trim();
+      const name  = document.getElementById("name").value?.trim();
+      const email = document.getElementById("email").value?.trim();
+      const raw   = Number(onlyDigits(document.getElementById("amount").value));
+      const amount = snap1000(raw);
 
-    IMP.request_pay({
-      pg: "html5_inicis",       
-      pay_method: "card",
-      name: "포인트 충전",
-      amount: amount,
-      buyer_name: name,
-      buyer_email: email
-    }, function (rsp) {
-      if (rsp.success) {
-        // 결제 성공 → 서버에 imp_uid 전송하여 검증 요청
-        fetch("${contextPath}/payment/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            imp_uid: rsp.imp_uid,
-            uid: uid
-          })
+      if (!uid || !amount) {
+        alert("유저 ID와 금액(1,000P 단위)을 확인하세요.");
+        $payBtn.disabled = false;
+        return;
+      }
+      if (amount > limit) {
+        alert("최대 충전 한도를 초과했습니다.");
+        $payBtn.disabled = false;
+        return;
+      }
+
+      // 1) 서버에서 주문번호(merchant_uid) 발급 및 대기 저장
+      const res = await fetch("${contextPath}/payment/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: amount
         })
-        .then(res => res.json())
-        .then(result => {
+      });
+      if (!res.ok) throw new Error("주문 생성 실패");
+      const { merchant_uid } = await res.json();
+
+      // 2) SDK 준비
+      const IMP = window.IMP;
+      if (!IMP) throw new Error("IMP SDK가 로드되지 않았습니다.");
+      IMP.init("imp85811517"); // 가맹점 코드
+
+      // 3) 결제창 호출
+      IMP.request_pay({
+        pg: "html5_inicis",
+        pay_method: "card",
+        name: "포인트 충전",
+        amount: amount,
+        buyer_name: name,
+        buyer_email: email,
+        merchant_uid: merchant_uid
+      }, async function (rsp) {
+        if (!rsp.success) {
+          alert("결제 실패: " + rsp.error_msg);
+          // 서버에 실패 상태 업데이트 요청
+          try {
+        	  await fetch(`${contextPath}/payment/fail`, {
+        		  method: "POST",
+        		  headers: {"Content-Type" : "application/json"},
+        		  body: JSON.stringify({merchantUid: merchant_uid})
+        	  });
+      		} catch (err) {
+      			console.error("실패 상태 업데이트 실패", err);
+      		}
+          $payBtn.disabled = false;
+          return;
+        }
+
+        // 4) 서버 검증
+        try {
+          const vres = await fetch("${contextPath}/payment/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              imp_uid: rsp.imp_uid
+            })
+          });
+          const result = await vres.json();
+
           if (result.success) {
             alert("충전 성공!");
             window.location.href = "${contextPath}/user/mypage";
           } else {
             alert("결제는 성공했지만 검증에 실패했습니다.");
+            $payBtn.disabled = false;
           }
-        });
-      } else {
-        alert("결제 실패: " + rsp.error_msg);
-      }
-    });
+        } catch (e) {
+          console.error(e);
+          alert("검증 중 오류가 발생했습니다.");
+          $payBtn.disabled = false;
+        }
+      });
+
+    } catch (e) {
+      console.error(e);
+      alert("결제 준비 중 오류가 발생했습니다.");
+      $payBtn.disabled = false;
+    }
   }
 </script>
+
+
+
 </body>
 </html>
 

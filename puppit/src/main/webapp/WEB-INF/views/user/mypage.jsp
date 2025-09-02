@@ -10,24 +10,17 @@
 
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #fff;
   --card: #fff;
   --text: #111;
   --muted: #8a8f98;
-  --primary: #4f86ff;
+  --primary: #333333;
   --line: #dfe3ea;
   --shadow: 0 8px 24px rgba(0, 0, 0, .08);
 }
 
 * {
   box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
-  color: var(--text);
 }
 
 .wrap {
@@ -45,7 +38,7 @@ body {
 
 .back-btn {
   border: none;
-  background-color: #f7f8fa;
+  background-color: #fff;
   font-size: 20px;
   color: #333;
   cursor: pointer;
@@ -76,6 +69,7 @@ body {
   flex: 0 0 64px;
   border: 2px solid #eee;
   background: #fafafa;
+  cursor: pointer;
 }
 
 .avatar img {
@@ -91,23 +85,6 @@ body {
 .nick {
   font-weight: 700;
   font-size: 18px;
-}
-
-.edit {
-  margin-left: auto;
-  background: #8e8e8e;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  cursor: pointer;
-  opacity: .95;
-  transition: .15s;
-  white-space: nowrap;
-}
-
-.edit:hover {
-  opacity: 1;
 }
 
 /* 포인트 카드 — 살짝 컴팩트 */
@@ -135,61 +112,58 @@ body {
 .point-row {
   display: flex;
   align-items: center;
+  justify-content: space-between; 
   gap: 12px;
   margin: 8px 0 16px;
 }
 
 .p-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
+  position: relative;
+  display: inline-block;
+  font-size: 28px; 
 }
 
-.p-icon img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.p-icon .fa-circle {
+  color: #FFD43B; 
 }
 
-.p-amount {
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: .5px;
+.p-icon .letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%); 
+  font-size: 22px;   
+  font-weight: 700;
+  color: #fff;       
+  font-family: 'Arial', sans-serif;
+  font-style: italic;
 }
 
-.charge {
-  margin-top: 6px;
-  width: 100%;
-  height: 56px;
-  border: none;
-  border-radius: 14px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 800;
-  font-size: 18px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(79, 134, 255, .35);
-  transition: transform .05s ease;
+.point-amount{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.p-amount{
+  font-size:28px;      
+  font-weight:800;     
+  line-height:1;
+  white-space:nowrap;  
+}
+
+.charge { width: auto; height: 44px; padding: 0 16px; border-radius: 12px; }
+
+.charge-inline {
+  height: 44px;           
+  padding: 0 16px;       
+  border-radius: 12px;   
 }
 
 .charge:active {
   transform: translateY(1px);
 }
-
-/* 아래 확장 공간 */
-.future-area {
-  margin-top: 18px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 18px;
-  box-shadow: var(--shadow);
-}
+.fa-heart {color: #d94164; font-size: 18px;}
 
 /* 반응형 */
 @media (min-width: 768px) {
@@ -199,6 +173,7 @@ body {
   }
   .p-amount {
     font-size: 32px;
+    font-weight:600;
   }
 }
 
@@ -261,13 +236,33 @@ body {
   <!-- 프로필 -->
   <div class="profile">
     <div class="avatar">
-      <img src="${contextPath}/resources/image/profile-default.png" alt="프로필 이미지" />
+      <c:choose>
+        <c:when test="${not empty user.profileImageKey}">
+          <img src="https://jscode-upload-images.s3.ap-northeast-2.amazonaws.com/${user.profileImageKey}"
+               alt="프로필 이미지"
+               onerror="this.src='${contextPath}/resources/image/profile-default.png'">
+        </c:when>
+        <c:otherwise>
+          <img src="${contextPath}/resources/image/profile-default.png" alt="프로필 이미지">
+        </c:otherwise>
+      </c:choose>
+      
     </div>
     <div class="who">
       <div class="nick">${user.nickName != null ? user.nickName : 'happy'}</div>
     </div>
-    <button class="edit" type="button" onclick="location.href='${contextPath}/user/profile'">프로필 수정</button>
+    <button class="action-btn" type="button" onclick="location.href='${contextPath}/user/checkPassword'">프로필 수정</button>
   </div>
+  
+    <!-- 프로필 이미지 업로드 폼 (숨김) -->
+  <form id="avatarForm"
+        action="${contextPath}/user/profile/image"
+        method="post"
+        enctype="multipart/form-data"
+        style="display:none">
+    <input id="avatarFile" type="file" name="file" accept="image/*">
+  </form>
+  
   
     <!-- 찜 목록 카드 -->
   <div class="action-card" style="margin-top: 18px;">
@@ -279,49 +274,127 @@ body {
   </div>
   
 
-  <!-- 포인트 카드 (컴팩트) -->
+  <!-- 포인트 충전 -->
   <div class="point-card">
     <div class="point-head">
       <div class="point-title">포인트</div>
     </div>
     <div class="point-row">
-      <div class="p-icon">
-        <img src="${contextPath}/resources/image/point-icon.png" alt="포인트" />
+      <div class="point-amount">
+        <div class="p-icon"><i class="fa-solid fa-circle"></i><span class="letter">p</span></div>
+        <div class="p-amount">
+          <c:choose>
+            <c:when test="${not empty user.point}">
+              <fmt:formatNumber value="${user.point}" type="number" />
+            </c:when>
+            <c:otherwise>0</c:otherwise>
+          </c:choose>
+        </div>
       </div>
-      <div class="p-amount">
-        <c:choose>
-          <c:when test="${not empty user.point}">
-            <fmt:formatNumber value="${user.point}" type="number" />
-          </c:when>
-          <c:otherwise>0</c:otherwise>
-        </c:choose>
-      </div>
+    
+      <button class="action-btn charge-inline" type="button"
+              onclick="location.href='${contextPath}/payment/paymentForm'">충전하기</button>
     </div>
-    <button class="charge" type="button" onclick="location.href='${contextPath}/payment/paymentForm'">충전하기</button>
+        
   </div>
 
-  <div class="future-area">
-    <div class="action-grid">
-      <!-- 포인트 충전 내역 -->
-      <div class="action-card">
-        <div>
-          <div class="action-title">포인트 충전 내역</div>
-          <div class="action-desc">최근 충전 기록을 확인하세요</div>
-        </div>
-        <button class="action-btn" type="button" onclick="location.href='${contextPath}/payment/history?userId=${user.userId}'">내역 보기</button>
-      </div>
-
-      <!-- 거래 내역 -->
-      <div class="action-card">
-        <div>
-          <div class="action-title">거래 내역</div>
-          <div class="action-desc">구매·판매 기록을 한눈에</div>
-        </div>
-        <button class="action-btn" type="button" onclick="location.href='${contextPath}/trade/history?userId=${user.userId}'">내역 보기</button>
-      </div>
+  <!-- 포인트 충전 내역 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">포인트 충전 내역</div>
+      <div class="action-desc">최근 충전 기록을 확인하세요</div>
     </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/payment/history'">
+      내역 보기
+    </button>
+  </div>
+  
+  <!-- 판매 내역 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">판매 내역</div>
+      <div class="action-desc">내가 판매한 기록을 확인하세요</div>
+    </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/trade/history?userId=${user.userId}&type=sell'">
+      내역 보기
+    </button>
+  </div>
+  
+  <!-- 구매 내역 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">구매 내역</div>
+      <div class="action-desc">내가 구매한 기록을 확인하세요</div>
+    </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/trade/history?userId=${user.userId}&type=buy'">
+      내역 보기
+    </button>
+  </div>
+  
+  <!-- 나한테 달린 후기 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">다른 사람의 후기</div>
+      <div class="action-desc">내 상품에 대한 다른 사람의 후기를 확인하세요</div>
+    </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/review/showOther'">
+      후기 보기
+    </button>
+  </div>
+  
+  <!-- 내가 쓴 후기 -->
+  <div class="action-card" style="margin-top: 18px;">
+    <div>
+      <div class="action-title">내 후기</div>
+      <div class="action-desc">내가 쓴 후기를 확인하세요</div>
+    </div>
+    <button class="action-btn" type="button"
+            onclick="location.href='${contextPath}/review/showMy'">
+      후기 보기
+    </button>
   </div>
 </div>
+
+<script>
+  (function () {
+    const avatarBox = document.querySelector(".profile .avatar");
+    const fileInput = document.getElementById("avatarFile");
+    const form = document.getElementById("avatarForm");
+
+    if (!avatarBox || !fileInput || !form) return;
+
+    // 1) 아바타 클릭 -> 파일 선택 창
+    avatarBox.addEventListener("click", function () {
+      fileInput.click();
+    });
+
+    // 2) 파일 선택 즉시 업로드
+    fileInput.addEventListener("change", function () {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+
+      // (선택) 간단 검증: 타입/크기
+      const okTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!okTypes.includes(file.type)) {
+        alert("JPG/PNG/WEBP만 업로드 가능합니다.");
+        fileInput.value = "";
+        return;
+      }
+      const MAX = 2 * 1024 * 1024; // 2MB 예시
+      if (file.size > MAX) {
+        alert("파일이 너무 큽니다. 최대 2MB까지 가능합니다.");
+        fileInput.value = "";
+        return;
+      }
+      
+      form.submit(); // 바로 업로드
+    });
+  })();
+</script>
 
 </body>
 </html>

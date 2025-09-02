@@ -17,21 +17,26 @@ public class TradePaymentService {
   private final PointDAO pointDAO;
   private final TradeDAO tradeDAO;
   
-  public boolean updateBuyerPoint(int buyerId, int amount) {
-    int resultPoint = pointDAO.updatePoint(buyerId, amount);
+
+  
+  @Transactional
+  public void payAndRecord(Integer buyerId, Integer sellerId, Integer productId, Integer quantity, Integer amount) {
+    Integer r1 = pointDAO.decreaseIfEnough(buyerId, amount);
+    if (r1 == 0) throw new RuntimeException("잔액이 부족합니다");
+
+    Integer r2 = pointDAO.updatePoint(sellerId, amount);
+    if (r2 == 0) throw new RuntimeException("판매자 포인트 적립 실패");
+
+    Integer r3 = tradeDAO.insertTrade(buyerId, sellerId, productId, "거래완료");
+    if (r3 == 0) throw new RuntimeException("거래 기록 실패");
     
-    return resultPoint == 1;
+    Integer r4 = tradeDAO.updateProductStatus(productId);
+    if (r4 == 0) throw new RuntimeException("상품상태코드 변경실패");
+    
+  
   }
   
-  public boolean updateSellerPoint(int sellerId, int amount) {
-    int resultPoint = pointDAO.updatePoint(sellerId, amount);
-    return resultPoint == 1;
-  }
-  
-  public boolean insertTrade(Integer buyerId, Integer sellerId, Integer productId, String status) {
-    int result = tradeDAO.insertTrade(buyerId, sellerId, productId, status);
-    return result == 1;
-  }
+
   
   public List<TradeDTO> selectTradeById(Integer userId) {
     List<TradeDTO> result = tradeDAO.selectTradeById(userId);
