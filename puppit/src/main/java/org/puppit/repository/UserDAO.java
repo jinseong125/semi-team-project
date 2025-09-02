@@ -57,6 +57,10 @@ public class UserDAO {
   public String findAccountIdByNameAndEmail(UserDTO user) {
     return sqlSession.selectOne("mybatis.mapper.userMapper.findAccountIdByNameAndEmail", user);
   }
+  // 비밀번호 찾기
+  public Integer updatePasswordByAccountId(Map<String, Object> map) {
+    return sqlSession.update("mybatis.mapper.userMapper.updatePasswordByAccountId", map);
+  }
   public Integer updateUser(Map<String, Object> map) {
     return sqlSession.update("mybatis.mapper.userMapper.updateUser", map);
   }

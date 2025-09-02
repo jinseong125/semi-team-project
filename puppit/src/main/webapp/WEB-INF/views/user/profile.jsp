@@ -186,7 +186,7 @@
     const nickName = document.getElementById("nickName").value.trim();
     if(!nickName) { alert("닉네임을 입력 해주세요"); return; }
     const isRegex = /^[A-Za-z0-9\uAC00-\uD7A3]{4,8}$/;
-    if(!isRegex.test(nickName)) { alert("닉네임 형식이 올바르지 않습니다"); return; }
+    if(!isRegex.test(nickName)) { alert("닉네임은 한글/영문/숫자 포함 4~8자 입니다"); return; }
 
     fetch("${contextPath}/user/check?nickName=" + encodeURIComponent(nickName))
       .then(response => {
