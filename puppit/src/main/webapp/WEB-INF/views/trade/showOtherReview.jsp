@@ -8,7 +8,7 @@
 </jsp:include>
 
 <style>
-  .table { width:100%; border-collapse:collapse; }
+  .table { width:1200px; border-collapse:collapse; margin:0 auto; padding:20px;}
   .table th,.table td { padding:12px; border-bottom:1px solid #eee; text-align:left; }
   .table th { background:#fafafa; font-weight:700; color:#374151; }
   .muted { color:#6b7280; font-size:.9rem; }
@@ -16,8 +16,23 @@
   .btn { border:1px solid #d1d5db; background:#fff; border-radius:8px; padding:6px 10px; cursor:pointer; }
   .btn.primary { background:#111; color:#fff; border-color:#111; }
   .btn.danger  { color:#d94164; border-color:#ffd9e1; background:#fff7f9; }
-  .content-input { width:100%; min-width:260px; padding:6px 8px; border:1px solid #d1d5db; border-radius:8px; }
-  .content-input[disabled] { border-color:transparent; background:transparent; padding:0; }
+  .content-input {
+    width: 100%;
+    min-width: 260px;
+    min-height: 80px;        
+    padding: 6px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    resize: vertical;        
+    font-family: inherit;     
+    line-height: 1.4;
+  }
+  .content-input[disabled] {
+    border-color: transparent;
+    background: transparent;
+    padding: 0;
+    resize: none;             
+  }
   select.rating { padding:6px 8px; border:1px solid #d1d5db; border-radius:8px; }
   select.rating[disabled] { border-color:transparent; background:transparent; appearance:none; -webkit-appearance:none; padding:0; }
   .row-editing { background:#fffdf6; }
@@ -42,7 +57,7 @@
   .title {
     font-size: 22px;
     font-weight: 800;
-    padding: 0 16px;
+    padding: 0 250px;
   }
 </style>
 
@@ -59,7 +74,7 @@
           <th>판매자</th>
           <th>구매자</th>
           <th>상품명</th>
-          <th style="width:40%;">내용</th>
+          <th style="width:20%;">내용</th>
           <th>평점</th>
           <th>작성</th>
           <th>수정</th>
@@ -71,13 +86,10 @@
             <td>${r.sellerNickname}</td>
             <td>${r.buyerNickname}</td>
             <td>${r.productName}</td>
-    
             <!-- 내용: 보기/수정 겸용 -->
             <td>
-              <input class="content-input" type="text" name="content"
-                     value="${r.content}" disabled />
+              <textarea class="content-input" name="content" disabled>${r.content}</textarea>
             </td>
-    
             <!-- 평점: 보기/수정 겸용 -->
             <td>
               <div class="rating-stars" data-rating="${r.rating}" data-editable="false">
@@ -88,7 +100,6 @@
                 <input type="hidden" class="rating-value" name="rating" value="${r.rating}" />
               </div>
             </td>
-    
             <td class="muted"><fmt:formatDate value="${r.createdAt}" pattern="yyyy.MM.dd HH:mm"/></td>
             <td class="muted">
               <c:choose>

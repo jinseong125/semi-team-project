@@ -9,7 +9,6 @@ import org.puppit.model.dto.PointDTO;
 import org.puppit.model.dto.RefundRequest;
 import org.puppit.model.dto.RefundResult;
 import org.puppit.model.dto.VerifyResultDTO;
-import org.puppit.service.IamPortService;
 import org.puppit.service.PointService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -31,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PointController {
   
   private final PointService pointService;
-  private final IamPortService iamportService;
   
   @GetMapping("/history")
   public String getPaymentHistory(@SessionAttribute Map<String, Object> sessionMap, Model model) {

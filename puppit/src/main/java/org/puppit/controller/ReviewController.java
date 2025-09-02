@@ -9,6 +9,7 @@ import javax.servlet.http.HttpSession;
 import org.puppit.model.dto.ReviewDTO;
 import org.puppit.model.dto.ReviewInfoDTO;
 import org.puppit.service.ReviewService;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,8 +59,12 @@ public class ReviewController {
     review.put("productId", productId);
     review.put("rating", rating);
     review.put("content", content);
-    boolean result = reviewService.register(review);
-    rttr.addFlashAttribute("msg", result ? "리뷰 작성 성공" : "리뷰 작성 실패");
+    try {
+      boolean result = reviewService.register(review);
+      rttr.addFlashAttribute("msg", result ? "리뷰 작성 성공" : "리뷰 작성 실패");
+    } catch (DuplicateKeyException e) {
+      rttr.addFlashAttribute("msg", "후기는 상품당 한 번만 작성할 수 있습니다.");
+    }
     return "redirect:/";
   }
   

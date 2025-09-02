@@ -27,6 +27,7 @@
     JOIN `user` b ON r.buyer_id = b.user_id
     JOIN product p ON r.product_id = p.product_id
     WHERE r.seller_id = #{userId}
+    ORDER BY r.updated_at DESC
   </select>
   
   <!-- 내가 쓴 리뷰 조회 -->
@@ -47,6 +48,7 @@
     JOIN `user` b ON r.buyer_id = b.user_id
     JOIN product p ON r.product_id = p.product_id
     WHERE r.buyer_id = #{userId}
+    ORDER BY r.updated_at DESC
   </select>
   
   <!-- 리뷰 삭제 -->
