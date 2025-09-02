@@ -104,12 +104,11 @@ public class ProductController {
         // JSP로 전달
         model.addAttribute("product", product);
         model.addAttribute("subImages", subImages);
-<<<<<<< HEAD
+
         model.addAttribute("isReadCount", isReadCount);
-=======
+
         Integer wishCount = wishListService.getCount(productId);
         model.addAttribute("wishCount", wishCount);
->>>>>>> e114a5d6f9a9c9c3b315dd831c345daa9d141d69
 
         return "product/detail";
     }
