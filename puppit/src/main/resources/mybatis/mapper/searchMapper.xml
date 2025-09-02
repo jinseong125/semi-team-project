@@ -20,6 +20,7 @@
     t.image_url    AS thumb_image_url,
     t.is_thumbnail AS thumb_is_thumbnail
   FROM product p
+  JOIN user u ON u.user_id = p.seller_id  AND u.is_deleted=0
   JOIN product_category c ON p.category_id = c.category_id
   JOIN product_status   s ON p.status_id   = s.status_id
   LEFT JOIN product_image t

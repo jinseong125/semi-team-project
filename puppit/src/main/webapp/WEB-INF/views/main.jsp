@@ -18,108 +18,107 @@
 <style>
 /* ===== 상품 그리드 ===== */
 .product-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 24px;
 }
 
 @media ( max-width :1024px) {
-  .product-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+	.product-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 
 @media ( max-width :768px) {
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+	.product-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 /* ===== 상품 카드 ===== */
 .product-card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  background: #fff;
-  border-radius: 14px;
-  border: 1px solid #ececef;
-  overflow: hidden;
-  transition: all 0.25s ease-in-out;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	background: #fff;
+	border-radius: 14px;
+	border: 1px solid #ececef;
+	overflow: hidden;
+	transition: all 0.25s ease-in-out;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .product-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+	transform: translateY(-6px) scale(1.02);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* ===== 썸네일 이미지 ===== */
 .thumb {
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-bottom: 1px solid #f1f1f1;
-  background: #f8f8f8;
-  transition: transform 0.3s ease;
+	width: 100%;
+	aspect-ratio: 1/1;
+	object-fit: cover;
+	border-bottom: 1px solid #f1f1f1;
+	background: #f8f8f8;
+	transition: transform 0.3s ease;
 }
 
 .product-card:hover .thumb {
-  transform: scale(1.05);
+	transform: scale(1.05);
 }
 
 /* ===== 상품명 ===== */
 .product-title {
-  margin: 10px 12px 4px;
-  font-size: 15px;
-  color: #111;
-  font-weight: 600;
-  line-height: 1.4;
-  white-space: normal;
-  overflow: hidden;
-  
+	margin: 10px 12px 4px;
+	font-size: 15px;
+	color: #111;
+	font-weight: 600;
+	line-height: 1.4;
+	white-space: normal;
+	overflow: hidden;
 }
-
-/* ===== 설명 ===== */
-.product-desc {
-  margin: 0 12px 6px;
-  font-size: 13px;
-  color: #6b7280;
-  line-height: 1.4;
-  max-height: 2.8em;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
+ 
 
 /* ===== 가격 ===== */
 .product-price {
-  margin: 0 12px 12px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #e74c3c;
+	margin: 0 12px 12px;
+	font-size: 15px;
+	font-weight: 700;
+	color: #e74c3c;
 }
 
 /* ===== 검색 결과 ===== */
-#search-results { background: #fff; }
+#search-results {
+	background: #fff;
+}
 
 .empty {
-  text-align: center;
-  padding: 20px;
-  color: #777;
+	text-align: center;
+	padding: 20px;
+	color: #777;
 }
 
 .badge {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 6px;
-  font-size: 12px;
-  border-radius: 6px;
-  color: #fff;
+	display: inline-block;
+	margin-left: 6px;
+	padding: 2px 6px;
+	font-size: 12px;
+	border-radius: 6px;
+	color: #fff;
 }
-.badge-sale { background-color: #28a745; }   /* 판매중 - 초록 */
-.badge-reserve { background-color: #ffc107; }/* 예약중 - 노랑 */
-.badge-soldout { background-color: #dc3545; }/* 판매완료 - 빨강 */
+
+.badge-sale {
+	background-color: #28a745;
+} /* 판매중 - 초록 */
+
+.badge-reserve {
+	background-color: #ffc107;
+} /* 예약중 - 노랑 */
+
+.badge-soldout {
+	background-color: #dc3545;
+} /* 판매완료 - 빨강 */
+
 </style>
 
 
@@ -143,7 +142,6 @@
 							<span class="badge badge-soldout">판매완료</span>
 						</c:if>
 					</div>
-					<div class="product-desc">${p.productDescription}</div>
 					<div class="product-price">
 						<fmt:formatNumber value="${p.productPrice}" type="number"
 							groupingUsed="true" />
