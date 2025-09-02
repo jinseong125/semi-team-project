@@ -126,6 +126,7 @@
 	<!-- 상품 리스트 -->
 	<c:if test="${not empty products}">
 		<div class="product-grid" id="productGrid">
+		    <!-- 초기 상품 리스트 동기 렌더링 -->
 			<c:forEach items="${products}" var="p">
 				<a class="product-card"
 					href="${contextPath}/product/detail/${p.productId}"> <img
@@ -157,6 +158,8 @@
 
 <script>
 (() => {
+	// 페이지 로드 시 동작
+	// URL 파라미터(q, category)를 확인해서 검색 / 카테고리 로딩 / 기본 로딩 결정
   document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
@@ -171,14 +174,17 @@
     }
   });
 
+  // 기본 설정
   const mainGrid = document.getElementById('productGrid');
-  const size    = 40;
-
+  const size    = 40;	// 한 번에 불러올 상품 개수
+  
+  // 상태값 관리
   let loading = false;
   let endOfData = false;
   let offset = mainGrid ? mainGrid.querySelectorAll('.product-card').length : 0;
-  let lastRequestedOffset = -1;
+  let lastRequestedOffset = -1;	// 마지막 요청 offset 중복 방지
 
+  // 중복 상품 방지
   const seenIds = new Set(
     Array.from(mainGrid ? mainGrid.querySelectorAll('.product-card') : [])
       .map(a => {
@@ -196,6 +202,7 @@
     catch { return v + '원'; }
   };
 
+  // 상품 리스트 DOM에 추가
   const appendProducts = (list) => {
     if (!Array.isArray(list) || !list.length) return;
 
@@ -204,7 +211,7 @@
 
     for (const p of list) {
       const id    = p.productId;
-      if (!id || seenIds.has(id)) continue;
+      if (!id || seenIds.has(id)) continue;  // 중복이면 skip
       seenIds.add(id);
 
       const name  = p.productName || '';
@@ -213,7 +220,7 @@
         (p.thumbnail && p.thumbnail.imageUrl) ? p.thumbnail.imageUrl :
         (p.thumbImageUrl ? p.thumbImageUrl : (contextPath + '/resources/image/no-image.png'));
 
-   // ✅ 상태 뱃지 처리
+   // 상태 뱃지 처리
       let statusBadge = '';
       if (p.statusId == 1) {
         statusBadge = '<span class="badge badge-sale">판매중</span>';
@@ -223,9 +230,7 @@
         statusBadge = '<span class="badge badge-soldout">판매완료</span>';
       }
 
-      
-      
-      
+      // 상품 카드 HTML 생성
       html +=
         '<a class="product-card" href="' + contextPath + '/product/detail/' + id + '">' +
          
@@ -246,6 +251,8 @@
 
   let currentFilter = { q:'', category:'', sort:'DESC' };
     
+  
+  // 무한스크롤 비동기 로직
   const fetchProducts = async () => {
     if (loading || endOfData) return;
     if (offset === lastRequestedOffset) return;
@@ -319,7 +326,7 @@
     }
   };
 
-  // 헤더에서 필터 이벤트 수신
+  // 헤더에서 전달받은 이벤트 처리
   window.addEventListener('puppit:applyFilter', (e) => {
     const { q = '', category = '' } = e.detail || {};
     offset = 0;
@@ -337,6 +344,7 @@
     fetchProducts();
   });
 
+  // 카테고리 선택시 상품 불러오기
   async function loadCategory(categoryName) {
     offset = 0;
     endOfData = false;
@@ -350,6 +358,7 @@
   }
   window.loadCategory = loadCategory;
 
+  // 검색시 상품 불러오기
   async function search(keyword) {
     const q = (keyword || "").trim();
     if (!q) return;
