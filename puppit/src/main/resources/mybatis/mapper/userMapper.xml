@@ -82,7 +82,7 @@
   </insert>
   
   <!-- 유저 정보 수정 -->
-  <update id="updateUser" parameterType="Map">
+  <update id="updateUser" parameterType="map">
     UPDATE `user`
     SET user_name  = #{user.userName},
         user_email = #{user.userEmail},
@@ -94,15 +94,6 @@
     UPDATE user
     SET profile_image_key = #{profileImageKey}
     WHERE user_id = #{userId}
-  </update>
-  
-  <!-- 비밀번호 변경 -->
-  <update id="changeUserPassword" parameterType="userDTO">
-    UPDATE user
-       SET user_password = #{userPassword},
-           salt = #{salt},
-           update_at = NOW()
-     WHERE user_id = #{userId}
   </update>
   
   <!-- kakao로 로그인 한 id 조회 -->

@@ -55,5 +55,8 @@ public class WishListService {
   public boolean existsByUserAndProduct(Integer userId, Integer productId) {
     return wishListDAO.existsByUserAndProduct(userId, productId) == 1 ? true : false;
   }
+  public Integer getCount(Integer productId) {
+    return wishListDAO.getCount(productId);
+  }
 
 }

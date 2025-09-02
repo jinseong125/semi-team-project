@@ -56,7 +56,9 @@ public class WishListDAO {
     info.put("userId", userId);
     info.put("productId", productId);
     return sst.selectOne("mybatis.mapper.wishListMapper.existsByUserAndProduct", info);
-    
+  }
+  public Integer getCount(Integer productId) {
+    return sst.selectOne("mybatis.mapper.wishListMapper.getCountByProductId", productId);
   }
 
 }

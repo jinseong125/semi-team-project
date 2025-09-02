@@ -76,4 +76,10 @@
     ) THEN 1 ELSE 0 END
   </select>
   
+  <select id="getCountByProductId" parameterType="int" resultType="int">
+    SELECT COUNT(*) 
+    FROM wishlist
+    WHERE product_id = #{productId}
+  </select>
+  
 </mapper>
