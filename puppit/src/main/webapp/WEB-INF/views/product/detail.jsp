@@ -308,7 +308,7 @@ if (sessionMap != null) {
         </span>
       </li>
       <li>
-        <span class="label">판매자 ID</span>
+        <span class="label">판매자</span>
         <span>${product.sellerNickname}</span>
       </li>
     </ul>
@@ -325,18 +325,18 @@ if (sessionMap != null) {
         </form>
       </c:if>
 
-      <button type="button" class="btn outline" onclick="history.back()">목록</button>
+        <button type="button" class="btn outline" onclick="history.back()">목록</button>
       <c:if test="${sessionMap.userId ne product.sellerId}">
-  <button
-    id="btnWish"
-    class="btn outline wish-btn ${product.wished ? 'is-on' : ''}"
-    data-product-id="${product.productId}"
-    aria-pressed="${product.wished ? 'true' : 'false'}"
-    title="찜">
-    <i class="fa-regular fa-heart icon off"></i>
-    <i class="fa-solid fa-heart icon on"></i>
-    <span class="text">찜</span>
-  </button>
+        <button
+          id="btnWish"
+          class="btn outline wish-btn ${product.wished ? 'is-on' : ''}"
+          data-product-id="${product.productId}"
+          aria-pressed="${product.wished ? 'true' : 'false'}"
+          title="찜">
+          <i class="fa-regular fa-heart icon off"></i>
+          <i class="fa-solid fa-heart icon on"></i>
+          <span class="text">찜 ${wishCount}</span>
+        </button>
 
   <c:choose>
     <c:when test="${product.status.statusName eq '판매완료'}">
@@ -442,6 +442,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       btn.classList.toggle('is-on', !!data.added);
       btn.setAttribute('aria-pressed', String(!!data.added));
+      
+      if (typeof data.wishCount === 'number') {
+          const span = btn.querySelector('.text');
+          if (span) {
+            span.textContent = "찜 " + data.wishCount;
+          }
+        }
+      
 
     } catch (e) {
       btn.classList.toggle('is-on', wasOn);

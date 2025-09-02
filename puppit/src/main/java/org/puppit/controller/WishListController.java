@@ -68,7 +68,9 @@ public class WishListController {
 
       // 서비스 시그니처가 (userId, productId)이므로 그대로 호출 OK
       boolean added = wishListService.toggle(userId, productId);
-      return Map.of("ok", true, "added", added);
+      Integer wishCount = wishListService.getCount(productId);
+      System.out.println("찜개수: " + wishCount);
+      return Map.of("ok", true, "added", added, "wishCount", wishCount);
 
   } catch (Exception e) {
       e.printStackTrace(); // 서버 콘솔에서 스택 확인
