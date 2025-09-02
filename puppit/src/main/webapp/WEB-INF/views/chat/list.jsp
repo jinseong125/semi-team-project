@@ -713,6 +713,7 @@ Promise.all(chatCountPromises).then(() => {
             const unreadCount = badge && badge.style.display !== 'none' ? parseInt(badge.textContent) || 0 : 0;
             console.log('unreadCount:', unreadCount);
             console.log({roomId, userId, count: unreadCount});
+            
             if (unreadCount > 0) {
                 fetch(contextPath + '/api/alarm/readAll', {
                     method: 'POST',
@@ -728,6 +729,15 @@ Promise.all(chatCountPromises).then(() => {
                     badge.style.display = 'none';
                     badge.textContent = '';
                     if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
+                    
+                 // 읽음 처리 함수 호출
+                    markRoomMessagesAsRead(roomId, unreadCount);
+                    
+                    // ★★★ [여기서] 읽음 처리 후 목록 새로고침 추가! ★★★
+                    setTimeout(reloadRecentRoomList, 250);
+                    // 250ms 딜레이: 서버에서 읽음 처리 완료 후 동기화
+                    
+                    
                 })
                 .catch(err => {
                     console.error('안읽은 메시지 읽음 처리 에러:', err);
@@ -1010,6 +1020,17 @@ function reloadRecentRoomList() {
                     }
                 });
             });
+            
+         // === [여기에 추가!] ===
+            // 채팅방 렌더링 후, 미읽은 메시지 뱃지 표시
+            fetch(contextPath + '/api/chat/unreadCount?userId=' + userId)
+                .then(res => res.json())
+                .then(unreadCounts => {
+                    updateUnreadBadges(unreadCounts); // 뱃지 표시
+                });
+            
+            
+            
         }) // ← forEach 바깥에 닫는 괄호!
         .catch(err => {
             console.error('채팅방 목록 재요청 에러:', err);
@@ -1092,6 +1113,27 @@ function markRoomMessagesAsRead(roomId, unreadCount) {
         console.error('안읽은 메시지 읽음 처리 에러:', err);
     });
 }
+
+function markRoomMessagesAsRead(roomId, unreadCount) {
+    fetch(contextPath + '/api/chat/readAll', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            roomId: roomId,
+            userId: userId,
+            count: unreadCount
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        removeUnreadBadge(roomId);
+        removeAlarmPopupRoom(roomId);
+    })
+    .catch(err => {
+        console.error('안읽은 메시지 읽음 처리 에러:', err);
+    });
+}
+
 
 
 //--- 알림 팝업에서 읽음 처리 ---
