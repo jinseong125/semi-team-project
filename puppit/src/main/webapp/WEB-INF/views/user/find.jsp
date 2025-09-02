@@ -141,7 +141,7 @@
           <input type="text" name="accountId" id="accountId" placeholder="아이디" required autocomplete="username">
         </div>
         <div class="form-group">
-          <input type="password" name="newPassword" id="newPassword" placeholder="새 비밀번호 (대문자 1개 포함, 영문/숫자/!@#만, 6~10자)" minlength="8" required autocomplete="new-password">
+          <input type="password" name="userPassword" id="userPassword" placeholder="새 비밀번호 (대문자 1개 포함, 영문/숫자/!@#만, 6~10자)" minlength="8" required autocomplete="new-password">
         </div>
         <div class="form-group">
           <input type="password" name="confirmPassword" id="confirmPassword" placeholder="새 비밀번호 확인" minlength="8" required autocomplete="new-password">
@@ -198,7 +198,7 @@
   var formPw = document.getElementById('form-reset-pw');
   if (formPw) {
     formPw.addEventListener('submit', function (e) {
-      var np = document.getElementById('newPassword').value;
+      var np = document.getElementById('userPassword').value;
       var cp = document.getElementById('confirmPassword').value;
       if (np !== cp) {
         e.preventDefault();

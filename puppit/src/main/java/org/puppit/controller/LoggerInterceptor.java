@@ -18,9 +18,11 @@ public class LoggerInterceptor implements HandlerInterceptor {
     String path = uri.substring(ctx.length());
     
     boolean isPublic = path.equals("/user/login")
-    || path.equals("/user/signup")
-    || path.equals("/user/find")
-    || path.equals("/user/check");
+                    || path.equals("/user/signup")
+                    || path.equals("/user/find")
+                    || path.equals("/user/check")
+                    || path.equals("/user/reset-password")
+                    || path.equals("/auth");
     
     if(isPublic) return true;
     // 세션에서 사용자 정보 조회

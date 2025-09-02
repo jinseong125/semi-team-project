@@ -222,7 +222,7 @@ public class UserController {
   // 비밀번호 변경
   @PostMapping("/reset-password")
   public String changePassword(@RequestParam String accountId,
-                               @RequestParam String newPassword,
+                               @RequestParam String userPassword,
                                 RedirectAttributes redirectAttr,
                                 HttpSession session) {
     if(accountId == null || accountId.isBlank()) {
@@ -230,13 +230,13 @@ public class UserController {
       redirectAttr.addFlashAttribute("activeTab", "resetPw");
       return "redirect:/user/find";
     }
-    boolean ok = userService.updatePassword(accountId, newPassword);
+    boolean ok = userService.updatePassword(accountId, userPassword);
     if(!ok) {
       redirectAttr.addFlashAttribute("error", "해당 아이디가 없습니다");
       redirectAttr.addFlashAttribute("activeTab", "resetPw");
       return "redirect:/user/find";
     }
-
+    redirectAttr.addFlashAttribute("msg", "비밀번호가 변경 되었습니다 다시 로그인 해주세요");
     return "redirect:/user/login";
   }
   // mypage에서 profile 가기전 password 검사 페이지
