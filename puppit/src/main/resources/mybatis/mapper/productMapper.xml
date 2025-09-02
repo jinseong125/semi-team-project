@@ -220,6 +220,7 @@
         <result property="sellerId"			column="seller_id" />
         <result property="productDescription" column="product_description" />
         <result property="sellerNickname" column="seller_nickname" />
+        <result property="isRead" column="is_read"/>
         
 
         <association property="category" javaType="org.puppit.model.dto.CategoryDTO">
@@ -300,6 +301,7 @@
 	           p.status_id,
 	           p.seller_id,
 	           p.product_description,
+	           p.is_read,
 	           c.category_name,
 	           s.status_name,
 	           t.image_id     AS thumb_image_id,
@@ -484,6 +486,10 @@
   LIMIT #{size} OFFSET #{offset}
 </select>
 
+
+<update id="updateIsReadCount" parameterType="int">
+	UPDATE product SET is_read = is_read + 1 WHERE product_id = #{productId}
+</update>
 
 
 

@@ -275,4 +275,10 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductImageDTO> getSubImages(Integer productId) {
       return productDAO.getsubImages(productId);
     }
+
+	@Override
+	public Integer updateIsReadCount(int productId) {
+		
+		return productDAO.updateIsReadCount(productId);
+	}
 }

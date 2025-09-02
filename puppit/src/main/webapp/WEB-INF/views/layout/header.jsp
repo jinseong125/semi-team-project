@@ -931,13 +931,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	  // deduped 결과도 찍기
 	  console.log('deduped:', deduped);
 
-	  if (deduped.length > 0) {
-		  updateAlarmBellColor(true); // 빨간색
-		} else {
-		  updateAlarmBellColor(false); // 검정색
-		}
-	  
-	  
 	  // === 팝업 UI용 roomId별로 그룹화 및 집계 ===
 	  // { roomId: { alarms: [], lastAlarm: {}, count: N } }
  	  const roomGroups = {};
@@ -1047,16 +1040,6 @@ document.addEventListener("DOMContentLoaded", function() {
 		      var liElem = alarmLink.closest('li');
 		      if (liElem) liElem.remove();
 
-		   // [!! 추가 !!] 알림이 다 사라진 경우 종모양 검정색으로 변경
-		      setTimeout(function() {
-		        var remaining = document.querySelectorAll('#alarmArea .alarm-link').length;
-		        if (remaining === 0) {
-		          updateAlarmBellColor(false); // 종모양 검정색
-		        }
-		      }, 100);
-		      
-		      
-		      
 		      // 2. 현재 클릭한 roomId에 해당하는 group.count 찾기
 		      //var groupCount = 1; // 기본값
 	    	  var groupCount = roomGroups && roomGroups[roomId] && roomGroups[roomId].count ? roomGroups[roomId].count : 1;
@@ -1168,10 +1151,7 @@ document.addEventListener("DOMContentLoaded", function() {
 		    alarmArea.style.display = "none";
 		    alarmArea.innerHTML = "";
 		    var alarmBell = document.getElementById("alarmBell");
-		    if (alarmBell) { 
-		    	alarmBell.style.display = "inline-block";
-		    	updateAlarmBellColor(false); // 검정색
-		    }
+		    if (alarmBell) alarmBell.style.display = "inline-block";
 		    if(window.alarmInterval) clearInterval(window.alarmInterval);
 		    alarmClosed = true;
 		    localStorage.setItem('puppitAlarmClosed', 'true');
@@ -1497,18 +1477,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	  const q = input.value.trim();
 	  if (q) window.location.href = contextPath + "/?q=" + encodeURIComponent(q);
   });
-  
-  function updateAlarmBellColor(hasAlarm) {
-	  var alarmBell = document.getElementById('alarmBell');
-	  if (!alarmBell) return;
-	  if (hasAlarm) {
-	    alarmBell.classList.add('red');
-	    alarmBell.querySelector('i').style.color = '#e74c3c'; // 빨간색
-	  } else {
-	    alarmBell.classList.remove('red');
-	    alarmBell.querySelector('i').style.color = ''; // 원래색(검정)
-	  }
-	}
 
 
 
