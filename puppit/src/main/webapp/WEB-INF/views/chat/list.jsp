@@ -710,8 +710,9 @@ Promise.all(chatCountPromises).then(() => {
 
             // 읽음 처리 + 뱃지 제거
             const badge = chatDiv.querySelector('.unread-badge');
+            console.log('badge: ', badge);
             const unreadCount = badge && badge.style.display !== 'none' ? parseInt(badge.textContent) || 0 : 0;
-            console.log('unreadCount:', unreadCount);
+            console.log('unreadCount00000:', unreadCount);
             console.log({roomId, userId, count: unreadCount});
             
             if (unreadCount > 0) {
@@ -726,9 +727,10 @@ Promise.all(chatCountPromises).then(() => {
                 })
                 .then(res => res.json())
                 .then(data => {
+                	console.log('');
                     badge.style.display = 'none';
                     badge.textContent = '';
-                    if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
+                   // if (window.removeAlarmPopupRoom) window.removeAlarmPopupRoom(roomId);
                     
                  // 읽음 처리 함수 호출
                     markRoomMessagesAsRead(roomId, unreadCount);
@@ -742,6 +744,8 @@ Promise.all(chatCountPromises).then(() => {
                 .catch(err => {
                     console.error('안읽은 메시지 읽음 처리 에러:', err);
                 });
+            }  else {
+            	console.log('else');
             }
         });
     });
@@ -1094,7 +1098,7 @@ function updateUnreadBadges(unreadCounts) {
 //--- 읽음 처리 ---
 function markRoomMessagesAsRead(roomId, unreadCount) {
     // userId는 chat_receiver 기준(로그인 사용자)
-    fetch(contextPath + '/api/chat/readAll', {
+    fetch(contextPath + '/api/alarm/readAll', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -1105,6 +1109,7 @@ function markRoomMessagesAsRead(roomId, unreadCount) {
     })
     .then(res => res.json())
     .then(data => {
+    	console.log('읽음처리 data: ', data);
         // 성공 시 뱃지 제거, 알림 팝업 제거
         removeUnreadBadge(roomId);
         removeAlarmPopupRoom(roomId);
@@ -1115,7 +1120,8 @@ function markRoomMessagesAsRead(roomId, unreadCount) {
 }
 
 function markRoomMessagesAsRead(roomId, unreadCount) {
-    fetch(contextPath + '/api/chat/readAll', {
+	console.log('roomId: ', roomId, ' ,unreadCount: ', unreadCount);
+    fetch(contextPath + '/api/alarm/readAll', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -1126,6 +1132,7 @@ function markRoomMessagesAsRead(roomId, unreadCount) {
     })
     .then(res => res.json())
     .then(data => {
+    	console.log('data: ', data);
         removeUnreadBadge(roomId);
         removeAlarmPopupRoom(roomId);
     })
@@ -1140,6 +1147,7 @@ function markRoomMessagesAsRead(roomId, unreadCount) {
 function removeAlarmPopupRoom(roomId) {
     // 알림 팝업에서 해당 roomId의 메시지 제거
     const alarmArea = document.getElementById('alarmArea');
+ 	console.log('removeAlarmPopupRoom: ' , alarmArea);
     if (alarmArea) {
         const alarmLinks = alarmArea.querySelectorAll('.alarm-link[data-room-id="' + roomId + '"]');
         alarmLinks.forEach(link => {
@@ -1156,6 +1164,7 @@ function removeAlarmPopupRoom(roomId) {
 
 // --- 뱃지 제거 ---
 function removeUnreadBadge(roomId) {
+	console.log('removeUnreadBadge() : roomId: ',roomId);
     document.querySelectorAll('.chatList[data-room-id="' + roomId + '"] .unread-badge').forEach(badge => {
         badge.style.display = 'none';
         badge.textContent = '';

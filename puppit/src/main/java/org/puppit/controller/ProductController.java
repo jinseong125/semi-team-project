@@ -87,7 +87,8 @@ public class ProductController {
     /** 상품 상세 조회 */
     @GetMapping("/detail/{productId}")
     public String getProductDetail(@PathVariable int productId, @SessionAttribute(value="sessionMap", required=false) Map<String,Object> sessionMap, Model model) {
-      ProductDTO product = productService.detailProducts(productId);
+    	Integer isReadCount = productService.updateIsReadCount(productId);
+    	ProductDTO product = productService.detailProducts(productId);
         if (product == null) {
             model.addAttribute("error", "해당 상품을 찾을 수 없습니다.");
             return "error/404";
@@ -99,10 +100,11 @@ public class ProductController {
       }
         product.setWished(wished);
         List<ProductImageDTO> subImages = productService.getSubImages(productId);
-
+        
         // JSP로 전달
         model.addAttribute("product", product);
         model.addAttribute("subImages", subImages);
+        model.addAttribute("isReadCount", isReadCount);
 
         return "product/detail";
     }

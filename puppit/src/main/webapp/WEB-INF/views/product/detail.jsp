@@ -287,6 +287,8 @@ if (sessionMap != null) {
     <div class="detail-price">
       <fmt:formatNumber value="${product.productPrice}" pattern="#,###"/>원
     </div>
+    
+     
 
     <!-- 상태 / 등록일 / 판매자 -->
     <ul class="meta-list">
@@ -310,6 +312,17 @@ if (sessionMap != null) {
       <li>
         <span class="label">판매자 ID</span>
         <span>${product.sellerNickname}</span>
+      </li>
+      <li>
+      	<!-- isReadCount + 눈 아이콘 표시 (fontawesome) -->
+     <span style=" color:#5d6470; font-size:15px;">
+       조회수
+       
+     </span>
+     <span>
+     	<c:out value="${product.isRead}" />
+     </span>
+      
       </li>
     </ul>
 

@@ -51,6 +51,8 @@ public interface ProductService {
     public List<ProductSearchDTO> searchByCategory(String categoryName); 
     
     List<ProductImageDTO> getSubImages(Integer productId);
+
+	Integer updateIsReadCount(int productId);
      
   
 
