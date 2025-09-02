@@ -5,7 +5,6 @@
 
 <jsp:include page="../layout/header.jsp"></jsp:include>
 
-<h1>프로필 페이지</h1>
 
 <style>
   :root {
@@ -94,7 +93,14 @@
     .button-check{ width:100%; }
     .danger-row{ flex-direction:column; align-items:stretch; }
   }
+  .title {
+    font-size: 22px;
+    font-weight: 800;
+    padding: 0 430px;
+  }
 </style>
+
+<div class="title">프로필 페이지</div>
 
 <div class="profile-card">
   <form id="profileForm" action="${contextPath}/user/profile" method="post">
@@ -164,6 +170,14 @@
 </div>
 
 <script type="text/javascript">
+  const initial = {
+		  nickname: document.getElementById("nickName").defaultValue,
+		  email: document.getElementById("userEmail").defaultValue
+  };
+  
+  const elNick = document.getElementById("nickName");
+  const elEmail = document.getElementById("userEmail");
+  
   let nicknameChecked = false;
   let emailChecked = false;
 
@@ -195,11 +209,22 @@
       });
   });
 
+
+    elNick.addEventListener("input", () => {
+      if (elNick.value !== initial.nickname) nicknameChecked = false;
+    });
+    elEmail.addEventListener("input", () => {
+      if (elEmail.value !== initial.email) emailChecked = false;
+    });
+
   // 수정 (form 밖 버튼 → form submit)
   document.getElementById("btn-submit").addEventListener("click", e => {
-    if(!nicknameChecked || !emailChecked) {
-      if(!nicknameChecked) alert("닉네임 중복확인을 해주세요");
-      else if(!emailChecked) alert("이메일 중복확인을 해주세요");
+	  const currNick = document.getElementById("nickName").value;
+	  const currEmail = document.getElementById("userEmail").value;
+	  
+    if((!nicknameChecked && initial.nickname != currNick) || (!emailChecked && initial.email != currEmail)) {
+      if(!nicknameChecked && initial.nickname != currNick) alert("닉네임 중복확인을 해주세요");
+      else if(!emailChecked && initial.email != currEmail) alert("이메일 중복확인을 해주세요");
       return;
     }
     document.getElementById("profileForm").submit();
