@@ -32,15 +32,22 @@ public class OrderController {
                           @RequestParam("chatSellerAccountId") String chatSellerAccountId, 
                           @RequestParam("productId") Integer productId, 
                           @RequestParam("quantity") Integer quantity, 
-                          Model model) {
+                          Model model,
+                          RedirectAttributes rttr) {
     
     ProductDTO productDTO = productService.getProductById(productId);
     Integer price = productDTO.getProductPrice();
     String productName = productDTO.getProductName();
     Integer amount = price * quantity;
+    Integer statusId = productDTO.getStatusId();
     
     UserDTO userDTO = userService.getUserId(String.valueOf(chatSellerAccountId));
     String userNickname = userDTO.getNickName();
+    
+    if(statusId == 3) {
+      rttr.addFlashAttribute("msg", "이미 판매완료된 상품입니다.");
+      return "redirect:/";
+    }
 
     model.addAttribute("buyerId", buyerId);
     model.addAttribute("sellerId", sellerId);

@@ -110,6 +110,18 @@ public class UserServiceImpl implements UserService {
     String encryptedPassword = secureUtil.hashPBKDF2(userPassword, auth.getSalt());
     return encryptedPassword.equals(auth.getUserPassword());
   }
+  // 비밀번호 찾기
+  @Override
+  public Boolean updatePassword(String accountId, String newPassword) {
+    byte[] salt = secureUtil.getSalt();
+    String encryptedPassword = secureUtil.hashPBKDF2(newPassword, salt);
+    
+    Map<String, Object> map = new HashMap<>();
+    map.put("accountId", accountId);
+    map.put("userPassword", encryptedPassword);
+    map.put("salt", salt);
+    return userDAO.updatePasswordByAccountId(map) == 1;
+  }
   @Override
   public Boolean isAccountIdAvailable(String accountId) {
     if(accountId == null || accountId.isBlank()) return false;

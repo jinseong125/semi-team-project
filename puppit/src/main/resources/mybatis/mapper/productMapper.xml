@@ -352,10 +352,11 @@
     <!-- ================= 자동완성 (검색) ================= -->
     <select id="getAutoComplete" parameterType="string" resultType="string">
         SELECT product_name
-        FROM product
+        FROM product p
+         JOIN user u ON u.user_id = p.seller_id AND u.is_deleted = 0 
         WHERE product_name LIKE CONCAT('%', #{keyword}, '%')
         ORDER BY product_name
-            LIMIT 50
+            LIMIT 40
     </select>
 
     <!-- 카테고리별 상품 조회 -->

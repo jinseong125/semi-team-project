@@ -18,108 +18,107 @@
 <style>
 /* ===== 상품 그리드 ===== */
 .product-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 24px;
 }
 
 @media ( max-width :1024px) {
-  .product-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+	.product-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 
 @media ( max-width :768px) {
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+	.product-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
 }
 
 /* ===== 상품 카드 ===== */
 .product-card {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  background: #fff;
-  border-radius: 14px;
-  border: 1px solid #ececef;
-  overflow: hidden;
-  transition: all 0.25s ease-in-out;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+	display: block;
+	text-decoration: none;
+	color: inherit;
+	background: #fff;
+	border-radius: 14px;
+	border: 1px solid #ececef;
+	overflow: hidden;
+	transition: all 0.25s ease-in-out;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .product-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+	transform: translateY(-6px) scale(1.02);
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* ===== 썸네일 이미지 ===== */
 .thumb {
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-bottom: 1px solid #f1f1f1;
-  background: #f8f8f8;
-  transition: transform 0.3s ease;
+	width: 100%;
+	aspect-ratio: 1/1;
+	object-fit: cover;
+	border-bottom: 1px solid #f1f1f1;
+	background: #f8f8f8;
+	transition: transform 0.3s ease;
 }
 
 .product-card:hover .thumb {
-  transform: scale(1.05);
+	transform: scale(1.05);
 }
 
 /* ===== 상품명 ===== */
 .product-title {
-  margin: 10px 12px 4px;
-  font-size: 15px;
-  color: #111;
-  font-weight: 600;
-  line-height: 1.4;
-  white-space: normal;
-  overflow: hidden;
-  
+	margin: 10px 12px 4px;
+	font-size: 15px;
+	color: #111;
+	font-weight: 600;
+	line-height: 1.4;
+	white-space: normal;
+	overflow: hidden;
 }
-
-/* ===== 설명 ===== */
-.product-desc {
-  margin: 0 12px 6px;
-  font-size: 13px;
-  color: #6b7280;
-  line-height: 1.4;
-  max-height: 2.8em;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
+ 
 
 /* ===== 가격 ===== */
 .product-price {
-  margin: 0 12px 12px;
-  font-size: 15px;
-  font-weight: 700;
-  color: #e74c3c;
+	margin: 0 12px 12px;
+	font-size: 15px;
+	font-weight: 700;
+	color: #e74c3c;
 }
 
 /* ===== 검색 결과 ===== */
-#search-results { background: #fff; }
+#search-results {
+	background: #fff;
+}
 
 .empty {
-  text-align: center;
-  padding: 20px;
-  color: #777;
+	text-align: center;
+	padding: 20px;
+	color: #777;
 }
 
 .badge {
-  display: inline-block;
-  margin-left: 6px;
-  padding: 2px 6px;
-  font-size: 12px;
-  border-radius: 6px;
-  color: #fff;
+	display: inline-block;
+	margin-left: 6px;
+	padding: 2px 6px;
+	font-size: 12px;
+	border-radius: 6px;
+	color: #fff;
 }
-.badge-sale { background-color: #28a745; }   /* 판매중 - 초록 */
-.badge-reserve { background-color: #ffc107; }/* 예약중 - 노랑 */
-.badge-soldout { background-color: #dc3545; }/* 판매완료 - 빨강 */
+
+.badge-sale {
+	background-color: #28a745;
+} /* 판매중 - 초록 */
+
+.badge-reserve {
+	background-color: #ffc107;
+} /* 예약중 - 노랑 */
+
+.badge-soldout {
+	background-color: #dc3545;
+} /* 판매완료 - 빨강 */
+
 </style>
 
 
@@ -127,6 +126,7 @@
 	<!-- 상품 리스트 -->
 	<c:if test="${not empty products}">
 		<div class="product-grid" id="productGrid">
+		    <!-- 초기 상품 리스트 동기 렌더링 -->
 			<c:forEach items="${products}" var="p">
 				<a class="product-card"
 					href="${contextPath}/product/detail/${p.productId}"> <img
@@ -143,7 +143,6 @@
 							<span class="badge badge-soldout">판매완료</span>
 						</c:if>
 					</div>
-					<div class="product-desc">${p.productDescription}</div>
 					<div class="product-price">
 						<fmt:formatNumber value="${p.productPrice}" type="number"
 							groupingUsed="true" />
@@ -159,6 +158,8 @@
 
 <script>
 (() => {
+	// 페이지 로드 시 동작
+	// URL 파라미터(q, category)를 확인해서 검색 / 카테고리 로딩 / 기본 로딩 결정
   document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
@@ -173,14 +174,17 @@
     }
   });
 
+  // 기본 설정
   const mainGrid = document.getElementById('productGrid');
-  const size    = 40;
-
+  const size    = 40;	// 한 번에 불러올 상품 개수
+  
+  // 상태값 관리
   let loading = false;
   let endOfData = false;
   let offset = mainGrid ? mainGrid.querySelectorAll('.product-card').length : 0;
-  let lastRequestedOffset = -1;
+  let lastRequestedOffset = -1;	// 마지막 요청 offset 중복 방지
 
+  // 중복 상품 방지
   const seenIds = new Set(
     Array.from(mainGrid ? mainGrid.querySelectorAll('.product-card') : [])
       .map(a => {
@@ -198,6 +202,7 @@
     catch { return v + '원'; }
   };
 
+  // 상품 리스트 DOM에 추가
   const appendProducts = (list) => {
     if (!Array.isArray(list) || !list.length) return;
 
@@ -206,7 +211,7 @@
 
     for (const p of list) {
       const id    = p.productId;
-      if (!id || seenIds.has(id)) continue;
+      if (!id || seenIds.has(id)) continue;  // 중복이면 skip
       seenIds.add(id);
 
       const name  = p.productName || '';
@@ -215,7 +220,7 @@
         (p.thumbnail && p.thumbnail.imageUrl) ? p.thumbnail.imageUrl :
         (p.thumbImageUrl ? p.thumbImageUrl : (contextPath + '/resources/image/no-image.png'));
 
-   // ✅ 상태 뱃지 처리
+   // 상태 뱃지 처리
       let statusBadge = '';
       if (p.statusId == 1) {
         statusBadge = '<span class="badge badge-sale">판매중</span>';
@@ -225,9 +230,7 @@
         statusBadge = '<span class="badge badge-soldout">판매완료</span>';
       }
 
-      
-      
-      
+      // 상품 카드 HTML 생성
       html +=
         '<a class="product-card" href="' + contextPath + '/product/detail/' + id + '">' +
          
@@ -248,6 +251,8 @@
 
   let currentFilter = { q:'', category:'', sort:'DESC' };
     
+  
+  // 무한스크롤 비동기 로직
   const fetchProducts = async () => {
     if (loading || endOfData) return;
     if (offset === lastRequestedOffset) return;
@@ -321,7 +326,7 @@
     }
   };
 
-  // 헤더에서 필터 이벤트 수신
+  // 헤더에서 전달받은 이벤트 처리
   window.addEventListener('puppit:applyFilter', (e) => {
     const { q = '', category = '' } = e.detail || {};
     offset = 0;
@@ -339,6 +344,7 @@
     fetchProducts();
   });
 
+  // 카테고리 선택시 상품 불러오기
   async function loadCategory(categoryName) {
     offset = 0;
     endOfData = false;
@@ -352,6 +358,7 @@
   }
   window.loadCategory = loadCategory;
 
+  // 검색시 상품 불러오기
   async function search(keyword) {
     const q = (keyword || "").trim();
     if (!q) return;

@@ -4,6 +4,10 @@
 
 <jsp:include page="../layout/header.jsp"/>
 
+<c:if test="${not empty msg}">
+  <div class="msg success"><c:out value="${msg}" /></div>
+</c:if>
+
 <!-- 페이지 전용 스타일 -->
 <style>
   :root{
