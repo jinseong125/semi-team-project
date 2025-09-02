@@ -1,5 +1,7 @@
 package org.puppit.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -133,6 +136,7 @@ public class UserController {
   // 로그인 폼 보여주기
   @GetMapping("/login")
   public String loginForm(Model model) {
+
     String kakaoApiKey = "79176a8cb995f6cf89985b3657377b24";
     String kakaoRedirectUri = "http://localhost:8080/puppit/auth/kakao/callback";
     model.addAttribute("kakaoApiKey", kakaoApiKey);
@@ -209,6 +213,31 @@ public class UserController {
       redirectAttr.addFlashAttribute("msg", findId + "입니다.");
       return "redirect:/user/login";
     }
+  }
+  // 비밀번호 변경 폼
+  @GetMapping("/reset-password")
+  public String changePassword() {
+    return "user/find";
+  }
+  // 비밀번호 변경
+  @PostMapping("/reset-password")
+  public String changePassword(@RequestParam String accountId,
+                               @RequestParam String newPassword,
+                                RedirectAttributes redirectAttr,
+                                HttpSession session) {
+    if(accountId == null || accountId.isBlank()) {
+      redirectAttr.addFlashAttribute("error", "아이디를 입력하세요");
+      redirectAttr.addFlashAttribute("activeTab", "resetPw");
+      return "redirect:/user/find";
+    }
+    boolean ok = userService.updatePassword(accountId, newPassword);
+    if(!ok) {
+      redirectAttr.addFlashAttribute("error", "해당 아이디가 없습니다");
+      redirectAttr.addFlashAttribute("activeTab", "resetPw");
+      return "redirect:/user/find";
+    }
+
+    return "redirect:/user/login";
   }
   // mypage에서 profile 가기전 password 검사 페이지
   @GetMapping("/checkPassword")

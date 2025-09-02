@@ -27,7 +27,7 @@ public interface UserService {
   // accountId 찾기
   String findAccountIdByUserNameUserEmail(UserDTO user);
   // 비밀번호 변경
-  // Boolean changeUserPasswordByuserId(UserDTO user);
+   Boolean updatePassword(String accountId, String newPassword);
   // 기존 비밀번호 확인
   Boolean passwordCheck(int userId, String userPassword);
 
