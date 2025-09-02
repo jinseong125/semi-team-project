@@ -249,6 +249,11 @@ public void deleteRoomsByProductId(Integer productId) {
     sqlSession.delete("mybatis.mapper.chatMapper.deleteRoomsByProductId", productId);
 }
 
+public void deleteAlarmsByRoomIdCascade(int roomId) {
+	sqlSession.delete("mybatis.mapper.chatMapper.deleteAlarmsByRoomIdCascade", roomId);
+	
+}
+
    
    
    
