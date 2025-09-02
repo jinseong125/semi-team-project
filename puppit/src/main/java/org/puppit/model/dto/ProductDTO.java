@@ -31,6 +31,7 @@ public class ProductDTO {
     private Timestamp productUpdatedAt;
     private int totalCount;
     private String statusName;
+    private int isRead;
 
 
     private CategoryDTO      category;

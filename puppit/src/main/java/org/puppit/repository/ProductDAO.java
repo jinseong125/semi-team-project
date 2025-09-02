@@ -141,6 +141,10 @@ public class ProductDAO {
     public List<ProductImageDTO> getsubImages(Integer productId) {
       return sqlSession.selectList("product.getSubImages", productId);
     }
+
+	public Integer updateIsReadCount(int productId) {		
+		return sqlSession.update("product.updateIsReadCount", productId);
+	}
     
 
 }
