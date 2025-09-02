@@ -144,16 +144,33 @@ ORDER BY c.chat_created_at DESC
     SELECT room_id FROM room WHERE product_id = #{productId}
 </select>
 
-<delete id="deleteAlarmsByRoomId">
-    DELETE FROM alarm WHERE room_id = #{roomId}
-</delete>
+<update id="deleteAlarmsByRoomIdCascade">
+    UPDATE alarm
+    SET is_deleted = 1
+    WHERE room_id = #{roomId}
+      AND message_id IN (
+        SELECT message_id FROM chat WHERE chat_room_id = #{roomId}
+      )
+</update>
 
-<delete id="deleteChatsByRoomId">
-    DELETE FROM chat WHERE chat_room_id = #{roomId}
-</delete>
 
-<delete id="deleteRoomsByProductId">
-    DELETE FROM room WHERE product_id = #{productId}
-</delete>
+
+<update id="deleteAlarmsByRoomId">
+    UPDATE alarm
+	SET is_deleted = 1
+	WHERE room_id = #{roomId}
+</update>
+
+<update id="deleteChatsByRoomId">
+    UPDATE chat
+	SET is_deleted = 1
+	WHERE chat_room_id = #{roomId};
+</update>
+
+<update id="deleteRoomsByProductId">
+    UPDATE room
+	SET is_deleted = 1
+	WHERE product_id = #{productId};
+</update>
   
 </mapper>

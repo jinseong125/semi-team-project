@@ -185,8 +185,9 @@ public class ChatServiceImpl implements ChatService{
 	}
 
 	@Override
-	@Transactional
 	public void removeRoomCascade(int roomId) throws Exception {
+		chatDAO.deleteAlarmsByRoomIdCascade(roomId);
+		
 		// 1. 자식(alarm) 먼저 삭제
 		chatDAO.deleteAlarmsByRoomId(roomId);
 	    // 2. 자식(chat) 먼저 삭제
