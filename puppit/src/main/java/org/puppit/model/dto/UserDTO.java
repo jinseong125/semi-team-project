@@ -19,7 +19,6 @@ public class UserDTO {
 
   //user table PK
   private Integer userId;
-  
   private String accountId;
   private String userName;
   private String nickName;
@@ -28,5 +27,11 @@ public class UserDTO {
   private String userPhone;
   private Timestamp createdAt;
   private Timestamp updatedAt;
+  private Integer point;
+  private byte[] salt;
+  private String profileImageKey;
+  private String provider;  // "kakao"
+  private Long providerId;  // 카카오 userId
+
   
 }

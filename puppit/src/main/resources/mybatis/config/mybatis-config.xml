@@ -4,19 +4,26 @@
   "http://mybatis.org/dtd/mybatis-3-config.dtd" >
 <configuration>
   
-  <!--  마이바이티스 환경 설정 (snake_case To camelCase) -->
-  <settings>
-    <setting name="mapUnderscoreToCamelCase" value="true"/>
-  </settings>
+ <settings>
+  <setting name="mapUnderscoreToCamelCase" value="true"/>
+</settings>
   
   <!-- 클래스에 별명 등록 (DTO) -->
   <typeAliases>
     <typeAlias type="org.puppit.model.dto.ChatListDTO" alias="ChatListDTO"/>
     <typeAlias type="org.puppit.model.dto.ChatMessageDTO" alias="ChatMessageDTO"/>
+    <typeAlias type="org.puppit.model.dto.ChatMessageSearchDTO" alias="ChatMessageSearchDTO"/>
+    <typeAlias type="org.puppit.model.dto.ChatRoomPeopleDTO" alias="ChatRoomPeopleDTO"/>
+    <typeAlias type="org.puppit.model.dto.ChatUserDTO" alias="ChatUserDTO"/>
+    <typeAlias type="org.puppit.model.dto.ChaListProfileImageDTO" alias="ChaListProfileImageDTO"/>
+    <typeAlias type="org.puppit.model.dto.NotificationDTO" alias="NotificationDTO"/>
+    <typeAlias type="org.puppit.model.dto.AlarmDuplicationDTO" alias="AlarmDuplicationDTO"/>
+    <typeAlias type="org.puppit.model.dto.AlarmReadDTO" alias="AlarmReadDTO"/>
     <typeAlias type="org.puppit.model.dto.UserDTO" alias="UserDTO"/>
     <typeAlias type="org.puppit.model.dto.UserStatusDTO" alias="UserStatusDTO"/>
     <typeAlias type="org.puppit.model.dto.PointDTO" alias="PointDTO"/>
     <typeAlias type="org.puppit.model.dto.ProductDTO" alias="ProductDTO"/>
+    <typeAlias type="org.puppit.model.dto.ProductStatusDTO" alias="ProductStatusDTO"/>
   </typeAliases>
 
   

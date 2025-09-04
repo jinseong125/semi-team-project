@@ -10,6 +10,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChatMessageSelectDTO {
+	private Integer userId;
 	private int roomId;
 	private String loginUserId;
+	private Integer productId; // 추가된 필드
 }
